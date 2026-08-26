@@ -41,6 +41,30 @@
 
         </div>
 
+        {{-- NÚMERO DE SERIE --}}
+        <div class="form-group mb-2 mb20">
+
+            <label for="num_serie" class="form-label">
+                {{ __('Num. Serie') }}
+            </label>
+
+            <input
+                type="text"
+                name="num_serie"
+                class="form-control @error('num_serie') is-invalid @enderror"
+                value="{{ old('num_serie', $equipo?->num_serie) }}"
+                id="num_serie"
+                placeholder="Num Serie"
+            >
+
+            {!! $errors->first(
+                'num_serie',
+                '<div class="invalid-feedback" role="alert">
+                    <strong>:message</strong>
+                </div>'
+            ) !!}
+
+        </div>
 
         {{-- MARCA --}}
         <div class="form-group mb-2 mb20">
@@ -93,33 +117,7 @@
 
         </div>
 
-
-        {{-- NÚMERO DE SERIE --}}
-        <div class="form-group mb-2 mb20">
-
-            <label for="num_serie" class="form-label">
-                {{ __('Num. Serie') }}
-            </label>
-
-            <input
-                type="text"
-                name="num_serie"
-                class="form-control @error('num_serie') is-invalid @enderror"
-                value="{{ old('num_serie', $equipo?->num_serie) }}"
-                id="num_serie"
-                placeholder="Num Serie"
-            >
-
-            {!! $errors->first(
-                'num_serie',
-                '<div class="invalid-feedback" role="alert">
-                    <strong>:message</strong>
-                </div>'
-            ) !!}
-
-        </div>
-
-
+        <!--
         {{-- CÓDIGO DE INVENTARIO --}}
         <div class="form-group mb-2 mb20">
 
@@ -143,7 +141,7 @@
                 </div>'
             ) !!}
 
-        </div>
+        </div>-->
 
 
         {{-- ESTADO --}}
@@ -293,17 +291,19 @@
 
 
     {{-- BOTÓN --}}
-    <div class="col-md-12 mt20 mt-2">
+    <div class="col-md-12 mt-4">
 
-        <button type="submit" class="btn btn-primary">
-            {{ __('Guardar') }}
-        </button>
+    <button type="submit" class="btn btn-success">
+        <i class="bi bi-check-circle"></i>
+        Guardar
+    </button>
 
-        <a href="{{ route('equipos.index') }}"
-           class="btn btn-secondary">
-            Volver
-        </a>
+    <a href="{{ route('equipos.index') }}"
+       class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i>
+        Volver
+    </a>
 
-    </div>
+</div>
 
 </div>

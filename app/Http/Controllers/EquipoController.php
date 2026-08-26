@@ -19,16 +19,12 @@ class EquipoController extends Controller
      */
     public function index(Request $request): View
     {
-        $buscar = trim($request->get('buscar'));
-        $equipos = Equipo::with('tipoEquipo', 'ubicacione')
-            ->where('marca', 'LIKE', '%'.$buscar.'%')
-            ->orWhere('modelo', 'LIKE', '%'.$buscar.'%')
-            ->orWhere('num_serie', 'LIKE', '%'.$buscar.'%')
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+    $equipos = Equipo::with([
+        'tipoEquipo',
+        'ubicacione'
+    ])->get();
 
-        return view('equipo.index', compact('equipos', 'buscar'))
-            ->with('i', (request()->input('page', 1) - 1) * $equipos->perPage());
+    return view('equipo.index', compact('equipos'));
     }
 
     /**

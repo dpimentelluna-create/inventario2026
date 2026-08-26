@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Equipo;
 
-class EspecificacionesLaptop extends Model
+class EspecificacionesEquipo extends Model
 {
-    protected $table = 'especificaciones_laptop';
+    protected $table = 'especificaciones_equipo';
 
     protected $perPage = 20;
 
     protected $fillable = [
         'equipo_id',
-        'procesador',
-        'ram',
-        'disco_duro',
+        'descripcion',
         'color',
         'estado',
         'observaciones'

@@ -38,7 +38,15 @@ class Equipo extends Model
      *
      * @var array<int, string>
      */
-    protected $fillable = ['tipo_equipo_id', 'marca', 'modelo', 'num_serie', 'codigo_inventario', 'estado', 'ubicacion_id', 'fecha_registro', 'observacion'];
+    
+    protected $fillable = [
+    'tipo_equipo_id',
+    'marca',
+    'modelo',
+    'num_serie',
+    'ubicacion_id',
+    'fecha_registro'
+    ];
 
 
     /**
@@ -78,11 +86,23 @@ class Equipo extends Model
      */
     public function especificacionesLaptops()
     {
-        return $this->hasMany(
+        return $this->hasoOne(
             \App\Models\EspecificacionesLaptop::class, 
             'equipo_id', 
             'id');
     }
+
+    /**
+ * @return \Illuminate\Database\Eloquent\Relations\HasOne
+ */
+public function especificacionesEquipo()
+{
+    return $this->hasOne(
+        \App\Models\EspecificacionesEquipo::class,
+        'equipo_id',
+        'id'
+    );
+}
     
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
