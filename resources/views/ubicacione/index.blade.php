@@ -31,7 +31,7 @@
 
                     <div class="card-body bg-white">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table id = "example" class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
@@ -52,7 +52,7 @@
 
                                             <td>
                                                 <form action="{{ route('ubicaciones.destroy', $ubicacione->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('ubicaciones.show', $ubicacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Mostrar') }}</a>
+                                                    <a class="btn btn-sm btn-primary " href="{{ route('ubicaciones.show', $ubicacione->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
                                                     <a class="btn btn-sm btn-success" href="{{ route('ubicaciones.edit', $ubicacione->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
