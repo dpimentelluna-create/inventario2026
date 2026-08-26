@@ -68,7 +68,7 @@ class Equipo extends Model
     public function accesoriosEquipos()
     {
         return $this->hasMany(
-            \App\Models\TiposEquipo::class,
+            \App\Models\AccesoriosEquipo::class,
             'equipo_id',
             'id');
     }

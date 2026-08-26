@@ -36,7 +36,7 @@ class Ubicacione extends Model
      */
     public function equipos()
     {
-        return $this->hasMany(\App\Models\Equipo::class, 'id', 'ubicacion_id');
+        return $this->hasMany(\App\Models\Equipo::class, 'ubicacion_id', 'id');
     }
     
     /**
