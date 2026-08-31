@@ -63,9 +63,9 @@ class AccesoriosEquipoController extends Controller
      */
     public function edit($id): View
     {
-         $accesoriosEquipo = AccesoriosEquipo::with([
-        'equipo.tipoEquipo',
-        'equipo.ubicacione'
+        $accesoriosEquipo = AccesoriosEquipo::with([
+            'equipo.tipoEquipo',
+            'equipo.ubicacione'
         ])->findOrFail($id);
 
         return view('accesorios-equipo.edit', compact('accesoriosEquipo'));
@@ -92,20 +92,20 @@ class AccesoriosEquipoController extends Controller
 
     public function buscarEquipos(Request $request)
     {
-    $buscar = trim($request->get('buscar', ''));
+        $buscar = trim($request->get('buscar', ''));
 
-    if ($buscar === '') {
-        return response()->json([]);
-    }
+        if ($buscar === '') {
+            return response()->json([]);
+        }
 
-    $equipos = Equipo::with('tipoEquipo')
-        ->whereNotNull('num_serie')
-        ->where('num_serie', '!=', '')
-        ->where('num_serie', 'LIKE', '%' . $buscar . '%')
-        ->orderBy('num_serie')
-        ->limit(10)
-        ->get();
+        $equipos = Equipo::with('tipoEquipo')
+            ->whereNotNull('num_serie')
+            ->where('num_serie', '!=', '')
+            ->where('num_serie', 'LIKE', '%' . $buscar . '%')
+            ->orderBy('num_serie')
+            ->limit(10)
+            ->get();
 
-    return response()->json($equipos);
+        return response()->json($equipos);
     }
 }

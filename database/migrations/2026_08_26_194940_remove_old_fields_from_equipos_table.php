@@ -25,12 +25,10 @@ return new class extends Migration
         $table->string('codigo_inventario', 50)->nullable();
 
         $table->enum('estado', [
-            'Nuevo',
-            'Operativo',
+            'Bueno',
             'Regular',
-            'Malogrado',
-            'De baja'
-        ])->default('Operativo');
+            'Malogrado'
+        ])->default('Regular');
 
         $table->text('observacion')->nullable();
     });

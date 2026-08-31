@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Equipo;
 use App\Models\TiposEquipo;
 use App\Models\Ubicacione;
+use App\Models\EspecificacionesLaptop;
+use App\Models\EspecificacionesEquipo;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -28,11 +30,15 @@ class HomeController extends Controller
         $totalEquipos = Equipo::count();
 
         // Equipos por estado
-        $operativos = Equipo::where('estado', 'Operativo')->count();
-        $regulares = Equipo::where('estado', 'Regular')->count();
-        $malogrados = Equipo::where('estado', 'Malogrado')->count();
-        $deBaja = Equipo::where('estado', 'De baja')->count();
+        $regulares = EspecificacionesLaptop::where('estado', 'Regular')->count()
+        + EspecificacionesEquipo::where('estado', 'Regular')->count();
 
+        $malogrados = EspecificacionesLaptop::where('estado', 'Malogrado')->count()
+        + EspecificacionesEquipo::where('estado', 'Malogrado')->count();
+
+        $buenos = EspecificacionesLaptop::where('estado', 'Bueno')->count()
+        + EspecificacionesEquipo::where('estado', 'Bueno')->count();
+        
         // Cantidad de equipos por tipo
         $equiposPorTipo = TiposEquipo::withCount('equipos')
             ->orderBy('nombre')
@@ -52,15 +58,14 @@ class HomeController extends Controller
         ->take(5)
         ->get();
 
-        return view('home', compact(
-            'totalEquipos',
-            'operativos',
-            'regulares',
-            'malogrados',
-            'deBaja',
-            'equiposPorTipo',
-            'equiposPorUbicacion',
-            'ultimosEquipos'
+    return view('home', compact(
+    'totalEquipos',
+    'buenos',
+    'regulares',
+    'malogrados',
+    'equiposPorTipo',
+    'equiposPorUbicacion',
+    'ultimosEquipos'
         ));
     }
 }

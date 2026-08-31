@@ -12,18 +12,16 @@ use Illuminate\Database\Eloquent\Model;
  * @property $marca
  * @property $modelo
  * @property $num_serie
- * @property $codigo_inventario
- * @property $estado
  * @property $ubicacion_id
  * @property $fecha_registro
- * @property $observacion
  * @property $created_at
  * @property $updated_at
  *
  * @property TiposEquipo $tiposEquipo
  * @property Ubicacione $ubicacione
  * @property AccesoriosEquipo[] $accesoriosEquipos
- * @property EspecificacionesLaptop[] $especificacionesLaptops
+ * @property EspecificacionesLaptop $especificacionesLaptops
+ * @property EspecificacionesEquipo $especificacionesEquipo
  * @property Prestamo[] $prestamos
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
@@ -52,6 +50,7 @@ class Equipo extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
+
     public function tipoEquipo(){
     return $this->belongsTo(
         \App\Models\TiposEquipo::class,
@@ -62,6 +61,7 @@ class Equipo extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
+
     public function ubicacione()
     {
         return $this->belongsTo(
@@ -73,6 +73,7 @@ class Equipo extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+    
     public function accesoriosEquipos()
     {
         return $this->hasMany(
@@ -82,11 +83,11 @@ class Equipo extends Model
     }
     
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function especificacionesLaptops()
     {
-        return $this->hasoOne(
+        return $this->hasOne(
             \App\Models\EspecificacionesLaptop::class, 
             'equipo_id', 
             'id');

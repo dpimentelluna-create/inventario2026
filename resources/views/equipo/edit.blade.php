@@ -7,34 +7,34 @@
 @section('content')
     <section class="content container-fluid">
 
-    <div class="row justify-content-center">
+        <div class="row justify-content-center">
 
-        <div class="col-md-10 col-lg-9">
+            <div class="col-md-10 col-lg-9">
 
-            <div class="card shadow-sm">
+                <div class="card shadow-sm">
 
-                {{-- ENCABEZADO --}}
-                <div class="card-header encabezado-verde">
-                    <h4 class="mb-0">
-                        <i class="bi bi-pencil-square"></i>
-                        Editar Equipo
-                    </h4>
-                </div>
+                    {{-- ENCABEZADO --}}
+                    <div class="card-header encabezado-verde">
+                        <h4 class="mb-0">
+                            <i class="bi bi-pencil-square"></i>
+                            Editar Equipo
+                        </h4>
+                    </div>
 
-                {{-- FORMULARIO --}}
-                <div class="card-body bg-white">
+                    {{-- FORMULARIO --}}
+                    <div class="card-body bg-white">
 
-                    <form method="POST"
-                          action="{{ route('equipos.update', $equipo->id) }}"
-                          role="form"
-                          enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('equipos.update', $equipo->id) }}" role="form"
+                            enctype="multipart/form-data">
 
-                        {{ method_field('PATCH') }}
-                        @csrf
+                            {{ method_field('PATCH') }}
+                            @csrf
 
-                        @include('equipo.form')
+                            @include('equipo.form')
 
-                    </form>
+                        </form>
+
+                    </div>
 
                 </div>
 
@@ -42,9 +42,7 @@
 
         </div>
 
-    </div>
-
-</section>
+    </section>
 @endsection
 <style>
     /* ENCABEZADO */

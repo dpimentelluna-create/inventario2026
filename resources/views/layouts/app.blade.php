@@ -107,11 +107,12 @@
                             </a>
                         </li>
 
+                        <!-- PAGINA DOCENTES
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('especificaciones-laptop.index') }}">
                             {{ __('Especificaciones') }}
                             </a>
-                        </li>
+                        </li>-->
 
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('accesorios-equipo.index') }}">

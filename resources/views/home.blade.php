@@ -32,18 +32,17 @@
         </div>
 
 
-        {{-- OPERATIVOS --}}
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Operativos</h6>
-                    <h2 class="fw-bold text-success">
-                        {{ $operativos }}
-                    </h2>
-                </div>
-            </div>
+        {{-- BUENOS --}}
+<div class="col-md-3 mb-3">
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+            <h6 class="text-muted">Buenos</h6>
+            <h2 class="fw-bold text-success">
+                {{ $buenos }}
+            </h2>
         </div>
-
+    </div>
+</div>
 
         {{-- REGULARES --}}
         <div class="col-md-3 mb-3">
@@ -246,7 +245,7 @@
                                         </td>
 
                                         <td>
-                                            {{ $equipo->created_at->format('d/m/Y') }}
+                                            {{ $equipo->created_at ? $equipo->created_at->format('d/m/Y') : '-' }}
                                         </td>
 
                                     </tr>
