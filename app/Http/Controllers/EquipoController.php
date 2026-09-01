@@ -7,6 +7,7 @@ use App\Models\TiposEquipo;
 use App\Models\Ubicacione;
 use App\Models\EspecificacionesLaptop;
 use App\Models\EspecificacionesEquipo;
+use App\Models\AccesoriosEquipo;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,8 @@ class EquipoController extends Controller
             'tipoEquipo',
             'ubicacione',
             'especificacionesLaptops',
-            'especificacionesEquipo'
+            'especificacionesEquipo',
+            'accesoriosEquipos'
         ])->get();
 
         return view('equipo.index', compact('equipos'));
@@ -37,10 +39,24 @@ class EquipoController extends Controller
     public function create(): View
     {
         $equipo = new Equipo();
+
         $tiposequipo = TiposEquipo::pluck('nombre', 'id');
         $ubicacione = Ubicacione::pluck('nombre', 'id');
 
-        return view('equipo.create', compact('equipo', 'tiposequipo', 'ubicacione'));
+        // Obtener tipos de accesorios guardados
+        $tiposAccesorios = AccesoriosEquipo::whereNotNull('tipo')
+            ->where('tipo', '!=', '')
+            ->select('tipo')
+            ->distinct()
+            ->orderBy('tipo')
+            ->pluck('tipo');
+
+        return view('equipo.create', compact(
+            'equipo',
+            'tiposequipo',
+            'ubicacione',
+            'tiposAccesorios'
+        ));
     }
 
     /**
@@ -48,7 +64,6 @@ class EquipoController extends Controller
      */
     public function store(EquipoRequest $request): RedirectResponse
     {
-
         //1. CREAR EL EQUIPO
         $equipo = Equipo::create([
             'tipo_equipo_id' => $request->tipo_equipo_id,
@@ -91,9 +106,16 @@ class EquipoController extends Controller
 
             foreach ($request->accesorios as $accesorio) {
 
+                // Determinar el tipo real
+                $tipo = $accesorio['tipo'] ?? null;
+
+                if ($tipo === 'Otro') {
+                    $tipo = trim($accesorio['tipo_personalizado'] ?? '');
+                }
+
                 // Evitar guardar filas completamente vacías
                 if (
-                    empty($accesorio['tipo']) &&
+                    empty($tipo) &&
                     empty($accesorio['marca']) &&
                     empty($accesorio['num_serie']) &&
                     empty($accesorio['observaciones'])
@@ -101,8 +123,13 @@ class EquipoController extends Controller
                     continue;
                 }
 
+                // Si no hay tipo, no guardar
+                if (empty($tipo)) {
+                    continue;
+                }
+
                 $equipo->accesoriosEquipos()->create([
-                    'tipo' => $accesorio['tipo'] ?? null,
+                    'tipo' => $tipo,
                     'marca' => $accesorio['marca'] ?? null,
                     'num_serie' => $accesorio['num_serie'] ?? null,
                     'estado' => $accesorio['estado'] ?? 'Regular',
@@ -119,19 +146,19 @@ class EquipoController extends Controller
             );
     }
 
-
     /**
      * Display the specified resource.
      */
     public function show($id): View
     {
-        $equipo = Equipo::with(
+        $equipo = Equipo::with([
             'tipoEquipo',
             'ubicacione',
             'especificacionesLaptops',
             'especificacionesEquipo',
             'accesoriosEquipos'
-        )->findOrFail($id);
+        ])->findOrFail($id);
+
         return view('equipo.show', compact('equipo'));
     }
 
@@ -152,14 +179,24 @@ class EquipoController extends Controller
         $especificacionesEquipo = $equipo->especificacionesEquipo;
 
         $tiposequipo = TiposEquipo::pluck('nombre', 'id');
+
         $ubicacione = Ubicacione::pluck('nombre', 'id');
+
+        // Obtener todos los tipos de accesorios registrados
+        $tiposAccesorios = AccesoriosEquipo::whereNotNull('tipo')
+            ->where('tipo', '!=', '')
+            ->select('tipo')
+            ->distinct()
+            ->orderBy('tipo')
+            ->pluck('tipo');
 
         return view('equipo.edit', compact(
             'equipo',
             'tiposequipo',
             'ubicacione',
             'especificacionesLaptop',
-            'especificacionesEquipo'
+            'especificacionesEquipo',
+            'tiposAccesorios'
         ));
     }
 
@@ -200,7 +237,6 @@ class EquipoController extends Controller
             // las eliminamos porque ahora es Laptop.
             $equipo->especificacionesEquipo()->delete();
         } else {
-
             $equipo->especificacionesEquipo()->updateOrCreate(
                 ['equipo_id' => $equipo->id],
                 [
@@ -219,13 +255,42 @@ class EquipoController extends Controller
         // 4. ACTUALIZAR ACCESORIOS
 
         $accesoriosEnFormulario = $request->input('accesorios', []);
-
-        // IDs de accesorios que siguen existiendo
         $idsConservados = [];
 
         foreach ($accesoriosEnFormulario as $accesorio) {
 
+            // ==========================================
+            // DETERMINAR EL TIPO REAL
+            // ==========================================
+
+            $tipo = $accesorio['tipo'] ?? null;
+
+            if ($tipo === 'Otro') {
+                $tipo = trim($accesorio['tipo_personalizado'] ?? '');
+            }
+
+            // ==========================================
+            // IGNORAR FILAS VACÍAS
+            // ==========================================
+
+            if (
+                empty($tipo) &&
+                empty($accesorio['marca']) &&
+                empty($accesorio['num_serie']) &&
+                empty($accesorio['observaciones'])
+            ) {
+                continue;
+            }
+
+            // Si no tiene tipo, no guardar
+            if (empty($tipo)) {
+                continue;
+            }
+
+            // ==========================================
             // ACCESORIO EXISTENTE
+            // ==========================================
+
             if (!empty($accesorio['id'])) {
 
                 $accesorioModelo = $equipo->accesoriosEquipos()
@@ -235,22 +300,27 @@ class EquipoController extends Controller
                 if ($accesorioModelo) {
 
                     $accesorioModelo->update([
-                        'tipo' => $accesorio['tipo'],
-                        'marca' => $accesorio['marca'],
-                        'num_serie' => $accesorio['num_serie'],
-                        'estado' => $accesorio['estado'],
+                        'tipo' => $tipo,
+                        'marca' => $accesorio['marca'] ?? null,
+                        'num_serie' => $accesorio['num_serie'] ?? null,
+                        'estado' => $accesorio['estado'] ?? 'Regular',
                         'observaciones' => $accesorio['observaciones'] ?? null,
                     ]);
 
+                    // IMPORTANTE:
+                    // conservar el ID del accesorio
                     $idsConservados[] = $accesorioModelo->id;
                 }
             } else {
 
+                // ==========================================
                 // NUEVO ACCESORIO
+                // ==========================================
+
                 $nuevoAccesorio = $equipo->accesoriosEquipos()->create([
-                    'tipo' => $accesorio['tipo'],
-                    'marca' => $accesorio['marca'],
-                    'num_serie' => $accesorio['num_serie'],
+                    'tipo' => $tipo,
+                    'marca' => $accesorio['marca'] ?? null,
+                    'num_serie' => $accesorio['num_serie'] ?? null,
                     'estado' => $accesorio['estado'] ?? 'Regular',
                     'observaciones' => $accesorio['observaciones'] ?? null,
                 ]);
@@ -259,18 +329,26 @@ class EquipoController extends Controller
             }
         }
 
+        // ==========================================
+        // ELIMINAR LOS ACCESORIOS QUITADOS
+        // ==========================================
 
-        // ELIMINAR ACCESORIOS QUE YA NO ESTÁN EN EL FORMULARIO
+        if (!empty($idsConservados)) {
 
-        $equipo->accesoriosEquipos()
-            ->whereNotIn('id', $idsConservados)
-            ->delete();
+            $equipo->accesoriosEquipos()
+                ->whereNotIn('id', $idsConservados)
+                ->delete();
+        } else {
+
+            // No quedan accesorios
+            $equipo->accesoriosEquipos()->delete();
+        }
 
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo actualizado correctamente.');
     }
 
-    public function guardarAccesorios(Request $request, Equipo $equipo): RedirectResponse
+    /*public function guardarAccesorios(Request $request, Equipo $equipo): RedirectResponse
     {
         if ($request->has('accesorios')) {
 
@@ -298,7 +376,7 @@ class EquipoController extends Controller
 
         return redirect()->route('equipos.index')
             ->with('success', 'Accesorios registrados correctamente.');
-    }
+    }*/
 
     public function destroy(Equipo $equipo): RedirectResponse
     {
