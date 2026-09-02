@@ -1,43 +1,6 @@
-}consulta SQL: Copiar
-
-
-TRUNCATE TABLE equipos;
-MySQL ha dicho: Documentación
-
-#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`accesorios_equipo`, CONSTRAINT `accesorios_equipo_equipo_id_foreign` FOREIGN KEY (`equipo_id`) REFERENCES `inventario2026`.`equipos` (`id`))
-
-
-
-
-
-
-consulta SQL: Copiar
-
-
-TRUNCATE TABLE equipos;
-MySQL ha dicho: Documentación
-
-#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`accesorios_equipo`, CONSTRAINT `accesorios_equipo_equipo_id_foreign` FOREIGN KEY (`equipo_id`) REFERENCES `inventario2026`.`equipos` (`id`))Análisis estático:
-
-Se encontraron 3 errores durante el análisis.
-
-Comienzo inesperado de declaración. (near "ET" at position 0)
-Comienzo inesperado de declaración. (near "FOREIGN_KEY_CHECKS" at position 3)
-Comienzo inesperado de declaración. (near "0" at position 24)
-consulta SQL: Copiar
-
-ET FOREIGN_KEY_CHECKS = 0;
-
-MySQL ha dicho: Documentación
-
-#1064 - Algo está equivocado en su sintax cerca 'ET FOREIGN_KEY_CHECKS = 0' en la linea 1
-
-
-
-
-
 SET FOREIGN_KEY_CHECKS = 0;
 
+TRUNCATE TABLE prestamos;
 TRUNCATE TABLE accesorios_equipo;
 TRUNCATE TABLE especificaciones_equipo;
 TRUNCATE TABLE especificaciones_laptop;
