@@ -1,4 +1,23 @@
-Análisis estático:
+}consulta SQL: Copiar
+
+
+TRUNCATE TABLE equipos;
+MySQL ha dicho: Documentación
+
+#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`accesorios_equipo`, CONSTRAINT `accesorios_equipo_equipo_id_foreign` FOREIGN KEY (`equipo_id`) REFERENCES `inventario2026`.`equipos` (`id`))
+
+
+
+
+
+
+consulta SQL: Copiar
+
+
+TRUNCATE TABLE equipos;
+MySQL ha dicho: Documentación
+
+#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`accesorios_equipo`, CONSTRAINT `accesorios_equipo_equipo_id_foreign` FOREIGN KEY (`equipo_id`) REFERENCES `inventario2026`.`equipos` (`id`))Análisis estático:
 
 Se encontraron 3 errores durante el análisis.
 
