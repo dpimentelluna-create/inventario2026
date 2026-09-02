@@ -1,3 +1,47 @@
+
+
+
+
+tabla
+registros
+equipos
+0
+accesorios_equipo
+0
+especificaciones_equipo
+0
+especificaciones_laptop
+0
+docentes
+2
+tipos_equipo
+40
+ubicaciones
+41
+users
+3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 SELECT 'equipos' AS tabla, COUNT(*) AS registros FROM equipos
 UNION ALL
 SELECT 'accesorios_equipo', COUNT(*) FROM accesorios_equipo
