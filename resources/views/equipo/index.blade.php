@@ -79,7 +79,11 @@
 
 
                                             <td class="text-center">{{ $equipo->ubicacione->nombre ?? '-'}}</td>
-                                            <td class="text-center">{{ $equipo->fecha_registro }}</td>
+                                            
+                                            <!--TD MODIFICADO PARA CAMBAR FORMATO DE FECHAS SIN ALTERAR LA BD -->
+                                            <td class="text-center">
+                                                {{ \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y') }}
+                                            </td>
 
                                             <td>
                                                 @if($equipo->especificacionesLaptops)
