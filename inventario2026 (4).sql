@@ -1,3 +1,18 @@
+consulta SQL: Copiar
+
+
+TRUNCATE TABLE docentes;
+MySQL ha dicho: Documentación
+
+#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`prestamos`, CONSTRAINT `prestamos_docente_id_foreign` FOREIGN KEY (`docente_id`) REFERENCES `inventario2026`.`docentes` (`id`))
+
+
+
+
+
+
+
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE docentes;
