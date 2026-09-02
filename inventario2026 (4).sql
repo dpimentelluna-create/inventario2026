@@ -1,3 +1,33 @@
+
+Tabla Ascendente 1
+registros
+accesorios_equipo
+0
+docentes
+0
+equipos
+0
+especificaciones_equipo
+0
+especificaciones_laptop
+0
+prestamos
+0
+tipos_equipo
+0
+ubicaciones
+0
+users
+0
+
+
+
+
+
+
+
+
+
 SELECT 'prestamos' AS tabla, COUNT(*) AS registros FROM prestamos
 UNION ALL
 SELECT 'equipos', COUNT(*) FROM equipos
