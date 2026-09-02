@@ -1,3 +1,22 @@
+Análisis estático:
+
+Se encontraron 3 errores durante el análisis.
+
+Comienzo inesperado de declaración. (near "ET" at position 0)
+Comienzo inesperado de declaración. (near "FOREIGN_KEY_CHECKS" at position 3)
+Comienzo inesperado de declaración. (near "0" at position 24)
+consulta SQL: Copiar
+
+ET FOREIGN_KEY_CHECKS = 0;
+
+MySQL ha dicho: Documentación
+
+#1064 - Algo está equivocado en su sintax cerca 'ET FOREIGN_KEY_CHECKS = 0' en la linea 1
+
+
+
+
+
 SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE accesorios_equipo;
