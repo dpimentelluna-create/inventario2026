@@ -1,4 +1,17 @@
-SET FOREIGN_KEY_CHECKS = 0;
+
+
+
+
+
+
+
+consulta SQL: Copiar
+
+
+TRUNCATE TABLE equipos;
+MySQL ha dicho: Documentación
+
+#1701 - Cannot truncate a table referenced in a foreign key constraint (`inventario2026`.`accesorios_equipo`, CONSTRAINT `accesorios_equipo_equipo_id_foreign` FOREIGN KEY (`equipo_id`) REFERENCES `inventario2026`.`equipos` (`id`))SET FOREIGN_KEY_CHECKS = 0;
 
 TRUNCATE TABLE prestamos;
 TRUNCATE TABLE accesorios_equipo;
