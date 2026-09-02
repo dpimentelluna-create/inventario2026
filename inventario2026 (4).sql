@@ -1,12 +1,4 @@
-DELETE FROM prestamos;
-DELETE FROM accesorios_equipo;
-DELETE FROM especificaciones_equipo;
-DELETE FROM especificaciones_laptop;
-DELETE FROM equipos;
-DELETE FROM docentes;
-DELETE FROM tipos_equipo;
-DELETE FROM ubicaciones;
-DELETE FROM users;
+SET FOREIGN_KEY_CHECKS = 1;
 -- =========================================================
 -- DATOS DE INVENTARIO2026
 -- NO INCLUYE LA TABLA migrations
