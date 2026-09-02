@@ -1,0 +1,34 @@
+
+NUEVO FLUJO TRABAJANDO SIMULTANEAMENTE:
+
+USUARIO 1:
+git status
+git add . 
+git commit -m "Descripcion del cambio"
+git push
+
+USUARIO 2: 
+git add . 
+git commit -m "Descripcion del nuevo cambio"
+git pull --rebase origin main
+git push origin main
+
+1: git pull --rebase origin main
+
+
+TÚ                              COMPAÑERO
+│                               │
+├─ git pull                     ├─ git pull
+│                               │
+├─ trabajas                      ├─ trabaja
+│                               │
+├─ commit                        │
+│                               │
+├─ push ────────────────► GitHub
+│                               │
+│                               ├─ termina
+│                               ├─ commit
+│                               ├─ git pull --rebase
+│                               └─ git push ─────────► GitHub
+│
+└─ git pull --rebase
