@@ -14,7 +14,7 @@
                         <span class="card-title">{{ __('Registrar') }} Prestamo</span>
                     </div>
                     <div class="card-body bg-white">
-                        <form method="POST" action="{{ route('prestamos.store') }}"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="{{ route('prestamos.store') }}" role="form" enctype="multipart/form-data">
                             @csrf
 
                             @include('prestamo.form')

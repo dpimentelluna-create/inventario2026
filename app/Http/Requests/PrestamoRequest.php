@@ -3,30 +3,100 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class PrestamoRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-			'equipo_id' => 'required',
-			'docente_id' => 'required',
-			'fecha_entrega' => 'required',
-			'estado' => 'required',
-			'observacion' => 'nullable|string',
+            // Datos generales del préstamo
+            'docente_id' => [
+                'required',
+                'exists:docentes,id',
+            ],
+
+            'cargo' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+
+            'fecha' => [
+                'required',
+                'date',
+            ],
+
+            'hora_inicio' => [
+                'required',
+                'date_format:H:i',
+            ],
+
+            'hora_fin' => [
+                'nullable',
+                'date_format:H:i',
+                'after_or_equal:hora_inicio',
+            ],
+
+            // Estado se determina automáticamente,
+            // por lo tanto NO se recibe desde el formulario.
+
+            // Equipos del préstamo
+            'equipos' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'equipos.*.equipo_id' => [
+                'required',
+                'exists:equipos,id',
+                'distinct',
+            ],
+
+            'equipos.*.estado' => [
+                'required',
+                Rule::in([
+                    'REGULAR',
+                    'BUENO',
+                    'MALOGRADO',
+                ]),
+            ],
+
+            'equipos.*.observacion' => [
+                'nullable',
+                'string',
+            ],
+
+            // Accesorios de cada equipo
+            'equipos.*.accesorios' => [
+                'nullable',
+                'array',
+            ],
+
+            'equipos.*.accesorios.*.accesorio_equipo_id' => [
+                'required',
+                'exists:accesorios_equipo,id',
+            ],
+
+            'equipos.*.accesorios.*.estado' => [
+                'required',
+                Rule::in([
+                    'REGULAR',
+                    'BUENO',
+                    'MALOGRADO',
+                ]),
+            ],
+
+            'equipos.*.accesorios.*.observacion' => [
+                'nullable',
+                'string',
+            ],
         ];
     }
 }

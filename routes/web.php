@@ -59,8 +59,11 @@ Route::get(
     '/prestamos/equipos-por-tipo/{tipoId}',
     [PrestamoController::class, 'equiposPorTipo']
 )->name('prestamos.equiposPorTipo');
+
 Route::get(
     '/prestamos/buscar-equipos',
     [PrestamoController::class, 'buscarEquipos']
 )->name('prestamos.buscarEquipos');
+
 Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
+

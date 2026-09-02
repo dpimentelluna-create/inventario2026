@@ -1,286 +1,977 @@
 <div class="row padding-1 p-1">
+
+    {{-- ========================================================= --}}
+    {{-- PARTE 1 — DATOS DEL PRÉSTAMO --}}
+    {{-- ========================================================= --}}
+
     <div class="col-md-12">
-        
-        <div class="form-group mb-3">
+        <div class="card mb-4">
 
-    <label for="tipo_equipo_id" class="form-label">
-        Tipo de Equipo
-    </label>
+            <div class="card-header encabezado-verde">
+                <h5 class="mb-0">
+                    <i class="bi bi-clipboard-check"></i>
+                    PARTE 1 — DATOS DEL PRÉSTAMO
+                </h5>
+            </div>
 
-    <select id="tipo_equipo_id" class="form-select">
-        <option value="">Seleccione un tipo de equipo</option>
+            <div class="card-body">
 
-        @foreach($tiposEquipo as $id => $nombre)
-            <option value="{{ $id }}">
-                {{ $nombre }}
-            </option>
-        @endforeach
-    </select>
+                <div class="row">
 
-</div>
+                    {{-- DOCENTE --}}
+                    <div class="col-md-6 mb-3">
+                        <label for="docente_id" class="form-label">
+                            DOCENTE <span class="text-danger">*</span>
+                        </label>
 
+                        <select
+                            name="docente_id"
+                            id="docente_id"
+                            class="form-select @error('docente_id') is-invalid @enderror"
+                            required
+                        >
+                            <option value="">-- Seleccionar docente --</option>
 
-<div class="form-group mb-3">
+                            @foreach ($docentes as $docente)
+                                <option
+                                    value="{{ $docente->id }}"
+                                    @selected(old('docente_id', $prestamo->docente_id) == $docente->id)
+                                >
+                                    {{ $docente->apellidos }} {{ $docente->nombres }}
+                                </option>
+                            @endforeach
+                        </select>
 
-    <label for="buscar_equipo" class="form-label">
-        Buscar por número de serie o código de inventario
-    </label>
-
-    <input
-        type="text"
-        id="buscar_equipo"
-        class="form-control"
-        placeholder="Ejemplo: ABC123 o INV-001"
-    >
-
-</div>
-
-
-<div class="table-responsive">
-
-    <table class="table table-bordered table-hover">
-
-        <thead class="table-dark">
-
-            <tr>
-                <th>Marca</th>
-                <th>Modelo</th>
-                <th>N.º Serie</th>
-                <th>Código Inventario</th>
-                <th>Acción</th>
-            </tr>
-
-        </thead>
-
-        <tbody id="resultados_equipos">
-
-            <tr>
-                <td colspan="5" class="text-center">
-                    Seleccione un tipo o realice una búsqueda
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
+                        @error('docente_id')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
 
 
-<input
-    type="hidden"
-    name="equipo_id"
-    id="equipo_id"
-    value="{{ old('equipo_id', $prestamo->equipo_id ?? '') }}"
->
-        
-    <div class="form-group mb-2 mb20">
-            <label for="docente_id" class="form-label">{{ __('Docente') }}</label>
+                    {{-- CARGO --}}
+                    <div class="col-md-6 mb-3">
+                        <label for="cargo" class="form-label">
+                            CARGO <span class="text-danger">*</span>
+                        </label>
 
-            <select name="docente_id"
-            class="form-select 
-            @error('docente_id') is-invalid @enderror"
-            id="docente_id">
+                        <input
+                            type="text"
+                            name="cargo"
+                            id="cargo"
+                            class="form-control campo-mayusculas @error('cargo') is-invalid @enderror"
+                            value="{{ old('cargo', $prestamo->cargo ?? 'DOCENTE') }}"
+                            maxlength="100"
+                            required
+                        >
 
-        <option value="">Seleccione el Docente</option>
+                        @error('cargo')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
 
-        @foreach($docente as $id => $nombre)
-            <option value="{{ $id }}"
-                {{ old('docente_id', $equipo->docente_id ?? '') == $id 
-                ? 'selected' : '' }}>{{ $nombre }}
-            </option>
-        @endforeach            
-        </select>
 
-        {!! $errors->first('docente_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+                    {{-- FECHA --}}
+                    <div class="col-md-4 mb-3">
+                        <label for="fecha" class="form-label">
+                            FECHA <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="date"
+                            name="fecha"
+                            id="fecha"
+                            class="form-control @error('fecha') is-invalid @enderror"
+                            value="{{ old('fecha', $prestamo->fecha ? $prestamo->fecha->format('Y-m-d') : '') }}"
+                            required
+                        >
+
+                        @error('fecha')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+
+                    {{-- HORA INICIO --}}
+                    <div class="col-md-4 mb-3">
+                        <label for="hora_inicio" class="form-label">
+                            HORA INICIO <span class="text-danger">*</span>
+                        </label>
+
+                        <input
+                            type="time"
+                            name="hora_inicio"
+                            id="hora_inicio"
+                            class="form-control @error('hora_inicio') is-invalid @enderror"
+                            value="{{ old('hora_inicio', $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '') }}"
+                            required
+                        >
+
+                        @error('hora_inicio')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+
+                    {{-- HORA FIN --}}
+                    <div class="col-md-4 mb-3">
+                        <label for="hora_fin" class="form-label">
+                            HORA FINAL
+                        </label>
+
+                        <input
+                            type="time"
+                            name="hora_fin"
+                            id="hora_fin"
+                            class="form-control @error('hora_fin') is-invalid @enderror"
+                            value="{{ old('hora_fin', $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '') }}"
+                        >
+
+                        <small class="text-muted">
+                            Dejar vacío si el préstamo continúa activo.
+                        </small>
+
+                        @error('hora_fin')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+                    </div>
+
+                </div>
+
+            </div>
         </div>
+    </div>
 
 
-        <div class="form-group mb-2 mb20">
-            <label for="ubicacion_destino_id" class="form-label">{{ __('Ubicacion Destino') }}</label>
-            <input type="text" name="ubicacion_destino_id" class="form-control @error('ubicacion_destino_id') is-invalid @enderror" value="{{ old('ubicacion_destino_id', $prestamo?->ubicacion_destino_id) }}" id="ubicacion_destino_id" placeholder="Ubicacion Destino Id">
-            {!! $errors->first('ubicacion_destino_id', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+    {{-- ========================================================= --}}
+    {{-- PARTE 2 — SELECCIÓN DE EQUIPOS --}}
+    {{-- ========================================================= --}}
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+            <div class="card-header encabezado-verde">
+                <h5 class="mb-0">
+                    <i class="bi bi-pc-display"></i>
+                    PARTE 2 — SELECCIÓN DE EQUIPOS
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    {{-- TIPO DE EQUIPO --}}
+                    <div class="col-md-4 mb-3">
+
+                        <label for="tipo_equipo_id" class="form-label">
+                            TIPO DE EQUIPO
+                        </label>
+
+                        <select
+                            id="tipo_equipo_id"
+                            class="form-select"
+                        >
+                            <option value="">
+                                TODOS
+                            </option>
+
+                            @foreach ($tiposEquipo as $tipo)
+                                <option value="{{ $tipo->id }}">
+                                    {{ $tipo->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                    </div>
+
+
+                    {{-- BUSCAR EQUIPO --}}
+                    <div class="col-md-8 mb-3">
+
+                        <label for="buscar_equipo" class="form-label">
+                            BUSCAR EQUIPO
+                        </label>
+
+                        <input
+                            type="text"
+                            id="buscar_equipo"
+                            class="form-control campo-mayusculas"
+                            placeholder="Buscar por tipo, marca, modelo, N/S o código de inventario..."
+                            autocomplete="off"
+                        >
+
+                    </div>
+
+                </div>
+
+
+                {{-- RESULTADOS DE BÚSQUEDA --}}
+                <div
+                    id="resultados_equipos"
+                    class="mt-2"
+                >
+                    <div class="text-muted text-center py-3">
+                        Escribe para buscar un equipo.
+                    </div>
+                </div>
+
+            </div>
         </div>
-        <div class="form-group mb-2 mb20">
-            <label for="fecha_entrega" class="form-label">{{ __('Fecha Entrega') }}</label>
-            <input type="text" name="fecha_entrega" class="form-control @error('fecha_entrega') is-invalid @enderror" value="{{ old('fecha_entrega', $prestamo?->fecha_entrega) }}" id="fecha_entrega" placeholder="Fecha Entrega">
-            {!! $errors->first('fecha_entrega', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+    </div>
+
+
+    {{-- ========================================================= --}}
+    {{-- PARTE 3 — EQUIPOS SELECCIONADOS --}}
+    {{-- ========================================================= --}}
+
+    <div class="col-md-12">
+        <div class="card mb-4">
+
+            <div class="card-header encabezado-verde">
+                <h5 class="mb-0">
+                    <i class="bi bi-list-check"></i>
+                    PARTE 3 — EQUIPOS SELECCIONADOS
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div id="equipos_seleccionados">
+
+                    <div
+                        id="mensaje_sin_equipos"
+                        class="text-center text-muted py-3"
+                    >
+                        No hay equipos seleccionados.
+                    </div>
+
+                </div>
+
+            </div>
         </div>
-        <div class="form-group mb-2 mb20">
-            <label for="fecha_devolucion_prevista" class="form-label">{{ __('Fecha Devolucion Prevista') }}</label>
-            <input type="text" name="fecha_devolucion_prevista" class="form-control @error('fecha_devolucion_prevista') is-invalid @enderror" value="{{ old('fecha_devolucion_prevista', $prestamo?->fecha_devolucion_prevista) }}" id="fecha_devolucion_prevista" placeholder="Fecha Devolucion Prevista">
-            {!! $errors->first('fecha_devolucion_prevista', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="fecha_devolucion_real" class="form-label">{{ __('Fecha Devolucion Real') }}</label>
-            <input type="text" name="fecha_devolucion_real" class="form-control @error('fecha_devolucion_real') is-invalid @enderror" value="{{ old('fecha_devolucion_real', $prestamo?->fecha_devolucion_real) }}" id="fecha_devolucion_real" placeholder="Fecha Devolucion Real">
-            {!! $errors->first('fecha_devolucion_real', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="estado" class="form-label">{{ __('Estado') }}</label>
-            <input type="text" name="estado" class="form-control @error('estado') is-invalid @enderror" value="{{ old('estado', $prestamo?->estado) }}" id="estado" placeholder="Estado">
-            {!! $errors->first('estado', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
-        </div>
-        <div class="form-group mb-2 mb20">
-            <label for="observacion" class="form-label">{{ __('Observacion') }}</label>
-            <input type="text" name="observacion" class="form-control @error('observacion') is-invalid @enderror" value="{{ old('observacion', $prestamo?->observacion) }}" id="observacion" placeholder="Observacion">
-            {!! $errors->first('observacion', '<div class="invalid-feedback" role="alert"><strong>:message</strong></div>') !!}
+    </div>
+
+
+    {{-- BOTONES --}}
+    <div class="col-md-12 mt-2">
+
+        <div class="d-flex justify-content-end gap-2">
+
+            <a
+                href="{{ route('prestamos.index') }}"
+                class="btn btn-secondary"
+            >
+                <i class="bi bi-x-circle"></i>
+                CANCELAR
+            </a>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+            >
+                <i class="bi bi-save"></i>
+                GUARDAR PRÉSTAMO
+            </button>
+
         </div>
 
     </div>
-    <div class="col-md-12 mt20 mt-2">
-        <button type="submit" class="btn btn-primary">{{ __('Registrar') }}</button>
-    </div>
+
 </div>
 
+<!--SCRIPT PARA BUSCAR-->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
 
-    const tipoEquipo = document.getElementById('tipo_equipo_id');
-    const buscar = document.getElementById('buscar_equipo');
-    const resultados = document.getElementById('resultados_equipos');
-    const equipoId = document.getElementById('equipo_id');
+        const buscarEquipo = document.getElementById('buscar_equipo');
+        const tipoEquipo = document.getElementById('tipo_equipo_id');
+        const resultados = document.getElementById('resultados_equipos');
+        const equiposSeleccionados = new Set();
 
-    function buscarEquipos() {
+        buscarEquipo.addEventListener('input', buscarEquipos);
+        tipoEquipo.addEventListener('change', buscarEquipos);
 
-        const tipo = tipoEquipo.value;
-        const texto = buscar.value;
 
-        if (tipo === '' && texto === '') {
+        function buscarEquipos() {
 
-            resultados.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center">
-                        Seleccione un tipo o realice una búsqueda
-                    </td>
-                </tr>
+            const buscar = buscarEquipo.value.trim();
+            const tipoId = tipoEquipo.value;
+
+            if (buscar === '' && tipoId === '') {
+
+                resultados.innerHTML = `
+                <div class="text-muted text-center py-3">
+                    Escribe para buscar un equipo.
+                </div>
             `;
 
-            return;
-        }
+                return;
+            }
 
-        const url = new URL(
-            "{{ route('prestamos.buscarEquipos') }}",
-            window.location.origin
-        );
+            resultados.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border text-success" role="status"></div>
+                <div class="mt-2 text-muted">
+                    Buscando equipos...
+                </div>
+            </div>
+        `;
 
-        if (tipo !== '') {
-            url.searchParams.append(
-                'tipo_equipo_id',
-                tipo
-            );
-        }
 
-        if (texto !== '') {
-            url.searchParams.append(
-                'buscar',
-                texto
-            );
-        }
+            const parametros = new URLSearchParams();
 
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
+            if (buscar !== '') {
+                parametros.append('buscar', buscar);
+            }
 
-                resultados.innerHTML = '';
+            if (tipoId !== '') {
+                parametros.append('tipo_equipo_id', tipoId);
+            }
 
-                if (data.length === 0) {
+
+            fetch(
+                `{{ route('prestamos.buscarEquipos') }}?${parametros.toString()}`
+            )
+                .then(response => {
+
+                    if (!response.ok) {
+                        throw new Error('Error al buscar equipos');
+                    }
+
+                    return response.json();
+                })
+                .then(equipos => {
+
+                    mostrarResultados(equipos);
+
+                })
+                .catch(error => {
+
+                    console.error(error);
 
                     resultados.innerHTML = `
-                        <tr>
-                            <td colspan="5" class="text-center">
-                                No se encontraron equipos
-                            </td>
-                        </tr>
+                <div class="alert alert-danger">
+                    Ocurrió un error al buscar los equipos.
+                </div>
+            `;
+                });
+        }
+
+
+        function mostrarResultados(equipos) {
+
+            if (equipos.length === 0) {
+
+                resultados.innerHTML = `
+                <div class="alert alert-warning">
+                    No se encontraron equipos.
+                </div>
+            `;
+
+                return;
+            }
+
+
+            let html = `
+            <div class="list-group">
+        `;
+
+
+            equipos.forEach(equipo => {
+
+                html += `
+                <button
+                    type="button"
+                    class="list-group-item list-group-item-action equipo-resultado"
+                    data-id="${equipo.id}"
+                >
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+
+                            <strong>
+                                ${equipo.tipo_equipo?.nombre ?? 'Sin tipo'}
+                            </strong>
+
+                            <br>
+
+                            <span>
+                                ${equipo.marca ?? ''}
+                                ${equipo.modelo ?? ''}
+                            </span>
+
+                            <br>
+
+                            <small class="text-muted">
+
+                                N/S:
+                                ${equipo.num_serie ?? 'Sin número de serie'}
+
+                            </small>
+
+                        </div>
+
+
+                        <span class="badge bg-secondary">
+                            ${equipo.estado ?? ''}
+                        </span>
+
+                    </div>
+
+                </button>
+            `;
+            });
+
+
+            html += `
+            </div>
+        `;
+
+
+            resultados.innerHTML = html;
+
+
+            document
+                .querySelectorAll('.equipo-resultado')
+                .forEach(elemento => {
+
+                    elemento.addEventListener('click', function () {
+
+                        const equipoId = this.dataset.id;
+
+                        agregarEquipo(equipoId);
+
+                    });
+
+                });
+        }
+
+
+        function agregarEquipo(equipoId) {
+
+            if (equiposSeleccionados.has(String(equipoId))) {
+
+                alert('Este equipo ya ha sido seleccionado.');
+
+                return;
+            }
+
+
+            // Buscar nuevamente el equipo para obtener todos sus datos
+            const tipoId = tipoEquipo.value;
+            const buscar = buscarEquipo.value.trim();
+
+            const parametros = new URLSearchParams();
+
+            if (buscar !== '') {
+                parametros.append('buscar', buscar);
+            }
+
+            if (tipoId !== '') {
+                parametros.append('tipo_equipo_id', tipoId);
+            }
+
+
+            fetch(
+                `{{ route('prestamos.buscarEquipos') }}?${parametros.toString()}`
+            )
+                .then(response => response.json())
+                .then(equipos => {
+
+                    const equipo = equipos.find(
+                        e => String(e.id) === String(equipoId)
+                    );
+
+                    if (!equipo) {
+
+                        alert('No se pudo encontrar el equipo seleccionado.');
+
+                        return;
+                    }
+
+                    equiposSeleccionados.add(String(equipo.id));
+
+                    mostrarEquipoSeleccionado(equipo);
+
+                    buscarEquipo.value = '';
+
+                    resultados.innerHTML = `
+                    <div class="text-muted text-center py-3">
+                        Equipo agregado correctamente.
+                        Puedes buscar otro equipo.
+                    </div>
                     `;
 
-                    return;
-                }
+                })
+                .catch(error => {
 
-                data.forEach(equipo => {
+                    console.error(error);
 
-                    resultados.innerHTML += `
-                        <tr>
-                            <td>${equipo.marca ?? ''}</td>
-                            <td>${equipo.modelo ?? ''}</td>
-                            <td>${equipo.num_serie ?? ''}</td>
-                            <td>${equipo.codigo_inventario ?? ''}</td>
-
-                            <td>
-                                <button
-                                    type="button"
-                                    class="btn btn-primary btn-sm seleccionar-equipo"
-                                    data-id="${equipo.id}"
-                                >
-                                    Seleccionar
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+                    alert('Ocurrió un error al seleccionar el equipo.');
 
                 });
 
-            })
-            .catch(error => {
+        }
 
-                console.error(error);
+        function mostrarEquipoSeleccionado(equipo) {
 
-                resultados.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center text-danger">
-                            Error al buscar equipos
-                        </td>
-                    </tr>
-                `;
+            const contenedor = document.getElementById(
+                'equipos_seleccionados'
+            );
 
-            });
-    }
+            const mensaje = document.getElementById(
+                'mensaje_sin_equipos'
+            );
 
-
-    tipoEquipo.addEventListener(
-        'change',
-        buscarEquipos
-    );
-
-
-    buscar.addEventListener(
-        'input',
-        buscarEquipos
-    );
-
-
-    resultados.addEventListener(
-        'click',
-        function (event) {
-
-            if (
-                event.target.classList.contains(
-                    'seleccionar-equipo'
-                )
-            ) {
-
-                equipoId.value =
-                    event.target.dataset.id;
-
-                resultados.querySelectorAll('tr')
-                    .forEach(row => {
-                        row.classList.remove(
-                            'table-success'
-                        );
-                    });
-
-                event.target.closest('tr')
-                    .classList.add(
-                        'table-success'
-                    );
-
-                event.target.textContent =
-                    'Seleccionado';
-
+            if (mensaje) {
+                mensaje.remove();
             }
 
+
+            const indice = document.querySelectorAll(
+                '.equipo-seleccionado'
+            ).length;
+
+
+            let accesoriosHtml = '';
+
+
+            if (
+                equipo.accesorios_equipos &&
+                equipo.accesorios_equipos.length > 0
+            ) {
+
+                equipo.accesorios_equipos.forEach(
+                    (accesorio, accesorioIndex) => {
+
+                        accesoriosHtml += `
+                    <div
+                        class="border rounded p-3 mb-3 accesorio-prestamo"
+                    >
+
+                        <input
+                            type="hidden"
+                            name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
+                            value="${accesorio.id}"
+                        >
+
+
+                        <div class="row">
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    TIPO
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.tipo ?? ''}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    MARCA
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.marca ?? ''}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    NÚMERO DE SERIE
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.num_serie ?? ''}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <div class="col-md-5 mb-3">
+
+                                <label class="form-label">
+                                    ESTADO
+                                    <span class="text-danger">*</span>
+                                </label>
+
+                                <select
+                                    name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option value="REGULAR">
+                                        REGULAR
+                                    </option>
+
+                                    <option value="BUENO" selected>
+                                        BUENO
+                                    </option>
+
+                                    <option value="MALOGRADO">
+                                        MALOGRADO
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <div class="col-md-7 mb-3">
+
+                                <label class="form-label">
+                                    OBSERVACIÓN
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
+                                    class="form-control"
+                                    placeholder="Observación del accesorio..."
+                                >
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                `;
+                    }
+                );
+
+            } else {
+
+                accesoriosHtml = `
+            <div class="text-muted">
+                Este equipo no tiene accesorios registrados.
+            </div>
+        `;
+            }
+
+
+            const equipoHtml = `
+
+        <div
+            class="card mb-4 equipo-seleccionado"
+            data-equipo-id="${equipo.id}"
+        >
+
+            <div class="card-header">
+
+                <div
+                    class="d-flex justify-content-between align-items-center"
+                >
+
+                    <strong class="titulo-equipo">
+                        EQUIPO ${indice + 1}
+                    </strong>
+
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm quitar-equipo"
+                    >
+                        <i class="bi bi-trash"></i>
+                        QUITAR
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <input
+                    type="hidden"
+                    name="equipos[${indice}][equipo_id]"
+                    value="${equipo.id}"
+                >
+
+
+                {{-- DATOS DEL EQUIPO --}}
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            TIPO DE EQUIPO
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.tipo_equipo?.nombre ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            MARCA
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.marca ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            MODELO
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.modelo ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            NÚMERO DE SERIE
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.num_serie ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            ESTADO
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <select
+                            name="equipos[${indice}][estado]"
+                            class="form-select"
+                            required
+                        >
+
+                            <option value="REGULAR">
+                                REGULAR
+                            </option>
+
+                            <option value="BUENO" selected>
+                                BUENO
+                            </option>
+
+                            <option value="MALOGRADO">
+                                MALOGRADO
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+                            OBSERVACIÓN DEL EQUIPO
+                        </label>
+
+                        <textarea
+                            name="equipos[${indice}][observacion]"
+                            class="form-control"
+                            rows="2"
+                            placeholder="Observación del equipo..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+                {{-- ACCESORIOS --}}
+
+                <div class="mt-3">
+
+                    <h6 class="mb-3">
+                        <i class="bi bi-puzzle"></i>
+                        ACCESORIOS DEL EQUIPO
+                    </h6>
+
+                    ${accesoriosHtml}
+
+                </div>
+
+            </div>
+
+        </div>
+    `;
+
+
+            contenedor.insertAdjacentHTML(
+                'beforeend',
+                equipoHtml
+            );
+
+
+            actualizarEventosQuitarEquipo();
         }
+
+        function actualizarEventosQuitarEquipo() {
+
+            document
+        .querySelectorAll('.quitar-equipo')
+        .forEach(boton => {
+
+            boton.onclick = function () {
+
+                const equipo = this.closest(
+                    '.equipo-seleccionado'
+                );
+
+                if (!equipo) {
+                    return;
+                }
+
+
+                const equipoId = equipo.dataset.equipoId;
+
+                equiposSeleccionados.delete(
+                    String(equipoId)
+                );
+
+                equipo.remove();
+
+
+                renumerarEquipos();
+
+
+                const equipos = document.querySelectorAll(
+                    '.equipo-seleccionado'
+                );
+
+
+                if (equipos.length === 0) {
+
+                    const contenedor =
+                        document.getElementById(
+                            'equipos_seleccionados'
+                        );
+
+                    contenedor.innerHTML = `
+                        <div
+                            id="mensaje_sin_equipos"
+                            class="text-center text-muted py-3"
+                        >
+                            No hay equipos seleccionados.
+                        </div>
+                    `;
+                }
+
+            };
+
+        });
+
+        }
+
+        function renumerarEquipos() {
+
+    const equipos = document.querySelectorAll(
+        '.equipo-seleccionado'
     );
+
+
+    equipos.forEach((equipo, indice) => {
+
+        // -------------------------------------------------
+        // Cambiar el texto EQUIPO 1, EQUIPO 2, etc.
+        // -------------------------------------------------
+
+        const titulo = equipo.querySelector(
+            '.titulo-equipo'
+        );
+
+        if (titulo) {
+
+            titulo.textContent =
+                `EQUIPO ${indice + 1}`;
+
+        }
+
+
+        // -------------------------------------------------
+        // Actualizar todos los name del equipo
+        // -------------------------------------------------
+
+        equipo
+            .querySelectorAll('[name]')
+            .forEach(campo => {
+
+                const nombreActual = campo.getAttribute(
+                    'name'
+                );
+
+                const nombreNuevo =
+                    nombreActual.replace(
+                        /^equipos\[\d+\]/,
+                        `equipos[${indice}]`
+                    );
+
+                campo.setAttribute(
+                    'name',
+                    nombreNuevo
+                );
+
+            });
+
+    });
+
+}
 
 });
 </script>

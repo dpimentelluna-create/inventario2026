@@ -3,63 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Class Prestamo
- *
- * @property $id
- * @property $equipo_id
- * @property $docente_id
- * @property $ubicacion_destino_id
- * @property $fecha_entrega
- * @property $fecha_devolucion_prevista
- * @property $fecha_devolucion_real
- * @property $estado
- * @property $observacion
- * @property $created_at
- * @property $updated_at
- *
- * @property Docente $docente
- * @property Equipo $equipo
- * @property Ubicacione $ubicacione
- * @package App
- * @mixin \Illuminate\Database\Eloquent\Builder
- */
 class Prestamo extends Model
 {
-    
     protected $perPage = 20;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = ['equipo_id', 'docente_id', 'ubicacion_destino_id', 'fecha_entrega', 'fecha_devolucion_prevista', 'fecha_devolucion_real', 'estado', 'observacion'];
+    protected $fillable = [
+        'docente_id',
+        'cargo',
+        'fecha',
+        'hora_inicio',
+        'hora_fin',
+        'estado',
+    ];
 
+    protected $casts = [
+        'fecha' => 'date',
+    ];
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Docente que recibe el préstamo
      */
-    public function docente()
+    public function docente(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Docente::class, 'docente_id', 'id');
+        return $this->belongsTo(Docente::class, 'docente_id');
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function ubicacione()
-    {
-        return $this->belongsTo(\App\Models\Ubicacione::class, 'ubicacion_destino_id', 'id');
-    }
-    
-    //llamar una foranea de otra foranea
-        public function equipo(){
-        return $this->belongsTo(TiposEquipo::class, 'tipo_equipo_id');
-    }
-        /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
 
+    /**
+     * Equipos incluidos en el préstamo
+     */
+    public function prestamoEquipos(): HasMany
+    {
+        return $this->hasMany(PrestamoEquipo::class, 'prestamo_id');
+    }
 }
