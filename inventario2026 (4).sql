@@ -1,4 +1,20 @@
-SET FOREIGN_KEY_CHECKS = 1;
+SELECT 'prestamos' AS tabla, COUNT(*) AS registros FROM prestamos
+UNION ALL
+SELECT 'equipos', COUNT(*) FROM equipos
+UNION ALL
+SELECT 'accesorios_equipo', COUNT(*) FROM accesorios_equipo
+UNION ALL
+SELECT 'especificaciones_equipo', COUNT(*) FROM especificaciones_equipo
+UNION ALL
+SELECT 'especificaciones_laptop', COUNT(*) FROM especificaciones_laptop
+UNION ALL
+SELECT 'docentes', COUNT(*) FROM docentes
+UNION ALL
+SELECT 'tipos_equipo', COUNT(*) FROM tipos_equipo
+UNION ALL
+SELECT 'ubicaciones', COUNT(*) FROM ubicaciones
+UNION ALL
+SELECT 'users', COUNT(*) FROM users;
 -- =========================================================
 -- DATOS DE INVENTARIO2026
 -- NO INCLUYE LA TABLA migrations
