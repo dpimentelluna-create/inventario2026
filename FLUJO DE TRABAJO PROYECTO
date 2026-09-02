@@ -13,9 +13,7 @@ git commit -m "Descripcion del nuevo cambio"
 git pull --rebase origin main
 git push origin main
 
-1: git pull --rebase origin main
-
-
+GRAFICO DE FLUJO:
 TÚ                              COMPAÑERO
 │                               │
 ├─ git pull                     ├─ git pull
