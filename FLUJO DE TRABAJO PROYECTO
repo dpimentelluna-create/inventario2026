@@ -5,7 +5,8 @@ USUARIO 1:
 git status
 git add . 
 git commit -m "Descripcion del cambio"
-git push
+git pull --rebase origin main
+git push origin main
 
 USUARIO 2: 
 git add . 
