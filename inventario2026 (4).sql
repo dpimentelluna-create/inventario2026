@@ -1,3 +1,16 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE accesorios_equipo;
+TRUNCATE TABLE especificaciones_equipo;
+TRUNCATE TABLE especificaciones_laptop;
+TRUNCATE TABLE equipos;
+TRUNCATE TABLE docentes;
+TRUNCATE TABLE tipos_equipo;
+TRUNCATE TABLE ubicaciones;
+TRUNCATE TABLE users;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
 -- =========================================================
 -- DATOS DE INVENTARIO2026
 -- NO INCLUYE LA TABLA migrations
