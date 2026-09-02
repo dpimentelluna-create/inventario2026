@@ -1,16 +1,18 @@
-SET FOREIGN_KEY_CHECKS = 0;
-
-TRUNCATE TABLE prestamos;
-TRUNCATE TABLE accesorios_equipo;
-TRUNCATE TABLE especificaciones_equipo;
-TRUNCATE TABLE especificaciones_laptop;
-TRUNCATE TABLE equipos;
-TRUNCATE TABLE docentes;
-TRUNCATE TABLE tipos_equipo;
-TRUNCATE TABLE ubicaciones;
-TRUNCATE TABLE users;
-
-SET FOREIGN_KEY_CHECKS = 1;
+SELECT 'equipos' AS tabla, COUNT(*) AS registros FROM equipos
+UNION ALL
+SELECT 'accesorios_equipo', COUNT(*) FROM accesorios_equipo
+UNION ALL
+SELECT 'especificaciones_equipo', COUNT(*) FROM especificaciones_equipo
+UNION ALL
+SELECT 'especificaciones_laptop', COUNT(*) FROM especificaciones_laptop
+UNION ALL
+SELECT 'docentes', COUNT(*) FROM docentes
+UNION ALL
+SELECT 'tipos_equipo', COUNT(*) FROM tipos_equipo
+UNION ALL
+SELECT 'ubicaciones', COUNT(*) FROM ubicaciones
+UNION ALL
+SELECT 'users', COUNT(*) FROM users;
 
 -- =========================================================
 -- DATOS DE INVENTARIO2026
