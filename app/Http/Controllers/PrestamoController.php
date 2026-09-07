@@ -146,6 +146,7 @@ class PrestamoController extends Controller
         $prestamo = Prestamo::with([
             'docente',
             'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.equipo.accesoriosEquipos',
             'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
         ])->findOrFail($id);
 
