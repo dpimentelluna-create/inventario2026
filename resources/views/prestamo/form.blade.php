@@ -774,24 +774,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         document
-            .querySelectorAll('.equipo-resultado:not(.disabled)')
-            .forEach(elemento => {
+    .querySelectorAll('.equipo-resultado:not(.disabled)')
+    .forEach(elemento => {
 
-                elemento.addEventListener(
-                    'click',
-                    function () {
+        elemento.addEventListener(
+            'click',
+            function () {
 
-                        const equipoId =
-                            this.dataset.id;
+                const equipoId =
+                    this.dataset.id;
 
-                        agregarEquipo(
-                            equipoId
-                        );
+                const equipo =
+                    equipos.find(
+                        e => String(e.id) === String(equipoId)
+                    );
 
-                    }
-                );
+                if (!equipo) {
 
-            });
+                    console.error(
+                        'No se pudo encontrar el equipo seleccionado:',
+                        equipoId
+                    );
+
+                    return;
+                }
+
+                agregarEquipo(equipo);
+
+            }
+        );
+
+    });
 
     }
 
@@ -800,125 +813,75 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ========================================================= */
     /* AGREGAR EQUIPO */
     /* ========================================================= */
+    function agregarEquipo(equipo) {
 
-    function agregarEquipo(equipoId) {
+        if (!equipo || !equipo.id) {
 
-        if (
-            equiposSeleccionados.has(
-                String(equipoId)
-            )
-        ) {
-
-            alert(
-                'Este equipo ya ha sido seleccionado.'
-            );
-
-            return;
-
-        }
-
-
-        const parametros =
-            new URLSearchParams();
-
-
-        parametros.append(
-            'buscar',
-            equipoId
-        );
-
-
-        fetch(
-            `{{ route('prestamos.buscarEquipos') }}?${parametros.toString()}`
-        )
-
-        .then(response => response.json())
-
-        .then(equipos => {
-
-            const equipo =
-                equipos.find(
-                    e =>
-                        String(e.id)
-                        === String(equipoId)
-                );
-
-
-            if (!equipo) {
-
-                alert(
-                    'No se pudo encontrar el equipo seleccionado.'
-                );
-
-                return;
-
-            }
-
-
-            equiposSeleccionados.add(
-                String(equipo.id)
-            );
-
-
-            mostrarEquipoSeleccionado(
+            console.error(
+                'Equipo inválido:',
                 equipo
             );
 
+            return;
+        }
 
-            buscarEquipo.value = '';
-
-
-            resultados.innerHTML = `
-
-                <div class="text-muted text-center py-3">
-
-                    Equipo agregado correctamente.
-
-                    Puedes buscar otro equipo.
-
-                </div>
-
-            `;
-
-        })
-
-        .catch(error => {
-
-            console.error(error);
-
-            alert(
-                'Ocurrió un error al seleccionar el equipo.'
-            );
-
-        });
-
-    }
+        const equipoId =
+            String(equipo.id);
 
 
+        // Evitar seleccionar el mismo equipo dos veces
+        if (equiposSeleccionados.has(equipoId)) {
+            return;
+        }
+
+
+        equiposSeleccionados.add(equipoId);
+
+
+        // Mostrar directamente el equipo seleccionado
+        mostrarEquipoSeleccionado(equipo);
+
+
+        // Limpiar buscador
+        buscarEquipo.value = '';
+
+
+        resultados.innerHTML = `
+
+        <div class="alert alert-success mb-0">
+
+            Equipo agregado correctamente.
+            Puedes buscar otro equipo.
+
+        </div>
+
+    `;
+}
 
     /* ========================================================= */
     /* MOSTRAR EQUIPO SELECCIONADO */
     /* ========================================================= */
-
     function mostrarEquipoSeleccionado(
         equipo,
-        estadoEquipo = 'BUENO',
+        estadoEquipo = null,
         observacionEquipo = '',
         accesoriosExistentes = null
     ) {
 
-        const mensaje =
-            document.getElementById(
-                'mensaje_sin_equipos'
-            );
-
-
-        if (mensaje) {
-
-            mensaje.remove();
-
+        /*
+         * Si no se proporciona un estado manual,
+         * utilizamos el estado actual del equipo.
+         */
+        if (!estadoEquipo) {
+            estadoEquipo = equipo.estado_actual ?? 'BUENO';
         }
 
+        const mensaje =
+            document.getElementById('mensaje_sin_equipos');
+
+        if (mensaje) {
+            mensaje.remove();
+        }
 
         const indice =
             document.querySelectorAll(
@@ -926,456 +889,399 @@ document.addEventListener('DOMContentLoaded', function () {
             ).length;
 
 
+        /* =========================================================
+           ACCESORIOS DEL EQUIPO
+        ========================================================= */
+
         let accesoriosHtml = '';
 
+        const accesorios =
+            accesoriosExistentes ??
+            equipo.accesorios_equipos ??
+            [];
 
-        if (
-            equipo.accesorios_equipos &&
-            equipo.accesorios_equipos.length > 0
-        ) {
 
-            equipo.accesorios_equipos.forEach(
+        if (accesorios.length > 0) {
+
+            accesoriosHtml = accesorios.map(
                 (accesorio, accesorioIndex) => {
 
-                    let estado =
+                    /*
+                     * En creación:
+                     * usamos el estado actual del accesorio.
+                     *
+                     * En edición:
+                     * accesoriosExistentes contiene el estado
+                     * guardado en el préstamo.
+                     */
+                    const estado =
                         accesorio.estado ?? 'BUENO';
 
-                    let observacion =
+                    const observacion =
                         accesorio.observacion ?? '';
 
 
-                    if (
-                        accesoriosExistentes
-                        &&
-                        accesoriosExistentes[accesorioIndex]
-                    ) {
+                    return `
+                    <div
+                        class="border rounded p-3 mb-3 accesorio-prestamo"
+                    >
 
-                        estado =
-                            accesoriosExistentes[
-                                accesorioIndex
-                            ].estado
-                            ?? estado;
-
-
-                        observacion =
-                            accesoriosExistentes[
-                                accesorioIndex
-                            ].observacion
-                            ?? observacion;
-
-                    }
-
-
-                    accesoriosHtml += `
-
-                        <div
-                            class="
-                                border
-                                rounded
-                                p-3
-                                mb-3
-                                accesorio-prestamo
-                            "
+                        <input
+                            type="hidden"
+                            name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
+                            value="${accesorio.id}"
                         >
 
-                            <input
-                                type="hidden"
-                                name="
-                                    equipos[${indice}]
-                                    [accesorios]
-                                    [${accesorioIndex}]
-                                    [accesorio_equipo_id]
-                                "
-                                value="${accesorio.id}"
-                            >
+                        <div class="row">
+
+                            <!-- TIPO -->
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    TIPO
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.tipo ?? ''}"
+                                    readonly
+                                >
+
+                            </div>
 
 
-                            <div class="row">
+                            <!-- MARCA -->
+                            <div class="col-md-4 mb-3">
 
-                                {{-- TIPO --}}
-                                <div class="col-md-4 mb-3">
+                                <label class="form-label">
+                                    MARCA
+                                </label>
 
-                                    <label class="form-label">
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.marca ?? ''}"
+                                    readonly
+                                >
 
-                                        TIPO
+                            </div>
 
-                                    </label>
 
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        value="${accesorio.tipo ?? ''}"
-                                        readonly
+                            <!-- NÚMERO DE SERIE -->
+                            <div class="col-md-4 mb-3">
+
+                                <label class="form-label">
+                                    NÚMERO DE SERIE
+                                </label>
+
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="${accesorio.num_serie ?? ''}"
+                                    readonly
+                                >
+
+                            </div>
+
+
+                            <!-- ESTADO -->
+                            <div class="col-md-5 mb-3">
+
+                                <label class="form-label">
+                                    ESTADO
+                                    <span class="text-danger">
+                                        *
+                                    </span>
+                                </label>
+
+                                <select
+                                    name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
+                                    class="form-select"
+                                    required
+                                >
+
+                                    <option
+                                        value="REGULAR"
+                                        ${estado === 'REGULAR' ? 'selected' : ''}
                                     >
+                                        REGULAR
+                                    </option>
 
-                                </div>
-
-
-                                {{-- MARCA --}}
-                                <div class="col-md-4 mb-3">
-
-                                    <label class="form-label">
-
-                                        MARCA
-
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        value="${accesorio.marca ?? ''}"
-                                        readonly
+                                    <option
+                                        value="BUENO"
+                                        ${estado === 'BUENO' ? 'selected' : ''}
                                     >
+                                        BUENO
+                                    </option>
 
-                                </div>
-
-
-                                {{-- SERIE --}}
-                                <div class="col-md-4 mb-3">
-
-                                    <label class="form-label">
-
-                                        NÚMERO DE SERIE
-
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        value="${accesorio.num_serie ?? ''}"
-                                        readonly
+                                    <option
+                                        value="MALOGRADO"
+                                        ${estado === 'MALOGRADO' ? 'selected' : ''}
                                     >
+                                        MALOGRADO
+                                    </option>
 
-                                </div>
+                                </select>
 
-
-                                {{-- ESTADO --}}
-                                <div class="col-md-5 mb-3">
-
-                                    <label class="form-label">
-
-                                        ESTADO
-
-                                        <span class="text-danger">
-                                            *
-                                        </span>
-
-                                    </label>
+                            </div>
 
 
-                                    <select
-                                        name="
-                                            equipos[${indice}]
-                                            [accesorios]
-                                            [${accesorioIndex}]
-                                            [estado]
-                                        "
-                                        class="form-select"
-                                        required
-                                    >
+                            <!-- OBSERVACIÓN -->
+                            <div class="col-md-7 mb-3">
 
-                                        <option
-                                            value="REGULAR"
-                                            ${estado === 'REGULAR' ? 'selected' : ''}
-                                        >
-                                            REGULAR
-                                        </option>
+                                <label class="form-label">
+                                    OBSERVACIÓN
+                                </label>
 
-                                        <option
-                                            value="BUENO"
-                                            ${estado === 'BUENO' ? 'selected' : ''}
-                                        >
-                                            BUENO
-                                        </option>
-
-                                        <option
-                                            value="MALOGRADO"
-                                            ${estado === 'MALOGRADO' ? 'selected' : ''}
-                                        >
-                                            MALOGRADO
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-
-                                {{-- OBSERVACIÓN --}}
-                                <div class="col-md-7 mb-3">
-
-                                    <label class="form-label">
-
-                                        OBSERVACIÓN
-
-                                    </label>
-
-
-                                    <input
-                                        type="text"
-                                        name="
-                                            equipos[${indice}]
-                                            [accesorios]
-                                            [${accesorioIndex}]
-                                            [observacion]
-                                        "
-                                        class="form-control"
-                                        value="${observacion ?? ''}"
-                                        placeholder="Observación del accesorio..."
-                                    >
-
-                                </div>
+                                <input
+                                    type="text"
+                                    name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
+                                    class="form-control"
+                                    value="${observacion}"
+                                    placeholder="Observación del accesorio..."
+                                >
 
                             </div>
 
                         </div>
 
-                    `;
-
+                    </div>
+                `;
                 }
-            );
+            ).join('');
 
         } else {
 
             accesoriosHtml = `
-
-                <div class="text-muted">
-
-                    Este equipo no tiene accesorios registrados.
-
-                </div>
-
-            `;
-
+            <div class="text-muted">
+                Este equipo no tiene accesorios registrados.
+            </div>
+        `;
         }
 
 
+        /* =========================================================
+           TARJETA DEL EQUIPO
+        ========================================================= */
+
         const equipoHtml = `
 
-            <div
-                class="card mb-4 equipo-seleccionado"
-                data-equipo-id="${equipo.id}"
-            >
+        <div
+            class="card mb-4 equipo-seleccionado"
+            data-equipo-id="${equipo.id}"
+        >
 
-                <div class="card-header">
+            <div class="card-header">
 
-                    <div
+                <div
+                    class="
+                        d-flex
+                        justify-content-between
+                        align-items-center
+                    "
+                >
+
+                    <strong class="titulo-equipo">
+                        EQUIPO ${indice + 1}
+                    </strong>
+
+
+                    <button
+                        type="button"
                         class="
-                            d-flex
-                            justify-content-between
-                            align-items-center
+                            btn
+                            btn-danger
+                            btn-sm
+                            quitar-equipo
                         "
                     >
 
-                        <strong class="titulo-equipo">
+                        <i class="bi bi-trash"></i>
 
-                            EQUIPO ${indice + 1}
+                        QUITAR
 
-                        </strong>
-
-
-                        <button
-                            type="button"
-                            class="
-                                btn
-                                btn-danger
-                                btn-sm
-                                quitar-equipo
-                            "
-                        >
-
-                            <i class="bi bi-trash"></i>
-
-                            QUITAR
-
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="card-body">
-
-                    {{-- ID DEL EQUIPO --}}
-                    <input
-                        type="hidden"
-                        name="equipos[${indice}][equipo_id]"
-                        value="${equipo.id}"
-                    >
-
-
-                    <div class="row">
-
-                        {{-- TIPO --}}
-                        <div class="col-md-4 mb-3">
-
-                            <label class="form-label">
-
-                                TIPO DE EQUIPO
-
-                            </label>
-
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="${equipo.tipo_equipo?.nombre ?? ''}"
-                                readonly
-                            >
-
-                        </div>
-
-
-                        {{-- MARCA --}}
-                        <div class="col-md-4 mb-3">
-
-                            <label class="form-label">
-
-                                MARCA
-
-                            </label>
-
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="${equipo.marca ?? ''}"
-                                readonly
-                            >
-
-                        </div>
-
-
-                        {{-- MODELO --}}
-                        <div class="col-md-4 mb-3">
-
-                            <label class="form-label">
-
-                                MODELO
-
-                            </label>
-
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="${equipo.modelo ?? ''}"
-                                readonly
-                            >
-
-                        </div>
-
-
-                        {{-- N/S --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-
-                                NÚMERO DE SERIE
-
-                            </label>
-
-
-                            <input
-                                type="text"
-                                class="form-control"
-                                value="${equipo.num_serie ?? ''}"
-                                readonly
-                            >
-
-                        </div>
-
-
-                        {{-- ESTADO --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label class="form-label">
-
-                                ESTADO
-
-                                <span class="text-danger">
-                                    *
-                                </span>
-
-                            </label>
-
-
-                            <select
-                                name="equipos[${indice}][estado]"
-                                class="form-select"
-                                required
-                            >
-
-                                <option
-                                    value="REGULAR"
-                                    ${estadoEquipo === 'REGULAR' ? 'selected' : ''}
-                                >
-                                    REGULAR
-                                </option>
-
-                                <option
-                                    value="BUENO"
-                                    ${estadoEquipo === 'BUENO' ? 'selected' : ''}
-                                >
-                                    BUENO
-                                </option>
-
-                                <option
-                                    value="MALOGRADO"
-                                    ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}
-                                >
-                                    MALOGRADO
-                                </option>
-
-                            </select>
-
-                        </div>
-
-
-                        {{-- OBSERVACIÓN --}}
-                        <div class="col-md-12 mb-3">
-
-                            <label class="form-label">
-
-                                OBSERVACIÓN DEL EQUIPO
-
-                            </label>
-
-
-                            <textarea
-                                name="equipos[${indice}][observacion]"
-                                class="form-control"
-                                rows="2"
-                                placeholder="Observación del equipo..."
-                            >${observacionEquipo ?? ''}</textarea>
-
-                        </div>
-
-                    </div>
-
-
-                    {{-- ACCESORIOS --}}
-                    <div class="mt-3">
-
-                        <h6 class="mb-3">
-
-                            <i class="bi bi-puzzle"></i>
-
-                            ACCESORIOS DEL EQUIPO
-
-                        </h6>
-
-
-                        ${accesoriosHtml}
-
-                    </div>
+                    </button>
 
                 </div>
 
             </div>
 
-        `;
 
+            <div class="card-body">
+
+                <!-- ID DEL EQUIPO -->
+
+                <input
+                    type="hidden"
+                    name="equipos[${indice}][equipo_id]"
+                    value="${equipo.id}"
+                >
+
+
+                <div class="row">
+
+                    <!-- TIPO -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            TIPO DE EQUIPO
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.tipo_equipo?.nombre ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- MARCA -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            MARCA
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.marca ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- MODELO -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            MODELO
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.modelo ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- NÚMERO DE SERIE -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            NÚMERO DE SERIE
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="${equipo.num_serie ?? ''}"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- ESTADO -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            ESTADO
+                            <span class="text-danger">
+                                *
+                            </span>
+                        </label>
+
+                        <select
+                            name="equipos[${indice}][estado]"
+                            class="form-select"
+                            required
+                        >
+
+                            <option
+                                value="REGULAR"
+                                ${estadoEquipo === 'REGULAR' ? 'selected' : ''}
+                            >
+                                REGULAR
+                            </option>
+
+                            <option
+                                value="BUENO"
+                                ${estadoEquipo === 'BUENO' ? 'selected' : ''}
+                            >
+                                BUENO
+                            </option>
+
+                            <option
+                                value="MALOGRADO"
+                                ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}
+                            >
+                                MALOGRADO
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- OBSERVACIÓN -->
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+                            OBSERVACIÓN DEL EQUIPO
+                        </label>
+
+                        <textarea
+                            name="equipos[${indice}][observacion]"
+                            class="form-control"
+                            rows="2"
+                            placeholder="Observación del equipo..."
+                        >${observacionEquipo ?? ''}</textarea>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ACCESORIOS -->
+
+                <div class="mt-3">
+
+                    <h6 class="mb-3">
+
+                        <i class="bi bi-puzzle"></i>
+
+                        ACCESORIOS DEL EQUIPO
+
+                    </h6>
+
+                    ${accesoriosHtml}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+        /* =========================================================
+           INSERTAR EQUIPO
+        ========================================================= */
 
         contenedor.insertAdjacentHTML(
             'beforeend',
@@ -1384,9 +1290,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
         actualizarEventosQuitarEquipo();
-
     }
-
 
 
     /* ========================================================= */

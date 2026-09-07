@@ -27,14 +27,14 @@ class PrestamoController extends Controller
             'prestamoEquipos.equipo.tipoEquipo',
             'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
         ])
-        ->latest('fecha')
-        ->paginate(20);
+            ->latest('fecha')
+            ->paginate(20);
 
         return view('prestamo.index', compact('prestamos'))
             ->with(
                 'i',
                 ($request->input('page', 1) - 1)
-                * $prestamos->perPage()
+                    * $prestamos->perPage()
             );
     }
 
@@ -107,10 +107,10 @@ class PrestamoController extends Controller
                         PrestamoAccesorio::create([
                             'prestamo_equipo_id' => $prestamoEquipo->id,
                             'accesorio_equipo_id' =>
-                                $accesorioData['accesorio_equipo_id'],
+                            $accesorioData['accesorio_equipo_id'],
                             'estado' => $accesorioData['estado'],
                             'observacion' =>
-                                $accesorioData['observacion'] ?? null,
+                            $accesorioData['observacion'] ?? null,
                         ]);
                     }
                 }
@@ -225,10 +225,10 @@ class PrestamoController extends Controller
                         PrestamoAccesorio::create([
                             'prestamo_equipo_id' => $prestamoEquipo->id,
                             'accesorio_equipo_id' =>
-                                $accesorioData['accesorio_equipo_id'],
+                            $accesorioData['accesorio_equipo_id'],
                             'estado' => $accesorioData['estado'],
                             'observacion' =>
-                                $accesorioData['observacion'] ?? null,
+                            $accesorioData['observacion'] ?? null,
                         ]);
                     }
                 }
@@ -263,17 +263,32 @@ class PrestamoController extends Controller
      */
     public function equiposPorTipo($tipoId)
     {
-        $equipos = Equipo::with('tipoEquipo')
+        $equipos = Equipo::with([
+            'tipoEquipo',
+            'especificacionesLaptops',
+            'especificacionesEquipo',
+            'accesoriosEquipos'
+        ])
             ->where('tipo_equipo_id', $tipoId)
             ->select(
                 'id',
                 'tipo_equipo_id',
                 'marca',
                 'modelo',
-                'num_serie',
-                'estado'
+                'num_serie'
             )
-            ->get();
+            ->get()
+            ->map(function ($equipo) {
+
+                $estadoActual =
+                    $equipo->especificacionesLaptops?->estado
+                    ?? $equipo->especificacionesEquipo?->estado
+                    ?? 'BUENO';
+
+                $equipo->estado_actual = $estadoActual;
+
+                return $equipo;
+            });
 
         return response()->json($equipos);
     }
@@ -285,16 +300,25 @@ class PrestamoController extends Controller
     {
         $query = Equipo::with([
             'tipoEquipo',
+            'especificacionesLaptops',
+            'especificacionesEquipo',
             'accesoriosEquipos'
         ]);
 
+        /*
+     * FILTRO POR TIPO DE EQUIPO
+     */
         if ($request->filled('tipo_equipo_id')) {
+
             $query->where(
                 'tipo_equipo_id',
                 $request->tipo_equipo_id
             );
         }
 
+        /*
+     * BÚSQUEDA GLOBAL
+     */
         if ($request->filled('buscar')) {
 
             $terminos = preg_split(
@@ -333,6 +357,9 @@ class PrestamoController extends Controller
             }
         }
 
+        /*
+     * OBTENER EQUIPOS
+     */
         $equipos = $query
             ->select(
                 'id',
@@ -341,7 +368,22 @@ class PrestamoController extends Controller
                 'modelo',
                 'num_serie'
             )
-            ->get();
+            ->get()
+            ->map(function ($equipo) {
+
+                /*
+             * El estado real se obtiene desde la
+             * especificación correspondiente.
+             */
+                $estadoActual =
+                    $equipo->especificacionesLaptops?->estado
+                    ?? $equipo->especificacionesEquipo?->estado
+                    ?? 'BUENO';
+
+                $equipo->estado_actual = $estadoActual;
+
+                return $equipo;
+            });
 
         return response()->json($equipos);
     }
