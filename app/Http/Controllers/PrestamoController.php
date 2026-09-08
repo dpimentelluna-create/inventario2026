@@ -648,4 +648,31 @@ class PrestamoController extends Controller
 
         return response()->json($equipos);
     }
+    public function registrarDocente(Request $request)
+{
+    $request->validate([
+        'nombres' => 'required|string|max:100',
+        'apellidos' => 'required|string|max:100',
+        'cargo' => 'required|string|max:100',
+    ]);
+
+    $docente = Docente::create([
+        'nombres' => mb_strtoupper(trim($request->nombres), 'UTF-8'),
+        'apellidos' => mb_strtoupper(trim($request->apellidos), 'UTF-8'),
+        'cargo' => mb_strtoupper(trim($request->cargo), 'UTF-8'),
+        'dni' => null,
+        'correo' => null,
+        'celular' => null,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'docente' => [
+            'id' => $docente->id,
+            'nombres' => $docente->nombres,
+            'apellidos' => $docente->apellidos,
+            'cargo' => $docente->cargo,
+        ],
+    ]);
+}
 }

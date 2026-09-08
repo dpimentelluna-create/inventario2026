@@ -55,6 +55,12 @@ Route::resource('accesorios-equipo', App\Http\Controllers\AccesoriosEquipoContro
 Route::resource('docentes', App\Http\Controllers\DocenteController::class);
 
 //PRESTAMOS
+Route::post(
+    '/prestamos/registrar-docente',
+    [PrestamoController::class, 'registrarDocente']
+)->name('prestamos.registrarDocente');
+
+
 Route::get(
     '/prestamos/equipos-por-tipo/{tipoId}',
     [PrestamoController::class, 'equiposPorTipo']
