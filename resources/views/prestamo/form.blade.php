@@ -35,71 +35,59 @@
 
                         </label>
 
-                        <select
-                            name="docente_id"
-                            id="docente_id"
-                            class="form-select @error('docente_id') is-invalid @enderror"
-                            required
-                        >
 
-                            <option value="">
-                                -- Seleccionar docente --
-                            </option>
+                        <div class="position-relative">
 
-                            @foreach ($docentes as $docente)
+                            {{-- ID REAL DEL DOCENTE --}}
+                            <input type="hidden" name="docente_id" id="docente_id"
+                                value="{{ old('docente_id', $prestamo->docente_id) }}">
 
-                                <option
-                                    value="{{ $docente->id }}"
-                                    @selected(
-        old(
-            'docente_id',
-            $prestamo->docente_id
-        ) == $docente->id
-    )
-                                >
+                            {{-- BUSCADOR --}}
+                            <input type="text" id="buscar_docente"
+                                class="form-control @error('docente_id') is-invalid @enderror"
+                                placeholder="Escribir nombre o apellido..." autocomplete="off" value="{{ old(
+    'buscar_docente',
+    $prestamo->exists && $prestamo->docente
+    ? $prestamo->docente->apellidos . ' ' . $prestamo->docente->nombres
+    : ''
+) }}" required>
 
-                                    {{ $docente->apellidos }}
-                                    {{ $docente->nombres }}
+                            {{-- RESULTADOS --}}
+                            <div id="resultados_docentes" class="list-group position-absolute w-100 shadow-sm"
+                                style="z-index: 1050; display: none;"></div>
 
-                                </option>
-
-                            @endforeach
-
-                        </select>
-
+                        </div>
 
                         @error('docente_id')
-
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 {{ $message }}
                             </div>
-
                         @enderror
 
                     </div>
 
 
-                    {{-- CARGO --}}
+                    {{-------------- CARGO -----------------}}
                     <div class="col-md-6 mb-3">
-
+                    
                         <label for="cargo" class="form-label">
-
+                    
                             CARGO
                             <span class="text-danger">*</span>
-
+                    
                         </label>
-
-                        <input
-                            type="text"
-                            name="cargo"
-                            id="cargo"
-                            class="form-control campo-mayusculas @error('cargo') is-invalid @enderror"
-                            value="{{ old('cargo', $prestamo->cargo ?? 'DOCENTE') }}"
-                            maxlength="100"
-                            required
-                        >
-
-
+                    
+                        <div class="position-relative">
+                    
+                            <input type="text" name="cargo" id="cargo"
+                                class="form-control campo-mayusculas @error('cargo') is-invalid @enderror"
+                                value="{{ old('cargo', $prestamo->cargo ?? 'DOCENTE') }}" maxlength="100" autocomplete="off" required>
+                    
+                            <div id="resultados_cargos" class="list-group position-absolute w-100 shadow-sm"
+                                style="z-index: 1050; display: none;"></div>
+                    
+                        </div>
+                    
                         @error('cargo')
 
                             <div class="invalid-feedback">
@@ -107,11 +95,11 @@
                             </div>
 
                         @enderror
-
+                    
                     </div>
 
 
-                    {{-- FECHA --}}
+                    {{-------------- FECHA -----------------}}
                     <div class="col-md-4 mb-3">
 
                         <label for="fecha" class="form-label">
@@ -121,20 +109,23 @@
 
                         </label>
 
-                        <input
-                            type="date"
-                            name="fecha"
-                            id="fecha"
-                            class="form-control @error('fecha') is-invalid @enderror"
-                            value="{{ old(
+
+                        <div class="input-group">
+
+                            <input type="date" name="fecha" id="fecha"
+                                class="form-control @error('fecha') is-invalid @enderror" value="{{ old(
     'fecha',
     $prestamo->fecha
     ? $prestamo->fecha->format('Y-m-d')
-    : ''
-) }}"
-                            required
-                        >
+    : now()->format('Y-m-d')
+) }}" required>
 
+                            <button type="button" class="btn btn-outline-success" id="btn_hoy">
+                                <i class="bi bi-calendar-check"></i>
+                                HOY
+                            </button>
+
+                        </div>
 
                         @error('fecha')
 
@@ -157,19 +148,13 @@
 
                         </label>
 
-                        <input
-                            type="time"
-                            name="hora_inicio"
-                            id="hora_inicio"
-                            class="form-control @error('hora_inicio') is-invalid @enderror"
-                            value="{{ old(
+                        <input type="time" name="hora_inicio" id="hora_inicio"
+                            class="form-control @error('hora_inicio') is-invalid @enderror" value="{{ old(
     'hora_inicio',
     $prestamo->hora_inicio
     ? substr($prestamo->hora_inicio, 0, 5)
     : ''
-) }}"
-                            required
-                        >
+) }}" required>
 
 
                         @error('hora_inicio')
@@ -192,18 +177,13 @@
 
                         </label>
 
-                        <input
-                            type="time"
-                            name="hora_fin"
-                            id="hora_fin"
-                            class="form-control @error('hora_fin') is-invalid @enderror"
-                            value="{{ old(
+                        <input type="time" name="hora_fin" id="hora_fin"
+                            class="form-control @error('hora_fin') is-invalid @enderror" value="{{ old(
     'hora_fin',
     $prestamo->hora_fin
     ? substr($prestamo->hora_fin, 0, 5)
     : ''
-) }}"
-                        >
+) }}">
 
                         <small class="text-muted">
 
@@ -229,8 +209,6 @@
         </div>
 
     </div>
-
-
 
     {{-- ========================================================= --}}
     {{-- PARTE 2 — SELECCIÓN DE EQUIPOS --}}
@@ -485,6 +463,17 @@
 
 </script>
 
+@php
+$docentesParaJs = $docentes->map(function ($docente) {
+    return [
+        'id' => $docente->id,
+        'nombres' => $docente->nombres,
+        'apellidos' => $docente->apellidos,
+        'cargo' => $docente->cargo,
+    ];
+})->values();
+@endphp
+
 
 
 {{-- ============================================================= --}}
@@ -503,6 +492,409 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const resultados =
         document.getElementById('resultados_equipos');
+
+    /*
+     * =========================================================
+     * BUSCADOR DE DOCENTES
+     * =========================================================
+     */
+
+    const buscarDocente =
+        document.getElementById('buscar_docente');
+
+    const docenteId =
+        document.getElementById('docente_id');
+
+    const resultadosDocentes =
+        document.getElementById('resultados_docentes');
+
+
+    // Lista de docentes existente en Laravel
+    const docentes = @json($docentesParaJs);
+
+    /*
+ * =========================================================
+ * BUSCADOR DE CARGOS
+ * =========================================================
+ */
+
+const cargo = document.getElementById('cargo');
+
+const resultadosCargos =
+    document.getElementById('resultados_cargos');
+
+
+/*
+ * Obtener cargos únicos de los docentes
+ */
+
+const cargos = [
+    ...new Set(
+        docentes
+            .map(docente => docente.cargo)
+            .filter(cargo => cargo && cargo.trim() !== '')
+            .map(cargo => cargo.trim())
+    )
+].sort();
+
+
+/*
+ * BUSCAR CARGO MIENTRAS SE ESCRIBE
+ */
+
+cargo.addEventListener(
+    'input',
+    function () {
+
+        const texto =
+            this.value.trim().toLowerCase();
+
+
+        const resultados =
+            cargos.filter(cargoExistente =>
+                cargoExistente
+                    .toLowerCase()
+                    .includes(texto)
+            );
+
+
+        mostrarResultadosCargos(
+            resultados
+        );
+    }
+);
+
+/*
+ * =========================================================
+ * MOSTRAR RESULTADOS DE CARGOS
+ * =========================================================
+ */
+
+function mostrarResultadosCargos(resultados) {
+
+    resultadosCargos.innerHTML = '';
+
+
+    /*
+     * Si no hay resultados
+     */
+
+    if (resultados.length === 0) {
+
+        resultadosCargos.style.display =
+            'none';
+
+        return;
+    }
+
+
+    /*
+     * Mostrar cargos encontrados
+     */
+
+    resultados.forEach(cargoExistente => {
+
+        const elemento =
+            document.createElement('button');
+
+
+        elemento.type = 'button';
+
+
+        elemento.className =
+            'list-group-item list-group-item-action';
+
+
+        elemento.textContent =
+            cargoExistente;
+
+
+        elemento.addEventListener(
+            'click',
+            function () {
+
+                cargo.value =
+                    cargoExistente;
+
+
+                resultadosCargos.innerHTML =
+                    '';
+
+                resultadosCargos.style.display =
+                    'none';
+
+
+                /*
+                 * Disparar input por si
+                 * otra función depende del cambio.
+                 */
+
+                cargo.dispatchEvent(
+                    new Event('change')
+                );
+            }
+        );
+
+
+        resultadosCargos.appendChild(
+            elemento
+        );
+    });
+
+
+    resultadosCargos.style.display =
+        'block';
+}
+
+/*
+ * =========================================================
+ * OCULTAR CARGOS AL HACER CLIC FUERA
+ * =========================================================
+ */
+
+document.addEventListener(
+    'click',
+    function (event) {
+
+        if (
+            !cargo.contains(event.target) &&
+            !resultadosCargos.contains(event.target)
+        ) {
+
+            resultadosCargos.innerHTML = '';
+
+            resultadosCargos.style.display =
+                'none';
+        }
+    }
+);
+
+    
+    /*
+     * BUSCAR MIENTRAS SE ESCRIBE
+     */
+    buscarDocente.addEventListener(
+        'input',
+    function () {
+
+            const texto =
+            this.value.trim()
+                .toLowerCase();
+
+            /*
+             * Si está vacío, limpiar resultados.
+             */
+        if (texto === '') {
+
+                docenteId.value = '';
+
+                resultadosDocentes.innerHTML = '';
+
+                resultadosDocentes.style.display =
+                'none';
+
+                    return;
+        }
+
+
+            /*
+             * Buscar por nombre o apellido.
+             */
+        const resultados =
+            docentes.filter(docente => {
+
+                    const nombreCompleto =
+                    `${docente.apellidos} ${docente.nombres}`
+                        .toLowerCase();
+
+                    return nombreCompleto.includes(
+                        texto
+                    );
+            });
+
+
+            /*
+             * Mostrar resultados.
+             */
+         mostrarResultadosDocentes(
+                resultados
+            );
+        }
+);
+
+    
+/*
+     * MOSTRAR RESULTADOS
+     */
+    function mostrarResultadosDocentes(
+        resultados
+) {
+
+        resultadosDocentes.innerHTML = '';
+
+
+        /*
+         * No existen coincidencias.
+         */
+    if (resultados.length === 0) {
+
+            resultadosDocentes.innerHTML = `
+            <div class="list-group-item">
+
+                <div class="text-muted mb-2">
+                    No se encontró el docente.
+                </div>
+
+                <button
+                    type="button"
+                    class="btn btn-success btn-sm w-100"
+                    id="registrar_docente_nuevo"
+                >
+                    <i class="bi bi-person-plus"></i>
+                    REGISTRAR NUEVO DOCENTE
+                </button>
+
+            </div>
+        `;
+
+            resultadosDocentes.style.display =
+            'block';
+
+                return;
+    }
+
+
+        /*
+         * Mostrar docentes encontrados.
+         */
+    resultados.forEach(docente => {
+
+            const elemento =
+            document.createElement('button');
+
+            elemento.type = 'button';
+
+            elemento.className =
+            'list-group-item list-group-item-action';
+
+            elemento.innerHTML = `
+            <div>
+                <strong>
+                    ${docente.apellidos}
+                    ${docente.nombres}
+                </strong>
+
+                <br>
+
+                <small class="text-muted">
+                    ${docente.cargo ?? 'Sin cargo'}
+                </small>
+            </div>
+        `;
+
+
+            elemento.addEventListener(
+                'click',
+            function () {
+
+                    /*
+                     * Guardar ID real.
+                     */
+                docenteId.value =
+                    docente.id;
+
+
+                    /*
+                     * Mostrar nombre completo.
+                     */
+                buscarDocente.value =
+                    `${docente.apellidos} ${docente.nombres}`;
+
+
+                    /*
+                     * Cargar cargo automáticamente.
+                     */
+                const campoCargo =
+                    document.getElementById('cargo');
+
+                    if (campoCargo) {
+
+                        campoCargo.value =
+                            docente.cargo ?? '';
+                }
+
+
+                    /*
+                     * Ocultar resultados.
+                     */
+                resultadosDocentes.innerHTML =
+                    '';
+
+                    resultadosDocentes.style.display =
+                        'none';
+                }
+        );
+
+
+            resultadosDocentes.appendChild(
+                elemento
+            );
+    });
+
+
+        resultadosDocentes.style.display =
+            'block';
+}
+
+/*
+ * =========================================================
+ * BOTÓN HOY
+ * =========================================================
+ */
+
+const fecha =
+    document.getElementById('fecha');
+
+const btnHoy =
+    document.getElementById('btn_hoy');
+
+
+btnHoy.addEventListener(
+    'click',
+    function () {
+
+        const hoy =
+            new Date();
+
+        const año =
+            hoy.getFullYear();
+
+        const mes =
+            String(
+                hoy.getMonth() + 1
+            ).padStart(2, '0');
+
+        const dia =
+            String(
+                hoy.getDate()
+            ).padStart(2, '0');
+
+
+        fecha.value  =
+                 `${año}-${mes}-${dia}`;
+
+
+        /*
+         * Disparar evento por si
+         * alguna otra función depende
+         * del cambio de fecha.
+         */
+        fecha.dispatchEvent(
+            new Event('change')
+        );
+    }
+);
+
 
     const contenedor =
         document.getElementById('equipos_seleccionados');
@@ -808,8 +1200,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     }
 
-
-
     /* ========================================================= */
     /* AGREGAR EQUIPO */
     /* ========================================================= */
@@ -827,7 +1217,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const equipoId =
             String(equipo.id);
-
 
         // Evitar seleccionar el mismo equipo dos veces
         if (equiposSeleccionados.has(equipoId)) {
