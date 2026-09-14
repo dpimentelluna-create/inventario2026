@@ -347,84 +347,55 @@
 
             <div class="card-body">
 
-                <div class="row">
+                <div id="panel_busqueda_equipos">
 
-                    {{-- TIPO DE EQUIPO --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="row">
 
-                        <label
-                            for="tipo_equipo_id"
-                            class="form-label"
-                        >
+                        <div class="col-md-4 mb-3">
+                            <label for="tipo_equipo_id" class="form-label">
+                                TIPO DE EQUIPO
+                            </label>
+                            <select id="tipo_equipo_id" class="form-select" disabled>
+                                <option value="">TODOS</option>
+                                @foreach ($tiposEquipo as $tipo)
+                                    <option value="{{ $tipo->id }}">
+                                        {{ $tipo->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
-                            TIPO DE EQUIPO
-
-                        </label>
-
-
-                        <select
-                            id="tipo_equipo_id"
-                            class="form-select"
-                        >
-
-                            <option value="">
-                                TODOS
-                            </option>
-
-
-                            @foreach ($tiposEquipo as $tipo)
-
-                                <option value="{{ $tipo->id }}">
-
-                                    {{ $tipo->nombre }}
-
-                                </option>
-
-                            @endforeach
-
-                        </select>
+                        <div class="col-md-8 mb-3">
+                            <label for="buscar_equipo" class="form-label">
+                                BUSCAR EQUIPO
+                            </label>
+                            <input
+                                type="text"
+                                id="buscar_equipo"
+                                class="form-control campo-mayusculas"
+                                placeholder="Complete la Parte 1 para buscar equipos..."
+                                autocomplete="off"
+                                disabled
+                            >
+                        </div>
 
                     </div>
 
-
-                    {{-- BUSCAR EQUIPO --}}
-                    <div class="col-md-8 mb-3">
-
-                        <label
-                            for="buscar_equipo"
-                            class="form-label"
-                        >
-
-                            BUSCAR EQUIPO
-
-                        </label>
-
-
-                        <input
-                            type="text"
-                            id="buscar_equipo"
-                            class="form-control campo-mayusculas"
-                            placeholder="Buscar por tipo, marca, modelo o N/S..."
-                            autocomplete="off"
-                        >
-
+                    <div id="resultados_equipos" class="mt-2">
+                        <div class="text-muted text-center py-3">
+                            Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.
+                        </div>
                     </div>
+
+                    <div id="error_equipos_parte2" class="error-toast-campo alert alert-danger py-1 px-2 small mt-2 mb-0" style="display: none;"></div>
 
                 </div>
 
-
-                {{-- RESULTADOS --}}
-                <div
-                    id="resultados_equipos"
-                    class="mt-2"
-                >
-
-                    <div class="text-muted text-center py-3">
-
-                        Escribe para buscar un equipo.
-
-                    </div>
-
+                <div class="text-center mt-3" id="wrap_btn_agregar_equipo" style="display: none;">
+                    <button type="button" class="btn btn-success" id="btn_agregar_equipo">
+                        <i class="bi bi-plus-circle"></i>
+                        AGREGAR EQUIPO
+                    </button>
                 </div>
 
             </div>
@@ -516,7 +487,14 @@
 
 </div>
 
-
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+    <div id="toast_prestamo" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toast_prestamo_texto"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
 
 {{-- ============================================================= --}}
 {{-- DATOS EXISTENTES PARA EDICIÓN --}}
@@ -625,6 +603,65 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Lista de docentes existente en Laravel
     const docentes = @json($docentesParaJs);
+
+    const esEdicion = @json((bool) $prestamo->exists);
+
+    function normalizarEstado(estado) {
+        const valor = String(estado || '').toUpperCase().trim();
+        if (valor.includes('MALO')) return 'MALOGRADO';
+        if (valor.includes('REG')) return 'REGULAR';
+        return 'BUENO';
+    }
+
+    function mostrarToast(mensaje, tipo) {
+        const toastEl = document.getElementById('toast_prestamo');
+        const textoEl = document.getElementById('toast_prestamo_texto');
+        if (!toastEl || !textoEl) {
+            return;
+        }
+
+        textoEl.textContent = mensaje;
+        toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-primary');
+        toastEl.classList.add(tipo === 'danger' ? 'text-bg-danger' : 'text-bg-success');
+
+        const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
+        toast.show();
+    }
+
+    function limpiarErroresCampos() {
+        document.querySelectorAll('.error-toast-campo').forEach(function (el) {
+            el.remove();
+        });
+        document.querySelectorAll('.is-invalid').forEach(function (el) {
+            el.classList.remove('is-invalid');
+        });
+    }
+
+    function mostrarErrorCampo(campo, mensaje) {
+        if (!campo) {
+            mostrarToast(mensaje, 'danger');
+            return;
+        }
+
+        campo.classList.add('is-invalid');
+
+        const contenedor = campo.closest('.mb-3') || campo.parentElement;
+        if (contenedor) {
+            let aviso = contenedor.querySelector('.error-toast-campo');
+            if (!aviso) {
+                aviso = document.createElement('div');
+                aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
+                campo.insertAdjacentElement('afterend', aviso);
+            }
+            aviso.textContent = mensaje;
+        }
+
+        mostrarToast(mensaje, 'danger');
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () {
+            campo.focus();
+        }, 350);
+    }
 
     let indiceDocenteSeleccionado = -1;
     
@@ -775,6 +812,7 @@ function mostrarResultadosCargos(resultados) {
  * =========================================================
  */
 
+if (cargo && resultadosCargos) {
 document.addEventListener(
     'click',
     function (event) {
@@ -791,6 +829,7 @@ document.addEventListener(
         }
     }
 );
+}
 
     
 /*
@@ -1144,6 +1183,9 @@ function seleccionarDocente(docente) {
     docenteId.value =
         docente.id;
 
+        docenteId.dispatchEvent(
+    new Event('change')
+);
 
     /*
      * Mostrar nombre completo
@@ -1165,6 +1207,8 @@ function seleccionarDocente(docente) {
 
         campoCargo.value =
             docente.cargo ?? '';
+
+        campoCargo.dispatchEvent(new Event('change'));
 
     }
 
@@ -1189,7 +1233,6 @@ function seleccionarDocente(docente) {
 
 }
 
-
 /*
  * =========================================================
  * BUSCAR MIENTRAS SE ESCRIBE
@@ -1211,8 +1254,29 @@ buscarDocente.addEventListener(
          * el ID anterior deja de ser válido.
          */
 
-        docenteId.value =
-            '';
+        docenteId.value = '';
+
+        const campoCargo =
+            document.getElementById('cargo');
+
+        if (campoCargo) {
+            campoCargo.value = '';
+        }
+
+
+        /*
+         * Si está vacío, ocultar resultados.
+         */
+
+        if (texto === '') {
+
+            resultadosDocentes.innerHTML = '';
+
+            resultadosDocentes.style.display =
+                'none';
+
+            return;
+        }
 
 
         /*
@@ -1896,6 +1960,12 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
     campoReal.value = hora24;
 
     campoTexto.setCustomValidity('');
+
+    campoReal.dispatchEvent(new Event('change'));
+
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
 }
 
 
@@ -2329,9 +2399,23 @@ if (formularioPrestamo) {
 
     formularioPrestamo.addEventListener('submit', function (event) {
 
-        // ---------------------------------------------
-        // PRIMERO PROCESAR LAS HORAS
-        // ---------------------------------------------
+        limpiarErroresCampos();
+
+        const docenteCampo = document.getElementById('docente_id');
+        const buscarDocenteCampo = document.getElementById('buscar_docente');
+        const fechaCampo = document.getElementById('fecha');
+
+        if (!docenteCampo || docenteCampo.value.trim() === '') {
+            event.preventDefault();
+            mostrarErrorCampo(buscarDocenteCampo, 'Seleccione un solicitante.');
+            return;
+        }
+
+        if (!fechaCampo || fechaCampo.value.trim() === '') {
+            event.preventDefault();
+            mostrarErrorCampo(fechaCampo, 'La fecha es obligatoria.');
+            return;
+        }
 
         if (horaInicioTexto && horaInicioTexto.value.trim() !== '') {
 
@@ -2340,6 +2424,35 @@ if (formularioPrestamo) {
                 horaInicioReal,
                 true
             );
+        }
+
+        if (!horaInicioReal || horaInicioReal.value.trim() === '') {
+            event.preventDefault();
+            mostrarErrorCampo(horaInicioTexto, 'La hora de inicio es obligatoria.');
+            return;
+        }
+
+        const equiposEnFormulario = this.querySelectorAll('.equipo-seleccionado input[name$="[equipo_id]"]');
+        if (equiposEnFormulario.length === 0) {
+            event.preventDefault();
+            const caja = document.getElementById('error_equipos_parte2');
+            if (caja) {
+                caja.style.display = 'block';
+                caja.textContent = 'Debe seleccionar al menos un equipo.';
+            }
+            mostrarToast('Debe seleccionar al menos un equipo.', 'danger');
+            const ancla = document.getElementById('panel_busqueda_equipos')
+                || document.getElementById('tipo_equipo_id');
+            if (ancla) {
+                ancla.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        const cajaEquipos = document.getElementById('error_equipos_parte2');
+        if (cajaEquipos) {
+            cajaEquipos.style.display = 'none';
+            cajaEquipos.textContent = '';
         }
 
 
@@ -2383,6 +2496,31 @@ if (formularioPrestamo) {
         // VALIDACIÓN GENERAL DEL FORMULARIO
         // ---------------------------------------------
 
+        const estadosValidos = ['BUENO', 'REGULAR', 'MALOGRADO'];
+        const estadosAccesorios = this.querySelectorAll(
+            'select[name*="[accesorios]"][name$="[estado]"], input[name*="[accesorios]"][name$="[estado]"]'
+        );
+        for (const campo of estadosAccesorios) {
+            const valor = (campo.value || '').toUpperCase().trim();
+            if (!estadosValidos.includes(valor)) {
+                event.preventDefault();
+                mostrarToast('Hay accesorios con estado inválido o vacío.', 'danger');
+                campo.focus();
+                return;
+            }
+        }
+
+        const idsAccesorios = this.querySelectorAll(
+            'input[name*="[accesorios]"][name$="[accesorio_equipo_id]"]'
+        );
+        for (const campo of idsAccesorios) {
+            if (!campo.value) {
+                event.preventDefault();
+                mostrarToast('Hay accesorios sin identificar. Quita el equipo y vuelve a agregarlo.', 'danger');
+                return;
+            }
+        }
+
         if (!this.checkValidity()) {
 
             event.preventDefault();
@@ -2395,7 +2533,73 @@ if (formularioPrestamo) {
     });
 }
 
+/*
+ * =========================================================
+ * VALIDAR PARTE 1 ANTES DE SELECCIONAR EQUIPO
+ * =========================================================
+ */
 
+function parte1Completa() {
+
+    const docente =
+        document.getElementById('docente_id');
+
+    const cargo =
+        document.getElementById('cargo');
+
+    const fecha =
+        document.getElementById('fecha');
+
+    const horaInicio =
+        document.getElementById('hora_inicio');
+
+
+    /*
+     * DOCENTE:
+     * Debe existir un ID real seleccionado.
+     */
+
+    if (!docente || docente.value.trim() === '') {
+
+        return false;
+    }
+
+
+    /*
+     * CARGO
+     */
+
+    if (!cargo || cargo.value.trim() === '') {
+
+        return false;
+    }
+
+
+    /*
+     * FECHA
+     */
+
+    if (!fecha || fecha.value.trim() === '') {
+
+        return false;
+    }
+
+
+    /*
+     * HORA INICIO
+     */
+
+    if (
+        !horaInicio ||
+        horaInicio.value.trim() === ''
+    ) {
+
+        return false;
+    }
+
+
+    return true;
+}
 
 
     /* ========================================================= */
@@ -2442,6 +2646,8 @@ if (formularioPrestamo) {
 
         }
 
+
+        resultados.style.display = 'block';
 
         resultados.innerHTML = `
 
@@ -2696,51 +2902,267 @@ if (formularioPrestamo) {
     }
 
     /* ========================================================= */
-    /* AGREGAR EQUIPO */
-    /* ========================================================= */
-    function agregarEquipo(equipo) {
+/* AGREGAR EQUIPO */
+/* ========================================================= */
 
-        if (!equipo || !equipo.id) {
+function validarAccesoriosEquipo(equipo) {
+    const accesorios = equipo.accesorios_equipos ?? [];
+    const estadosValidos = ['BUENO', 'REGULAR', 'MALOGRADO'];
+    const errores = [];
 
-            console.error(
-                'Equipo inválido:',
-                equipo
-            );
-
-            return;
+    accesorios.forEach(function (accesorio, i) {
+        const n = i + 1;
+        if (!accesorio.id) {
+            errores.push('Accesorio ' + n + ': no tiene ID válido.');
         }
-
-        const equipoId =
-            String(equipo.id);
-
-        // Evitar seleccionar el mismo equipo dos veces
-        if (equiposSeleccionados.has(equipoId)) {
-            return;
+        if (!accesorio.tipo || String(accesorio.tipo).trim() === '') {
+            errores.push('Accesorio ' + n + ': falta el TIPO.');
         }
+        if (!accesorio.num_serie || String(accesorio.num_serie).trim() === '') {
+            errores.push('Accesorio ' + n + ': falta el NÚMERO DE SERIE.');
+        }
+        const estado = (accesorio.estado || 'BUENO').toUpperCase();
+        if (!estadosValidos.includes(estado)) {
+            errores.push('Accesorio ' + n + ': estado inválido.');
+        }
+    });
 
-
-        equiposSeleccionados.add(equipoId);
-
-
-        // Mostrar directamente el equipo seleccionado
-        mostrarEquipoSeleccionado(equipo);
-
-
-        // Limpiar buscador
-        buscarEquipo.value = '';
-
-
-        resultados.innerHTML = `
-
-        <div class="alert alert-success mb-0">
-
-            Equipo agregado correctamente.
-            Puedes buscar otro equipo.
-
-        </div>
-
-    `;
+    return errores;
 }
+
+function agregarEquipo(equipo) {
+
+    /*
+     * Primero verificar que la Parte 1
+     * esté completamente llena.
+     */
+
+    if (!parte1Completa()) {
+
+        alert(
+            'Complete primero los datos obligatorios de la Parte 1: DOCENTE, CARGO, FECHA y HORA INICIO.'
+        );
+
+        return;
+    }
+
+
+    /*
+     * Verificar que el equipo sea válido.
+     */
+
+    if (!equipo || !equipo.id) {
+
+        console.error(
+            'Equipo inválido:',
+            equipo
+        );
+
+        return;
+    }
+
+    const erroresAccesorios = validarAccesoriosEquipo(equipo);
+    if (erroresAccesorios.length > 0) {
+        mostrarToast(
+            'No se puede agregar el equipo. Accesorios incompletos: ' + erroresAccesorios.join(' '),
+            'danger'
+        );
+        return;
+    }
+
+
+    /*
+     * Obtener ID del equipo.
+     */
+
+    const equipoId =
+        String(equipo.id);
+
+
+    /*
+     * Evitar seleccionar el mismo equipo
+     * más de una vez.
+     */
+
+    if (equiposSeleccionados.has(equipoId)) {
+        return;
+    }
+
+
+    /*
+     * Registrar equipo seleccionado.
+     */
+
+    equiposSeleccionados.add(equipoId);
+
+    mostrarEquipoSeleccionado(equipo);
+
+    ocultarCamposBusqueda();
+
+    mostrarToast('Equipo seleccionado', 'success');
+
+    const cards = document.querySelectorAll('.equipo-seleccionado');
+    const ultima = cards[cards.length - 1];
+    if (ultima) {
+        ultima.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+/*
+ * =========================================================
+ * BLOQUEAR / DESBLOQUEAR BUSCADOR DE EQUIPOS
+ * =========================================================
+ */
+
+const btnAgregarEquipo = document.getElementById('btn_agregar_equipo');
+const wrapBtnAgregarEquipo = document.getElementById('wrap_btn_agregar_equipo');
+const panelBusquedaEquipos = document.getElementById('panel_busqueda_equipos');
+
+function hayEquiposSeleccionados() {
+    return equiposSeleccionados.size > 0;
+}
+
+function ocultarCamposBusqueda() {
+    if (panelBusquedaEquipos) {
+        panelBusquedaEquipos.style.display = 'none';
+    }
+    if (buscarEquipo) {
+        buscarEquipo.value = '';
+        buscarEquipo.disabled = true;
+    }
+    if (tipoEquipo) {
+        tipoEquipo.value = '';
+        tipoEquipo.disabled = true;
+    }
+    if (resultados) {
+        resultados.innerHTML = '';
+    }
+    if (wrapBtnAgregarEquipo) {
+        wrapBtnAgregarEquipo.style.display = 'block';
+    }
+}
+
+function mostrarCamposBusqueda() {
+    if (panelBusquedaEquipos) {
+        panelBusquedaEquipos.style.display = 'block';
+    }
+    if (wrapBtnAgregarEquipo) {
+        wrapBtnAgregarEquipo.style.display = 'none';
+    }
+}
+
+function actualizarEstadoBuscadorEquipos() {
+    const parte1Ok = parte1Completa();
+
+    if (!parte1Ok) {
+        if (panelBusquedaEquipos) {
+            panelBusquedaEquipos.style.display = 'block';
+        }
+        if (wrapBtnAgregarEquipo) {
+            wrapBtnAgregarEquipo.style.display = 'none';
+        }
+        if (tipoEquipo) {
+            tipoEquipo.disabled = true;
+            tipoEquipo.value = '';
+        }
+        if (buscarEquipo) {
+            buscarEquipo.disabled = true;
+            buscarEquipo.value = '';
+            buscarEquipo.placeholder = 'Complete la Parte 1 para buscar equipos...';
+        }
+        if (resultados) {
+            resultados.innerHTML = `
+                <div class="text-muted text-center py-3">
+                    Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.
+                </div>
+            `;
+        }
+        return;
+    }
+
+    if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display === 'none') {
+        if (wrapBtnAgregarEquipo) {
+            wrapBtnAgregarEquipo.style.display = 'block';
+        }
+        return;
+    }
+
+    if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display !== 'none') {
+        if (tipoEquipo) tipoEquipo.disabled = false;
+        if (buscarEquipo) {
+            buscarEquipo.disabled = false;
+            buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+        }
+        return;
+    }
+
+    if (panelBusquedaEquipos) {
+        panelBusquedaEquipos.style.display = 'block';
+    }
+    if (wrapBtnAgregarEquipo) {
+        wrapBtnAgregarEquipo.style.display = 'none';
+    }
+    if (tipoEquipo) tipoEquipo.disabled = false;
+    if (buscarEquipo) {
+        buscarEquipo.disabled = false;
+        buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+    }
+}
+
+if (btnAgregarEquipo) {
+    btnAgregarEquipo.addEventListener('click', function () {
+        if (!parte1Completa()) {
+            alert('Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.');
+            return;
+        }
+        mostrarCamposBusqueda();
+        if (tipoEquipo) tipoEquipo.disabled = false;
+        if (buscarEquipo) {
+            buscarEquipo.disabled = false;
+            buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+            buscarEquipo.focus();
+        }
+    });
+}
+
+/*
+ * Revisar cambios en los campos de la Parte 1
+ */
+
+[
+    'docente_id',
+    'cargo',
+    'fecha',
+    'hora_inicio'
+].forEach(id => {
+
+    const campo =
+        document.getElementById(id);
+
+    if (!campo) {
+        return;
+    }
+
+
+    campo.addEventListener(
+        'input',
+        actualizarEstadoBuscadorEquipos
+    );
+
+
+    campo.addEventListener(
+        'change',
+        actualizarEstadoBuscadorEquipos
+    );
+});
+
+
+/*
+ * Estado inicial
+ */
+
+actualizarEstadoBuscadorEquipos();
+
 
     /* ========================================================= */
     /* MOSTRAR EQUIPO SELECCIONADO */
@@ -2756,9 +3178,9 @@ if (formularioPrestamo) {
          * Si no se proporciona un estado manual,
          * utilizamos el estado actual del equipo.
          */
-        if (!estadoEquipo) {
-            estadoEquipo = equipo.estado_actual ?? 'BUENO';
-        }
+        estadoEquipo = normalizarEstado(estadoEquipo || equipo.estado_actual);
+
+        // esEdicion se define una sola vez al inicio del script
 
         const mensaje =
             document.getElementById('mensaje_sin_equipos');
@@ -2799,137 +3221,56 @@ if (formularioPrestamo) {
                      * guardado en el préstamo.
                      */
                     const estado =
-                        accesorio.estado ?? 'BUENO';
+                        normalizarEstado(accesorio.estado);
 
                     const observacion =
                         accesorio.observacion ?? '';
 
 
                     return `
-                    <div
-                        class="border rounded p-3 mb-3 accesorio-prestamo"
-                    >
-
-                        <input
-                            type="hidden"
+                    <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light">
+                        <input type="hidden"
                             name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
-                            value="${accesorio.id}"
-                        >
-
-                        <div class="row">
-
-                            <!-- TIPO -->
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    TIPO
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="${accesorio.tipo ?? ''}"
-                                    readonly
-                                >
-
-                            </div>
-
-
-                            <!-- MARCA -->
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    MARCA
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="${accesorio.marca ?? ''}"
-                                    readonly
-                                >
-
-                            </div>
-
-
-                            <!-- NÚMERO DE SERIE -->
-                            <div class="col-md-4 mb-3">
-
-                                <label class="form-label">
-                                    NÚMERO DE SERIE
-                                </label>
-
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="${accesorio.num_serie ?? ''}"
-                                    readonly
-                                >
-
-                            </div>
-
-
-                            <!-- ESTADO -->
-                            <div class="col-md-5 mb-3">
-
-                                <label class="form-label">
-                                    ESTADO
-                                    <span class="text-danger">
-                                        *
-                                    </span>
-                                </label>
-
-                                <select
-                                    name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
-                                    class="form-select"
-                                    required
-                                >
-
-                                    <option
-                                        value="REGULAR"
-                                        ${estado === 'REGULAR' ? 'selected' : ''}
-                                    >
-                                        REGULAR
-                                    </option>
-
-                                    <option
-                                        value="BUENO"
-                                        ${estado === 'BUENO' ? 'selected' : ''}
-                                    >
-                                        BUENO
-                                    </option>
-
-                                    <option
-                                        value="MALOGRADO"
-                                        ${estado === 'MALOGRADO' ? 'selected' : ''}
-                                    >
-                                        MALOGRADO
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            <!-- OBSERVACIÓN -->
-                            <div class="col-md-7 mb-3">
-
-                                <label class="form-label">
-                                    OBSERVACIÓN
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
-                                    class="form-control"
-                                    value="${observacion}"
-                                    placeholder="Observación del accesorio..."
-                                >
-
-                            </div>
-
+                            value="${accesorio.id}">
+                        <div class="fw-semibold small mb-2">ACCESORIO ${accesorioIndex + 1}</div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">TIPO</label>
+                            <input type="text" class="form-control form-control-sm" value="${accesorio.tipo ?? ''}" readonly>
                         </div>
-
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">MARCA</label>
+                            <input type="text" class="form-control form-control-sm" value="${accesorio.marca ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">NÚM. SERIE</label>
+                            <input type="text" class="form-control form-control-sm" value="${accesorio.num_serie ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">ESTADO</label>
+                            ${esEdicion ? `
+                            <select name="equipos[${indice}][accesorios][${accesorioIndex}][estado]" class="form-select form-select-sm" required>
+                                <option value="REGULAR" ${estado === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                                <option value="BUENO" ${estado === 'BUENO' ? 'selected' : ''}>BUENO</option>
+                                <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
+                            </select>
+                            ` : `
+                            <input type="text" class="form-control form-control-sm" value="${estado}" readonly>
+                            <input type="hidden" name="equipos[${indice}][accesorios][${accesorioIndex}][estado]" value="${estado}">
+                            `}
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label small mb-0">OBSERVACIÓN</label>
+                            ${esEdicion ? `
+                            <input type="text"
+                                name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
+                                class="form-control form-control-sm"
+                                value="${observacion}"
+                                placeholder="Observación...">
+                            ` : `
+                            <input type="text" class="form-control form-control-sm" value="${observacion ?? ''}" readonly>
+                            <input type="hidden" name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]" value="${observacion ?? ''}">
+                            `}
+                        </div>
                     </div>
                 `;
                 }
@@ -2949,6 +3290,19 @@ if (formularioPrestamo) {
            TARJETA DEL EQUIPO
         ========================================================= */
 
+        const resumenEquipo = [
+            equipo.tipo_equipo?.nombre ?? 'SIN TIPO',
+            equipo.marca ?? '',
+            equipo.num_serie ?? 'S/N'
+        ].filter(Boolean).join('  |  ');
+
+        const accesorioResumen = accesorios[0] || null;
+        const resumenAccesorio = accesorioResumen
+            ? [accesorioResumen.tipo ?? 'SIN TIPO', accesorioResumen.num_serie ?? 'S/N']
+                .filter(Boolean)
+                .join('  |  ')
+            : '';
+
         const equipoHtml = `
 
         <div
@@ -2958,201 +3312,95 @@ if (formularioPrestamo) {
 
             <div class="card-header">
 
-                <div
-                    class="
-                        d-flex
-                        justify-content-between
-                        align-items-center
-                    "
-                >
+                <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
 
                     <strong class="titulo-equipo">
                         EQUIPO ${indice + 1}
                     </strong>
 
-
-                    <button
-                        type="button"
-                        class="
-                            btn
-                            btn-danger
-                            btn-sm
-                            quitar-equipo
-                        "
-                    >
-
-                        <i class="bi bi-trash"></i>
-
-                        QUITAR
-
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-menos">
+                            VER MENOS
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-mas" style="display: none;">
+                            VER MÁS
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm quitar-equipo">
+                            <i class="bi bi-trash"></i>
+                            QUITAR
+                        </button>
+                    </div>
 
                 </div>
 
             </div>
 
 
-            <div class="card-body">
+            <div class="card-body py-3">
 
-                <!-- ID DEL EQUIPO -->
+                <input type="hidden" name="equipos[${indice}][equipo_id]" value="${equipo.id}">
 
-                <input
-                    type="hidden"
-                    name="equipos[${indice}][equipo_id]"
-                    value="${equipo.id}"
-                >
+                <div class="resumen-equipo mb-0" style="display: none;">
+                    <label class="form-label small mb-1">EQUIPO</label>
+                    <input type="text" class="form-control form-control-sm mb-2" value="${resumenEquipo}" readonly>
+                    ${resumenAccesorio ? `
+                    <label class="form-label small mb-1">ACCESORIO 1</label>
+                    <input type="text" class="form-control form-control-sm" value="${resumenAccesorio}" readonly>
+                    ` : `
+                    <div class="text-muted small">Sin accesorios</div>
+                    `}
+                </div>
 
+                <div class="detalle-equipo">
 
-                <div class="row">
+                <div class="row g-3">
 
-                    <!-- TIPO -->
-
-                    <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            TIPO DE EQUIPO
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="${equipo.tipo_equipo?.nombre ?? ''}"
-                            readonly
-                        >
-
+                    <div class="col-md-6 border-end">
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">TIPO</label>
+                            <input type="text" class="form-control form-control-sm" value="${equipo.tipo_equipo?.nombre ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">MARCA</label>
+                            <input type="text" class="form-control form-control-sm" value="${equipo.marca ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">MODELO</label>
+                            <input type="text" class="form-control form-control-sm" value="${equipo.modelo ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">NÚM. SERIE</label>
+                            <input type="text" class="form-control form-control-sm" value="${equipo.num_serie ?? ''}" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-0">ESTADO</label>
+                            ${esEdicion ? `
+                            <select name="equipos[${indice}][estado]" class="form-select form-select-sm" required>
+                                <option value="REGULAR" ${estadoEquipo === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                                <option value="BUENO" ${estadoEquipo === 'BUENO' ? 'selected' : ''}>BUENO</option>
+                                <option value="MALOGRADO" ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
+                            </select>
+                            ` : `
+                            <input type="text" class="form-control form-control-sm" value="${estadoEquipo}" readonly>
+                            <input type="hidden" name="equipos[${indice}][estado]" value="${estadoEquipo}">
+                            `}
+                        </div>
+                        <div>
+                            <label class="form-label small mb-0">OBSERVACIÓN</label>
+                            ${esEdicion ? `
+                            <textarea name="equipos[${indice}][observacion]" class="form-control form-control-sm" rows="2" placeholder="Observación del equipo...">${observacionEquipo ?? ''}</textarea>
+                            ` : `
+                            <textarea class="form-control form-control-sm" rows="2" readonly>${observacionEquipo ?? ''}</textarea>
+                            <input type="hidden" name="equipos[${indice}][observacion]" value="${observacionEquipo ?? ''}">
+                            `}
+                        </div>
                     </div>
 
-
-                    <!-- MARCA -->
-
-                    <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            MARCA
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="${equipo.marca ?? ''}"
-                            readonly
-                        >
-
-                    </div>
-
-
-                    <!-- MODELO -->
-
-                    <div class="col-md-4 mb-3">
-
-                        <label class="form-label">
-                            MODELO
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="${equipo.modelo ?? ''}"
-                            readonly
-                        >
-
-                    </div>
-
-
-                    <!-- NÚMERO DE SERIE -->
-
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label">
-                            NÚMERO DE SERIE
-                        </label>
-
-                        <input
-                            type="text"
-                            class="form-control"
-                            value="${equipo.num_serie ?? ''}"
-                            readonly
-                        >
-
-                    </div>
-
-
-                    <!-- ESTADO -->
-
-                    <div class="col-md-6 mb-3">
-
-                        <label class="form-label">
-                            ESTADO
-                            <span class="text-danger">
-                                *
-                            </span>
-                        </label>
-
-                        <select
-                            name="equipos[${indice}][estado]"
-                            class="form-select"
-                            required
-                        >
-
-                            <option
-                                value="REGULAR"
-                                ${estadoEquipo === 'REGULAR' ? 'selected' : ''}
-                            >
-                                REGULAR
-                            </option>
-
-                            <option
-                                value="BUENO"
-                                ${estadoEquipo === 'BUENO' ? 'selected' : ''}
-                            >
-                                BUENO
-                            </option>
-
-                            <option
-                                value="MALOGRADO"
-                                ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}
-                            >
-                                MALOGRADO
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- OBSERVACIÓN -->
-
-                    <div class="col-md-12 mb-3">
-
-                        <label class="form-label">
-                            OBSERVACIÓN DEL EQUIPO
-                        </label>
-
-                        <textarea
-                            name="equipos[${indice}][observacion]"
-                            class="form-control"
-                            rows="2"
-                            placeholder="Observación del equipo..."
-                        >${observacionEquipo ?? ''}</textarea>
-
+                    <div class="col-md-6">
+                        ${accesoriosHtml}
                     </div>
 
                 </div>
-
-
-                <!-- ACCESORIOS -->
-
-                <div class="mt-3">
-
-                    <h6 class="mb-3">
-
-                        <i class="bi bi-puzzle"></i>
-
-                        ACCESORIOS DEL EQUIPO
-
-                    </h6>
-
-                    ${accesoriosHtml}
 
                 </div>
 
@@ -3172,8 +3420,53 @@ if (formularioPrestamo) {
             equipoHtml
         );
 
+        if (!esEdicion) {
+            const cardNueva = contenedor.querySelector('.equipo-seleccionado:last-child');
+            if (cardNueva) {
+                cardNueva.querySelectorAll('select').forEach(function (el) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = el.name;
+                    hidden.value = el.value;
+                    el.insertAdjacentElement('afterend', hidden);
+                    el.disabled = true;
+                    el.removeAttribute('name');
+                });
+                cardNueva.querySelectorAll('textarea, input[type="text"]').forEach(function (el) {
+                    el.readOnly = true;
+                });
+            }
+        }
 
         actualizarEventosQuitarEquipo();
+        actualizarEventosVerMasMenos();
+    }
+
+    function actualizarEventosVerMasMenos() {
+        document.querySelectorAll('.equipo-seleccionado').forEach(function (card) {
+            const btnMas = card.querySelector('.btn-ver-mas');
+            const btnMenos = card.querySelector('.btn-ver-menos');
+            const detalle = card.querySelector('.detalle-equipo');
+            const resumen = card.querySelector('.resumen-equipo');
+
+            if (btnMenos) {
+                btnMenos.onclick = function () {
+                    if (detalle) detalle.style.display = 'none';
+                    if (resumen) resumen.style.display = 'block';
+                    btnMenos.style.display = 'none';
+                    if (btnMas) btnMas.style.display = 'inline-block';
+                };
+            }
+
+            if (btnMas) {
+                btnMas.onclick = function () {
+                    if (detalle) detalle.style.display = 'block';
+                    if (resumen) resumen.style.display = 'none';
+                    btnMas.style.display = 'none';
+                    if (btnMenos) btnMenos.style.display = 'inline-block';
+                };
+            }
+        });
     }
 
 
@@ -3213,6 +3506,7 @@ if (formularioPrestamo) {
 
                     equipo.remove();
 
+                    mostrarToast('Equipo eliminado', 'danger');
 
                     renumerarEquipos();
 
@@ -3241,6 +3535,14 @@ if (formularioPrestamo) {
                             </div>
 
                         `;
+
+                        if (wrapBtnAgregarEquipo) {
+                            wrapBtnAgregarEquipo.style.display = 'none';
+                        }
+                        if (panelBusquedaEquipos) {
+                            panelBusquedaEquipos.style.display = 'block';
+                        }
+                        actualizarEstadoBuscadorEquipos();
 
                     }
 
@@ -3352,8 +3654,40 @@ if (formularioPrestamo) {
             }
         );
 
+        ocultarCamposBusqueda();
+
     }
 
+    const erroresServidor = @json($errors->toArray());
+    const mapaCampos = {
+        docente_id: 'buscar_docente',
+        cargo: 'cargo',
+        fecha: 'fecha',
+        hora_inicio: 'hora_inicio_texto',
+        hora_fin: 'hora_fin_texto',
+        equipos: 'error_equipos_parte2'
+    };
+
+    const primerError = Object.keys(erroresServidor)[0];
+    if (primerError) {
+        const mensaje = erroresServidor[primerError][0];
+        if (primerError === 'equipos' || primerError.startsWith('equipos.')) {
+            const caja = document.getElementById('error_equipos_parte2');
+            if (caja) {
+                caja.style.display = 'block';
+                caja.textContent = mensaje;
+            }
+            mostrarToast(mensaje, 'danger');
+            const ancla = document.getElementById('panel_busqueda_equipos');
+            if (ancla) {
+                ancla.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } else {
+            const idCampo = mapaCampos[primerError] || primerError.split('.')[0];
+            const campo = document.getElementById(idCampo);
+            mostrarErrorCampo(campo, mensaje);
+        }
+    }
 
 });
 

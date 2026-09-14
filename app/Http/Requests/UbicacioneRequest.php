@@ -6,24 +6,41 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UbicacioneRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'nombre' => $this->aMayusculas($this->nombre),
+            'tipo' => $this->aMayusculas($this->tipo),
+        ]);
+    }
+
     public function rules(): array
     {
         return [
-			'nombre' => 'required|string',
-			'tipo' => 'nullable|string',
+            'nombre' => ['required', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
+            'tipo' => ['nullable', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
         ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nombre.regex' => 'El nombre de la ubicación solo puede contener letras.',
+            'tipo.regex' => 'El tipo de ubicación solo puede contener letras.',
+        ];
+    }
+
+    private function aMayusculas($valor): ?string
+    {
+        if ($valor === null || trim((string) $valor) === '') {
+            return null;
+        }
+
+        return mb_strtoupper(trim((string) $valor), 'UTF-8');
     }
 }

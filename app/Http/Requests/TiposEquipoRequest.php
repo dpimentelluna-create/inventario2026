@@ -6,23 +6,31 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class TiposEquipoRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'nombre' => $this->nombre
+                ? mb_strtoupper(trim((string) $this->nombre), 'UTF-8')
+                : null,
+        ]);
+    }
+
     public function rules(): array
     {
         return [
-			'nombre' => 'required|string',
+            'nombre' => ['required', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'nombre.regex' => 'El tipo de equipo solo puede contener letras.',
         ];
     }
 }

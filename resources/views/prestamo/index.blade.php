@@ -299,7 +299,7 @@
                                                         href="{{ route('prestamos.show', $prestamo->id) }}"
                                                     >
                                                         <i class="fa fa-fw fa-eye"></i>
-                                                        Ver
+                                                        
                                                     </a>
 
 
@@ -308,7 +308,7 @@
                                                         href="{{ route('prestamos.edit', $prestamo->id) }}"
                                                     >
                                                         <i class="fa fa-fw fa-edit"></i>
-                                                        Editar
+                                                        
                                                     </a>
 
 
@@ -328,7 +328,7 @@
                                                     >
 
                                                         <i class="fa fa-fw fa-trash"></i>
-                                                        Eliminar
+                                                        
 
                                                     </button>
 
