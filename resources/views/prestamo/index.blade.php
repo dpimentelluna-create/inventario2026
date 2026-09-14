@@ -6,375 +6,123 @@
 
 @section('content')
     <div class="container-fluid">
-
         <div class="row">
-
-            <div class="col-sm-12">
-
+            <div class="col-12">
                 <div class="card">
-
-                    {{-- ENCABEZADO --}}
                     <div class="card-header">
-
-                        <div
-                            style="
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: center;
-                            "
-                        >
-
-                            <span id="card_title">
-                                {{ __('Préstamos') }}
-                            </span>
-
-                            <div class="float-right">
-
-                                <a
-                                    href="{{ route('prestamos.create') }}"
-                                    class="btn btn-primary btn-sm"
-                                >
-                                    <i class="fa fa-plus"></i>
-                                    {{ __('Nuevo Préstamo') }}
-                                </a>
-
-                            </div>
-
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <span id="card_title">{{ __('PRÉSTAMOS') }}</span>
+                            <a href="{{ route('prestamos.create') }}" class="btn btn-primary btn-sm">
+                                {{ __('Registrar Nuevo') }}
+                            </a>
                         </div>
-
                     </div>
 
-
-                    {{-- MENSAJE --}}
-                    @if ($message = Session::get('success'))
-
-                        <div class="alert alert-success m-4">
-
-                            <p class="mb-0">
-                                {{ $message }}
-                            </p>
-
-                        </div>
-
-                    @endif
-
-
-                    {{-- TABLA --}}
-                    <div class="card-body bg-white">
-
+                    <div class="card-body">
                         <div class="table-responsive">
-
-                            <table
-                                class="table table-striped table-hover align-middle"
-                            >
-
+                            <table id="example" class="table table-bordered table-hover" style="width:100%">
                                 <thead class="thead">
-
                                     <tr>
-
-                                        <th>
-                                            No
-                                        </th>
-
-                                        <th>
-                                            APELLIDOS Y NOMBRES
-                                        </th>
-
-                                        <th>
-                                            CARGO
-                                        </th>
-
-                                        <th>
-                                            EQUIPO / EQUIPOS
-                                        </th>
-
-                                        <th>
-                                            FECHA
-                                        </th>
-
-                                        <th>
-                                            HORA INICIO
-                                        </th>
-
-                                        <th>
-                                            HORA FINAL
-                                        </th>
-
-                                        <th>
-                                            ESTADO
-                                        </th>
-
-                                        <th>
-                                            OBSERVACIONES
-                                        </th>
-
-                                        <th>
-                                        </th>
-
+                                        <th>No</th>
+                                        <th class="text-center">Solicitante</th>
+                                        <th class="text-center">Cargo</th>
+                                        <th class="text-center">Equipos</th>
+                                        <th class="text-center">Fecha</th>
+                                        <th class="text-center">Hora inicio</th>
+                                        <th class="text-center">Hora final</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center columna-acciones">Acciones</th>
                                     </tr>
-
                                 </thead>
-
-
                                 <tbody>
-
-                                    @forelse ($prestamos as $prestamo)
-
+                                    @foreach ($prestamos as $i => $prestamo)
                                         <tr>
-
-                                            {{-- NÚMERO --}}
+                                            <td>{{ $i + 1 }}</td>
                                             <td>
-                                                {{ ++$i }}
-                                            </td>
-
-
-                                            {{-- DOCENTE --}}
-                                            <td>
-
                                                 {{ $prestamo->docente->apellidos ?? '' }}
                                                 {{ $prestamo->docente->nombres ?? '' }}
-
                                             </td>
-
-
-                                            {{-- CARGO --}}
+                                            <td>{{ $prestamo->cargo }}</td>
                                             <td>
-
-                                                {{ $prestamo->cargo }}
-
-                                            </td>
-
-
-                                            {{-- EQUIPOS --}}
-                                            <td>
-
-                                                @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
-
-                                                    <div class="mb-2">
-
-                                                        <strong>
-                                                            {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? 'Sin tipo' }}
-                                                        </strong>
-
-                                                        <br>
-
+                                                @forelse ($prestamo->prestamoEquipos as $prestamoEquipo)
+                                                    <div class="mb-1">
+                                                        {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? '' }}
                                                         {{ $prestamoEquipo->equipo->marca ?? '' }}
-                                                        {{ $prestamoEquipo->equipo->modelo ?? '' }}
-
-                                                        <br>
-
                                                         <small class="text-muted">
-
-                                                            N/S:
-                                                            {{ $prestamoEquipo->equipo->num_serie ?? 'Sin número de serie' }}
-
+                                                            N/S {{ $prestamoEquipo->equipo->num_serie ?? '-' }}
                                                         </small>
-
                                                     </div>
-
-                                                @endforeach
-
+                                                @empty
+                                                    —
+                                                @endforelse
                                             </td>
-
-
-                                            {{-- FECHA --}}
-                                            <td>
-
-                                                {{ $prestamo->fecha
-                                                    ? $prestamo->fecha->format('d-m-Y')
-                                                    : ''
-                                                }}
-
+                                            <td class="text-center">
+                                                {{ $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('d-m-Y') : '-' }}
                                             </td>
-
-
-                                            {{-- HORA INICIO --}}
-                                            <td>
-
-                                                {{ $prestamo->hora_inicio
-                                                    ? substr($prestamo->hora_inicio, 0, 5)
-                                                    : ''
-                                                }}
-
+                                            <td class="text-center">
+                                                {{ $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '-' }}
                                             </td>
-
-
-                                            {{-- HORA FINAL --}}
-                                            <td>
-
-                                                @if ($prestamo->hora_fin)
-
-                                                    {{ substr($prestamo->hora_fin, 0, 5) }}
-
-                                                @else
-
-                                                    <span class="text-muted">
-                                                        —
-                                                    </span>
-
-                                                @endif
-
+                                            <td class="text-center">
+                                                {{ $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '—' }}
                                             </td>
-
-
-                                            {{-- ESTADO --}}
-                                            <td>
-
+                                            <td class="text-center">
                                                 @if ($prestamo->estado === 'ACTIVO')
-
-                                                    <span class="badge bg-success">
-                                                        ACTIVO
-                                                    </span>
-
+                                                    <span class="badge bg-success">ACTIVO</span>
                                                 @else
-
-                                                    <span class="badge bg-secondary">
-                                                        TERMINADO
-                                                    </span>
-
+                                                    <span class="badge bg-secondary">TERMINADO</span>
                                                 @endif
-
                                             </td>
-
-
-                                            {{-- OBSERVACIONES --}}
-                                            <td>
-
-                                                @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
-
-                                                    @if ($prestamoEquipo->observacion)
-
-                                                        <div class="mb-2">
-
-                                                            <strong>
-                                                                {{ $prestamoEquipo->equipo->marca ?? '' }}
-                                                                {{ $prestamoEquipo->equipo->modelo ?? '' }}:
-                                                            </strong>
-
-                                                            {{ $prestamoEquipo->observacion }}
-
-                                                        </div>
-
-                                                    @endif
-
-
-                                                    {{-- OBSERVACIONES DE ACCESORIOS --}}
-                                                    @foreach ($prestamoEquipo->prestamoAccesorios as $prestamoAccesorio)
-
-                                                        @if ($prestamoAccesorio->observacion)
-
-                                                            <div class="mb-2">
-
-                                                                <small>
-
-                                                                    Accesorio:
-                                                                    {{ $prestamoAccesorio->accesorioEquipo->tipo ?? '' }}
-
-                                                                    —
-                                                                    {{ $prestamoAccesorio->observacion }}
-
-                                                                </small>
-
-                                                            </div>
-
-                                                        @endif
-
-                                                    @endforeach
-
-                                                @endforeach
-
+                                            <td class="text-center columna-acciones">
+                                                <div class="d-flex justify-content-center align-items-center gap-1">
+                                                    <form action="{{ route('prestamos.destroy', $prestamo->id) }}" method="POST">
+                                                        <a class="btn btn-info btn-accion" href="{{ route('prestamos.show', $prestamo->id) }}">
+                                                            <i class="fa-solid fa-eye"></i>
+                                                        </a>
+                                                        <a class="btn btn-warning btn-accion" href="{{ route('prestamos.edit', $prestamo->id) }}">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                        </a>
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-accion"
+                                                            onclick="event.preventDefault(); confirmarEliminar(this.closest('form'));">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
-
-
-                                            {{-- ACCIONES --}}
-                                            <td>
-
-                                                <form
-                                                    action="{{ route('prestamos.destroy', $prestamo->id) }}"
-                                                    method="POST"
-                                                >
-
-                                                    <a
-                                                        class="btn btn-sm btn-primary"
-                                                        href="{{ route('prestamos.show', $prestamo->id) }}"
-                                                    >
-                                                        <i class="fa fa-fw fa-eye"></i>
-                                                        
-                                                    </a>
-
-
-                                                    <a
-                                                        class="btn btn-sm btn-success"
-                                                        href="{{ route('prestamos.edit', $prestamo->id) }}"
-                                                    >
-                                                        <i class="fa fa-fw fa-edit"></i>
-                                                        
-                                                    </a>
-
-
-                                                    @csrf
-                                                    @method('DELETE')
-
-
-                                                    <button
-                                                        type="submit"
-                                                        class="btn btn-danger btn-sm"
-                                                        onclick="
-                                                            event.preventDefault();
-                                                            confirm('¿Está seguro de eliminar este préstamo?')
-                                                            ? this.closest('form').submit()
-                                                            : false;
-                                                        "
-                                                    >
-
-                                                        <i class="fa fa-fw fa-trash"></i>
-                                                        
-
-                                                    </button>
-
-                                                </form>
-
-                                            </td>
-
                                         </tr>
-
-                                    @empty
-
-                                        <tr>
-
-                                            <td
-                                                colspan="10"
-                                                class="text-center text-muted py-4"
-                                            >
-                                                No hay préstamos registrados.
-
-                                            </td>
-
-                                        </tr>
-
-                                    @endforelse
-
+                                    @endforeach
                                 </tbody>
-
                             </table>
-
                         </div>
-
                     </div>
-
                 </div>
-
-
-                {{-- PAGINACIÓN --}}
-                <div class="mt-3">
-
-                    {!! $prestamos->withQueryString()->links() !!}
-
-                </div>
-
             </div>
-
         </div>
-
     </div>
 @endsection
+
+<style>
+    #example {
+        border-collapse: collapse !important;
+        width: 100%;
+    }
+    #example thead th {
+        background-color: #5fe65f !important;
+        color: #000000 !important;
+        text-align: center !important;
+        vertical-align: middle !important;
+        font-weight: bold;
+    }
+    #example tbody td {
+        vertical-align: middle !important;
+    }
+    #example tbody tr:hover {
+        background-color: #f2f2f2 !important;
+    }
+    @media (max-width: 768px) {
+        #example_wrapper {
+            overflow-x: auto;
+        }
+    }
+</style>

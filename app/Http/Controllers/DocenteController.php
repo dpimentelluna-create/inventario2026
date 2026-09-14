@@ -16,10 +16,9 @@ class DocenteController extends Controller
      */
     public function index(Request $request): View
     {
-        $docentes = Docente::paginate();
+        $docentes = Docente::orderBy('apellidos')->get();
 
-        return view('docente.index', compact('docentes'))
-            ->with('i', ($request->input('page', 1) - 1) * $docentes->perPage());
+        return view('docente.index', compact('docentes'));
     }
 
     /**
@@ -39,8 +38,9 @@ class DocenteController extends Controller
     {
         Docente::create($request->validated());
 
-        return Redirect::route('docentes.index')
-            ->with('success', 'Docente created successfully.');
+        return redirect()->route('docentes.index')
+            ->with('success', 'Docente registrado.')
+            ->with('toast_tipo', 'exito');
     }
 
     /**
@@ -70,15 +70,17 @@ class DocenteController extends Controller
     {
         $docente->update($request->validated());
 
-        return Redirect::route('docentes.index')
-            ->with('success', 'Docente updated successfully');
+        return redirect()->route('docentes.index')
+            ->with('success', 'Docente actualizado.')
+            ->with('toast_tipo', 'aviso');
     }
 
     public function destroy($id): RedirectResponse
     {
         Docente::find($id)->delete();
 
-        return Redirect::route('docentes.index')
-            ->with('success', 'Docente deleted successfully');
+        return redirect()->route('docentes.index')
+            ->with('success', 'Docente eliminado.')
+            ->with('toast_tipo', 'error');
     }
 }

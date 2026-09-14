@@ -15,11 +15,13 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
-
+    
     <!--LINK PARA ICONOS-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
     <!--EDITAR ICONOS-->
     <style>
@@ -119,7 +121,7 @@
 
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('docentes.index') }}">
-                                    {{ __('Docentes') }}
+                                    {{ __('Solicitantes') }}
                                 </a>
                             </li>
 
@@ -167,6 +169,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
         new DataTable('#example', {
             pageLength: 10,
@@ -182,7 +185,63 @@
             }
         });
     </script>
-    <!--Fin del script-->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEliminar(form) {
+        Swal.fire({
+            title: '¿Eliminar registro?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(function (result) {
+            if (result.isConfirmed) {
+                form.submit();
+            }
+        });
+        return false;
+    }
+</script>
+<!--Fin del script-->
+
+
+@php
+$mensajeToast = session('success') ?? session('error') ?? session('warning');
+$tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
+@endphp
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    toastr.options = {
+        closeButton: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        timeOut: 3500,
+        showMethod: 'fadeIn',
+        hideMethod: 'fadeOut'
+    };
+</script>
+
+@if (session('success') || session('error') || session('warning'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tipo = @json(session('toast_tipo'));
+        const mensaje = @json(session('success') ?? session('error') ?? session('warning'));
+
+        if (tipo === 'error') {
+            toastr.error(mensaje);
+        } else if (tipo === 'aviso' || tipo === 'warning') {
+            toastr.warning(mensaje);
+        } else {
+            toastr.success(mensaje);
+        }
+    });
+</script>
+@endif
 
 </body>
 

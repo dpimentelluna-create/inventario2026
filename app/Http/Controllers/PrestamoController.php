@@ -23,19 +23,12 @@ class PrestamoController extends Controller
     public function index(Request $request): View
     {
         $prestamos = Prestamo::with([
-            'docente',
-            'prestamoEquipos.equipo.tipoEquipo',
-            'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
-        ])
-            ->latest('fecha')
-            ->paginate(20);
+        'docente',
+        'prestamoEquipos.equipo.tipoEquipo',
+        'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+    ])->latest('fecha')->get();
 
-        return view('prestamo.index', compact('prestamos'))
-            ->with(
-                'i',
-                ($request->input('page', 1) - 1)
-                    * $prestamos->perPage()
-            );
+    return view('prestamo.index', compact('prestamos'));
     }
 
     /**
@@ -266,11 +259,13 @@ class PrestamoController extends Controller
         });
 
 
+        
+
         return Redirect::route('prestamos.index')
             ->with(
                 'success',
                 'Préstamo registrado correctamente.'
-            );
+            )->with('success', 'Préstamo registrado.')->with('toast_tipo', 'exito');
     }
 
     /**
@@ -498,7 +493,8 @@ class PrestamoController extends Controller
             ->with(
                 'success',
                 'Préstamo actualizado correctamente.'
-            );
+            )->with('success', 'Préstamo actualizado.')->with('toast_tipo', 'aviso');
+
     }
 
 
@@ -516,7 +512,7 @@ class PrestamoController extends Controller
             ->with(
                 'success',
                 'Préstamo eliminado correctamente.'
-            );
+            )->with('success', 'Préstamo eliminado.')->with('toast_tipo', 'error');
     }
 
     /**

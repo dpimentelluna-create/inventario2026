@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class DocenteRequest extends FormRequest
 {
@@ -17,7 +18,9 @@ class DocenteRequest extends FormRequest
             'nombres' => $this->aMayusculas($this->nombres),
             'apellidos' => $this->aMayusculas($this->apellidos),
             'cargo' => $this->aMayusculas($this->cargo),
-            'dni' => $this->dni !== null ? trim((string) $this->dni) : null,
+            'dni' => ($this->dni !== null && trim((string) $this->dni) !== '')
+                ? trim((string) $this->dni)
+                : null,
             'correo' => $this->correo !== null ? strtolower(trim((string) $this->correo)) : null,
             'celular' => $this->celular !== null ? trim((string) $this->celular) : null,
         ]);
@@ -29,9 +32,13 @@ class DocenteRequest extends FormRequest
             'nombres' => ['required', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
             'apellidos' => ['required', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
             'cargo' => ['required', 'string', 'max:100', 'regex:/^[A-ZÁÉÍÓÚÑÜ\s.]+$/u'],
-            'dni' => ['nullable', 'digits:8'],
+            'dni' => [
+                'nullable',
+                'digits:8',
+                Rule::unique('docentes', 'dni')->ignore($this->route('docente')),
+            ],
             'correo' => ['nullable', 'email', 'max:150'],
-            'celular' => ['nullable', 'regex:/^[0-9+\s-]{6,15}$/'],
+            'celular' => ['nullable', 'digits:9'],
         ];
     }
 
@@ -42,8 +49,9 @@ class DocenteRequest extends FormRequest
             'apellidos.regex' => 'Los apellidos solo pueden contener letras.',
             'cargo.regex' => 'El cargo solo puede contener letras.',
             'dni.digits' => 'El DNI debe tener 8 dígitos.',
+            'dni.unique' => 'Este DNI ya está registrado.',
             'correo.email' => 'Ingrese un correo válido.',
-            'celular.regex' => 'El celular solo puede contener números.',
+            'celular.digits' => 'Ingrese un numero correcto',
         ];
     }
 

@@ -1,37 +1,53 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ $ubicacione->name ?? __('Show') . " " . __('Ubicacione') }}
+    Ver Ubicación
 @endsection
 
 @section('content')
-    <section class="content container-fluid">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div class="float-left">
-                            <span class="card-title">{{ __('Mostrar') }} Ubicaciones</span>
+<section class="content container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header encabezado-verde d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h4 class="mb-0">
+                        <i class="bi bi-geo-alt"></i>
+                        Ubicación
+                    </h4>
+                    <a class="btn btn-primary btn-sm" href="{{ route('ubicaciones.index') }}">ATRÁS</a>
+                </div>
+                <div class="card-body bg-white">
+                    <div class="row">
+                        <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label">NOMBRE</label>
+                            <input type="text" class="form-control" value="{{ $ubicacione->nombre }}" readonly>
                         </div>
-                        <div class="float-right">
-                            <a class="btn btn-primary btn-sm" href="{{ route('ubicaciones.index') }}"> {{ __('Atrás') }}</a>
+                        <div class="col-12 col-md-6 mb-3">
+                            <label class="form-label">TIPO</label>
+                            <input type="text" class="form-control" value="{{ $ubicacione->tipo ?? '-' }}" readonly>
                         </div>
-                    </div>
-
-                    <div class="card-body bg-white">
-                        
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Nombre:</strong>
-                                    {{ $ubicacione->nombre }}
-                                </div>
-                                <div class="form-group mb-2 mb20">
-                                    <strong>Tipo:</strong>
-                                    {{ $ubicacione->tipo }}
-                                </div>
-
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 @endsection
+
+<style>
+    .encabezado-verde {
+        background-color: #90EE90 !important;
+        color: #000000;
+        border-bottom: 1px solid #000000;
+        padding: 15px;
+    }
+    .card {
+        border: 1px solid #000000;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #198754;
+    }
+</style>
