@@ -59,3 +59,4 @@
         min-width: 100px;
     }
 </style>
+@include('aviso-cambios')

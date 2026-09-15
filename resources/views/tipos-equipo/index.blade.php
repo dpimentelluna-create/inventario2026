@@ -16,27 +16,23 @@
                                 {{ __('Tipos Equipos') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('tipos-equipo.create') }}" class="btn btn-primary btn-sm float-right"  data-placement="left">
-                                  {{ __('Crear Nuevo') }}
+                            <div class="float-right">
+                                <a href="{{ route('tipos-equipo.create') }}" class="btn btn-primary btn-sm float-right"
+                                    data-placement="left">
+                                    {{ __('Crear Nuevo') }}
                                 </a>
-                              </div>
+                            </div>
                         </div>
                     </div>
-                    @if ($message = Session::get('success'))
-                        <div class="alert alert-success m-4">
-                            <p>{{ $message }}</p>
-                        </div>
-                    @endif
 
-                    <div class="card-body bg-white">
+                    <div class="card-body">
                         <div class="table-responsive">
-                            <table id = "example" class="table table-striped table-hover">
+                            <table id="example" class="table table-striped table-hover">
                                 <thead class="thead">
                                     <tr>
                                         <th>No</th>
-                                        
-									<th >Nombre</th>
+
+                                        <th>Nombre</th>
 
                                         <th></th>
                                     </tr>
@@ -45,16 +41,23 @@
                                     @foreach ($tiposEquipos as $tiposEquipo)
                                         <tr>
                                             <td>{{ ++$i }}</td>
-                                            
-										<td >{{ $tiposEquipo->nombre }}</td>
+
+                                            <td>{{ $tiposEquipo->nombre }}</td>
 
                                             <td>
-                                                <form action="{{ route('tipos-equipo.destroy', $tiposEquipo->id) }}" method="POST">
-                                                    <a class="btn btn-sm btn-primary " href="{{ route('tipos-equipo.show', $tiposEquipo->id) }}"><i class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
-                                                    <a class="btn btn-sm btn-success" href="{{ route('tipos-equipo.edit', $tiposEquipo->id) }}"><i class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
+                                                <form action="{{ route('tipos-equipo.destroy', $tiposEquipo->id) }}"
+                                                    method="POST">
+                                                    <a class="btn btn-sm btn-primary "
+                                                        href="{{ route('tipos-equipo.show', $tiposEquipo->id) }}"><i
+                                                            class="fa fa-fw fa-eye"></i> {{ __('Ver') }}</a>
+                                                    <a class="btn btn-sm btn-success"
+                                                        href="{{ route('tipos-equipo.edit', $tiposEquipo->id) }}"><i
+                                                            class="fa fa-fw fa-edit"></i> {{ __('Editar') }}</a>
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="event.preventDefault(); confirm('Are you sure to delete?') ? this.closest('form').submit() : false;"><i class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm"
+                                                        onclick="event.preventDefault(); confirmarEliminar(this.closest('form'));"><i
+                                                            class="fa fa-fw fa-trash"></i> {{ __('Eliminar') }}</button>
                                                 </form>
                                             </td>
                                         </tr>

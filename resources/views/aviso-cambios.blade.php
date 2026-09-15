@@ -1,0 +1,50 @@
+{{-- Incluir al final de create/edit: @include('aviso-cambios') --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('main form') || document.querySelector('form');
+    if (!form) return;
+
+    let conCambios = false;
+
+    form.addEventListener('input', function () { conCambios = true; });
+    form.addEventListener('change', function () { conCambios = true; });
+    form.addEventListener('submit', function () { conCambios = false; });
+
+    function confirmarSalida(url) {
+        if (typeof Swal === 'undefined') {
+            if (confirm('Cambios sin guardar. ¿Desea salir?')) window.location.href = url;
+            return;
+        }
+        Swal.fire({
+            icon: 'warning',
+            title: 'Cambios sin guardar',
+            text: '¿Desea salir?',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, salir',
+            cancelButtonText: 'Seguir editando',
+            reverseButtons: true
+        }).then(function (r) {
+            if (r.isConfirmed) window.location.href = url;
+        });
+    }
+
+    document.querySelectorAll('a[href]').forEach(function (enlace) {
+        const href = enlace.getAttribute('href');
+        if (!href || href === '#' || href.startsWith('javascript:')) return;
+
+        enlace.addEventListener('click', function (e) {
+            if (!conCambios) return;
+            e.preventDefault();
+            confirmarSalida(enlace.href);
+        });
+    });
+
+    window.addEventListener('beforeunload', function (e) {
+        if (!conCambios) return;
+        e.preventDefault();
+        e.returnValue = '';
+    });
+});
+</script>

@@ -40,7 +40,7 @@ class TiposEquipoController extends Controller
         TiposEquipo::create($request->validated());
 
         return Redirect::route('tipos-equipo.index')
-            ->with('success', 'TiposEquipo created successfully.');
+            ->with('success', 'Tipo de Equipo registrado.')->with('toast_tipo', 'aviso');
     }
 
     /**
@@ -71,7 +71,7 @@ class TiposEquipoController extends Controller
         $tiposEquipo->update($request->validated());
 
         return Redirect::route('tipos-equipo.index')
-            ->with('success', 'TiposEquipo updated successfully');
+            ->with('success', 'Tipo de Equipo actualizado.')->with('toast_tipo', 'aviso');
     }
 
     public function destroy($id): RedirectResponse
@@ -79,6 +79,6 @@ class TiposEquipoController extends Controller
         TiposEquipo::find($id)->delete();
 
         return Redirect::route('tipos-equipo.index')
-            ->with('success', 'TiposEquipo deleted successfully');
+            ->with('success', 'Tipo de Equipo eliminado.')->with('toast_tipo', 'error');
     }
 }

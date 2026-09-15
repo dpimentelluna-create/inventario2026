@@ -28,13 +28,21 @@ class EquipoRequest extends FormRequest
             'observaciones_equipo' => $this->aMayusculas($this->observaciones_equipo),
             'estado_laptop' => $this->normalizarEstado($this->estado_laptop),
             'estado_equipo' => $this->normalizarEstado($this->estado_equipo),
+            'nuevo_tipo_equipo' => $this->aMayusculas($this->nuevo_tipo_equipo),
         ]);
     }
 
     public function rules(): array
     {
         return [
-            'tipo_equipo_id' => ['required', 'exists:tipos_equipo,id'],
+            'tipo_equipo_id' => ['required_without:nuevo_tipo_equipo', 'nullable', 'exists:tipos_equipo,id'],
+            'nuevo_tipo_equipo' => [
+                'nullable',
+                'string',
+                'max:100',
+                'required_without:tipo_equipo_id',
+                Rule::unique('tipos_equipo', 'nombre'),
+            ],
             'marca' => ['required', 'string', 'max:80'],
             'modelo' => ['nullable', 'string', 'max:100'],
             'num_serie' => ['required', 'string', 'max:100'],

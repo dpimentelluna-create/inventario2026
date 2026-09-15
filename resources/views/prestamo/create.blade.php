@@ -41,3 +41,4 @@
         overflow: hidden;
     }
 </style>
+@include('aviso-cambios')

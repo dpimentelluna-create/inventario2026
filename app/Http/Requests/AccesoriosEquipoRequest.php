@@ -22,7 +22,6 @@ class AccesoriosEquipoRequest extends FormRequest
             'observaciones' => $this->aMayusculas($this->observaciones),
         ]);
     }
-
     public function rules(): array
     {
         return [

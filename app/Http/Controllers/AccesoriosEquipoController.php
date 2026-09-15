@@ -42,7 +42,7 @@ class AccesoriosEquipoController extends Controller
         AccesoriosEquipo::create($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'AccesoriosEquipo created successfully.');
+            ->with('success', 'Accesorio registrado.')->with('toast_tipo', 'exito');
     }
 
     /**
@@ -79,7 +79,7 @@ class AccesoriosEquipoController extends Controller
         $accesoriosEquipo->update($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'AccesoriosEquipo updated successfully');
+            ->with('success', 'Accesorio actualizado.')->with('toast_tipo', 'exito');
     }
 
     public function destroy($id): RedirectResponse
@@ -87,7 +87,7 @@ class AccesoriosEquipoController extends Controller
         AccesoriosEquipo::find($id)->delete();
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'AccesoriosEquipo deleted successfully');
+            ->with('success', 'Accesorio eliminado.')->with('toast_tipo', 'exito');
     }
 
     public function buscarEquipos(Request $request)

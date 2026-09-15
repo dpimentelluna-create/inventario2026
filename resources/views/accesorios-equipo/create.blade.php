@@ -26,3 +26,4 @@
         </div>
     </section>
 @endsection
+@include('aviso-cambios')

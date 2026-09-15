@@ -14,10 +14,17 @@ class TiposEquipoRequest extends FormRequest
     protected function prepareForValidation(): void
     {
         $this->merge([
-            'nombre' => $this->nombre
-                ? mb_strtoupper(trim((string) $this->nombre), 'UTF-8')
-                : null,
+            'nombre' => $this->aMayusculas($this->nombre),
         ]);
+    }
+
+    private function aMayusculas($valor): ?string
+    {
+        if ($valor === null || trim((string) $valor) === '') {
+            return null;
+        }
+
+        return mb_strtoupper(trim((string) $valor), 'UTF-8');
     }
 
     public function rules(): array

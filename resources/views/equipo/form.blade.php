@@ -22,33 +22,52 @@
                     {{-- TIPO DE EQUIPO --}}
                     <div class="col-12 col-lg-6 mb-3">
 
-                        <label for="tipo_equipo_id" class="form-label">
-                            Tipo de Equipo
+                        <label for="buscar_tipo_equipo" class="form-label">
+                            TIPO DE EQUIPO
+                            <span class="text-danger">*</span>
                         </label>
 
-                        <select name="tipo_equipo_id" class="form-select @error('tipo_equipo_id') is-invalid @enderror"
-                            id="tipo_equipo_id">
+                        <input type="hidden"
+                            name="tipo_equipo_id"
+                            id="tipo_equipo_id"
+                            value="{{ old('tipo_equipo_id', $equipo->tipo_equipo_id ?? '') }}">
 
-                            <option value="">
-                                Seleccione un Tipo de Equipo
-                            </option>
+                        <div class="position-relative">
+                            <input
+                                type="text"
+                                id="buscar_tipo_equipo"
+                                class="form-control campo-mayusculas @error('tipo_equipo_id') is-invalid @enderror"
+                                placeholder="Escriba o seleccione..."
+                                autocomplete="off"
+                                value="{{ old('buscar_tipo_equipo', $equipo->tipoEquipo->nombre ?? '') }}"
+                            >
 
-                            @foreach($tiposequipo as $id => $nombre)
+                            <div
+                                id="lista_tipos_equipo"
+                                class="position-absolute w-100 bg-white border rounded shadow-sm"
+                                style="display: none; z-index: 1000; max-height: 220px; overflow-y: auto;"
+                            ></div>
+                        </div>
 
-                                <option value="{{ $id }}" {{ old('tipo_equipo_id', $equipo->tipo_equipo_id ?? '') == $id ? 'selected' : '' }}>
-                                    {{ $nombre }}
-                                </option>
-
-                            @endforeach
-
-                        </select>
+                        <div id="wrap_nuevo_tipo_equipo" class="mt-2" style="display: none;">
+                            <label for="nuevo_tipo_equipo" class="form-label">
+                                ESPECIFIQUE EL TIPO
+                            </label>
+                            <input
+                                type="text"
+                                name="nuevo_tipo_equipo"
+                                id="nuevo_tipo_equipo"
+                                class="form-control campo-mayusculas"
+                                placeholder="Ej. PROYECTOR"
+                                value="{{ old('nuevo_tipo_equipo') }}"
+                            >
+                        </div>
 
                         @error('tipo_equipo_id')
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 <strong>{{ $message }}</strong>
                             </div>
                         @enderror
-
                     </div>
 
 
@@ -56,11 +75,11 @@
                     <div class="col-12 col-lg-6 mb-3">
 
                         <label for="num_serie" class="form-label">
-                            Número de Serie
+                            NUMERO DE SERIE
                         </label>
 
                         <input type="text" name="num_serie"
-                            class="form-control @error('num_serie') is-invalid @enderror"
+                            class="form-control campo-mayusculas @error('num_serie') is-invalid @enderror"
                             value="{{ old('num_serie', $equipo?->num_serie) }}" id="num_serie"
                             placeholder="Ingrese el número de serie">
 
@@ -77,10 +96,10 @@
                     <div class="col-12 col-lg-6 mb-3">
 
                         <label for="marca" class="form-label">
-                            Marca
+                            MARCA
                         </label>
 
-                        <input type="text" name="marca" class="form-control  @error('marca') is-invalid @enderror"
+                        <input type="text" name="marca" class="form-control campo-mayusculas  @error('marca') is-invalid @enderror"
                             value="{{ old('marca', $equipo?->marca) }}" id="marca" placeholder="Ingrese la marca">
 
                         @error('marca')
@@ -96,7 +115,7 @@
                     <div class="col-12 col-lg-6 mb-3">
 
                         <label for="modelo" class="form-label">
-                            Modelo
+                            MOELO
                         </label>
 
                         <input type="text" name="modelo" class="form-control campo-mayusculas @error('modelo') is-invalid @enderror"
@@ -115,7 +134,7 @@
                     <div class="col-12 col-lg-6 mb-3">
 
                         <label for="ubicacion_id" class="form-label">
-                            Ubicación
+                            UBICACION
                         </label>
 
                         <select name="ubicacion_id" class="form-select @error('ubicacion_id') is-invalid @enderror"
@@ -144,27 +163,18 @@
                     </div>
 
 
-                    {{-- FECHA DE REGISTRO --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="fecha_registro" class="form-label">
-                            Fecha de Registro
-                        </label>
-
-                        <input type="date" name="fecha_registro"
-                            class="form-control @error('fecha_registro') is-invalid @enderror"
-                            value="{{ old('fecha_registro', $equipo?->fecha_registro) }}" id="fecha_registro">
-
-                        @error('fecha_registro')
-                            <div class="invalid-feedback">
-                                <strong>{{ $message }}</strong>
+                        {{-- FECHA DE REGISTRO --}}
+                        <div class="col-12 col-lg-6 mb-3">
+                            <label for="fecha_registro" class="form-label">Fecha de Registro</label>
+                            <div class="d-flex gap-2">
+                                <input type="date" name="fecha_registro" id="fecha_registro" class="form-control"
+                                    value="{{ old('fecha_registro', $equipo->fecha_registro ?? now()->format('Y-m-d')) }}">
+                                <button type="button" id="btn_fecha_hoy" class="btn btn-outline-success">HOY</button>
                             </div>
-                        @enderror
-
-                    </div>
-                </div>
-            </div>
-        </div>
+                        </div>
+                        </div> {{-- row --}}
+                </div> {{-- card-body --}}
+            </div> {{-- card parte 1 --}}
 
         {{-- ===================================================== --}}
         {{-- PARTE 2 - ESPECIFICACIONES --}}
@@ -652,815 +662,416 @@
 
     </div>
 
-<script>
-    const tiposAccesorios = @json($tiposAccesorios);
-    console.log('TIPOS:', tiposAccesorios);
-console.log('CANTIDAD:', tiposAccesorios.length);
-</script>
 
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function () {
 
-<script>
+    function aMayusculas(campo) {
+        if (!campo) return;
+        const start = campo.selectionStart;
+        const end = campo.selectionEnd;
+        campo.value = campo.value.toUpperCase();
+        if (typeof start === 'number') campo.setSelectionRange(start, end);
+    }
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
+        campo.addEventListener('input', function () { aMayusculas(this); });
+    });
 
-        // =====================================================
-        // CONVERTIR TEXTO A MAYÚSCULAS
-        // =====================================================
+    const tiposEquipoData = [
+        @foreach($tiposequipo as $id => $nombre)
+            { id: {{ (int) $id }}, nombre: @json($nombre) },
+        @endforeach
+    ];
 
-        function convertirAMayusculas(campo) {
+    const inputTipoEq = document.getElementById('buscar_tipo_equipo');
+    const hiddenTipoEq = document.getElementById('tipo_equipo_id');
+    const listaTipoEq = document.getElementById('lista_tipos_equipo');
+    const wrapNuevoTipo = document.getElementById('wrap_nuevo_tipo_equipo');
+    const inputNuevoTipo = document.getElementById('nuevo_tipo_equipo');
+    const laptopBox = document.getElementById('especificaciones-laptop');
+    const equipoBox = document.getElementById('especificaciones-equipo');
+    const mensajeSpecs = document.getElementById('mensaje-especificaciones');
+    const fechaRegistro = document.getElementById('fecha_registro');
+    const btnHoy = document.getElementById('btn_fecha_hoy');
+    const container = document.getElementById('accesorios-container');
+    const botonAgregar = document.getElementById('agregar-accesorio');
+    const mensajeVacio = document.getElementById('sin-accesorios');
+    const cardParte3 = botonAgregar ? botonAgregar.closest('.card') : null;
+    const tiposAccesorios = @json($tiposAccesorios ?? []);
+    const idsBloqueados = ['num_serie', 'marca', 'modelo', 'ubicacion_id', 'fecha_registro', 'btn_fecha_hoy'];
 
-            if (!campo) {
-                return;
+    function fechaHoyISO() {
+        const d = new Date();
+        return d.getFullYear() + '-' +
+            String(d.getMonth() + 1).padStart(2, '0') + '-' +
+            String(d.getDate()).padStart(2, '0');
+    }
+
+    if (fechaRegistro && !fechaRegistro.value) {
+        fechaRegistro.value = fechaHoyISO();
+    }
+    if (btnHoy && fechaRegistro) {
+        btnHoy.addEventListener('click', function () {
+            fechaRegistro.value = fechaHoyISO();
+        });
+    }
+
+    function tipoEquipoListo() {
+        if (hiddenTipoEq && String(hiddenTipoEq.value).trim() !== '') return true;
+        return !!(
+            inputTipoEq &&
+            inputTipoEq.value.trim().toUpperCase() === 'OTRO' &&
+            inputNuevoTipo &&
+            inputNuevoTipo.value.trim() !== ''
+        );
+    }
+
+    function actualizarBloqueoParte1() {
+        const listo = tipoEquipoListo();
+
+        idsBloqueados.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.tagName === 'SELECT' || el.type === 'button') {
+                el.disabled = !listo;
+            } else {
+                el.readOnly = !listo;
             }
-
-            campo.value = campo.value.toUpperCase();
-        }
-
-        // =====================================================
-        // CAMPOS CON MAYÚSCULAS
-        // =====================================================
-
-        document.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
-
-            campo.addEventListener('input', function () {
-                convertirAMayusculas(this);
-            });
-
+            el.classList.toggle('bg-light', !listo);
         });
 
-        // =====================================================
-        // VALORES POR DEFECTO PARA LAPTOPS
-        // =====================================================
-
-        const valoresPorDefectoLaptop = {
-            procesador: 'Intel Core-I3-400 CPU 1.70 Ghz',
-            ram: '4GB DDR3',
-            disco_duro: 'HGST 465 GB',
-            color_laptop: 'NEGRO',
-            estado_laptop: 'Regular',
-            observaciones_laptop: ' '
-        };
-
-        // =====================================================
-        // PARTE 2 - ESPECIFICACIONES
-        // =====================================================
-
-        const tipoEquipo = document.getElementById('tipo_equipo_id');
-        const laptop = document.getElementById('especificaciones-laptop');
-        const equipo = document.getElementById('especificaciones-equipo');
-        const mensaje = document.getElementById('mensaje-especificaciones');
-
-
-        function mostrarEspecificaciones() {
-
-            if (!tipoEquipo || !laptop || !equipo || !mensaje) {
-                return;
-            }
-
-            const textoSeleccionado =
-                tipoEquipo.options[tipoEquipo.selectedIndex]?.text
-                    .trim()
-                    .toUpperCase();
-
-
-            // Ocultar todo
-            laptop.style.display = 'none';
-            equipo.style.display = 'none';
-            mensaje.style.display = 'none';
-
-
-            // Sin selección
-            if (!tipoEquipo.value) {
-
-                mensaje.style.display = 'block';
-
-                return;
-            }
-
-
-            // LAPTOP
-            if (textoSeleccionado === 'LAPTOP') {
-
-                laptop.style.display = 'block';
-
-                // Rellenar valores por defecto
-                const procesador = document.getElementById('procesador');
-                const ram = document.getElementById('ram');
-                const discoDuro = document.getElementById('disco_duro');
-                const colorLaptop = document.getElementById('color_laptop');
-                const estadoLaptop = document.getElementById('estado_laptop');
-                const observacionesLaptop = document.getElementById('observaciones_laptop');
-
-                if (procesador && !procesador.value) {
-                    procesador.value = valoresPorDefectoLaptop.procesador;
-                }
-
-                if (ram && !ram.value) {
-                    ram.value = valoresPorDefectoLaptop.ram;
-                }
-
-                if (discoDuro && !discoDuro.value) {
-                    discoDuro.value = valoresPorDefectoLaptop.disco_duro;
-                }
-
-                if (colorLaptop && !colorLaptop.value) {
-                    colorLaptop.value = valoresPorDefectoLaptop.color_laptop;
-                }
-
-                if (estadoLaptop && !estadoLaptop.value) {
-                    estadoLaptop.value = valoresPorDefectoLaptop.estado_laptop;
-                }
-
-                if (observacionesLaptop && !observacionesLaptop.value) {
-                    observacionesLaptop.value = valoresPorDefectoLaptop.observaciones_laptop;
-                }
-
-            } else {
-                // Cualquier otro tipo
-                equipo.style.display = 'block';
-            }
+        if (botonAgregar) botonAgregar.disabled = !listo;
+        if (cardParte3) {
+            cardParte3.style.opacity = listo ? '1' : '0.55';
+            cardParte3.style.pointerEvents = listo ? 'auto' : 'none';
         }
+    }
 
-
-        if (tipoEquipo) {
-
-            tipoEquipo.addEventListener(
-                'change',
-                mostrarEspecificaciones
-            );
-
-            mostrarEspecificaciones();
+    function textoTipoEquipo() {
+        if (inputNuevoTipo && inputNuevoTipo.value.trim() !== '') {
+            return inputNuevoTipo.value.trim().toUpperCase();
         }
-
-
-        // =====================================================
-        // PARTE 3 - ACCESORIOS
-        // =====================================================
-
-        const container =
-            document.getElementById('accesorios-container');
-
-        const botonAgregar =
-            document.getElementById('agregar-accesorio');
-
-        const mensajeVacio =
-            document.getElementById('sin-accesorios');
-
-
-        if (!container) {
-            return;
-        }
-
-
-        // =====================================================
-        // TIPOS DE ACCESORIOS
-        // =====================================================
-
-        const tiposAccesorios =
-            @json($tiposAccesorios);
-
-
-        // =====================================================
-        // CONTADOR
-        // =====================================================
-
-        let contador =
-            container.querySelectorAll('.accesorio-item').length;
-
-
-        // =====================================================
-        // ACTUALIZAR MENSAJE
-        // =====================================================
-
-        function actualizarMensaje() {
-
-            if (!mensajeVacio) {
-                return;
-            }
-
-
-            const existenAccesorios =
-                container.querySelector('.accesorio-item');
-
-
-            if (existenAccesorios) {
-
-                mensajeVacio.style.display = 'none';
-
-            } else {
-
-                mensajeVacio.style.display = 'block';
-
-            }
-        }
-
-
-        // =====================================================
-        // MOSTRAR / OCULTAR "OTRO"
-        // =====================================================
-
-        function actualizarTipoPersonalizado(accesorio) {
-
-            const inputTipo =
-                accesorio.querySelector('.tipo-accesorio');
-
-            const contenedor =
-                accesorio.querySelector('.tipo-personalizado-container');
-
-            const inputPersonalizado =
-                accesorio.querySelector('.tipo-personalizado');
-
-
-            if (
-                !inputTipo ||
-                !contenedor ||
-                !inputPersonalizado
-            ) {
-                return;
-            }
-
-
-            // Si el usuario escribió "Otro"
-            if (
-                inputTipo.value.trim().toLowerCase() === 'otro'
-            ) {
-
-                contenedor.style.display = 'block';
-
-                inputPersonalizado.required = true;
-
-            } else {
-
-                contenedor.style.display = 'none';
-
-                inputPersonalizado.required = false;
-            }
-        }
-
-
-        // =====================================================
-        // CONFIGURAR COMBOBOX
-        // =====================================================
-
-        function configurarCombobox(accesorio) {
-
-            const input =
-                accesorio.querySelector('.tipo-accesorio');
-
-            const lista =
-                accesorio.querySelector('.lista-tipos-accesorio');
-
-
-            if (!input || !lista) {
-                return;
-            }
-
-
-            // =================================================
-            // MOSTRAR RESULTADOS
-            // =================================================
-
-            function mostrarLista() {
-
-                const texto =
-                    input.value.trim().toLowerCase();
-
-
-                lista.innerHTML = '';
-
-
-                // -------------------------------------------------
-                // FILTRAR TIPOS
-                // -------------------------------------------------
-
-                const resultados =
-                    tiposAccesorios.filter(function (tipo) {
-
-                        return tipo
-                            .toLowerCase()
-                            .includes(texto);
-
-                    });
-
-
-                // -------------------------------------------------
-                // RESULTADOS
-                // -------------------------------------------------
-
-                resultados.forEach(function (tipo) {
-
-                    const opcion =
-                        document.createElement('div');
-
-
-                    opcion.className =
-                        'px-3 py-2';
-
-
-                    opcion.style.cursor =
-                        'pointer';
-
-
-                    opcion.textContent =
-                        tipo;
-
-
-                    // ---------------------------------------------
-                    // SELECCIONAR
-                    // ---------------------------------------------
-
-                    opcion.addEventListener(
-                        'mousedown',
-                        function (event) {
-
-                            event.preventDefault();
-
-                            input.value = tipo;
-
-                            lista.style.display = 'none';
-
-                            actualizarTipoPersonalizado(
-                                accesorio
-                            );
-
-                        }
+        return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
+    }
+
+    function mostrarCampoNuevoTipo(mostrar) {
+        if (!wrapNuevoTipo || !inputNuevoTipo) return;
+        wrapNuevoTipo.style.display = mostrar ? 'block' : 'none';
+        inputNuevoTipo.required = !!mostrar;
+        if (!mostrar) inputNuevoTipo.value = '';
+    }
+
+    function tipoYaExiste(nombre) {
+        const n = (nombre || '').trim().toUpperCase();
+        if (!n) return null;
+        return tiposEquipoData.find(function (t) {
+            return String(t.nombre).toUpperCase() === n;
+        }) || null;
+    }
+
+
+    function mostrarEspecificaciones() {
+
+                // Ocultar inicialmente ambos bloques
+                if (laptopBox) {
+                    laptopBox.style.display = 'none';
+                }
+
+                if (equipoBox) {
+                    equipoBox.style.display = 'none';
+                }
+
+                if (mensajeSpecs) {
+                    mensajeSpecs.style.display = 'block';
+                }
+
+
+                // Obtener el tipo seleccionado
+                const tipoTexto =
+                    inputTipoEq
+                        ? inputTipoEq.value.trim().toUpperCase()
+                        : '';
+
+                const tipoSeleccionado =
+                    tipoTexto !== '' &&
+                    (
+                        (hiddenTipoEq && String(hiddenTipoEq.value).trim() !== '') ||
+                        tipoTexto === 'OTRO'
                     );
 
 
-                    // ---------------------------------------------
-                    // EFECTO AL PASAR EL MOUSE
-                    // ---------------------------------------------
-
-                    opcion.addEventListener(
-                        'mouseenter',
-                        function () {
-
-                            opcion.style.backgroundColor =
-                                '#f0f0f0';
-
-                        }
-                    );
-
-
-                    opcion.addEventListener(
-                        'mouseleave',
-                        function () {
-
-                            opcion.style.backgroundColor =
-                                '';
-
-                        }
-                    );
-
-
-                    lista.appendChild(opcion);
-
-                });
-
-
-                // -------------------------------------------------
-                // OPCIÓN "OTRO"
-                // -------------------------------------------------
-
-                const opcionOtro =
-                    document.createElement('div');
-
-
-                opcionOtro.className =
-                    'px-3 py-2';
-
-
-                opcionOtro.style.cursor =
-                    'pointer';
-
-
-                opcionOtro.textContent =
-                    'Otro...';
-
-
-                opcionOtro.addEventListener(
-                    'mousedown',
-                    function (event) {
-
-                        event.preventDefault();
-
-                        input.value = 'Otro';
-
-                        lista.style.display = 'none';
-
-                        actualizarTipoPersonalizado(
-                            accesorio
-                        );
-
-                    }
-                );
-
-
-                opcionOtro.addEventListener(
-                    'mouseenter',
-                    function () {
-
-                        opcionOtro.style.backgroundColor =
-                            '#f0f0f0';
-
-                    }
-                );
-
-
-                opcionOtro.addEventListener(
-                    'mouseleave',
-                    function () {
-
-                        opcionOtro.style.backgroundColor =
-                            '';
-
-                    }
-                );
-
-
-                lista.appendChild(opcionOtro);
-
-
-                // -------------------------------------------------
-                // MOSTRAR LISTA
-                // -------------------------------------------------
-
-                lista.style.display =
-                    'block';
-            }
-
-
-            // =================================================
-            // AL ESCRIBIR
-            // =================================================
-
-            input.addEventListener(
-                'input',
-                function () {
-
-                    mostrarLista();
-
-                    actualizarTipoPersonalizado(
-                        accesorio
-                    );
-
+                // Si todavía no se ha seleccionado un tipo
+                if (!tipoSeleccionado) {
+                    actualizarBloqueoParte1();
+                    return;
                 }
-            );
 
 
-            // =================================================
-            // AL HACER CLICK
-            // =================================================
-
-            input.addEventListener(
-                'focus',
-                function () {
-
-                    mostrarLista();
-
+                // Ya existe un tipo seleccionado
+                if (mensajeSpecs) {
+                    mensajeSpecs.style.display = 'none';
                 }
-            );
 
 
-            // =================================================
-            // CERRAR LISTA AL HACER CLICK AFUERA
-            // =================================================
+                // =========================================================
+                // LAPTOP
+                // =========================================================
 
-            document.addEventListener(
-                'click',
-                function (event) {
+                if (tipoTexto === 'LAPTOP') {
 
-                    if (
-                        !accesorio.contains(
-                            event.target
-                        )
-                    ) {
-
-                        lista.style.display =
-                            'none';
-
+                    if (laptopBox) {
+                        laptopBox.style.display = 'block';
                     }
 
                 }
-            );
-
-        }
 
 
-        // =====================================================
-        // CONFIGURAR ACCESORIOS EXISTENTES
-        // =====================================================
+                // =========================================================
+                // OTROS EQUIPOS
+                // =========================================================
 
-        container
-            .querySelectorAll('.accesorio-item')
-            .forEach(function (accesorio) {
+                else if (equipoBox) {
 
-                configurarCombobox(accesorio);
+                    equipoBox.style.display = 'block';
 
-                actualizarTipoPersonalizado(
-                    accesorio
-                );
+                }
 
+
+                // Actualizar bloqueo de los demás campos
+                actualizarBloqueoParte1();
+    }
+
+
+    function pintarListaTiposEquipo() {
+        if (!inputTipoEq || !listaTipoEq) return;
+        const texto = inputTipoEq.value.trim().toUpperCase();
+        listaTipoEq.innerHTML = '';
+
+        tiposEquipoData.filter(function (tipo) {
+            return String(tipo.nombre).toUpperCase().includes(texto);
+        }).forEach(function (tipo) {
+            const item = document.createElement('div');
+            item.className = 'px-3 py-2';
+            item.style.cursor = 'pointer';
+            item.textContent = tipo.nombre;
+            item.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                inputTipoEq.value = String(tipo.nombre).toUpperCase();
+                hiddenTipoEq.value = tipo.id;
+                mostrarCampoNuevoTipo(false);
+                listaTipoEq.style.display = 'none';
+                mostrarEspecificaciones();
             });
+            listaTipoEq.appendChild(item);
+        });
 
+        const otro = document.createElement('div');
+        otro.className = 'px-3 py-2 fw-semibold';
+        otro.style.cursor = 'pointer';
+        otro.textContent = 'OTRO';
+        otro.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            inputTipoEq.value = 'OTRO';
+            hiddenTipoEq.value = '';
+            mostrarCampoNuevoTipo(true);
+            listaTipoEq.style.display = 'none';
+            if (inputNuevoTipo) inputNuevoTipo.focus();
+            mostrarEspecificaciones();
+        });
+        listaTipoEq.appendChild(otro);
+        listaTipoEq.style.display = 'block';
+    }
 
+    if (inputTipoEq) {
+        inputTipoEq.addEventListener('focus', pintarListaTiposEquipo);
+        inputTipoEq.addEventListener('click', pintarListaTiposEquipo);
+        inputTipoEq.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+            hiddenTipoEq.value = '';
+            mostrarCampoNuevoTipo(this.value.trim() === 'OTRO');
+            pintarListaTiposEquipo();
+            mostrarEspecificaciones();
+        });
+    }
+
+    if (inputNuevoTipo) {
+        inputNuevoTipo.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+            mostrarEspecificaciones();
+        });
+        inputNuevoTipo.addEventListener('blur', function () {
+            const existe = tipoYaExiste(this.value);
+            if (!existe) return;
+            inputTipoEq.value = existe.nombre;
+            hiddenTipoEq.value = existe.id;
+            mostrarCampoNuevoTipo(false);
+            mostrarEspecificaciones();
+            if (typeof toastr !== 'undefined') {
+                toastr.warning('ESE TIPO YA ESTÁ REGISTRADO. SE SELECCIONÓ DE LA LISTA.');
+            }
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        if (listaTipoEq && inputTipoEq && !inputTipoEq.contains(event.target) && !listaTipoEq.contains(event.target)) {
+            listaTipoEq.style.display = 'none';
+        }
+    });
+
+    let contador = container ? container.querySelectorAll('.accesorio-item').length : 0;
+
+    function actualizarMensaje() {
+        if (!mensajeVacio || !container) return;
+        mensajeVacio.style.display = container.querySelector('.accesorio-item') ? 'none' : 'block';
+    }
+
+    function actualizarTipoPersonalizado(accesorio) {
+        const inputTipo = accesorio.querySelector('.tipo-accesorio');
+        const wrap = accesorio.querySelector('.tipo-personalizado-container');
+        const inputPers = accesorio.querySelector('.tipo-personalizado');
+        if (!inputTipo || !wrap || !inputPers) return;
+        const esOtro = inputTipo.value.trim().toUpperCase() === 'OTRO';
+        wrap.style.display = esOtro ? 'block' : 'none';
+        inputPers.required = esOtro;
+    }
+
+    function configurarCombobox(accesorio) {
+        const input = accesorio.querySelector('.tipo-accesorio');
+        const lista = accesorio.querySelector('.lista-tipos-accesorio');
+        if (!input || !lista) return;
+
+        function mostrarLista() {
+            const texto = input.value.trim().toUpperCase();
+            lista.innerHTML = '';
+            (tiposAccesorios || []).filter(function (tipo) {
+                return String(tipo).toUpperCase().includes(texto);
+            }).forEach(function (tipo) {
+                const opcion = document.createElement('div');
+                opcion.className = 'px-3 py-2';
+                opcion.style.cursor = 'pointer';
+                opcion.textContent = tipo;
+                opcion.addEventListener('mousedown', function (event) {
+                    event.preventDefault();
+                    input.value = String(tipo).toUpperCase();
+                    lista.style.display = 'none';
+                    actualizarTipoPersonalizado(accesorio);
+                });
+                lista.appendChild(opcion);
+            });
+            const opcionOtro = document.createElement('div');
+            opcionOtro.className = 'px-3 py-2 fw-semibold';
+            opcionOtro.style.cursor = 'pointer';
+            opcionOtro.textContent = 'OTRO';
+            opcionOtro.addEventListener('mousedown', function (event) {
+                event.preventDefault();
+                input.value = 'OTRO';
+                lista.style.display = 'none';
+                actualizarTipoPersonalizado(accesorio);
+            });
+            lista.appendChild(opcionOtro);
+            lista.style.display = 'block';
+        }
+
+        input.addEventListener('input', function () {
+            mostrarLista();
+            actualizarTipoPersonalizado(accesorio);
+        });
+        input.addEventListener('focus', mostrarLista);
+        input.addEventListener('click', mostrarLista);
+    }
+
+    if (container) {
+        container.querySelectorAll('.accesorio-item').forEach(function (accesorio) {
+            configurarCombobox(accesorio);
+            actualizarTipoPersonalizado(accesorio);
+        });
         actualizarMensaje();
 
-
-        // =====================================================
-        // AGREGAR NUEVO ACCESORIO
-        // =====================================================
-
         if (botonAgregar) {
-
-            botonAgregar.addEventListener(
-                'click',
-                function () {
-
-
-                    const accesorio =
-                        document.createElement('div');
-
-
-                    accesorio.className =
-                        'accesorio-item border rounded p-3 mb-3';
-
-
-                    accesorio.innerHTML = `
-
+            botonAgregar.addEventListener('click', function () {
+                if (!tipoEquipoListo()) return;
+                const accesorio = document.createElement('div');
+                accesorio.className = 'accesorio-item border rounded p-3 mb-3';
+                accesorio.innerHTML = `
                     <div class="row">
-
-                        {{-- TIPO --}}
-                        <div class="col-12 col-md-12 mb-3">
-
-                            <label class="form-label">
-                                Tipo
-                            </label>
-
-                            <div class="contenedor-tipo-accesorio position-relative">
-
-    <input
-        type="text"
-        name="accesorios[${contador}][tipo]"
-        class="form-control tipo-accesorio campo-mayusculas"
-        placeholder="Escriba o seleccione..."
-        autocomplete="off"
-    >
-
-    <div
-        class="lista-tipos-accesorio"
-        style="
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            max-height: 300px;
-            overflow-y: auto;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,.15);
-            z-index: 9999;
-        "
-    >
-    </div>
-
-</div>
-
-                            {{-- TIPO PERSONALIZADO --}}
-                            <div
-                                class="tipo-personalizado-container mt-2"
-                                style="display: none;"
-                            >
-
-                                <label class="form-label">
-                                    Especifique el tipo
-                                </label>
-
-                                <input
-                                    type="text"
-                                    name="accesorios[${contador}][tipo_personalizado]"
-                                    class="form-control tipo-personalizado campo-mayusculas"
-                                    placeholder="Ej. Cable HDMI"
-                                >
-
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Tipo</label>
+                            <div class="position-relative">
+                                <input type="text" name="accesorios[${contador}][tipo]" class="form-control tipo-accesorio campo-mayusculas" autocomplete="off">
+                                <div class="lista-tipos-accesorio" style="display:none;"></div>
                             </div>
-
+                            <div class="tipo-personalizado-container mt-2" style="display:none;">
+                                <label class="form-label">Especifique el tipo</label>
+                                <input type="text" name="accesorios[${contador}][tipo_personalizado]" class="form-control tipo-personalizado campo-mayusculas">
+                            </div>
                         </div>
-
-
-                        {{-- MARCA --}}
-                        <div class="col-12 col-md-12 mb-3">
-
-                            <label class="form-label">
-                                Marca
-                            </label>
-
-                            <input
-                                type="text"
-                                name="accesorios[${contador}][marca]"
-                                class="form-control campo-mayusculas"
-                                placeholder="Marca"
-                            >
-
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Marca</label>
+                            <input type="text" name="accesorios[${contador}][marca]" class="form-control campo-mayusculas">
                         </div>
-
-
-                        {{-- NÚMERO DE SERIE --}}
-                        <div class="col-12 col-md-12 mb-3">
-
-                            <label class="form-label">
-                                N.º de Serie
-                            </label>
-
-                            <input
-                                type="text"
-                                name="accesorios[${contador}][num_serie]"
-                                class="form-control campo-mayusculas"
-                                placeholder="N.º Serie"
-                            >
-
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">N.º de Serie</label>
+                            <input type="text" name="accesorios[${contador}][num_serie]" class="form-control campo-mayusculas">
                         </div>
-
-
-                        {{-- ESTADO --}}
-                        <div class="col-12 col-md-12 mb-3">
-
-                            <label class="form-label">
-                                Estado
-                            </label>
-
-                            <select
-                                name="accesorios[${contador}][estado]"
-                                class="form-select"
-                            >
-
-                                <option
-                                    value="Regular"
-                                    selected
-                                >
-                                    REGULAR
-                                </option>
-
-                                <option value="Bueno">
-                                    BUENO
-                                </option>
-
-                                <option value="Malogrado">
-                                    MALOGRADO
-                                </option>
-
+                        <div class="col-md-2 mb-3">
+                            <label class="form-label">Estado</label>
+                            <select name="accesorios[${contador}][estado]" class="form-select">
+                                <option value="REGULAR" selected>REGULAR</option>
+                                <option value="BUENO">BUENO</option>
+                                <option value="MALOGRADO">MALOGRADO</option>
                             </select>
-
                         </div>
-
-
-                        {{-- OBSERVACIONES --}}
-                        <div class="col-12 col-md-12 mb-3">
-
-                            <label class="form-label">
-                                Observaciones
-                            </label>
-
-                            <textarea
-                                name="accesorios[${contador}][observaciones]"
-                                class="form-control campo-mayusculas"
-                                rows="1"
-                                placeholder="Observaciones"
-                            ></textarea>
-
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Observaciones</label>
+                            <textarea name="accesorios[${contador}][observaciones]" class="form-control campo-mayusculas" rows="1"></textarea>
                         </div>
-
-
-                        {{-- ELIMINAR --}}
-                        <div class="col-12 col-md-1 mb-3 d-flex align-items-end">
-
-                            <button
-                                type="button"
-                                class="btn btn-danger btn-eliminar-accesorio"
-                                title="Eliminar accesorio"
-                            >
-
-                                <i class="bi bi-trash"></i>
-
-                            </button>
-
+                        <div class="col-12 col-md-1 mb-3 d-flex align-items-end justify-content-center">
+                            <button type="button" class="btn btn-danger btn-eliminar-accesorio"><i class="bi bi-trash"></i></button>
                         </div>
-
-                    </div>
-                `;
-
-
-                    container.appendChild(
-                        accesorio
-                    );
-
-                    // Aplicar mayúsculas a los campos del nuevo accesorio
-                    accesorio.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
-
-                        campo.addEventListener('input', function () {
-                            convertirAMayusculas(this);
-                        });
-
-                    });
-
-                    // Configurar combobox
-                    configurarCombobox(
-                        accesorio
-                    );
-
-                    contador++;
-
-                    actualizarMensaje();
-
-                }
-            );
-
+                    </div>`;
+                container.appendChild(accesorio);
+                accesorio.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
+                    campo.addEventListener('input', function () { aMayusculas(this); });
+                });
+                configurarCombobox(accesorio);
+                contador++;
+                actualizarMensaje();
+            });
         }
 
+        container.addEventListener('click', function (event) {
+            const botonEliminar = event.target.closest('.btn-eliminar-accesorio');
+            if (!botonEliminar) return;
+            const accesorio = botonEliminar.closest('.accesorio-item');
+            if (accesorio) accesorio.remove();
+            actualizarMensaje();
+        });
+    }
 
-        // =====================================================
-        // ELIMINAR ACCESORIO
-        // =====================================================
+    document.addEventListener('click', function (event) {
+        document.querySelectorAll('.lista-tipos-accesorio').forEach(function (lista) {
+            const accesorio = lista.closest('.accesorio-item');
+            if (accesorio && !accesorio.contains(event.target)) lista.style.display = 'none';
+        });
+    });
 
-        container.addEventListener(
-            'click',
-            function (event) {
-
-                const botonEliminar =
-                    event.target.closest(
-                        '.btn-eliminar-accesorio'
-                    );
-
-
-                if (!botonEliminar) {
-                    return;
+    const form = inputTipoEq ? inputTipoEq.closest('form') : null;
+    if (form) {
+        form.addEventListener('submit', function () {
+            idsBloqueados.forEach(function (id) {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = false;
+                    el.readOnly = false;
                 }
-
-                const confirmar = confirm(
-                    '¿Está seguro de que desea eliminar este accesorio?'
-                );
-
-                 if (!confirmar) {
-                    return;
-                }
-
-                const accesorio =
-                    botonEliminar.closest(
-                        '.accesorio-item'
-                    );
-
-
-                if (accesorio) {
-
-                    accesorio.remove();
-
-                }
-
-                actualizarMensaje();
-
-            }
-        );
-
-
-        // =====================================================
-        // CERRAR COMBOBOX AL HACER CLICK FUERA
-        // =====================================================
-
-        document.addEventListener(
-            'click',
-            function (event) {
-
-                document
-                    .querySelectorAll(
-                        '.lista-tipos-accesorio'
-                    )
-                    .forEach(function (lista) {
-
-                        const accesorio =
-                            lista.closest(
-                                '.accesorio-item'
-                            );
-
-
-                        if (
-                            accesorio &&
-                            !accesorio.contains(
-                                event.target
-                            )
-                        ) {
-
-                            lista.style.display =
-                                'none';
-
-                        }
-
-                    });
-
-            }
-        );
             });
+        });
+    }
+
+    mostrarEspecificaciones();
+});
 </script>
 
 <style>

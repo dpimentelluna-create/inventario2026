@@ -49,7 +49,7 @@
                                                         {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? '' }}
                                                         {{ $prestamoEquipo->equipo->marca ?? '' }}
                                                         <small class="text-muted">
-                                                            N/S {{ $prestamoEquipo->equipo->num_serie ?? '-' }}
+                                                            N/S: {{ $prestamoEquipo->equipo->num_serie ?? '-' }}
                                                         </small>
                                                     </div>
                                                 @empty

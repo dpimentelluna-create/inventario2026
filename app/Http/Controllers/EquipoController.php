@@ -20,17 +20,29 @@ class EquipoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+     public function index(): View
     {
         $equipos = Equipo::with([
             'tipoEquipo',
             'ubicacione',
             'especificacionesLaptops',
             'especificacionesEquipo',
-            'accesoriosEquipos'
         ])->get();
 
-        return view('equipo.index', compact('equipos'));
+        $filtroTipos = TiposEquipo::orderBy('nombre')->pluck('nombre');
+        $filtroMarcas = Equipo::whereNotNull('marca')->where('marca', '!=', '')
+            ->distinct()->orderBy('marca')->pluck('marca');
+        $filtroModelos = Equipo::whereNotNull('modelo')->where('modelo', '!=', '')
+            ->distinct()->orderBy('modelo')->pluck('modelo');
+        $filtroUbicaciones = Ubicacione::orderBy('nombre')->pluck('nombre');
+
+        return view('equipo.index', compact(
+            'equipos',
+            'filtroTipos',
+            'filtroMarcas',
+            'filtroModelos',
+            'filtroUbicaciones'
+        ));
     }
 
     /**
@@ -64,9 +76,18 @@ class EquipoController extends Controller
      */
     public function store(EquipoRequest $request): RedirectResponse
     {
+        $tipoEquipoId = $request->tipo_equipo_id;
+
+        if ($request->filled('nuevo_tipo_equipo')) {
+            $tipo = \App\Models\TiposEquipo::firstOrCreate([
+                'nombre' => mb_strtoupper(trim($request->nuevo_tipo_equipo), 'UTF-8'),
+            ]);
+            $tipoEquipoId = $tipo->id;
+        }
+
         //1. CREAR EL EQUIPO
         $equipo = Equipo::create([
-            'tipo_equipo_id' => $request->tipo_equipo_id,
+            'tipo_equipo_id' => $tipoEquipoId,
             'marca' => $request->marca,
             'modelo' => $request->modelo,
             'num_serie' => $request->num_serie,
@@ -74,9 +95,9 @@ class EquipoController extends Controller
             'fecha_registro' => $request->fecha_registro,
         ]);
 
-        //2. OBTENER EL TIPO DE EQUIPO
-        $tipoEquipo = TiposEquipo::find($request->tipo_equipo_id);
 
+        //2. OBTENER EL TIPO DE EQUIPO
+        $tipoEquipo = TiposEquipo::find($tipoEquipoId);
         //3. GUARDAR ESPICCIFIACIONES
         // IF IS LAPTOP:
         if ($tipoEquipo && strtoupper($tipoEquipo->nombre) === 'LAPTOP') {
@@ -140,10 +161,7 @@ class EquipoController extends Controller
 
         //5. FINALIZAR
         return redirect()->route('equipos.index')
-            ->with(
-                'success',
-                'Equipo, especificaciones y accesorios registrados correctamente.'
-            );
+            ->with('success', 'Equipo registrado.')->with('toast_tipo', 'exito');
     }
 
     /**
@@ -205,9 +223,18 @@ class EquipoController extends Controller
      */
     public function update(EquipoRequest $request, Equipo $equipo): RedirectResponse
     {
+        $tipoEquipoId = $request->tipo_equipo_id;
+
+        if ($request->filled('nuevo_tipo_equipo')) {
+            $tipo = \App\Models\TiposEquipo::firstOrCreate([
+                'nombre' => mb_strtoupper(trim($request->nuevo_tipo_equipo), 'UTF-8'),
+            ]);
+            $tipoEquipoId = $tipo->id;
+        }
+
         // 1. Actualizar información principal del equipo
         $equipo->update([
-            'tipo_equipo_id' => $request->tipo_equipo_id,
+            'tipo_equipo_id' => $tipoEquipoId,
             'marca' => $request->marca,
             'modelo' => $request->modelo,
             'num_serie' => $request->num_serie,
@@ -216,7 +243,7 @@ class EquipoController extends Controller
         ]);
 
         // 2. Obtener el tipo de equipo
-        $tipoEquipo = TiposEquipo::find($request->tipo_equipo_id);
+        $tipoEquipo = TiposEquipo::find($tipoEquipoId);
 
         // 3. Actualizar especificaciones
         if ($tipoEquipo && strtoupper($tipoEquipo->nombre) === 'LAPTOP') {
@@ -228,7 +255,7 @@ class EquipoController extends Controller
                     'ram' => $request->ram,
                     'disco_duro' => $request->disco_duro,
                     'color' => $request->color_laptop,
-                    'estado' => $request->estado_laptop ?? 'Regular',
+                    'estado' => $request->estado_laptop ?? 'REGULAR',
                     'observaciones' => $request->observaciones_laptop,
                 ]
             );
@@ -242,7 +269,7 @@ class EquipoController extends Controller
                 [
                     'descripcion' => $request->descripcion,
                     'color' => $request->color_equipo,
-                    'estado' => $request->estado_equipo ?? 'Regular',
+                    'estado' => $request->estado_equipo ?? 'REGULAR',
                     'observaciones' => $request->observaciones_equipo,
                 ]
             );
@@ -265,7 +292,7 @@ class EquipoController extends Controller
 
             $tipo = $accesorio['tipo'] ?? null;
 
-            if ($tipo === 'Otro') {
+            if (strtoupper(trim((string) $tipo)) === 'OTRO') {
                 $tipo = trim($accesorio['tipo_personalizado'] ?? '');
             }
 
@@ -303,7 +330,7 @@ class EquipoController extends Controller
                         'tipo' => $tipo,
                         'marca' => $accesorio['marca'] ?? null,
                         'num_serie' => $accesorio['num_serie'] ?? null,
-                        'estado' => $accesorio['estado'] ?? 'Regular',
+                        'estado' => $accesorio['estado'] ?? 'REGULAR',
                         'observaciones' => $accesorio['observaciones'] ?? null,
                     ]);
 
@@ -345,44 +372,13 @@ class EquipoController extends Controller
         }
 
         return redirect()->route('equipos.index')
-            ->with('success', 'Equipo actualizado correctamente.');
+            ->with('success', 'Equipo actualizado.')->with('toast_tipo', 'aviso');
     }
-
-    /*public function guardarAccesorios(Request $request, Equipo $equipo): RedirectResponse
-    {
-        if ($request->has('accesorios')) {
-
-            foreach ($request->accesorios as $accesorio) {
-
-                // No guardar filas completamente vacías
-                if (
-                    empty($accesorio['tipo']) &&
-                    empty($accesorio['marca']) &&
-                    empty($accesorio['num_serie']) &&
-                    empty($accesorio['observaciones'])
-                ) {
-                    continue;
-                }
-
-                $equipo->accesoriosEquipos()->create([
-                    'tipo' => $accesorio['tipo'] ?? null,
-                    'marca' => $accesorio['marca'] ?? null,
-                    'num_serie' => $accesorio['num_serie'] ?? null,
-                    'estado' => $accesorio['estado'] ?? 'Regular',
-                    'observaciones' => $accesorio['observaciones'] ?? null,
-                ]);
-            }
-        }
-
-        return redirect()->route('equipos.index')
-            ->with('success', 'Accesorios registrados correctamente.');
-    }*/
-
     public function destroy(Equipo $equipo): RedirectResponse
     {
         $equipo->delete();
 
         return redirect()->route('equipos.index')
-            ->with('success', 'Equipo eliminado correctamente.');
+            ->with('success', 'Equipo eliminado.')->with('toast_tipo', 'error');
     }
 }
