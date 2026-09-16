@@ -243,6 +243,56 @@ $tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
 </script>
 @endif
 
+<script>
+    /*
+     * =========================================================
+     * ATAJO GENERAL DEL SISTEMA - RETROCEDER
+     * =========================================================
+     *
+     * ESC = RETROCEDER
+     *
+     * LOS FORMULARIOS CON CAMBIOS SIN GUARDAR
+     * CONTROLAN SU PROPIA SALIDA.
+     *
+     */
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            if (event.key !== 'Escape') {
+                return;
+            }
+
+
+            /*
+             * SI ESTA PÁGINA TIENE UN FORMULARIO
+             * PROTEGIDO CONTRA CAMBIOS SIN GUARDAR,
+             * DEJAR QUE ESE FORMULARIO CONTROLE ESC.
+             */
+
+            if (
+                typeof formularioModificado !== 'undefined'
+            ) {
+
+                return;
+
+            }
+
+
+            event.preventDefault();
+
+
+            if (window.history.length > 1) {
+
+                window.history.back();
+
+            }
+
+        }
+    );
+</script>
+
 </body>
 
 </html>

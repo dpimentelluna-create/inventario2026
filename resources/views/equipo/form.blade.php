@@ -1,421 +1,615 @@
 <div class="row padding-1 p-1">
 
-    {{-- ===================================================== --}}
-    {{-- PARTE 1 - DATOS DEL EQUIPO --}}
-    {{-- ===================================================== --}}
-
-    <div class="col-12">
-
-        <div class="card mb-4">
-
-            <div class="card-header encabezado-verde">
-                <h5 class="mb-0">
-                    <i class="bi bi-pc-display"></i>
-                    PARTE 1 — DATOS DEL EQUIPO
-                </h5>
-            </div>
-
-            <div class="card-body">
-
-                <div class="row">
-
-                    {{-- TIPO DE EQUIPO --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="buscar_tipo_equipo" class="form-label">
-                            TIPO DE EQUIPO
-                            <span class="text-danger">*</span>
-                        </label>
-
-                        <input type="hidden"
-                            name="tipo_equipo_id"
-                            id="tipo_equipo_id"
-                            value="{{ old('tipo_equipo_id', $equipo->tipo_equipo_id ?? '') }}">
-
-                        <div class="position-relative">
-                            <input
-                                type="text"
-                                id="buscar_tipo_equipo"
-                                class="form-control campo-mayusculas @error('tipo_equipo_id') is-invalid @enderror"
-                                placeholder="Escriba o seleccione..."
-                                autocomplete="off"
-                                value="{{ old('buscar_tipo_equipo', $equipo->tipoEquipo->nombre ?? '') }}"
-                            >
-
-                            <div
-                                id="lista_tipos_equipo"
-                                class="position-absolute w-100 bg-white border rounded shadow-sm"
-                                style="display: none; z-index: 1000; max-height: 220px; overflow-y: auto;"
-                            ></div>
-                        </div>
-
-                        <div id="wrap_nuevo_tipo_equipo" class="mt-2" style="display: none;">
-                            <label for="nuevo_tipo_equipo" class="form-label">
-                                ESPECIFIQUE EL TIPO
-                            </label>
-                            <input
-                                type="text"
-                                name="nuevo_tipo_equipo"
-                                id="nuevo_tipo_equipo"
-                                class="form-control campo-mayusculas"
-                                placeholder="Ej. PROYECTOR"
-                                value="{{ old('nuevo_tipo_equipo') }}"
-                            >
-                        </div>
-
-                        @error('tipo_equipo_id')
-                            <div class="invalid-feedback d-block">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-                    </div>
-
-
-                    {{-- NÚMERO DE SERIE --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="num_serie" class="form-label">
-                            NUMERO DE SERIE
-                        </label>
-
-                        <input type="text" name="num_serie"
-                            class="form-control campo-mayusculas @error('num_serie') is-invalid @enderror"
-                            value="{{ old('num_serie', $equipo?->num_serie) }}" id="num_serie"
-                            placeholder="Ingrese el número de serie">
-
-                        @error('num_serie')
-                            <div class="invalid-feedback">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- MARCA --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="marca" class="form-label">
-                            MARCA
-                        </label>
-
-                        <input type="text" name="marca" class="form-control campo-mayusculas  @error('marca') is-invalid @enderror"
-                            value="{{ old('marca', $equipo?->marca) }}" id="marca" placeholder="Ingrese la marca">
-
-                        @error('marca')
-                            <div class="invalid-feedback">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- MODELO --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="modelo" class="form-label">
-                            MOELO
-                        </label>
-
-                        <input type="text" name="modelo" class="form-control campo-mayusculas @error('modelo') is-invalid @enderror"
-                            value="{{ old('modelo', $equipo?->modelo) }}" id="modelo" placeholder="Ingrese el modelo">
-
-                        @error('modelo')
-                            <div class="invalid-feedback">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- UBICACIÓN --}}
-                    <div class="col-12 col-lg-6 mb-3">
-
-                        <label for="ubicacion_id" class="form-label">
-                            UBICACION
-                        </label>
-
-                        <select name="ubicacion_id" class="form-select @error('ubicacion_id') is-invalid @enderror"
-                            id="ubicacion_id">
-
-                            <option value="">
-                                Seleccione una Ubicación
-                            </option>
-
-                            @foreach($ubicacione as $id => $nombre)
-
-                                <option value="{{ $id }}" {{ old('ubicacion_id', $equipo->ubicacion_id ?? '') == $id ? 'selected' : '' }}>
-                                    {{ $nombre }}
-                                </option>
-
-                            @endforeach
-
-                        </select>
-
-                        @error('ubicacion_id')
-                            <div class="invalid-feedback">
-                                <strong>{{ $message }}</strong>
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                        {{-- FECHA DE REGISTRO --}}
-                        <div class="col-12 col-lg-6 mb-3">
-                            <label for="fecha_registro" class="form-label">Fecha de Registro</label>
-                            <div class="d-flex gap-2">
-                                <input type="date" name="fecha_registro" id="fecha_registro" class="form-control"
-                                    value="{{ old('fecha_registro', $equipo->fecha_registro ?? now()->format('Y-m-d')) }}">
-                                <button type="button" id="btn_fecha_hoy" class="btn btn-outline-success">HOY</button>
-                            </div>
-                        </div>
-                        </div> {{-- row --}}
-                </div> {{-- card-body --}}
-            </div> {{-- card parte 1 --}}
-
-        {{-- ===================================================== --}}
-        {{-- PARTE 2 - ESPECIFICACIONES --}}
-        {{-- ===================================================== --}}
-
-        <div class="card mb-4">
-
-            <div class="card-header encabezado-verde">
-                <h5 class="mb-0">
-                    <i class="bi bi-cpu"></i>
-                    PARTE 2 — ESPECIFICACIONES
-                </h5>
-            </div>
-
-            <div class="card-body">
-
-                {{-- MENSAJE INICIAL --}}
-                <div id="mensaje-especificaciones" class="text-muted">
-                    <i class="bi bi-info-circle"></i>
-                    Seleccione primero el tipo de equipo para ingresar sus especificaciones.
-                </div>
-
-                {{-- ================================================= --}}
-                {{-- ESPECIFICACIONES PARA LAPTOP --}}
-                {{-- ================================================= --}}
-
-                <div id="especificaciones-laptop" style="display: none;">
-
-                    <h6 class="fw-bold text-success mb-3 text-wrap">
-                        <i class="bi bi-laptop"></i>
-                        Especificaciones de Laptop
-                    </h6>
-
-                    <div class="row">
-
-                        {{-- PROCESADOR --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="procesador" class="form-label">
-                                Procesador
-                            </label>
-
-                            <input type="text" name="procesador" id="procesador" class="form-control campo-mayusculas"
-                                placeholder="Ej. Intel Core i5"
-                                value="{{ old('procesador') }}">
-                        </div>
-
-
-                        {{-- RAM --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="ram" class="form-label">
-                                Memoria RAM
-                            </label>
-
-                            <input type="text" name="ram" id="ram" class="form-control campo-mayusculas" placeholder="Ej. 8GB DDR4"
-                                value="{{ old('ram', $equipo->especificacionesLaptops?->ram) }}">
-
-                        </div>
-
-
-                        {{-- DISCO DURO --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="disco_duro" class="form-label">
-                                Disco Duro
-                            </label>
-
-                            <input type="text" name="disco_duro" id="disco_duro" class="form-control campo-mayusculas"
-                                placeholder="Ej. SSD 512GB"
-                                value="{{ old('disco_duro', $equipo->especificacionesLaptops?->disco_duro) }}">
-
-                        </div>
-
-
-                        {{-- COLOR --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="color_laptop" class="form-label">
-                                Color
-                            </label>
-
-                            <input type="text" name="color_laptop" id="color_laptop" class="form-control campo-mayusculas"
-                                placeholder="Ej. Negro"
-                                value="{{ old('color_laptop', $equipo->especificacionesLaptops?->color) }}">
-
-                        </div>
-
-
-                        {{-- ESTADO --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="estado_laptop" class="form-label">
-                                Estado
-                            </label>
-
-                            <select name="estado_laptop" id="estado_laptop" class="form-select">
-                                <option value="REGULAR" {{ old('estado_laptop', 'REGULAR') === 'REGULAR' ? 'selected' : '' }}>
-                                    REGULAR
-                                </option>
-                            
-                                <option value="BUENO" {{ old('estado_laptop') === 'BUENO' ? 'selected' : '' }}>
-                                    BUENO
-                                </option>
-                            
-                                <option value="MALOGRADO" {{ old('estado_laptop') === 'MALOGRADO' ? 'selected' : '' }}>
-                                    MALOGRADO
-                                </option>
-                            </select>
-
-                        </div>
-
-
-                        {{-- OBSERVACIONES --}}
-                        <div class="col-md-12 mb-3">
-
-                            <label for="observaciones_laptop" class="form-label">
-                                Observaciones
-                            </label>
-
-                            <textarea name="observaciones_laptop" id="observaciones_laptop" class="form-control campo-mayusculas"
-                                rows="3"
-                                placeholder="Observaciones de la laptop">{{ old('observaciones_laptop', $equipo->especificacionesLaptops?->observaciones) }}</textarea>
-
-                        </div>
-                    </div>
-                </div>
-
-
-                {{-- ================================================= --}}
-                {{-- ESPECIFICACIONES PARA OTROS EQUIPOS --}}
-                {{-- ================================================= --}}
-
-                <div id="especificaciones-equipo" style="display: none;">
-
-                    <h6 class="fw-bold text-success mb-3 text-wrap">
-                        <i class="bi bi-box"></i>
-                        Especificaciones del Equipo
-                    </h6>
-
-                    <div class="row">
-
-                        {{-- DESCRIPCIÓN --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="descripcion" class="form-label">
-                                Descripción
-                            </label>
-
-                            <input type="text" name="descripcion" id="descripcion" class="form-control campo-mayusculas"
-                                placeholder="Descripción del equipo"
-                                value="{{ old('descripcion', $equipo->especificacionesEquipo?->descripcion) }}">
-
-                        </div>
-
-
-                        {{-- COLOR --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="color_equipo" class="form-label">
-                                Color
-                            </label>
-
-                            <input type="text" name="color_equipo" id="color_equipo" class="form-control campo-mayusculas"
-                                placeholder="Ej. Negro"
-                                value="{{ old('color_equipo', $equipo->especificacionesEquipo?->color) }}">
-
-                        </div>
-
-
-                        {{-- ESTADO --}}
-                        <div class="col-md-6 mb-3">
-
-                            <label for="estado_equipo" class="form-label">
-                                Estado
-                            </label>
-
-                            <select name="estado_equipo" id="estado_equipo" class="form-select">
-                                <option value="REGULAR" {{ old('estado_equipo', 'REGULAR') === 'REGULAR' ? 'selected' : '' }}>
-                                    REGULAR
-                                </option>
-                            
-                                <option value="BUENO" {{ old('estado_equipo') === 'BUENO' ? 'selected' : '' }}>
-                                    BUENO
-                                </option>
-                            
-                                <option value="MALOGRADO" {{ old('estado_equipo') === 'MALOGRADO' ? 'selected' : '' }}>
-                                    MALOGRADO
-                                </option>
-                            </select>
-
-                        </div>
-
-
-                        {{-- OBSERVACIONES --}}
-                        <div class="col-md-12 mb-3">
-
-                            <label for="observaciones_equipo" class="form-label">
-                                Observaciones
-                            </label>
-
-                            <textarea name="observaciones_equipo" id="observaciones_equipo" class="form-control campo-mayusculas"
-                                rows="3"
-                                placeholder="Observaciones del equipo">{{ old('observaciones_equipo', $equipo->especificacionesEquipo?->observaciones) }}</textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        {{-- ===================================================== --}}
-{{-- PARTE 3 - ACCESORIOS --}}
+{{-- ===================================================== --}}
+{{-- PARTE 1 — DATOS DEL EQUIPO --}}
 {{-- ===================================================== --}}
 
-<div class="col-md-12 mt-4">
+<div class="col-12">
 
-    <div class="card border-body">
+    <div class="card mb-4">
 
         <div class="card-header encabezado-verde">
             <h5 class="mb-0">
-                <i class="bi bi-tools"></i>
-                PARTE 3 - ACCESORIOS DEL EQUIPO
+                <i class="bi bi-pc-display"></i>
+                PARTE 1 — DATOS DEL EQUIPO
             </h5>
         </div>
 
         <div class="card-body">
 
-            {{-- MENSAJE CUANDO NO HAY ACCESORIOS --}}
-            <div id="sin-accesorios" class="text-center text-muted py-3">
+            <div class="row">
+
+                {{-- ================================================= --}}
+                {{-- TIPO DE EQUIPO --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="buscar_tipo_equipo" class="form-label">
+                        TIPO DE EQUIPO
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    {{-- ID REAL --}}
+                    <input
+                        type="hidden"
+                        name="tipo_equipo_id"
+                        id="tipo_equipo_id"
+                        value="{{ old('tipo_equipo_id', $equipo->tipo_equipo_id ?? '') }}"
+                    >
+
+                    {{-- BUSCADOR --}}
+                    <div class="position-relative">
+
+                        <input
+                            type="text"
+                            id="buscar_tipo_equipo"
+                            class="form-control campo-mayusculas @error('tipo_equipo_id') is-invalid @enderror"
+                            placeholder="ESCRIBA O SELECCIONE..."
+                            autocomplete="off"
+                            value="{{ old('buscar_tipo_equipo', $equipo->tipoEquipo->nombre ?? '') }}"
+                            required
+                        >
+
+                        {{-- RESULTADOS --}}
+                        <div
+                            id="lista_tipos_equipo"
+                            class="position-absolute w-100 bg-white border rounded shadow-sm"
+                            style="
+                                display: none;
+                                z-index: 1050;
+                                max-height: 220px;
+                                overflow-y: auto;
+                            "
+                        ></div>
+
+                    </div>
+
+                    {{-- NUEVO TIPO --}}
+                    <div
+                        id="wrap_nuevo_tipo_equipo"
+                        class="mt-2"
+                        style="display: none;"
+                    >
+
+                        <label for="nuevo_tipo_equipo" class="form-label">
+                            ESPECIFIQUE EL TIPO
+                        </label>
+
+                        <input
+                            type="text"
+                            name="nuevo_tipo_equipo"
+                            id="nuevo_tipo_equipo"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. PROYECTOR"
+                            value="{{ old('nuevo_tipo_equipo') }}"
+                            maxlength="100"
+                        >
+
+                    </div>
+
+                    @error('tipo_equipo_id')
+                        <div class="invalid-feedback d-block">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+
+                {{-- ================================================= --}}
+                {{-- NÚMERO DE SERIE --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="num_serie" class="form-label">
+                        NÚMERO DE SERIE
+                    </label>
+
+                    <input
+                        type="text"
+                        name="num_serie"
+                        id="num_serie"
+                        class="form-control campo-mayusculas @error('num_serie') is-invalid @enderror"
+                        value="{{ old('num_serie', $equipo->num_serie ?? '') }}"
+                        placeholder="INGRESE EL NÚMERO DE SERIE"
+                    >
+
+                    @error('num_serie')
+                        <div class="invalid-feedback">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+
+                {{-- ================================================= --}}
+                {{-- MARCA --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="marca" class="form-label">
+                        MARCA
+                    </label>
+
+                    <input
+                        type="text"
+                        name="marca"
+                        id="marca"
+                        class="form-control campo-mayusculas @error('marca') is-invalid @enderror"
+                        value="{{ old('marca', $equipo->marca ?? '') }}"
+                        placeholder="INGRESE LA MARCA"
+                    >
+
+                    @error('marca')
+                        <div class="invalid-feedback">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+
+                {{-- ================================================= --}}
+                {{-- MODELO --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="modelo" class="form-label">
+                        MODELO
+                    </label>
+
+                    <input
+                        type="text"
+                        name="modelo"
+                        id="modelo"
+                        class="form-control campo-mayusculas @error('modelo') is-invalid @enderror"
+                        value="{{ old('modelo', $equipo->modelo ?? '') }}"
+                        placeholder="INGRESE EL MODELO"
+                    >
+
+                    @error('modelo')
+                        <div class="invalid-feedback">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+
+                {{-- ================================================= --}}
+                {{-- UBICACIÓN --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="ubicacion_id" class="form-label">
+                        UBICACIÓN
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <select
+                        name="ubicacion_id"
+                        id="ubicacion_id"
+                        class="form-select @error('ubicacion_id') is-invalid @enderror"
+                        required
+                    >
+
+                        <option value="">
+                            SELECCIONE UNA UBICACIÓN
+                        </option>
+
+                        @foreach($ubicacione as $id => $nombre)
+
+                            <option
+                                value="{{ $id }}"
+                                {{ old('ubicacion_id', $equipo->ubicacion_id ?? '') == $id ? 'selected' : '' }}
+                            >
+                                {{ strtoupper($nombre) }}
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                    @error('ubicacion_id')
+                        <div class="invalid-feedback">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+
+                {{-- ================================================= --}}
+                {{-- FECHA DE REGISTRO --}}
+                {{-- ================================================= --}}
+
+                <div class="col-12 col-lg-6 mb-3">
+
+                    <label for="fecha_registro" class="form-label">
+                        FECHA DE REGISTRO
+                        <span class="text-danger">*</span>
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            type="date"
+                            name="fecha_registro"
+                            id="fecha_registro"
+                            class="form-control @error('fecha_registro') is-invalid @enderror"
+                            value="{{ old(
+                                'fecha_registro',
+                                $equipo->fecha_registro
+                                ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
+                                : now()->format('Y-m-d')
+                            ) }}"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="btn_fecha_hoy"
+                            class="btn btn-outline-success"
+                        >
+                            <i class="bi bi-calendar-check"></i>
+                            HOY
+                        </button>
+
+                    </div>
+
+                    @error('fecha_registro')
+                        <div class="invalid-feedback d-block">
+                            <strong>{{ $message }}</strong>
+                        </div>
+                    @enderror
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ===================================================== --}}
+    {{-- PARTE 2 — ESPECIFICACIONES --}}
+    {{-- ===================================================== --}}
+
+    <div class="card mb-4">
+
+        <div class="card-header encabezado-verde">
+
+            <h5 class="mb-0">
+                <i class="bi bi-cpu"></i>
+                PARTE 2 — ESPECIFICACIONES
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {{-- MENSAJE INICIAL --}}
+            <div
+                id="mensaje-especificaciones"
+                class="text-muted"
+            >
                 <i class="bi bi-info-circle"></i>
-                Este equipo no tiene accesorios registrados.
+                SELECCIONE PRIMERO EL TIPO DE EQUIPO PARA INGRESAR SUS ESPECIFICACIONES.
             </div>
 
 
-            {{-- CONTENEDOR DE ACCESORIOS --}}
+            {{-- ================================================= --}}
+            {{-- ESPECIFICACIONES PARA LAPTOP --}}
+            {{-- ================================================= --}}
+
+            <div
+                id="especificaciones-laptop"
+                style="display: none;"
+            >
+
+                <h6 class="fw-bold text-success mb-3 text-wrap">
+                    <i class="bi bi-laptop"></i>
+                    ESPECIFICACIONES DE LAPTOP
+                </h6>
+
+                <div class="row">
+
+                    {{-- PROCESADOR --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="procesador" class="form-label">
+                            PROCESADOR
+                        </label>
+
+                        <input
+                            type="text"
+                            name="procesador"
+                            id="procesador"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. INTEL CORE I5"
+                            value="{{ old('procesador', $equipo->especificacionesLaptops?->procesador ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- RAM --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="ram" class="form-label">
+                            MEMORIA RAM
+                        </label>
+
+                        <input
+                            type="text"
+                            name="ram"
+                            id="ram"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. 8GB DDR4"
+                            value="{{ old('ram', $equipo->especificacionesLaptops?->ram ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- DISCO DURO --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="disco_duro" class="form-label">
+                            DISCO DURO
+                        </label>
+
+                        <input
+                            type="text"
+                            name="disco_duro"
+                            id="disco_duro"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. SSD 512GB"
+                            value="{{ old('disco_duro', $equipo->especificacionesLaptops?->disco_duro ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- COLOR --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="color_laptop" class="form-label">
+                            COLOR
+                        </label>
+
+                        <input
+                            type="text"
+                            name="color_laptop"
+                            id="color_laptop"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. NEGRO"
+                            value="{{ old('color_laptop', $equipo->especificacionesLaptops?->color ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- ESTADO --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="estado_laptop" class="form-label">
+                            ESTADO
+                        </label>
+
+                        <select
+                            name="estado_laptop"
+                            id="estado_laptop"
+                            class="form-select"
+                        >
+
+                            <option
+                                value="REGULAR"
+                                {{ old('estado_laptop', $equipo->especificacionesLaptops?->estado ?? 'REGULAR') === 'REGULAR' ? 'selected' : '' }}
+                            >
+                                REGULAR
+                            </option>
+
+                            <option
+                                value="BUENO"
+                                {{ old('estado_laptop', $equipo->especificacionesLaptops?->estado ?? '') === 'BUENO' ? 'selected' : '' }}
+                            >
+                                BUENO
+                            </option>
+
+                            <option
+                                value="MALOGRADO"
+                                {{ old('estado_laptop', $equipo->especificacionesLaptops?->estado ?? '') === 'MALOGRADO' ? 'selected' : '' }}
+                            >
+                                MALOGRADO
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- OBSERVACIONES --}}
+                    <div class="col-md-12 mb-3">
+
+                        <label for="observaciones_laptop" class="form-label">
+                            OBSERVACIONES
+                        </label>
+
+                        <textarea
+                            name="observaciones_laptop"
+                            id="observaciones_laptop"
+                            class="form-control campo-mayusculas"
+                            rows="3"
+                            placeholder="OBSERVACIONES DE LA LAPTOP"
+                        >{{ old('observaciones_laptop', $equipo->especificacionesLaptops?->observaciones ?? '') }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            {{-- ================================================= --}}
+            {{-- ESPECIFICACIONES PARA OTROS EQUIPOS --}}
+            {{-- ================================================= --}}
+
+            <div
+                id="especificaciones-equipo"
+                style="display: none;"
+            >
+
+                <h6 class="fw-bold text-success mb-3 text-wrap">
+                    <i class="bi bi-box"></i>
+                    ESPECIFICACIONES DEL EQUIPO
+                </h6>
+
+                <div class="row">
+
+                    {{-- DESCRIPCIÓN --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="descripcion" class="form-label">
+                            DESCRIPCIÓN
+                        </label>
+
+                        <input
+                            type="text"
+                            name="descripcion"
+                            id="descripcion"
+                            class="form-control campo-mayusculas"
+                            placeholder="DESCRIPCIÓN DEL EQUIPO"
+                            value="{{ old('descripcion', $equipo->especificacionesEquipo?->descripcion ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- COLOR --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="color_equipo" class="form-label">
+                            COLOR
+                        </label>
+
+                        <input
+                            type="text"
+                            name="color_equipo"
+                            id="color_equipo"
+                            class="form-control campo-mayusculas"
+                            placeholder="EJ. NEGRO"
+                            value="{{ old('color_equipo', $equipo->especificacionesEquipo?->color ?? '') }}"
+                        >
+
+                    </div>
+
+
+                    {{-- ESTADO --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="estado_equipo" class="form-label">
+                            ESTADO
+                        </label>
+
+                        <select
+                            name="estado_equipo"
+                            id="estado_equipo"
+                            class="form-select"
+                        >
+
+                            <option
+                                value="REGULAR"
+                                {{ old('estado_equipo', $equipo->especificacionesEquipo?->estado ?? 'REGULAR') === 'REGULAR' ? 'selected' : '' }}
+                            >
+                                REGULAR
+                            </option>
+
+                            <option
+                                value="BUENO"
+                                {{ old('estado_equipo', $equipo->especificacionesEquipo?->estado ?? '') === 'BUENO' ? 'selected' : '' }}
+                            >
+                                BUENO
+                            </option>
+
+                            <option
+                                value="MALOGRADO"
+                                {{ old('estado_equipo', $equipo->especificacionesEquipo?->estado ?? '') === 'MALOGRADO' ? 'selected' : '' }}
+                            >
+                                MALOGRADO
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    {{-- OBSERVACIONES --}}
+                    <div class="col-md-12 mb-3">
+
+                        <label for="observaciones_equipo" class="form-label">
+                            OBSERVACIONES
+                        </label>
+
+                        <textarea
+                            name="observaciones_equipo"
+                            id="observaciones_equipo"
+                            class="form-control campo-mayusculas"
+                            rows="3"
+                            placeholder="OBSERVACIONES DEL EQUIPO"
+                        >{{ old('observaciones_equipo', $equipo->especificacionesEquipo?->observaciones ?? '') }}</textarea>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- ===================================================== --}}
+    {{-- PARTE 3 — ACCESORIOS --}}
+    {{-- ===================================================== --}}
+
+    <div class="card mb-4">
+
+        <div class="card-header encabezado-verde">
+
+            <h5 class="mb-0">
+                <i class="bi bi-tools"></i>
+                PARTE 3 — ACCESORIOS DEL EQUIPO
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            {{-- MENSAJE SIN ACCESORIOS --}}
+            <div
+                id="sin-accesorios"
+                class="text-center text-muted py-3"
+            >
+                <i class="bi bi-info-circle"></i>
+                ESTE EQUIPO NO TIENE ACCESORIOS REGISTRADOS.
+            </div>
+
+
+            {{-- CONTENEDOR --}}
             <div id="accesorios-container">
 
-                {{-- ===================================================== --}}
+                {{-- ================================================= --}}
                 {{-- ACCESORIOS EXISTENTES --}}
-                {{-- ===================================================== --}}
+                {{-- ================================================= --}}
 
                 @if(isset($equipo->accesoriosEquipos))
 
@@ -423,7 +617,7 @@
 
                         <div class="accesorio-item border rounded p-3 mb-3">
 
-                            {{-- ID DEL ACCESORIO EXISTENTE --}}
+                            {{-- ID --}}
                             <input
                                 type="hidden"
                                 name="accesorios[{{ $indice }}][id]"
@@ -432,14 +626,11 @@
 
                             <div class="row">
 
-                                {{-- ================================================= --}}
                                 {{-- TIPO --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-md-2 mb-3">
 
                                     <label class="form-label">
-                                        Tipo
+                                        TIPO
                                     </label>
 
                                     <div class="position-relative">
@@ -449,38 +640,38 @@
                                             name="accesorios[{{ $indice }}][tipo]"
                                             class="form-control tipo-accesorio campo-mayusculas"
                                             value="{{ $accesorio->tipo }}"
-                                            placeholder="Escriba o seleccione..."
+                                            placeholder="ESCRIBA O SELECCIONE..."
                                             autocomplete="off"
                                         >
 
-                                        {{-- LISTA DE RESULTADOS --}}
                                         <div
                                             class="lista-tipos-accesorio position-absolute w-100 bg-white border rounded shadow-sm"
-                                            style="display: none; z-index: 1000;"
-                                        >
-                                        </div>
+                                            style="
+                                                display: none;
+                                                z-index: 1050;
+                                                max-height: 220px;
+                                                overflow-y: auto;
+                                            "
+                                        ></div>
 
                                     </div>
 
 
-                                    {{-- ================================================= --}}
                                     {{-- TIPO PERSONALIZADO --}}
-                                    {{-- ================================================= --}}
-
                                     <div
                                         class="tipo-personalizado-container mt-2"
                                         style="display: none;"
                                     >
 
                                         <label class="form-label">
-                                            Especifique el tipo
+                                            ESPECIFIQUE EL TIPO
                                         </label>
 
                                         <input
                                             type="text"
                                             name="accesorios[{{ $indice }}][tipo_personalizado]"
                                             class="form-control tipo-personalizado campo-mayusculas"
-                                            placeholder="Ej. Cable HDMI"
+                                            placeholder="EJ. CABLE HDMI"
                                         >
 
                                     </div>
@@ -488,14 +679,11 @@
                                 </div>
 
 
-                                {{-- ================================================= --}}
                                 {{-- MARCA --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-md-2 mb-3">
 
                                     <label class="form-label">
-                                        Marca
+                                        MARCA
                                     </label>
 
                                     <input
@@ -503,20 +691,17 @@
                                         name="accesorios[{{ $indice }}][marca]"
                                         class="form-control campo-mayusculas"
                                         value="{{ $accesorio->marca }}"
-                                        placeholder="Marca"
+                                        placeholder="MARCA"
                                     >
 
                                 </div>
 
 
-                                {{-- ================================================= --}}
                                 {{-- NÚMERO DE SERIE --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-md-2 mb-3">
 
                                     <label class="form-label">
-                                        N.º de Serie
+                                        NÚMERO DE SERIE
                                     </label>
 
                                     <input
@@ -524,20 +709,17 @@
                                         name="accesorios[{{ $indice }}][num_serie]"
                                         class="form-control campo-mayusculas"
                                         value="{{ $accesorio->num_serie }}"
-                                        placeholder="N.º Serie"
+                                        placeholder="N.º SERIE"
                                     >
 
                                 </div>
 
 
-                                {{-- ================================================= --}}
                                 {{-- ESTADO --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-md-2 mb-3">
 
                                     <label class="form-label">
-                                        Estado
+                                        ESTADO
                                     </label>
 
                                     <select
@@ -571,33 +753,31 @@
                                 </div>
 
 
-                                {{-- ================================================= --}}
                                 {{-- OBSERVACIONES --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-md-3 mb-3">
 
                                     <label class="form-label">
-                                        Observaciones
+                                        OBSERVACIONES
                                     </label>
 
                                     <textarea
                                         name="accesorios[{{ $indice }}][observaciones]"
-                                        class="form-control"
+                                        class="form-control campo-mayusculas"
                                         rows="1"
-                                        placeholder="Observaciones campo-mayusculas"
+                                        placeholder="OBSERVACIONES"
                                     >{{ $accesorio->observaciones }}</textarea>
 
                                 </div>
 
 
-                                {{-- ================================================= --}}
                                 {{-- ELIMINAR --}}
-                                {{-- ================================================= --}}
-
                                 <div class="col-12 col-md-1 mb-3 d-flex align-items-end justify-content-center">
 
-                                    <button type="button" class="btn btn-danger btn-eliminar-accesorio" title="Eliminar accesorio">
+                                    <button
+                                        type="button"
+                                        class="btn btn-danger btn-eliminar-accesorio"
+                                        title="ELIMINAR ACCESORIO"
+                                    >
                                         <i class="bi bi-trash"></i>
                                     </button>
 
@@ -614,10 +794,7 @@
             </div>
 
 
-            {{-- ===================================================== --}}
             {{-- BOTÓN AGREGAR --}}
-            {{-- ===================================================== --}}
-
             <div class="text-center mt-3">
 
                 <button
@@ -626,7 +803,7 @@
                     class="btn btn-success"
                 >
                     <i class="bi bi-plus-circle"></i>
-                    Agregar accesorio
+                    AGREGAR ACCESORIO
                 </button>
 
             </div>
@@ -635,32 +812,79 @@
 
     </div>
 
-</div>
 
-        {{-- ===================================================== --}}
-        {{-- BOTONES --}}
-        {{-- ===================================================== --}}
+    {{-- ===================================================== --}}
+    {{-- BOTONES --}}
+    {{-- ===================================================== --}}
 
-        <div class="col-md-12 mt-2 mb-3">
+    <div class="col-md-12 mt-2 mb-3">
 
-            <button type="submit" class="btn btn-success">
+        <div class="d-flex justify-content-end gap-2">
 
-                <i class="bi bi-check-circle"></i>
-                Guardar
-            </button>
-
-
-            <a href="{{ route('equipos.index') }}" class="btn btn-secondary">
-
-                <i class="bi bi-arrow-left"></i>
-                Volver
+            <a
+                href="{{ route('equipos.index') }}"
+                class="btn btn-secondary btn-salir-form"
+            >
+                <i class="bi bi-x-circle"></i>
+                CANCELAR
             </a>
+
+            <button
+                type="submit"
+                class="btn btn-success"
+                id="btn_guardar_equipo"
+            >
+                <i class="bi bi-save"></i>
+
+                {{ $equipo->exists ? 'ACTUALIZAR EQUIPO' : 'GUARDAR EQUIPO' }}
+
+            </button>
 
         </div>
 
+    </div>
+
+</div>
+```
+
+</div>
+
+{{-- ===================================================== --}}
+{{-- TOAST DE NOTIFICACIONES --}}
+{{-- ===================================================== --}}
+
+<div
+    class="toast-container position-fixed top-0 end-0 p-3"
+    style="z-index: 1090;"
+>
+
+```
+<div
+    id="toast_equipo"
+    class="toast align-items-center border-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+>
+
+    <div class="d-flex">
+
+        <div
+            class="toast-body"
+            id="toast_equipo_texto"
+        ></div>
+
+        <button
+            type="button"
+            class="btn-close btn-close-white me-2 m-auto"
+            data-bs-dismiss="toast"
+        ></button>
 
     </div>
 
+</div>
+
+</div>
 
     <script>
         
@@ -1109,20 +1333,319 @@
         });
     });
 
-    const form = inputTipoEq ? inputTipoEq.closest('form') : null;
-    if (form) {
-        form.addEventListener('submit', function () {
-            idsBloqueados.forEach(function (id) {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.disabled = false;
-                    el.readOnly = false;
-                }
-            });
-        });
-    }
+            const form = inputTipoEq ? inputTipoEq.closest('form') : null;
+                localStorage.setItem(
+                    'equipos_filtros_nuevo_equipo',
+                    '1'
+                );
+
+                form.addEventListener('submit', function () {
+                    idsBloqueados.forEach(function (id) {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.disabled = false;
+                            el.readOnly = false;
+                        }
+                    });
+                });
 
     mostrarEspecificaciones();
+
+    /*
+ * =========================================================
+ * PROTECCIÓN CONTRA CAMBIOS SIN GUARDAR
+ * =========================================================
+ *
+ * FUNCIONA PARA:
+ * - CREAR EQUIPO
+ * - EDITAR EQUIPO
+ * - BOTÓN VOLVER
+ * - TECLA ESC
+ *
+ * SI EXISTEN CAMBIOS:
+ *
+ * "CAMBIOS SIN GUARDAR"
+ * "¿DESEA SALIR?"
+ *
+ */
+
+
+/*
+ * =========================================================
+ * VARIABLES
+ * =========================================================
+ */
+
+let formularioModificado = false;
+let formularioEnviado = false;
+
+
+/*
+ * OBTENER EL FORMULARIO
+ */
+
+const formularioEquipo =
+    inputTipoEq
+        ? inputTipoEq.closest('form')
+        : null;
+
+
+/*
+ * =========================================================
+ * MARCAR FORMULARIO COMO MODIFICADO
+ * =========================================================
+ */
+
+if (formularioEquipo) {
+
+    /*
+     * INPUT
+     *
+     * Detecta escritura en:
+     * - textos
+     * - textarea
+     * - campos dinámicos
+     */
+
+    formularioEquipo.addEventListener(
+        'input',
+        function () {
+
+            formularioModificado = true;
+
+        }
+    );
+
+
+    /*
+     * CHANGE
+     *
+     * Detecta:
+     * - SELECT
+     * - FECHA
+     * - cambios realizados mediante selección
+     */
+
+    formularioEquipo.addEventListener(
+        'change',
+        function () {
+
+            formularioModificado = true;
+
+        }
+    );
+
+
+    /*
+     * SUBMIT
+     *
+     * Si se presiona GUARDAR,
+     * ya no debemos mostrar "Cambios sin guardar".
+     */
+
+    formularioEquipo.addEventListener(
+        'submit',
+        function () {
+
+            formularioEnviado = true;
+            formularioModificado = false;
+
+        }
+    );
+
+}
+
+
+/*
+ * =========================================================
+ * FUNCIÓN PARA MOSTRAR EL AVISO
+ * =========================================================
+ */
+
+function confirmarSalidaEquipo() {
+
+    /*
+     * SI NO HAY CAMBIOS,
+     * SALIR DIRECTAMENTE.
+     */
+
+    if (!formularioModificado) {
+
+        return true;
+
+    }
+
+
+    /*
+     * AVISO DE CONFIRMACIÓN
+     *
+     * Este mensaje utiliza el cuadro de confirmación
+     * nativo del navegador.
+     */
+
+    return window.confirm(
+        'CAMBIOS SIN GUARDAR\n\n' +
+        '¿DESEA SALIR?\n\n' +
+        'Los cambios realizados no se guardarán.'
+    );
+
+}
+
+
+/*
+ * =========================================================
+ * BOTÓN VOLVER
+ * =========================================================
+ */
+
+document
+    .querySelectorAll(
+        'a[href*="equipos"]'
+    )
+    .forEach(function (enlace) {
+
+        /*
+         * SOLAMENTE CONTROLAR EL BOTÓN
+         * QUE LLEVA AL INDEX.
+         */
+
+        const texto =
+            enlace.textContent
+                .trim()
+                .toUpperCase();
+
+        if (texto !== 'VOLVER') {
+            return;
+        }
+
+
+        enlace.addEventListener(
+            'click',
+            function (event) {
+
+                /*
+                 * SI NO HAY CAMBIOS,
+                 * DEJAR CONTINUAR NORMALMENTE.
+                 */
+
+                if (!formularioModificado) {
+                    return;
+                }
+
+
+                /*
+                 * DETENER LA NAVEGACIÓN
+                 * HASTA QUE EL USUARIO DECIDA.
+                 */
+
+                event.preventDefault();
+
+
+                if (confirmarSalidaEquipo()) {
+
+                    formularioModificado = false;
+
+                    window.location.href =
+                        enlace.href;
+
+                }
+
+            }
+        );
+
+    });
+
+
+/*
+ * =========================================================
+ * ATAJO ESC
+ * =========================================================
+ *
+ * ESC = RETROCEDER
+ *
+ * PERO SI HAY CAMBIOS:
+ *
+ * ESC
+ * ↓
+ * CAMBIOS SIN GUARDAR
+ * ↓
+ * ¿DESEA SALIR?
+ *
+ */
+
+document.addEventListener(
+    'keydown',
+    function (event) {
+
+        /*
+         * SOLO ESC
+         */
+
+        if (event.key !== 'Escape') {
+            return;
+        }
+
+
+        /*
+         * SI ESTAMOS DENTRO DE UNA LISTA/DROPDOWN
+         * DEL FORMULARIO, NO INTERFERIR.
+         *
+         * El comportamiento principal será
+         * controlar la salida del formulario.
+         */
+
+        event.preventDefault();
+
+
+        /*
+         * SI EL FORMULARIO YA SE ENVIÓ,
+         * NO HACER NADA.
+         */
+
+        if (formularioEnviado) {
+            return;
+        }
+
+
+        /*
+         * SI HAY CAMBIOS,
+         * MOSTRAR CONFIRMACIÓN.
+         */
+
+        if (formularioModificado) {
+
+            const salir =
+                confirmarSalidaEquipo();
+
+
+            if (!salir) {
+                return;
+            }
+
+        }
+
+
+        /*
+         * MARCAR COMO SIN CAMBIOS
+         * ANTES DE RETROCEDER.
+         */
+
+        formularioModificado = false;
+
+
+        /*
+         * RETROCEDER.
+         */
+
+        if (window.history.length > 1) {
+
+            window.history.back();
+
+        }
+
+    }
+);
+
 });
 </script>
 

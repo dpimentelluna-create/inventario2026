@@ -640,115 +640,149 @@ window.addEventListener('load', function () {
 
     }
 
-        /*
-     * =========================================================
-     * MANTENER LA PAGINACIÓN ACTIVA
-     * =========================================================
-     *
-     * GUARDA LA PÁGINA ACTUAL ANTES DE SALIR DEL INDEX.
-     *
-     * FUNCIONA PARA:
-     * - REGISTRAR NUEVO
-     * - VER
-     * - EDITAR
-     * - ELIMINAR
-     *
-     * TAMBIÉN GUARDA LA PÁGINA CUANDO EL USUARIO
-     * CAMBIA DE PÁGINA.
-     *
-     */
+/*
+ * =========================================================
+ * MANTENER LA PAGINACIÓN ACTIVA
+ * =========================================================
+ *
+ * GUARDA Y RECUPERA LA PÁGINA ACTUAL DEL DATATABLE.
+ *
+ * FUNCIONA PARA:
+ * - REGISTRAR NUEVO
+ * - VER
+ * - EDITAR
+ * - ELIMINAR
+ *
+ * TAMBIÉN FUNCIONA AL VOLVER CON EL BOTÓN ATRÁS.
+ *
+ */
 
-    const STORAGE_PAGE_KEY =
-        STORAGE_KEY + '_pagina';
+const STORAGE_PAGE_KEY = STORAGE_KEY + '_pagina';
+const STORAGE_NUEVO_EQUIPO = STORAGE_KEY + '_nuevo_equipo';
 
+function guardarPaginaActual() {
+    const paginaActual = tabla.page();
+    localStorage.setItem(STORAGE_PAGE_KEY, String(paginaActual));
+}
 
-    /*
-     * GUARDAR PÁGINA ACTUAL
-     */
+function cargarPaginaActual() {
 
-    function guardarPaginaActual() {
+    // Si acabamos de registrar un equipo nuevo,
+    // ir directamente a la última página.
+    const nuevoEquipo = localStorage.getItem(STORAGE_NUEVO_EQUIPO);
 
-        const paginaActual =
-            tabla.page();
+    if (nuevoEquipo === '1') {
 
-        localStorage.setItem(
-            STORAGE_PAGE_KEY,
-            String(paginaActual)
-        );
+        localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
 
+        setTimeout(function () {
+
+            const cantidadPaginas = tabla.page.info().pages;
+
+            if (cantidadPaginas > 0) {
+
+                const ultimaPagina = cantidadPaginas - 1;
+
+                tabla.page(ultimaPagina).draw('page');
+
+                localStorage.setItem(
+                    STORAGE_PAGE_KEY,
+                    String(ultimaPagina)
+                );
+            }
+
+        }, 100);
+
+        return;
     }
 
+    // Comportamiento normal:
+    // recuperar la página donde estaba anteriormente.
+    const paginaGuardada = localStorage.getItem(STORAGE_PAGE_KEY);
 
-    /*
-     * CARGAR PÁGINA GUARDADA
-     */
-
-    function cargarPaginaActual() {
-
-        const paginaGuardada =
-            localStorage.getItem(
-                STORAGE_PAGE_KEY
-            );
-
-        if (
-            paginaGuardada === null
-        ) {
-
-            return;
-
-        }
-
-        const pagina =
-            parseInt(
-                paginaGuardada,
-                10
-            );
-
-        if (
-            !isNaN(pagina) &&
-            pagina >= 0
-        ) {
-
-            tabla.page(pagina);
-
-        }
-
+    if (paginaGuardada === null) {
+        return;
     }
 
+    const pagina = parseInt(paginaGuardada, 10);
 
-    /*
-     * CUANDO EL USUARIO CAMBIA DE PÁGINA,
-     * GUARDARLA AUTOMÁTICAMENTE.
-     */
+    if (isNaN(pagina) || pagina < 0) {
+        return;
+    }
 
-    tabla.on(
-        'page.dt',
-        function () {
+    const paginasDisponibles = tabla.page.info().pages;
 
-            guardarPaginaActual();
+    if (paginasDisponibles === 0) {
+        return;
+    }
 
-        }
-    );
+    // Evita intentar ir a una página que ya no existe.
+    const paginaFinal =
+        Math.min(pagina, paginasDisponibles - 1);
+
+    tabla.page(paginaFinal).draw('page');
+}
 
 
-    /*
-     * ANTES DE SALIR DEL INDEX:
-     *
-     * GUARDAR LA PÁGINA ACTUAL.
-     *
-     * ESTO CUBRE:
-     * REGISTRAR / VER / EDITAR / ELIMINAR
-     */
+/*
+ * =========================================================
+ * CUANDO CAMBIA LA PAGINACIÓN
+ * =========================================================
+ */
 
-    window.addEventListener(
-        'beforeunload',
-        function () {
+tabla.on(
+    'page.dt',
+    function () {
 
-            guardarPaginaActual();
+        guardarPaginaActual();
 
-        }
-    );
+    }
+);
 
+
+/*
+ * =========================================================
+ * ANTES DE SALIR DEL INDEX
+ * =========================================================
+ *
+ * GUARDA LA PÁGINA ACTUAL SIN IMPORTAR
+ * QUÉ BOTÓN SE UTILICE.
+ *
+ */
+
+window.addEventListener(
+    'beforeunload',
+    function () {
+
+        guardarPaginaActual();
+
+    }
+);
+
+
+/*
+ * =========================================================
+ * AL VOLVER CON EL BOTÓN ATRÁS
+ * =========================================================
+ *
+ * Esto es importante porque el navegador puede utilizar
+ * el historial/bfcache y en ese caso "load" puede no
+ * ejecutarse nuevamente.
+ *
+ */
+
+window.addEventListener(
+    'pageshow',
+    function () {
+
+        setTimeout(function () {
+
+            cargarPaginaActual();
+
+        }, 100);
+
+    }
+);
 /*--------------------------------------------------------*/
 
     function cargarEstadoFiltros() {
@@ -1536,11 +1570,11 @@ window.addEventListener('load', function () {
      * NO HACER SCROLL.
      */
 
-    setTimeout(function () {
+setTimeout(function () {
 
-        cargarPaginaActual();
+    cargarPaginaActual();
 
-    }, 150);
+}, 200);
 
 
     /*
@@ -1565,6 +1599,87 @@ window.addEventListener('load', function () {
             event.preventDefault();
 
             aplicarFiltros();
+
+        }
+    );
+
+        /*
+     * =========================================================
+     * ATAJO DE TECLADO - REGISTRAR NUEVO
+     * =========================================================
+     *
+     * TECLA:
+     * +
+     *
+     * ABRE EL FORMULARIO "REGISTRAR NUEVO".
+     *
+     */
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            /*
+             * DETECTAR LA TECLA "+"
+             */
+
+            if (event.key !== '+') {
+                return;
+            }
+
+
+            /*
+             * NO EJECUTAR EL ATAJO SI EL USUARIO
+             * ESTÁ ESCRIBIENDO EN UN CAMPO.
+             */
+
+            const elemento =
+                event.target;
+
+            const tipoElemento =
+                elemento.tagName
+                    ? elemento.tagName.toLowerCase()
+                    : '';
+
+
+            if (
+                tipoElemento === 'input' ||
+                tipoElemento === 'textarea' ||
+                tipoElemento === 'select'
+            ) {
+
+                return;
+
+            }
+
+
+            /*
+             * EVITAR EL COMPORTAMIENTO NORMAL
+             * DE LA TECLA.
+             */
+
+            event.preventDefault();
+
+
+            /*
+             * BUSCAR EL ENLACE DE REGISTRAR NUEVO.
+             */
+
+            const botonRegistrar =
+                document.querySelector(
+                    'a[href*="/equipos/create"]'
+                );
+
+
+            /*
+             * ABRIR REGISTRAR NUEVO.
+             */
+
+            if (botonRegistrar) {
+
+                botonRegistrar.click();
+
+            }
 
         }
     );
