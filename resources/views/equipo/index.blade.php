@@ -18,7 +18,13 @@
 
                     <div class="card-body">
 
-                        <div class="d-flex justify-content-end mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span id="mensaje_coincidencias" class="text-success fw-bold" style="display:none;">
+                                    SE ENCONTRARON: 0 COINCIDENCIAS
+                                </span>
+                            </div>
+
                             <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
                                 FILTROS <span id="badge_filtros" class="badge bg-success ms-1 d-none">0</span>
                             </button>
@@ -28,8 +34,14 @@
                             <div class="row g-2">
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">TIPO</label>
-                                    <input type="text" id="filtro_tipo" class="form-control form-control-sm"
-                                        list="lista_filtro_tipo" placeholder="TODOS" autocomplete="off">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="filtro_tipo" class="form-control form-control-sm"
+                                            list="lista_filtro_tipo" placeholder="TODOS" autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_tipo" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                     <datalist id="lista_filtro_tipo">
                                         @foreach ($filtroTipos as $nombre)
                                             <option value="{{ $nombre }}"></option>
@@ -38,21 +50,40 @@
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">MARCA</label>
-                                    <input type="text" id="filtro_marca" class="form-control form-control-sm"
-                                        list="lista_filtro_marca" placeholder="ELIJA UN TIPO" autocomplete="off" disabled>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="filtro_marca" class="form-control form-control-sm"
+                                            list="lista_filtro_marca" placeholder="ELIJA UN TIPO" autocomplete="off"
+                                            disabled>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_marca" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                     <datalist id="lista_filtro_marca"></datalist>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">MODELO</label>
-                                    <input type="text" id="filtro_modelo" class="form-control form-control-sm"
-                                        list="lista_filtro_modelo" placeholder="ELIJA UNA MARCA" autocomplete="off"
-                                        disabled>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="filtro_modelo" class="form-control form-control-sm"
+                                            list="lista_filtro_modelo" placeholder="ELIJA UNA MARCA" autocomplete="off"
+                                            disabled>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_modelo" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                     <datalist id="lista_filtro_modelo"></datalist>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">UBICACIÓN</label>
-                                    <input type="text" id="filtro_ubicacion" class="form-control form-control-sm"
-                                        list="lista_filtro_ubicacion" placeholder="TODAS" autocomplete="off">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="filtro_ubicacion" class="form-control form-control-sm"
+                                            list="lista_filtro_ubicacion" placeholder="TODAS" autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_ubicacion" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                     <datalist id="lista_filtro_ubicacion">
                                         @foreach ($filtroUbicaciones as $nombre)
                                             <option value="{{ $nombre }}"></option>
@@ -61,26 +92,43 @@
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">ESTADO</label>
-                                    <select id="filtro_estado" class="form-select form-select-sm">
-                                        <option value="">TODOS</option>
-                                        <option value="BUENO">BUENO</option>
-                                        <option value="REGULAR">REGULAR</option>
-                                        <option value="MALOGRADO">MALOGRADO</option>
-                                    </select>
+                                    <div class="input-group input-group-sm">
+                                        <select id="filtro_estado" class="form-select form-select-sm">
+                                            <option value="">TODOS</option>
+                                            <option value="BUENO">BUENO</option>
+                                            <option value="REGULAR">REGULAR</option>
+                                            <option value="MALOGRADO">MALOGRADO</option>
+                                        </select>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_estado" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">N.º SERIE</label>
-                                    <input type="text" id="filtro_serie"
-                                        class="form-control form-control-sm campo-mayusculas" list="lista_filtro_serie"
-                                        placeholder="ESCRIBA 3 CARACTERES" autocomplete="off">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="filtro_serie"
+                                            class="form-control form-control-sm campo-mayusculas"
+                                            list="lista_filtro_serie" placeholder="ESCRIBA 3 CARACTERES"
+                                            autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_serie" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                     <datalist id="lista_filtro_serie"></datalist>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">FECHA</label>
-                                    <div class="d-flex gap-1">
+                                    <div class="input-group input-group-sm">
                                         <input type="date" id="filtro_fecha" class="form-control form-control-sm">
                                         <button type="button" id="btn_filtro_hoy"
                                             class="btn btn-outline-success btn-sm">HOY</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_fecha" tabindex="-1" title="Limpiar">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     </div>
                                 </div>
                                 <div class="col-12 d-flex justify-content-end align-items-end gap-2 mt-2">
@@ -184,242 +232,1342 @@
 
 <script>
 window.addEventListener('load', function () {
+
     if (typeof $ === 'undefined' || !$.fn.DataTable) return;
+
     const tabla = $('#example').DataTable();
+
+    const STORAGE_KEY = 'equipos_filtros_estado';
+
+    /*
+     * =========================================================
+     * ELEMENTOS PRINCIPALES
+     * =========================================================
+     */
 
     const panel = document.getElementById('panel_filtros');
     const btnToggle = document.getElementById('btn_toggle_filtros');
     const badge = document.getElementById('badge_filtros');
+    const mensajeCoincidencias =
+        document.getElementById('mensaje_coincidencias');
+
     const inputTipo = document.getElementById('filtro_tipo');
     const inputMarca = document.getElementById('filtro_marca');
     const inputModelo = document.getElementById('filtro_modelo');
+    const inputUbicacion = document.getElementById('filtro_ubicacion');
     const inputSerie = document.getElementById('filtro_serie');
     const inputFecha = document.getElementById('filtro_fecha');
+    const inputEstado = document.getElementById('filtro_estado');
+
+    const listaTipo = document.getElementById('lista_filtro_tipo');
     const listaMarca = document.getElementById('lista_filtro_marca');
     const listaModelo = document.getElementById('lista_filtro_modelo');
+    const listaUbicacion = document.getElementById('lista_filtro_ubicacion');
     const listaSerie = document.getElementById('lista_filtro_serie');
 
+
+    /*
+     * =========================================================
+     * DATOS DE LOS EQUIPOS
+     * =========================================================
+     */
+
     const filas = [];
+
     tabla.rows().every(function () {
+
         const d = this.data();
+
         filas.push({
             tipo: String(d[1] || '').toUpperCase(),
             serie: String(d[2] || '').toUpperCase(),
             marca: String(d[3] || '').toUpperCase(),
             modelo: String(d[4] || '').toUpperCase()
         });
+
     });
 
-    function val(id) {
-        const el = document.getElementById(id);
-        return el ? el.value.trim().toUpperCase() : '';
-    }
-    function fechaFiltro() {
-        return inputFecha ? inputFecha.value : '';
-    }
-    function llenarLista(datalist, valores) {
-        if (!datalist) return;
-        datalist.innerHTML = '';
-        Array.from(valores).sort().forEach(function (v) {
-            if (!v || v === '-') return;
-            const op = document.createElement('option');
-            op.value = v;
-            datalist.appendChild(op);
-        });
-    }
-    function setBloqueo(el, bloqueado, placeholder) {
-        if (!el) return;
-        el.disabled = bloqueado;
-        el.classList.toggle('bg-light', bloqueado);
-        if (bloqueado) el.value = '';
-        if (placeholder) el.placeholder = placeholder;
-    }
-
-    function actualizarEncadenados() {
-        const tipo = val('filtro_tipo');
-        const marca = val('filtro_marca');
-
-        if (!tipo) {
-            setBloqueo(inputMarca, true, 'ELIJA UN TIPO');
-            setBloqueo(inputModelo, true, 'ELIJA UNA MARCA');
-            llenarLista(listaMarca, []);
-            llenarLista(listaModelo, []);
-            return;
-        }
-
-        const marcas = new Set();
-        filas.forEach(function (f) {
-            if (f.tipo.indexOf(tipo) !== -1) marcas.add(f.marca);
-        });
-        setBloqueo(inputMarca, false, 'TODAS');
-        llenarLista(listaMarca, marcas);
-
-        if (!marca) {
-            setBloqueo(inputModelo, true, 'ELIJA UNA MARCA');
-            llenarLista(listaModelo, []);
-            return;
-        }
-
-        const modelos = new Set();
-        filas.forEach(function (f) {
-            if (f.tipo.indexOf(tipo) !== -1 && f.marca.indexOf(marca) !== -1) modelos.add(f.modelo);
-        });
-        setBloqueo(inputModelo, false, 'TODOS');
-        llenarLista(listaModelo, modelos);
-    }
-
-    function actualizarSeries() {
-        if (!inputSerie || !listaSerie) return;
-        const q = inputSerie.value.trim().toUpperCase();
-        listaSerie.innerHTML = '';
-        if (q.length < 3) return;
-        const vistos = new Set();
-        filas.forEach(function (f) {
-            if (f.serie.indexOf(q) !== -1 && !vistos.has(f.serie)) {
-                vistos.add(f.serie);
-                const op = document.createElement('option');
-                op.value = f.serie;
-                listaSerie.appendChild(op);
-            }
-        });
-    }
-
-    function contarFiltros() {
-        let n = 0;
-        ['filtro_tipo', 'filtro_marca', 'filtro_modelo', 'filtro_ubicacion', 'filtro_estado', 'filtro_serie'].forEach(function (id) {
-            if (val(id)) n++;
-        });
-        if (fechaFiltro()) n++;
-        return n;
-    }
-    function actualizarBadge() {
-        const n = contarFiltros();
-        if (!badge) return;
-        badge.textContent = n;
-        badge.classList.toggle('d-none', n === 0);
-    }
-
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        if (settings.nTable.id !== 'example') return true;
-        const tipo = val('filtro_tipo');
-        const marca = val('filtro_marca');
-        const modelo = val('filtro_modelo');
-        const ubicacion = val('filtro_ubicacion');
-        const estado = val('filtro_estado');
-        const serie = val('filtro_serie');
-        const fecha = fechaFiltro();
-        if (tipo && String(data[1]).toUpperCase().indexOf(tipo) === -1) return false;
-        if (serie && String(data[2]).toUpperCase().indexOf(serie) === -1) return false;
-        if (marca && String(data[3]).toUpperCase().indexOf(marca) === -1) return false;
-        if (modelo && String(data[4]).toUpperCase().indexOf(modelo) === -1) return false;
-        if (estado && String(data[5]).toUpperCase() !== estado) return false;
-        if (ubicacion && String(data[6]).toUpperCase().indexOf(ubicacion) === -1) return false;
-        if (fecha) {
-            const nodo = tabla.row(dataIndex).node();
-            const iso = nodo && nodo.querySelector('[data-fecha]')
-                ? nodo.querySelector('[data-fecha]').getAttribute('data-fecha') : '';
-            if (iso !== fecha) return false;
-        }
-        return true;
-    });
-
-    if (btnToggle && panel) {
-        btnToggle.addEventListener('click', function () {
-            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-        });
-    }
-
-    if (inputTipo) inputTipo.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
-        actualizarEncadenados();
-    });
-    if (inputMarca) inputMarca.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
-        actualizarEncadenados();
-    });
-    if (inputSerie) inputSerie.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
-        actualizarSeries();
-    });
 
     /*
- * =========================================================
- * APLICAR FILTROS CON ENTER
- * =========================================================
- */
+     * =========================================================
+     * FUNCIONES GENERALES
+     * =========================================================
+     */
 
-    [
-        'filtro_tipo',
-        'filtro_marca',
-        'filtro_modelo',
-        'filtro_ubicacion',
-        'filtro_estado',
-        'filtro_serie',
-        'filtro_fecha'
-    ].forEach(function (id) {
+    function val(id) {
 
-        const campo = document.getElementById(id);
+        const el = document.getElementById(id);
 
-        if (!campo) return;
+        return el
+            ? el.value.trim().toUpperCase()
+            : '';
 
-        campo.addEventListener('keydown', function (event) {
+    }
 
-            if (event.key === 'Enter') {
 
-                event.preventDefault();
+    function fechaFiltro() {
 
-                aplicarFiltros();
+        return inputFecha
+            ? inputFecha.value
+            : '';
+
+    }
+
+
+    function llenarLista(datalist, valores) {
+
+        if (!datalist) return;
+
+        datalist.innerHTML = '';
+
+        Array.from(valores)
+            .sort()
+            .forEach(function (v) {
+
+                if (!v || v === '-') return;
+
+                const op = document.createElement('option');
+
+                op.value = v;
+
+                datalist.appendChild(op);
+
+            });
+
+    }
+
+
+    function setBloqueo(el, bloqueado, placeholder) {
+
+        if (!el) return;
+
+        el.disabled = bloqueado;
+
+        el.classList.toggle(
+            'bg-light',
+            bloqueado
+        );
+
+        if (bloqueado) {
+
+            el.value = '';
+
+        }
+
+        if (placeholder) {
+
+            el.placeholder = placeholder;
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * FILTROS ENCADENADOS
+     * =========================================================
+     */
+
+    function actualizarEncadenados() {
+
+        const tipo = val('filtro_tipo');
+        const marca = val('filtro_marca');
+
+        /*
+         * SI NO HAY TIPO
+         */
+
+        if (!tipo) {
+
+            setBloqueo(
+                inputMarca,
+                true,
+                'ELIJA UN TIPO'
+            );
+
+            setBloqueo(
+                inputModelo,
+                true,
+                'ELIJA UNA MARCA'
+            );
+
+            llenarLista(listaMarca, []);
+            llenarLista(listaModelo, []);
+
+            return;
+
+        }
+
+
+        /*
+         * OBTENER MARCAS SEGÚN TIPO
+         */
+
+        const marcas = new Set();
+
+        filas.forEach(function (f) {
+
+            if (
+                f.tipo.indexOf(tipo) !== -1 &&
+                f.marca
+            ) {
+
+                marcas.add(f.marca);
+
             }
 
         });
 
-    });
 
-    document.getElementById('btn_filtro_hoy')?.addEventListener('click', function () {
-        if (!inputFecha) return;
-        const d = new Date();
-        inputFecha.value = d.getFullYear() + '-' +
-            String(d.getMonth() + 1).padStart(2, '0') + '-' +
-            String(d.getDate()).padStart(2, '0');
-    });
+        setBloqueo(
+            inputMarca,
+            false,
+            'TODAS'
+        );
+
+        llenarLista(
+            listaMarca,
+            marcas
+        );
+
+
+        /*
+         * SI NO HAY MARCA
+         */
+
+        if (!marca) {
+
+            setBloqueo(
+                inputModelo,
+                true,
+                'ELIJA UNA MARCA'
+            );
+
+            llenarLista(
+                listaModelo,
+                []
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * OBTENER MODELOS SEGÚN TIPO + MARCA
+         */
+
+        const modelos = new Set();
+
+        filas.forEach(function (f) {
+
+            if (
+                f.tipo.indexOf(tipo) !== -1 &&
+                f.marca.indexOf(marca) !== -1 &&
+                f.modelo
+            ) {
+
+                modelos.add(f.modelo);
+
+            }
+
+        });
+
+
+        setBloqueo(
+            inputModelo,
+            false,
+            'TODOS'
+        );
+
+        llenarLista(
+            listaModelo,
+            modelos
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * FILTRO DE NÚMERO DE SERIE
+     * =========================================================
+     */
+
+    function actualizarSeries() {
+
+        if (!inputSerie || !listaSerie) return;
+
+        const q =
+            inputSerie.value
+                .trim()
+                .toUpperCase();
+
+        listaSerie.innerHTML = '';
+
+        if (q.length < 3) return;
+
+        const vistos = new Set();
+
+        filas.forEach(function (f) {
+
+            if (
+                f.serie.indexOf(q) !== -1 &&
+                !vistos.has(f.serie)
+            ) {
+
+                vistos.add(f.serie);
+
+                const op =
+                    document.createElement('option');
+
+                op.value = f.serie;
+
+                listaSerie.appendChild(op);
+
+            }
+
+        });
+
+    }
+
+
+    /*
+     * =========================================================
+     * CONTADOR DE FILTROS
+     * =========================================================
+     */
+
+    function contarFiltros() {
+
+        let n = 0;
+
+        [
+            'filtro_tipo',
+            'filtro_marca',
+            'filtro_modelo',
+            'filtro_ubicacion',
+            'filtro_estado',
+            'filtro_serie'
+        ].forEach(function (id) {
+
+            if (val(id)) {
+
+                n++;
+
+            }
+
+        });
+
+        if (fechaFiltro()) {
+
+            n++;
+
+        }
+
+        return n;
+
+    }
+
+
+    function actualizarBadge() {
+
+        if (!badge) return;
+
+        const cantidad =
+            contarFiltros();
+
+        badge.textContent = cantidad;
+
+        badge.classList.toggle(
+            'd-none',
+            cantidad === 0
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * LOCALSTORAGE
+     * =========================================================
+     */
+
+    function guardarEstadoFiltros() {
+
+        const estado = {
+
+            tipo: inputTipo
+                ? inputTipo.value
+                : '',
+
+            marca: inputMarca
+                ? inputMarca.value
+                : '',
+
+            modelo: inputModelo
+                ? inputModelo.value
+                : '',
+
+            ubicacion: inputUbicacion
+                ? inputUbicacion.value
+                : '',
+
+            estado: inputEstado
+                ? inputEstado.value
+                : '',
+
+            serie: inputSerie
+                ? inputSerie.value
+                : '',
+
+            fecha: inputFecha
+                ? inputFecha.value
+                : '',
+
+            panelAbierto:
+                panel
+                    ? panel.style.display !== 'none'
+                    : false
+
+        };
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(estado)
+        );
+
+    }
+
+        /*
+     * =========================================================
+     * MANTENER LA PAGINACIÓN ACTIVA
+     * =========================================================
+     *
+     * GUARDA LA PÁGINA ACTUAL ANTES DE SALIR DEL INDEX.
+     *
+     * FUNCIONA PARA:
+     * - REGISTRAR NUEVO
+     * - VER
+     * - EDITAR
+     * - ELIMINAR
+     *
+     * TAMBIÉN GUARDA LA PÁGINA CUANDO EL USUARIO
+     * CAMBIA DE PÁGINA.
+     *
+     */
+
+    const STORAGE_PAGE_KEY =
+        STORAGE_KEY + '_pagina';
+
+
+    /*
+     * GUARDAR PÁGINA ACTUAL
+     */
+
+    function guardarPaginaActual() {
+
+        const paginaActual =
+            tabla.page();
+
+        localStorage.setItem(
+            STORAGE_PAGE_KEY,
+            String(paginaActual)
+        );
+
+    }
+
+
+    /*
+     * CARGAR PÁGINA GUARDADA
+     */
+
+    function cargarPaginaActual() {
+
+        const paginaGuardada =
+            localStorage.getItem(
+                STORAGE_PAGE_KEY
+            );
+
+        if (
+            paginaGuardada === null
+        ) {
+
+            return;
+
+        }
+
+        const pagina =
+            parseInt(
+                paginaGuardada,
+                10
+            );
+
+        if (
+            !isNaN(pagina) &&
+            pagina >= 0
+        ) {
+
+            tabla.page(pagina);
+
+        }
+
+    }
+
+
+    /*
+     * CUANDO EL USUARIO CAMBIA DE PÁGINA,
+     * GUARDARLA AUTOMÁTICAMENTE.
+     */
+
+    tabla.on(
+        'page.dt',
+        function () {
+
+            guardarPaginaActual();
+
+        }
+    );
+
+
+    /*
+     * ANTES DE SALIR DEL INDEX:
+     *
+     * GUARDAR LA PÁGINA ACTUAL.
+     *
+     * ESTO CUBRE:
+     * REGISTRAR / VER / EDITAR / ELIMINAR
+     */
+
+    window.addEventListener(
+        'beforeunload',
+        function () {
+
+            guardarPaginaActual();
+
+        }
+    );
+
+/*--------------------------------------------------------*/
+
+    function cargarEstadoFiltros() {
+
+        const datos =
+            localStorage.getItem(STORAGE_KEY);
+
+        if (!datos) return false;
+
+        try {
+
+            const estado =
+                JSON.parse(datos);
+
+            if (inputTipo) {
+                inputTipo.value =
+                    estado.tipo || '';
+            }
+
+            if (inputMarca) {
+                inputMarca.value =
+                    estado.marca || '';
+            }
+
+            if (inputModelo) {
+                inputModelo.value =
+                    estado.modelo || '';
+            }
+
+            if (inputUbicacion) {
+                inputUbicacion.value =
+                    estado.ubicacion || '';
+            }
+
+            if (inputEstado) {
+                inputEstado.value =
+                    estado.estado || '';
+            }
+
+            if (inputSerie) {
+                inputSerie.value =
+                    estado.serie || '';
+            }
+
+            if (inputFecha) {
+                inputFecha.value =
+                    estado.fecha || '';
+            }
+
+
+            /*
+             * RESTAURAR PANEL
+             */
+
+            if (
+                panel &&
+                estado.panelAbierto
+            ) {
+
+                panel.style.display = 'block';
+
+            }
+
+
+            return true;
+
+        } catch (error) {
+
+            console.error(
+                'Error al recuperar los filtros:',
+                error
+            );
+
+            localStorage.removeItem(
+                STORAGE_KEY
+            );
+
+            return false;
+
+        }
+
+    }
+
+
+    /*
+     * =========================================================
+     * MENSAJE DE COINCIDENCIAS
+     * =========================================================
+     */
+
+    function mostrarCoincidencias() {
+
+        if (!mensajeCoincidencias) return;
+
+        const cantidadFiltros =
+            contarFiltros();
+
+
+        /*
+         * SIN FILTROS:
+         * OCULTAR MENSAJE
+         */
+
+        if (cantidadFiltros === 0) {
+
+            mensajeCoincidencias.style.display =
+                'none';
+
+            return;
+
+        }
+
+
+        /*
+         * CON FILTROS:
+         * MOSTRAR COINCIDENCIAS
+         */
+
+        const coincidencias =
+            tabla.rows({
+                search: 'applied'
+            }).count();
+
+
+        mensajeCoincidencias.textContent =
+            'SE ENCONTRARON: ' +
+            coincidencias +
+            ' COINCIDENCIAS';
+
+
+        mensajeCoincidencias.style.display =
+            'inline';
+
+    }
+
+
+    /*
+     * =========================================================
+     * FILTRO PERSONALIZADO DATATABLE
+     * =========================================================
+     */
+
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+
+            if (
+                settings.nTable.id !== 'example'
+            ) {
+
+                return true;
+
+            }
+
+
+            const tipo = val('filtro_tipo');
+            const marca = val('filtro_marca');
+            const modelo = val('filtro_modelo');
+            const ubicacion = val('filtro_ubicacion');
+            const estado = val('filtro_estado');
+            const serie = val('filtro_serie');
+            const fecha = fechaFiltro();
+
+
+            /*
+             * TIPO
+             */
+
+            if (
+                tipo &&
+                String(data[1])
+                    .toUpperCase()
+                    .indexOf(tipo) === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * SERIE
+             */
+
+            if (
+                serie &&
+                String(data[2])
+                    .toUpperCase()
+                    .indexOf(serie) === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * MARCA
+             */
+
+            if (
+                marca &&
+                String(data[3])
+                    .toUpperCase()
+                    .indexOf(marca) === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * MODELO
+             */
+
+            if (
+                modelo &&
+                String(data[4])
+                    .toUpperCase()
+                    .indexOf(modelo) === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * ESTADO
+             */
+
+            if (
+                estado &&
+                String(data[5])
+                    .toUpperCase() !== estado
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * UBICACIÓN
+             */
+
+            if (
+                ubicacion &&
+                String(data[6])
+                    .toUpperCase()
+                    .indexOf(ubicacion) === -1
+            ) {
+
+                return false;
+
+            }
+
+
+            /*
+             * FECHA
+             */
+
+            if (fecha) {
+
+                const nodo =
+                    tabla.row(dataIndex).node();
+
+                const elementoFecha =
+                    nodo
+                        ? nodo.querySelector(
+                            '[data-fecha]'
+                        )
+                        : null;
+
+                const iso =
+                    elementoFecha
+                        ? elementoFecha.getAttribute(
+                            'data-fecha'
+                        )
+                        : '';
+
+                if (iso !== fecha) {
+
+                    return false;
+
+                }
+
+            }
+
+
+            return true;
+
+        }
+    );
+
+
+    /*
+     * =========================================================
+     * ACTUALIZAR RESULTADOS
+     * =========================================================
+     *
+     * FILTRA SIN MOVER LA PANTALLA.
+     *
+     */
+
+    function actualizarResultados() {
+
+        actualizarEncadenados();
+
+        actualizarSeries();
+
+        actualizarBadge();
+
+        guardarEstadoFiltros();
+
+        tabla.draw();
+
+        mostrarCoincidencias();
+
+    }
+
+
+    /*
+     * =========================================================
+     * APLICAR FILTROS + SCROLL
+     * =========================================================
+     *
+     * ESTA FUNCIÓN SE USA SOLAMENTE PARA:
+     *
+     * 1. ENTER GLOBAL
+     * 2. BOTÓN FILTRAR
+     *
+     */
 
     function aplicarFiltros() {
-        actualizarBadge();
-        tabla.draw();
+
+        actualizarResultados();
 
         setTimeout(function () {
 
             const tablaElement =
                 document.getElementById('example');
 
-            if (tablaElement) {
-                tablaElement.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
+            if (!tablaElement) return;
+
+            tablaElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
 
         }, 100);
+
     }
 
-    document.getElementById('btn_aplicar_filtros')?.addEventListener(
-        'click',
-        aplicarFiltros
+
+    /*
+     * =========================================================
+     * MOSTRAR / OCULTAR FILTROS
+     * =========================================================
+     */
+
+    if (btnToggle && panel) {
+
+        btnToggle.addEventListener(
+            'click',
+            function () {
+
+                const estaOculto =
+                    panel.style.display === 'none';
+
+                panel.style.display =
+                    estaOculto
+                        ? 'block'
+                        : 'none';
+
+                guardarEstadoFiltros();
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * LIMPIAR UN SOLO CAMPO - BOTÓN X
+     * =========================================================
+     *
+     * LIMPIA EL CAMPO + ACTUALIZA RESULTADOS.
+     *
+     * NO HACE SCROLL.
+     *
+     */
+
+    function limpiarCampo(id) {
+
+        const el =
+            document.getElementById(id);
+
+        if (!el) return;
+
+
+        /*
+         * LIMPIAR CAMPO
+         */
+
+        el.value = '';
+
+
+        /*
+         * SI ES TIPO O MARCA,
+         * ACTUALIZAR CAMPOS ENCADENADOS
+         */
+
+        if (
+            id === 'filtro_tipo' ||
+            id === 'filtro_marca'
+        ) {
+
+            actualizarEncadenados();
+
+        }
+
+
+        /*
+         * LIMPIAR SUGERENCIAS DE SERIE
+         */
+
+        if (
+            id === 'filtro_serie' &&
+            listaSerie
+        ) {
+
+            listaSerie.innerHTML = '';
+
+        }
+
+
+        /*
+         * ACTUALIZAR TODO
+         */
+
+        actualizarResultados();
+
+    }
+
+
+    document
+        .querySelectorAll('.btn-limpiar-campo')
+        .forEach(function (btn) {
+
+            btn.addEventListener(
+                'click',
+                function () {
+
+                    limpiarCampo(
+                        btn.getAttribute(
+                            'data-target'
+                        )
+                    );
+
+                }
+            );
+
+        });
+
+
+    /*
+     * =========================================================
+     * EVENTOS DE LOS CAMPOS
+     * =========================================================
+     *
+     * AL ESCRIBIR O SELECCIONAR:
+     *
+     * FILTRA AUTOMÁTICAMENTE.
+     *
+     * NO HACE SCROLL.
+     *
+     */
+
+    if (inputTipo) {
+
+        inputTipo.addEventListener(
+            'input',
+            function () {
+
+                this.value =
+                    this.value.toUpperCase();
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputMarca) {
+
+        inputMarca.addEventListener(
+            'input',
+            function () {
+
+                this.value =
+                    this.value.toUpperCase();
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputModelo) {
+
+        inputModelo.addEventListener(
+            'input',
+            function () {
+
+                this.value =
+                    this.value.toUpperCase();
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputUbicacion) {
+
+        inputUbicacion.addEventListener(
+            'input',
+            function () {
+
+                this.value =
+                    this.value.toUpperCase();
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputSerie) {
+
+        inputSerie.addEventListener(
+            'input',
+            function () {
+
+                this.value =
+                    this.value.toUpperCase();
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputEstado) {
+
+        inputEstado.addEventListener(
+            'change',
+            function () {
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    if (inputFecha) {
+
+        inputFecha.addEventListener(
+            'change',
+            function () {
+
+                actualizarResultados();
+
+            }
+        );
+
+    }
+
+
+    /*
+     * =========================================================
+     * BOTÓN HOY
+     * =========================================================
+     *
+     * SELECCIONA HOY Y FILTRA AUTOMÁTICAMENTE.
+     *
+     * NO HACE SCROLL.
+     *
+     */
+
+    document
+        .getElementById('btn_filtro_hoy')
+        ?.addEventListener(
+            'click',
+            function () {
+
+                if (!inputFecha) return;
+
+                const d = new Date();
+
+                inputFecha.value =
+                    d.getFullYear() +
+                    '-' +
+                    String(
+                        d.getMonth() + 1
+                    ).padStart(2, '0') +
+                    '-' +
+                    String(
+                        d.getDate()
+                    ).padStart(2, '0');
+
+
+                actualizarResultados();
+
+            }
+        );
+
+
+    /*
+     * =========================================================
+     * BOTÓN FILTRAR
+     * =========================================================
+     *
+     * FILTRA + HACE SCROLL.
+     *
+     */
+
+    document
+        .getElementById('btn_aplicar_filtros')
+        ?.addEventListener(
+            'click',
+            function () {
+
+                aplicarFiltros();
+
+            }
+        );
+
+
+    /*
+     * =========================================================
+     * BOTÓN LIMPIAR TODOS
+     * =========================================================
+     *
+     * LIMPIA TODO.
+     * OCULTA MENSAJE.
+     * NO HACE SCROLL.
+     *
+     */
+
+    document
+        .getElementById('btn_limpiar_filtros')
+        ?.addEventListener(
+            'click',
+            function () {
+
+
+                [
+                    'filtro_tipo',
+                    'filtro_marca',
+                    'filtro_modelo',
+                    'filtro_ubicacion',
+                    'filtro_serie',
+                    'filtro_fecha'
+                ].forEach(function (id) {
+
+                    const el =
+                        document.getElementById(id);
+
+                    if (el) {
+
+                        el.value = '';
+
+                    }
+
+                });
+
+
+                if (inputEstado) {
+
+                    inputEstado.value = '';
+
+                }
+
+
+                actualizarEncadenados();
+
+
+                if (listaSerie) {
+
+                    listaSerie.innerHTML = '';
+
+                }
+
+
+                /*
+                 * ELIMINAR ESTADO GUARDADO
+                 */
+
+                localStorage.removeItem(
+                    STORAGE_KEY
+                );
+
+
+                /*
+                 * ACTUALIZAR TABLA
+                 */
+
+                actualizarBadge();
+
+                tabla.draw();
+
+
+                /*
+                 * OCULTAR MENSAJE
+                 */
+
+                if (mensajeCoincidencias) {
+
+                    mensajeCoincidencias.style.display =
+                        'none';
+
+                }
+
+            }
+        );
+
+
+    /*
+     * =========================================================
+     * RECUPERAR FILTROS GUARDADOS
+     * =========================================================
+     *
+     * AL CARGAR:
+     *
+     * - RECUPERA FILTROS
+     * - ACTUALIZA TABLA
+     * - MUESTRA MENSAJE
+     * - NO HACE SCROLL
+     *
+     */
+
+         /*
+     * =========================================================
+     * RECUPERAR ESTADO AL REGRESAR AL INDEX
+     * =========================================================
+     */
+
+    const filtrosRecuperados =
+        cargarEstadoFiltros();
+
+
+    if (filtrosRecuperados) {
+
+        actualizarEncadenados();
+
+        actualizarSeries();
+
+        actualizarBadge();
+
+        tabla.draw();
+
+        mostrarCoincidencias();
+
+    }
+
+
+    /*
+     * RESTAURAR LA PÁGINA ANTERIOR
+     *
+     * NO HACER SCROLL.
+     */
+
+    setTimeout(function () {
+
+        cargarPaginaActual();
+
+    }, 150);
+
+
+    /*
+     * =========================================================
+     * ENTER GLOBAL DEL INDEX
+     * =========================================================
+     *
+     * IMPORTANTE:
+     * NO EXISTEN EVENTOS ENTER INDIVIDUALES.
+     *
+     * ESTE ÚNICO EVENTO CONTROLA ENTER
+     * EN TODO EL INDEX.
+     *
+     */
+
+    document.addEventListener(
+        'keydown',
+        function (event) {
+
+            if (event.key !== 'Enter') return;
+
+            event.preventDefault();
+
+            aplicarFiltros();
+
+        }
     );
 
-    document.getElementById('btn_limpiar_filtros')?.addEventListener('click', function () {
-        ['filtro_tipo', 'filtro_marca', 'filtro_modelo', 'filtro_ubicacion', 'filtro_serie', 'filtro_fecha'].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        const est = document.getElementById('filtro_estado');
-        if (est) est.value = '';
-        actualizarEncadenados();
-        if (listaSerie) listaSerie.innerHTML = '';
-        actualizarBadge();
-        tabla.draw();
-    });
-
-    actualizarEncadenados();
 });
 </script>

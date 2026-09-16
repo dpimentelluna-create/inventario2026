@@ -217,10 +217,9 @@
                                 Procesador
                             </label>
 
-                            <input type="text" name="procesador" id="procesador" class="form-control"
+                            <input type="text" name="procesador" id="procesador" class="form-control campo-mayusculas"
                                 placeholder="Ej. Intel Core i5"
-                                value="{{ old('procesador', $equipo->especificacionesLaptops?->procesador) }}">
-
+                                value="{{ old('procesador') }}">
                         </div>
 
 
@@ -273,15 +272,15 @@
                             </label>
 
                             <select name="estado_laptop" id="estado_laptop" class="form-select">
-                                <option value="Regular" {{ old('estado_laptop', $especificacionesLaptop?->estado ?? 'Regular') == 'Regular' ? 'selected' : '' }}>
+                                <option value="REGULAR" {{ old('estado_laptop', 'REGULAR') === 'REGULAR' ? 'selected' : '' }}>
                                     REGULAR
                                 </option>
-
-                                <option value="Bueno" {{ old('estado_laptop', $especificacionesLaptop?->estado ?? 'Regular') == 'Bueno' ? 'selected' : '' }}>
+                            
+                                <option value="BUENO" {{ old('estado_laptop') === 'BUENO' ? 'selected' : '' }}>
                                     BUENO
                                 </option>
-
-                                <option value="Malogrado" {{ old('estado_laptop', $especificacionesLaptop?->estado ?? 'Regular') == 'Malogrado' ? 'selected' : '' }}>
+                            
+                                <option value="MALOGRADO" {{ old('estado_laptop') === 'MALOGRADO' ? 'selected' : '' }}>
                                     MALOGRADO
                                 </option>
                             </select>
@@ -354,15 +353,15 @@
                             </label>
 
                             <select name="estado_equipo" id="estado_equipo" class="form-select">
-                                <option value="Regular" {{ old('estado_equipo', $especificacionesEquipo?->estado ?? 'Regular') == 'Regular' ? 'selected' : '' }}>
+                                <option value="REGULAR" {{ old('estado_equipo', 'REGULAR') === 'REGULAR' ? 'selected' : '' }}>
                                     REGULAR
                                 </option>
-
-                                <option value="Bueno" {{ old('estado_equipo', $especificacionesEquipo?->estado ?? 'Regular') == 'Bueno' ? 'selected' : '' }}>
+                            
+                                <option value="BUENO" {{ old('estado_equipo') === 'BUENO' ? 'selected' : '' }}>
                                     BUENO
                                 </option>
-
-                                <option value="Malogrado" {{ old('estado_equipo', $especificacionesEquipo?->estado ?? 'Regular') == 'Malogrado' ? 'selected' : '' }}>
+                            
+                                <option value="MALOGRADO" {{ old('estado_equipo') === 'MALOGRADO' ? 'selected' : '' }}>
                                     MALOGRADO
                                 </option>
                             </select>
@@ -774,7 +773,10 @@
 
     function mostrarEspecificaciones() {
 
-                // Ocultar inicialmente ambos bloques
+                // ==========================================
+                // OCULTAR TODO AL INICIO
+                // ==========================================
+
                 if (laptopBox) {
                     laptopBox.style.display = 'none';
                 }
@@ -788,58 +790,108 @@
                 }
 
 
-                // Obtener el tipo seleccionado
-                const tipoTexto =
-                    inputTipoEq
-                        ? inputTipoEq.value.trim().toUpperCase()
-                        : '';
+                // ==========================================
+                // OBTENER DATOS DEL TIPO SELECCIONADO
+                // ==========================================
 
-                const tipoSeleccionado =
-                    tipoTexto !== '' &&
-                    (
-                        (hiddenTipoEq && String(hiddenTipoEq.value).trim() !== '') ||
-                        tipoTexto === 'OTRO'
-                    );
+                const tipoId = hiddenTipoEq
+                    ? String(hiddenTipoEq.value).trim()
+                    : '';
+
+                const tipoTexto = inputTipoEq
+                    ? inputTipoEq.value.trim().toUpperCase()
+                    : '';
 
 
-                // Si todavía no se ha seleccionado un tipo
-                if (!tipoSeleccionado) {
-                    actualizarBloqueoParte1();
-                    return;
+                // ==========================================
+                // SI ES "OTRO"
+                // ==========================================
+
+                const esOtro =
+                    tipoTexto === 'OTRO' &&
+                    inputNuevoTipo &&
+                    inputNuevoTipo.value.trim() !== '';
+
+
+                // ==========================================
+                // BUSCAR EL TIPO REAL EN LA LISTA
+                // ==========================================
+
+                let tipoSeleccionado = null;
+
+                if (tipoId !== '') {
+
+                    tipoSeleccionado = tiposEquipoData.find(function (tipo) {
+
+                        return String(tipo.id) === tipoId;
+
+                    });
+
                 }
 
 
-                // Ya existe un tipo seleccionado
+                // ==========================================
+                // SI TODAVÍA NO HAY TIPO SELECCIONADO
+                // ==========================================
+
+                if (!tipoSeleccionado && !esOtro) {
+
+                    actualizarBloqueoParte1();
+
+                    return;
+
+                }
+
+
+                // ==========================================
+                // YA EXISTE UN TIPO
+                // ==========================================
+
                 if (mensajeSpecs) {
                     mensajeSpecs.style.display = 'none';
                 }
 
 
-                // =========================================================
-                // LAPTOP
-                // =========================================================
+                // ==========================================
+                // DETERMINAR SI ES LAPTOP
+                // ==========================================
 
-                if (tipoTexto === 'LAPTOP') {
+                const nombreTipo = tipoSeleccionado
+                    ? String(tipoSeleccionado.nombre).trim().toUpperCase()
+                    : tipoTexto;
 
+
+                if (nombreTipo === 'LAPTOP') {
+
+                    // Mostrar especificaciones de Laptop
                     if (laptopBox) {
                         laptopBox.style.display = 'block';
+                    }
+
+                    // Ocultar especificaciones generales
+                    if (equipoBox) {
+                        equipoBox.style.display = 'none';
+                    }
+
+                } else {
+
+                    // Mostrar especificaciones de otros equipos
+                    if (equipoBox) {
+                        equipoBox.style.display = 'block';
+                    }
+
+                    // Ocultar especificaciones de Laptop
+                    if (laptopBox) {
+                        laptopBox.style.display = 'none';
                     }
 
                 }
 
 
-                // =========================================================
-                // OTROS EQUIPOS
-                // =========================================================
+                // ==========================================
+                // ACTUALIZAR BLOQUEO DE PARTE 1
+                // ==========================================
 
-                else if (equipoBox) {
-
-                    equipoBox.style.display = 'block';
-
-                }
-
-
-                // Actualizar bloqueo de los demás campos
                 actualizarBloqueoParte1();
     }
 
