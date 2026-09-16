@@ -295,6 +295,16 @@
 
         <div class="card-body">
 
+            {{-- AVISO: PARTE 1 INCOMPLETA --}}
+            <div
+                id="bloqueo-parte2"
+                class="alert alert-warning py-2 px-3 small mb-3"
+                style="display: none;"
+            >
+                <i class="bi bi-lock-fill"></i>
+                COMPLETE LA UBICACIÓN Y LA FECHA DE REGISTRO EN LA PARTE 1 PARA CONTINUAR.
+            </div>
+
             {{-- MENSAJE INICIAL --}}
             <div
                 id="mensaje-especificaciones"
@@ -594,6 +604,16 @@
 
         <div class="card-body">
 
+            {{-- AVISO: PARTE 1 INCOMPLETA --}}
+            <div
+                id="bloqueo-parte3"
+                class="alert alert-warning py-2 px-3 small mb-3"
+                style="display: none;"
+            >
+                <i class="bi bi-lock-fill"></i>
+                COMPLETE TODOS LOS CAMPOS OBLIGATORIOS DE LA PARTE 1 (TIPO, UBICACIÓN Y FECHA) PARA HABILITAR LOS ACCESORIOS.
+            </div>
+
             {{-- MENSAJE SIN ACCESORIOS --}}
             <div
                 id="sin-accesorios"
@@ -845,7 +865,6 @@
     </div>
 
 </div>
-```
 
 </div>
 
@@ -858,7 +877,6 @@
     style="z-index: 1090;"
 >
 
-```
 <div
     id="toast_equipo"
     class="toast align-items-center border-0"
@@ -902,6 +920,63 @@
         campo.addEventListener('input', function () { aMayusculas(this); });
     });
 
+    /*
+     * =========================================================
+     * NOTIFICACIONES Y VALIDACIÓN DE CAMPOS
+     * (mismo formato usado en prestamo/form.blade.php)
+     * =========================================================
+     */
+
+    function mostrarToast(mensaje, tipo) {
+        const toastEl = document.getElementById('toast_equipo');
+        const textoEl = document.getElementById('toast_equipo_texto');
+        if (!toastEl || !textoEl) {
+            return;
+        }
+
+        textoEl.textContent = mensaje;
+        toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-primary');
+        toastEl.classList.add(tipo === 'danger' ? 'text-bg-danger' : 'text-bg-success');
+
+        const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
+        toast.show();
+    }
+
+    function limpiarErroresCampos() {
+        document.querySelectorAll('.error-toast-campo').forEach(function (el) {
+            el.remove();
+        });
+        document.querySelectorAll('.is-invalid').forEach(function (el) {
+            el.classList.remove('is-invalid');
+        });
+    }
+
+    function mostrarErrorCampo(campo, mensaje) {
+        if (!campo) {
+            mostrarToast(mensaje, 'danger');
+            return;
+        }
+
+        campo.classList.add('is-invalid');
+
+        const contenedor = campo.closest('.mb-3') || campo.parentElement;
+        if (contenedor) {
+            let aviso = contenedor.querySelector('.error-toast-campo');
+            if (!aviso) {
+                aviso = document.createElement('div');
+                aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
+                campo.insertAdjacentElement('afterend', aviso);
+            }
+            aviso.textContent = mensaje;
+        }
+
+        mostrarToast(mensaje, 'danger');
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () {
+            campo.focus();
+        }, 350);
+    }
+
     const tiposEquipoData = [
         @foreach($tiposequipo as $id => $nombre)
             { id: {{ (int) $id }}, nombre: @json($nombre) },
@@ -922,6 +997,9 @@
     const botonAgregar = document.getElementById('agregar-accesorio');
     const mensajeVacio = document.getElementById('sin-accesorios');
     const cardParte3 = botonAgregar ? botonAgregar.closest('.card') : null;
+    const bloqueoParte2 = document.getElementById('bloqueo-parte2');
+    const bloqueoParte3 = document.getElementById('bloqueo-parte3');
+    const cardParte2 = mensajeSpecs ? mensajeSpecs.closest('.card') : null;
     const tiposAccesorios = @json($tiposAccesorios ?? []);
     const idsBloqueados = ['num_serie', 'marca', 'modelo', 'ubicacion_id', 'fecha_registro', 'btn_fecha_hoy'];
 
@@ -938,7 +1016,16 @@
     if (btnHoy && fechaRegistro) {
         btnHoy.addEventListener('click', function () {
             fechaRegistro.value = fechaHoyISO();
+            mostrarEspecificaciones();
         });
+    }
+    if (fechaRegistro) {
+        fechaRegistro.addEventListener('input', mostrarEspecificaciones);
+        fechaRegistro.addEventListener('change', mostrarEspecificaciones);
+    }
+    const inputUbicacionEq = document.getElementById('ubicacion_id');
+    if (inputUbicacionEq) {
+        inputUbicacionEq.addEventListener('change', mostrarEspecificaciones);
     }
 
     function tipoEquipoListo() {
@@ -949,6 +1036,25 @@
             inputNuevoTipo &&
             inputNuevoTipo.value.trim() !== ''
         );
+    }
+
+    /*
+     * =========================================================
+     * PARTE 1 COMPLETA (TIPO + UBICACIÓN + FECHA)
+     * (mismo criterio usado en prestamo/form.blade.php)
+     * =========================================================
+     */
+
+    function parte1Completa() {
+        if (!tipoEquipoListo()) return false;
+
+        const ubicacion = document.getElementById('ubicacion_id');
+        if (!ubicacion || ubicacion.value.trim() === '') return false;
+
+        const fecha = document.getElementById('fecha_registro');
+        if (!fecha || fecha.value.trim() === '') return false;
+
+        return true;
     }
 
     function actualizarBloqueoParte1() {
@@ -965,10 +1071,30 @@
             el.classList.toggle('bg-light', !listo);
         });
 
-        if (botonAgregar) botonAgregar.disabled = !listo;
+        // ==========================================
+        // PARTE 2 Y 3: SOLO SE HABILITAN
+        // SI LA PARTE 1 ESTÁ COMPLETA Y VÁLIDA
+        // ==========================================
+
+        const completo = parte1Completa();
+
+        if (botonAgregar) botonAgregar.disabled = !completo;
         if (cardParte3) {
-            cardParte3.style.opacity = listo ? '1' : '0.55';
-            cardParte3.style.pointerEvents = listo ? 'auto' : 'none';
+            cardParte3.style.opacity = completo ? '1' : '0.55';
+            cardParte3.style.pointerEvents = completo ? 'auto' : 'none';
+        }
+        if (cardParte2) {
+            cardParte2.style.opacity = completo ? '1' : '0.55';
+            cardParte2.style.pointerEvents = completo ? 'auto' : 'none';
+        }
+
+        // Aviso de Parte 2: solo aplica cuando YA hay tipo elegido
+        // (si no hay tipo, el mensaje "mensaje-especificaciones" ya lo indica)
+        if (bloqueoParte2) {
+            bloqueoParte2.style.display = (listo && !completo) ? 'block' : 'none';
+        }
+        if (bloqueoParte3) {
+            bloqueoParte3.style.display = completo ? 'none' : 'block';
         }
     }
 
@@ -1349,302 +1475,64 @@
                     });
                 });
 
-    mostrarEspecificaciones();
-
     /*
- * =========================================================
- * PROTECCIÓN CONTRA CAMBIOS SIN GUARDAR
- * =========================================================
- *
- * FUNCIONA PARA:
- * - CREAR EQUIPO
- * - EDITAR EQUIPO
- * - BOTÓN VOLVER
- * - TECLA ESC
- *
- * SI EXISTEN CAMBIOS:
- *
- * "CAMBIOS SIN GUARDAR"
- * "¿DESEA SALIR?"
- *
- */
-
-
-/*
- * =========================================================
- * VARIABLES
- * =========================================================
- */
-
-let formularioModificado = false;
-let formularioEnviado = false;
-
-
-/*
- * OBTENER EL FORMULARIO
- */
-
-const formularioEquipo =
-    inputTipoEq
-        ? inputTipoEq.closest('form')
-        : null;
-
-
-/*
- * =========================================================
- * MARCAR FORMULARIO COMO MODIFICADO
- * =========================================================
- */
-
-if (formularioEquipo) {
-
-    /*
-     * INPUT
-     *
-     * Detecta escritura en:
-     * - textos
-     * - textarea
-     * - campos dinámicos
+     * =========================================================
+     * VALIDACIÓN AL ENVIAR EL FORMULARIO
+     * (mismo formato usado en prestamo/form.blade.php)
+     * =========================================================
      */
 
-    formularioEquipo.addEventListener(
-        'input',
-        function () {
+    if (form) {
 
-            formularioModificado = true;
+        form.addEventListener('submit', function (event) {
 
-        }
-    );
+            limpiarErroresCampos();
 
+            const tipoIdCampo = document.getElementById('tipo_equipo_id');
 
-    /*
-     * CHANGE
-     *
-     * Detecta:
-     * - SELECT
-     * - FECHA
-     * - cambios realizados mediante selección
-     */
-
-    formularioEquipo.addEventListener(
-        'change',
-        function () {
-
-            formularioModificado = true;
-
-        }
-    );
-
-
-    /*
-     * SUBMIT
-     *
-     * Si se presiona GUARDAR,
-     * ya no debemos mostrar "Cambios sin guardar".
-     */
-
-    formularioEquipo.addEventListener(
-        'submit',
-        function () {
-
-            formularioEnviado = true;
-            formularioModificado = false;
-
-        }
-    );
-
-}
-
-
-/*
- * =========================================================
- * FUNCIÓN PARA MOSTRAR EL AVISO
- * =========================================================
- */
-
-function confirmarSalidaEquipo() {
-
-    /*
-     * SI NO HAY CAMBIOS,
-     * SALIR DIRECTAMENTE.
-     */
-
-    if (!formularioModificado) {
-
-        return true;
-
-    }
-
-
-    /*
-     * AVISO DE CONFIRMACIÓN
-     *
-     * Este mensaje utiliza el cuadro de confirmación
-     * nativo del navegador.
-     */
-
-    return window.confirm(
-        'CAMBIOS SIN GUARDAR\n\n' +
-        '¿DESEA SALIR?\n\n' +
-        'Los cambios realizados no se guardarán.'
-    );
-
-}
-
-
-/*
- * =========================================================
- * BOTÓN VOLVER
- * =========================================================
- */
-
-document
-    .querySelectorAll(
-        'a[href*="equipos"]'
-    )
-    .forEach(function (enlace) {
-
-        /*
-         * SOLAMENTE CONTROLAR EL BOTÓN
-         * QUE LLEVA AL INDEX.
-         */
-
-        const texto =
-            enlace.textContent
-                .trim()
-                .toUpperCase();
-
-        if (texto !== 'VOLVER') {
-            return;
-        }
-
-
-        enlace.addEventListener(
-            'click',
-            function (event) {
-
-                /*
-                 * SI NO HAY CAMBIOS,
-                 * DEJAR CONTINUAR NORMALMENTE.
-                 */
-
-                if (!formularioModificado) {
-                    return;
-                }
-
-
-                /*
-                 * DETENER LA NAVEGACIÓN
-                 * HASTA QUE EL USUARIO DECIDA.
-                 */
-
+            if (!inputTipoEq || inputTipoEq.value.trim() === '' || !tipoIdCampo || tipoIdCampo.value.trim() === '') {
                 event.preventDefault();
-
-
-                if (confirmarSalidaEquipo()) {
-
-                    formularioModificado = false;
-
-                    window.location.href =
-                        enlace.href;
-
-                }
-
-            }
-        );
-
-    });
-
-
-/*
- * =========================================================
- * ATAJO ESC
- * =========================================================
- *
- * ESC = RETROCEDER
- *
- * PERO SI HAY CAMBIOS:
- *
- * ESC
- * ↓
- * CAMBIOS SIN GUARDAR
- * ↓
- * ¿DESEA SALIR?
- *
- */
-
-document.addEventListener(
-    'keydown',
-    function (event) {
-
-        /*
-         * SOLO ESC
-         */
-
-        if (event.key !== 'Escape') {
-            return;
-        }
-
-
-        /*
-         * SI ESTAMOS DENTRO DE UNA LISTA/DROPDOWN
-         * DEL FORMULARIO, NO INTERFERIR.
-         *
-         * El comportamiento principal será
-         * controlar la salida del formulario.
-         */
-
-        event.preventDefault();
-
-
-        /*
-         * SI EL FORMULARIO YA SE ENVIÓ,
-         * NO HACER NADA.
-         */
-
-        if (formularioEnviado) {
-            return;
-        }
-
-
-        /*
-         * SI HAY CAMBIOS,
-         * MOSTRAR CONFIRMACIÓN.
-         */
-
-        if (formularioModificado) {
-
-            const salir =
-                confirmarSalidaEquipo();
-
-
-            if (!salir) {
+                mostrarErrorCampo(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
                 return;
             }
 
-        }
+            const ubicacionCampo = document.getElementById('ubicacion_id');
+            if (!ubicacionCampo || ubicacionCampo.value.trim() === '') {
+                event.preventDefault();
+                mostrarErrorCampo(ubicacionCampo, 'Seleccione una ubicación.');
+                return;
+            }
 
+            const fechaCampo = document.getElementById('fecha_registro');
+            if (!fechaCampo || fechaCampo.value.trim() === '') {
+                event.preventDefault();
+                mostrarErrorCampo(fechaCampo, 'La fecha de registro es obligatoria.');
+                return;
+            }
 
-        /*
-         * MARCAR COMO SIN CAMBIOS
-         * ANTES DE RETROCEDER.
-         */
+            const estadosValidos = ['BUENO', 'REGULAR', 'MALOGRADO'];
+            const estadosAccesorios = this.querySelectorAll(
+                'select[name*="accesorios"][name$="[estado]"], input[name*="accesorios"][name$="[estado]"]'
+            );
+            for (const campo of estadosAccesorios) {
+                const valor = (campo.value || '').toUpperCase().trim();
+                if (!estadosValidos.includes(valor)) {
+                    event.preventDefault();
+                    mostrarToast('Hay accesorios con estado inválido o vacío.', 'danger');
+                    campo.focus();
+                    return;
+                }
+            }
 
-        formularioModificado = false;
-
-
-        /*
-         * RETROCEDER.
-         */
-
-        if (window.history.length > 1) {
-
-            window.history.back();
-
-        }
-
+            if (!this.checkValidity()) {
+                event.preventDefault();
+                this.reportValidity();
+                return;
+            }
+        });
     }
-);
+
+    mostrarEspecificaciones();
 
 });
 </script>

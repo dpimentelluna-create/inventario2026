@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('change', function () { conCambios = true; });
     form.addEventListener('submit', function () { conCambios = false; });
 
-    function confirmarSalida(url) {
+    function confirmarSalida(accion) {
         if (typeof Swal === 'undefined') {
-            if (confirm('Cambios sin guardar. ¿Desea salir?')) window.location.href = url;
+            if (confirm('Cambios sin guardar. ¿Desea salir?')) accion();
             return;
         }
         Swal.fire({
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             cancelButtonText: 'Seguir editando',
             reverseButtons: true
         }).then(function (r) {
-            if (r.isConfirmed) window.location.href = url;
+            if (r.isConfirmed) accion();
         });
     }
 
@@ -37,8 +37,27 @@ document.addEventListener('DOMContentLoaded', function () {
         enlace.addEventListener('click', function (e) {
             if (!conCambios) return;
             e.preventDefault();
-            confirmarSalida(enlace.href);
+            confirmarSalida(function () { window.location.href = enlace.href; });
         });
+    });
+
+    // ESC = retroceder (con confirmación si hay cambios sin guardar)
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        e.preventDefault();
+
+        function retroceder() {
+            if (window.history.length > 1) {
+                window.history.back();
+            }
+        }
+
+        if (!conCambios) {
+            retroceder();
+            return;
+        }
+
+        confirmarSalida(retroceder);
     });
 
     window.addEventListener('beforeunload', function (e) {
