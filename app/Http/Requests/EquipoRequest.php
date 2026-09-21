@@ -59,7 +59,7 @@ class EquipoRequest extends FormRequest
             'estado_laptop' => ['nullable', Rule::in(['BUENO', 'REGULAR', 'MALOGRADO'])],
             'observaciones_laptop' => ['nullable', 'string'],
 
-            'descripcion' => ['nullable', 'string'],
+            'descripcion' => ['required', 'string'],
             'color_equipo' => ['nullable', 'string'],
             'estado_equipo' => ['nullable', Rule::in(['BUENO', 'REGULAR', 'MALOGRADO'])],
             'observaciones_equipo' => ['nullable', 'string'],

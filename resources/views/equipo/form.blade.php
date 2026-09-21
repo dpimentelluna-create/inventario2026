@@ -1070,16 +1070,19 @@
      */
 
     function parte1Completa() {
-        if (!tipoEquipoListo()) return false;
+    if (!tipoEquipoListo()) return false;
 
-        const ubicacion = document.getElementById('ubicacion_id');
-        if (!ubicacion || ubicacion.value.trim() === '') return false;
+    const serie = document.getElementById('num_serie');
+    if (!serie || serie.value.trim() === '') return false;
 
-        const fecha = document.getElementById('fecha_registro');
-        if (!fecha || fecha.value.trim() === '') return false;
+    const ubicacion = document.getElementById('ubicacion_id');
+    if (!ubicacion || ubicacion.value.trim() === '') return false;
 
-        return true;
-    }
+    const fecha = document.getElementById('fecha_registro');
+    if (!fecha || fecha.value.trim() === '') return false;
+
+    return true;
+}
 
     function actualizarBloqueoParte1() {
         const listo = tipoEquipoListo();
@@ -1193,6 +1196,15 @@ function limpiarFormularioMenosSerie() {
                     mensajeSpecs.style.display = 'block';
                 }
 
+                if (equipoBox && equipoBox.style.display !== 'none') {
+    const desc = document.getElementById('descripcion');
+    if (!desc || !desc.value.trim()) {
+        event.preventDefault();
+        mostrarErrorCampo(desc, 'La descripción es obligatoria.');
+        return;
+    }
+}
+
 
                 // ==========================================
                 // OBTENER DATOS DEL TIPO SELECCIONADO
@@ -1265,8 +1277,14 @@ function limpiarFormularioMenosSerie() {
 
                 const nombreTipo = tipoSeleccionado
                     ? String(tipoSeleccionado.nombre).trim().toUpperCase()
-                    : tipoTexto;
+                    : (esOtro && inputNuevoTipo ? inputNuevoTipo.value.trim().toUpperCase() : tipoTexto);
 
+                if (nombreTipo && nombreTipo !== 'OTRO' && nombreTipo !== ultimoTipoEquipo) {
+                    if (ultimoTipoEquipo !== '') {
+                        limpiarAlCambiarTipo();
+                    }
+                    ultimoTipoEquipo = nombreTipo;
+                }
 
                 if (nombreTipo === 'LAPTOP') {
 
@@ -1294,7 +1312,24 @@ function limpiarFormularioMenosSerie() {
                     aplicarUltimoRegistro(nombreTipo);
 
                 }
-
+                
+                const inputSerie = document.getElementById('num_serie');
+if (inputSerie) {
+    inputSerie.addEventListener('input', function () {
+        actualizarBloqueoParte1();
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            const err = this.parentElement.querySelector('.error-toast-campo');
+            if (err) err.remove();
+        }
+    });
+    inputSerie.addEventListener('blur', function () {
+        actualizarBloqueoParte1();
+        if (!this.value.trim()) {
+            mostrarErrorCampo(this, 'El número de serie es obligatorio.');
+        }
+    });
+}
 
                 // ==========================================
                 // ACTUALIZAR BLOQUEO DE PARTE 1
@@ -1302,6 +1337,32 @@ function limpiarFormularioMenosSerie() {
 
                 actualizarBloqueoParte1();
     }
+
+    function validarCampoVivo(id, mensaje) {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    campo.addEventListener('blur', function () {
+        if (!this.value.trim()) {
+            mostrarErrorCampo(this, mensaje);
+        }
+    });
+    campo.addEventListener('input', function () {
+        if (this.value.trim()) {
+            this.classList.remove('is-invalid');
+            const err = (this.closest('.mb-3') || this.parentElement).querySelector('.error-toast-campo');
+            if (err) err.remove();
+        }
+    });
+}
+
+validarCampoVivo('num_serie', 'El número de serie es obligatorio.');
+validarCampoVivo('marca', 'La marca es obligatoria.');
+validarCampoVivo('descripcion', 'La descripción es obligatoria.');
+validarCampoVivo('procesador', 'El procesador es obligatorio.');
+validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
+validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
+
+
 function limpiarFormularioMenosSerie() {
     ['marca', 'modelo', 'ubicacion_id'].forEach(function (id) { setCampo(id, ''); });
 
@@ -1491,6 +1552,61 @@ function limpiarFormularioMenosSerie() {
         }
     }
 
+    function validarFilaAccesorio(accesorio) {
+    function errorEn(campo, mensaje) {
+        if (!campo) return;
+        campo.classList.add('is-invalid');
+        let aviso = campo.parentElement.querySelector('.error-toast-campo');
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
+            campo.insertAdjacentElement('afterend', aviso);
+        }
+        aviso.textContent = mensaje;
+    }
+
+    function limpiar(campo) {
+        if (!campo) return;
+        campo.classList.remove('is-invalid');
+        const aviso = campo.parentElement.querySelector('.error-toast-campo');
+        if (aviso) aviso.remove();
+    }
+
+    function reglas() {
+        return [
+            [accesorio.querySelector('.tipo-accesorio'), 'El tipo es obligatorio.'],
+            [accesorio.querySelector('[name*="[marca]"]'), 'La marca es obligatoria.'],
+            [accesorio.querySelector('[name*="[num_serie]"]'), 'El número de serie es obligatorio.'],
+            [accesorio.querySelector('[name*="[estado]"]'), 'El estado es obligatorio.']
+        ];
+    }
+
+    function filaTieneDatos() {
+        return reglas().some(function (par) {
+            const v = ((par[0] && par[0].value) || '').trim().toUpperCase();
+            return v && v !== 'REGULAR';
+        }) || (((accesorio.querySelector('[name*="[observaciones]"]') || {}).value || '').trim() !== '');
+    }
+
+    reglas().forEach(function (par) {
+        const campo = par[0];
+        if (!campo) return;
+        campo.addEventListener('blur', function () {
+            if (!filaTieneDatos()) {
+                limpiar(campo);
+                return;
+            }
+            if (!this.value.trim()) errorEn(this, par[1]);
+        });
+        campo.addEventListener('input', function () {
+            if (this.value.trim()) limpiar(this);
+        });
+        campo.addEventListener('change', function () {
+            if (this.value.trim()) limpiar(this);
+        });
+    });
+}
+
     function configurarCombobox(accesorio) {
         const input = accesorio.querySelector('.tipo-accesorio');
         const lista = accesorio.querySelector('.lista-tipos-accesorio');
@@ -1576,6 +1692,7 @@ function limpiarFormularioMenosSerie() {
         container.querySelectorAll('.accesorio-item').forEach(function (accesorio) {
             configurarCombobox(accesorio);
             actualizarTipoPersonalizado(accesorio);
+            validarFilaAccesorio(accesorio);
         });
         actualizarMensaje();
 
@@ -1626,6 +1743,7 @@ function limpiarFormularioMenosSerie() {
                     campo.addEventListener('input', function () { aMayusculas(this); });
                 });
                 configurarCombobox(accesorio);
+                validarFilaAccesorio(accesorio);
                 contador++;
                 actualizarMensaje();
             });
