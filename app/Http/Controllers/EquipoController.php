@@ -20,7 +20,7 @@ class EquipoController extends Controller
     /**
      * Display a listing of the resource.
      */
-     public function index(): View
+    public function index(): View
     {
         $equipos = Equipo::with([
             'tipoEquipo',
@@ -63,11 +63,69 @@ class EquipoController extends Controller
             ->orderBy('tipo')
             ->pluck('tipo');
 
+
+        $ultimasMarcasAccesorio = [];
+
+
+        $ultimosPorTipo = [];
+
+        $equiposTipo = Equipo::with(['tipoEquipo', 'especificacionesLaptops', 'especificacionesEquipo'])
+            ->orderByDesc('id')
+            ->get();
+
+        foreach ($equiposTipo as $eq) {
+            $nombre = mb_strtoupper(trim($eq->tipoEquipo->nombre ?? ''), 'UTF-8');
+            if ($nombre === '' || isset($ultimosPorTipo[$nombre])) {
+                continue;
+            }
+
+            $lap = $eq->especificacionesLaptops;
+            $gen = $eq->especificacionesEquipo;
+
+            $ultimosPorTipo[$nombre] = [
+                'marca' => $eq->marca,
+                'modelo' => $eq->modelo,
+                'procesador' => $lap->procesador ?? null,
+                'ram' => $lap->ram ?? null,
+                'disco_duro' => $lap->disco_duro ?? null,
+                'color' => $lap->color ?? $gen->color ?? null,
+                'descripcion' => $gen->descripcion ?? null,
+            ];
+        }
+
+
+        $filasMarca = \App\Models\AccesoriosEquipo::query()
+            ->join('equipos', 'equipos.id', '=', 'accesorios_equipo.equipo_id')
+            ->join('tipos_equipo', 'tipos_equipo.id', '=', 'equipos.tipo_equipo_id')
+            ->whereNotNull('accesorios_equipo.tipo')
+            ->where('accesorios_equipo.tipo', '!=', '')
+            ->whereNotNull('accesorios_equipo.marca')
+            ->where('accesorios_equipo.marca', '!=', '')
+            ->orderByDesc('accesorios_equipo.id')
+            ->get([
+                'tipos_equipo.nombre as tipo_equipo',
+                'accesorios_equipo.tipo as tipo_accesorio',
+                'accesorios_equipo.marca as marca',
+            ]);
+
+        foreach ($filasMarca as $fila) {
+            $clave = mb_strtoupper(trim($fila->tipo_equipo), 'UTF-8')
+                . '|'
+                . mb_strtoupper(trim($fila->tipo_accesorio), 'UTF-8');
+
+            if (!isset($ultimasMarcasAccesorio[$clave])) {
+                $ultimasMarcasAccesorio[$clave] = mb_strtoupper(trim($fila->marca), 'UTF-8');
+            }
+        }
+
+
         return view('equipo.create', compact(
             'equipo',
             'tiposequipo',
             'ubicacione',
-            'tiposAccesorios'
+            'tiposAccesorios',
+            'ultimasMarcasAccesorio',
+            'ultimosPorTipo'
         ));
     }
 
@@ -98,6 +156,7 @@ class EquipoController extends Controller
 
         //2. OBTENER EL TIPO DE EQUIPO
         $tipoEquipo = TiposEquipo::find($tipoEquipoId);
+
         //3. GUARDAR ESPICCIFIACIONES
         // IF IS LAPTOP:
         if ($tipoEquipo && strtoupper($tipoEquipo->nombre) === 'LAPTOP') {
@@ -107,7 +166,7 @@ class EquipoController extends Controller
                 'ram' => $request->ram,
                 'disco_duro' => $request->disco_duro,
                 'color' => $request->color_laptop,
-                'estado' => $request->estado_laptop ?? 'Regular',
+                'estado' => $request->estado_laptop ?? 'REGULAR',
                 'observaciones' => $request->observaciones_laptop,
             ]);
 
@@ -117,7 +176,7 @@ class EquipoController extends Controller
                 'equipo_id' => $equipo->id,
                 'descripcion' => $request->descripcion,
                 'color' => $request->color_equipo,
-                'estado' => $request->estado_equipo ?? 'Regular',
+                'estado' => $request->estado_equipo ?? 'REGULAR',
                 'observaciones' => $request->observaciones_equipo,
             ]);
         }
@@ -130,7 +189,7 @@ class EquipoController extends Controller
                 // Determinar el tipo real
                 $tipo = $accesorio['tipo'] ?? null;
 
-                if ($tipo === 'Otro') {
+                if ($tipo === 'OTRO') {
                     $tipo = trim($accesorio['tipo_personalizado'] ?? '');
                 }
 
@@ -153,7 +212,7 @@ class EquipoController extends Controller
                     'tipo' => $tipo,
                     'marca' => $accesorio['marca'] ?? null,
                     'num_serie' => $accesorio['num_serie'] ?? null,
-                    'estado' => $accesorio['estado'] ?? 'Regular',
+                    'estado' => $accesorio['estado'] ?? 'REGULAR',
                     'observaciones' => $accesorio['observaciones'] ?? null,
                 ]);
             }
@@ -208,13 +267,69 @@ class EquipoController extends Controller
             ->orderBy('tipo')
             ->pluck('tipo');
 
+        $ultimasMarcasAccesorio = [];
+
+
+        $ultimosPorTipo = [];
+
+        $equiposTipo = Equipo::with(['tipoEquipo', 'especificacionesLaptops', 'especificacionesEquipo'])
+            ->orderByDesc('id')
+            ->get();
+
+        foreach ($equiposTipo as $eq) {
+            $nombre = mb_strtoupper(trim($eq->tipoEquipo->nombre ?? ''), 'UTF-8');
+            if ($nombre === '' || isset($ultimosPorTipo[$nombre])) {
+                continue;
+            }
+
+            $lap = $eq->especificacionesLaptops;
+            $gen = $eq->especificacionesEquipo;
+
+            $ultimosPorTipo[$nombre] = [
+                'marca' => $eq->marca,
+                'modelo' => $eq->modelo,
+                'procesador' => $lap->procesador ?? null,
+                'ram' => $lap->ram ?? null,
+                'disco_duro' => $lap->disco_duro ?? null,
+                'color' => $lap->color ?? $gen->color ?? null,
+                'descripcion' => $gen->descripcion ?? null,
+            ];
+        }
+
+
+        $filasMarca = \App\Models\AccesoriosEquipo::query()
+            ->join('equipos', 'equipos.id', '=', 'accesorios_equipo.equipo_id')
+            ->join('tipos_equipo', 'tipos_equipo.id', '=', 'equipos.tipo_equipo_id')
+            ->whereNotNull('accesorios_equipo.tipo')
+            ->where('accesorios_equipo.tipo', '!=', '')
+            ->whereNotNull('accesorios_equipo.marca')
+            ->where('accesorios_equipo.marca', '!=', '')
+            ->orderByDesc('accesorios_equipo.id')
+            ->get([
+                'tipos_equipo.nombre as tipo_equipo',
+                'accesorios_equipo.tipo as tipo_accesorio',
+                'accesorios_equipo.marca as marca',
+            ]);
+
+        foreach ($filasMarca as $fila) {
+            $clave = mb_strtoupper(trim($fila->tipo_equipo), 'UTF-8')
+                . '|'
+                . mb_strtoupper(trim($fila->tipo_accesorio), 'UTF-8');
+
+            if (!isset($ultimasMarcasAccesorio[$clave])) {
+                $ultimasMarcasAccesorio[$clave] = mb_strtoupper(trim($fila->marca), 'UTF-8');
+            }
+        }
+
         return view('equipo.edit', compact(
             'equipo',
             'tiposequipo',
             'ubicacione',
             'especificacionesLaptop',
             'especificacionesEquipo',
-            'tiposAccesorios'
+            'tiposAccesorios',
+            'ultimasMarcasAccesorio',
+            'ultimosPorTipo'
         ));
     }
 

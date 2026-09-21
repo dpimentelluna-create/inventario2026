@@ -28,14 +28,17 @@ class EquipoRequest extends FormRequest
             'observaciones_equipo' => $this->aMayusculas($this->observaciones_equipo),
             'estado_laptop' => $this->normalizarEstado($this->estado_laptop),
             'estado_equipo' => $this->normalizarEstado($this->estado_equipo),
-            'nuevo_tipo_equipo' => $this->aMayusculas($this->nuevo_tipo_equipo),
         ]);
     }
 
     public function rules(): array
     {
         return [
-            'tipo_equipo_id' => ['required_without:nuevo_tipo_equipo', 'nullable', 'exists:tipos_equipo,id'],
+            'tipo_equipo_id' => [
+                'nullable',
+                'required_without:nuevo_tipo_equipo',
+                'exists:tipos_equipo,id',
+            ],
             'nuevo_tipo_equipo' => [
                 'nullable',
                 'string',
@@ -69,6 +72,8 @@ class EquipoRequest extends FormRequest
             'estado_laptop.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'estado_equipo.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'num_serie.required' => 'El número de serie es obligatorio.',
+            'tipo_equipo_id.required_without' => 'Seleccione un tipo de equipo o registre uno nuevo.',
+            'nuevo_tipo_equipo.required_without' => 'Especifique el nuevo tipo de equipo.',
         ];
     }
 

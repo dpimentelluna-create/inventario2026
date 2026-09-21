@@ -72,4 +72,3 @@ Route::get(
 )->name('prestamos.buscarEquipos');
 
 Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
-

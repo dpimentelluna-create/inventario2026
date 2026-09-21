@@ -985,6 +985,7 @@
 
     const inputTipoEq = document.getElementById('buscar_tipo_equipo');
     const hiddenTipoEq = document.getElementById('tipo_equipo_id');
+    let indiceTipoActivo = -1;
     const listaTipoEq = document.getElementById('lista_tipos_equipo');
     const wrapNuevoTipo = document.getElementById('wrap_nuevo_tipo_equipo');
     const inputNuevoTipo = document.getElementById('nuevo_tipo_equipo');
@@ -1001,7 +1002,30 @@
     const bloqueoParte3 = document.getElementById('bloqueo-parte3');
     const cardParte2 = mensajeSpecs ? mensajeSpecs.closest('.card') : null;
     const tiposAccesorios = @json($tiposAccesorios ?? []);
+    const ultimasMarcasAccesorio = @json($ultimasMarcasAccesorio ?? []);
+    const ultimosPorTipo = @json($ultimosPorTipo ?? []);
+    const ultimasMarcasAccesorios = @json($ultimasMarcasAccesorios ?? []);
     const idsBloqueados = ['num_serie', 'marca', 'modelo', 'ubicacion_id', 'fecha_registro', 'btn_fecha_hoy'];
+
+    function aplicarUltimoRegistro(nombreTipo) {
+        const data = ultimosPorTipo[String(nombreTipo || '').toUpperCase()];
+        if (!data) return;
+        const mapa = {
+            marca: data.marca,
+            modelo: data.modelo,
+            procesador: data.procesador,
+            ram: data.ram,
+            disco_duro: data.disco_duro,
+            color_laptop: data.color,
+            descripcion: data.descripcion,
+            color_equipo: data.color
+        };
+        Object.keys(mapa).forEach(function (id) {
+            const el = document.getElementById(id);
+            if (!el || String(el.value || '').trim()) return;
+            if (mapa[id]) el.value = mapa[id];
+        });
+    }
 
     function fechaHoyISO() {
         const d = new Date();
@@ -1120,6 +1144,36 @@
         }) || null;
     }
 
+    let ultimoTipoEquipo = '';
+
+function setCampo(id, valor) {
+    const el = document.getElementById(id);
+    if (el) el.value = valor;
+}
+
+function limpiarAlCambiarTipo() {
+    ['marca', 'modelo'].forEach(function (id) { setCampo(id, ''); });
+    ['procesador', 'ram', 'disco_duro', 'color_laptop', 'observaciones_laptop'].forEach(function (id) {
+        setCampo(id, '');
+    });
+    setCampo('estado_laptop', 'REGULAR');
+    ['descripcion', 'color_equipo', 'observaciones_equipo'].forEach(function (id) {
+        setCampo(id, '');
+    });
+    setCampo('estado_equipo', 'REGULAR');
+    if (container) {
+        container.querySelectorAll('.accesorio-item').forEach(function (item) { item.remove(); });
+        if (typeof actualizarMensaje === 'function') actualizarMensaje();
+    }
+}
+
+function limpiarFormularioMenosSerie() {
+    limpiarAlCambiarTipo();
+    setCampo('ubicacion_id', '');
+    if (fechaRegistro && typeof fechaHoyISO === 'function') {
+        fechaRegistro.value = fechaHoyISO();
+    }
+}
 
     function mostrarEspecificaciones() {
 
@@ -1179,18 +1233,21 @@
 
                 }
 
+                
+
 
                 // ==========================================
                 // SI TODAVÍA NO HAY TIPO SELECCIONADO
                 // ==========================================
 
                 if (!tipoSeleccionado && !esOtro) {
-
-                    actualizarBloqueoParte1();
-
-                    return;
-
-                }
+    if (ultimoTipoEquipo !== '') {
+        limpiarFormularioMenosSerie();
+        ultimoTipoEquipo = '';
+    }
+    actualizarBloqueoParte1();
+    return;
+}
 
 
                 // ==========================================
@@ -1213,15 +1270,14 @@
 
                 if (nombreTipo === 'LAPTOP') {
 
-                    // Mostrar especificaciones de Laptop
                     if (laptopBox) {
                         laptopBox.style.display = 'block';
                     }
-
-                    // Ocultar especificaciones generales
                     if (equipoBox) {
                         equipoBox.style.display = 'none';
                     }
+
+                    aplicarUltimoRegistro(nombreTipo);
 
                 } else {
 
@@ -1235,6 +1291,8 @@
                         laptopBox.style.display = 'none';
                     }
 
+                    aplicarUltimoRegistro(nombreTipo);
+
                 }
 
 
@@ -1244,7 +1302,26 @@
 
                 actualizarBloqueoParte1();
     }
+function limpiarFormularioMenosSerie() {
+    ['marca', 'modelo', 'ubicacion_id'].forEach(function (id) { setCampo(id, ''); });
 
+    ['procesador', 'ram', 'disco_duro', 'color_laptop', 'observaciones_laptop'].forEach(function (id) {
+        setCampo(id, '');
+    });
+    setCampo('estado_laptop', 'REGULAR');
+
+    ['descripcion', 'color_equipo', 'observaciones_equipo'].forEach(function (id) {
+        setCampo(id, '');
+    });
+    setCampo('estado_equipo', 'REGULAR');
+
+    if (fechaRegistro) fechaRegistro.value = fechaHoyISO();
+
+    if (container) {
+        container.querySelectorAll('.accesorio-item').forEach(function (item) { item.remove(); });
+        actualizarMensaje();
+    }
+}
 
     function pintarListaTiposEquipo() {
         if (!inputTipoEq || !listaTipoEq) return;
@@ -1284,6 +1361,39 @@
         });
         listaTipoEq.appendChild(otro);
         listaTipoEq.style.display = 'block';
+        indiceTipoActivo = -1;
+    }
+
+    function itemsListaTipo() {
+        return listaTipoEq ? Array.from(listaTipoEq.querySelectorAll('div')) : [];
+    }
+
+    function pintarActivoTipo() {
+        itemsListaTipo().forEach(function (el, i) {
+            el.style.backgroundColor = i === indiceTipoActivo ? '#d1e7dd' : '';
+        });
+        const act = itemsListaTipo()[indiceTipoActivo];
+        if (act) act.scrollIntoView({ block: 'nearest' });
+    }
+
+    function seleccionarItemTipo(item) {
+        if (!item) return;
+        const texto = item.textContent.trim().toUpperCase();
+        if (texto === 'OTRO') {
+            inputTipoEq.value = 'OTRO';
+            hiddenTipoEq.value = '';
+            mostrarCampoNuevoTipo(true);
+            if (inputNuevoTipo) inputNuevoTipo.focus();
+        } else {
+            const tipo = tiposEquipoData.find(function (t) {
+                return String(t.nombre).toUpperCase() === texto;
+            });
+            inputTipoEq.value = texto;
+            hiddenTipoEq.value = tipo ? tipo.id : '';
+            mostrarCampoNuevoTipo(false);
+        }
+        listaTipoEq.style.display = 'none';
+        mostrarEspecificaciones();
     }
 
     if (inputTipoEq) {
@@ -1295,6 +1405,28 @@
             mostrarCampoNuevoTipo(this.value.trim() === 'OTRO');
             pintarListaTiposEquipo();
             mostrarEspecificaciones();
+        });
+        inputTipoEq.addEventListener('keydown', function (e) {
+            const items = itemsListaTipo();
+            const visible = listaTipoEq && listaTipoEq.style.display !== 'none' && items.length;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!visible) pintarListaTiposEquipo();
+                const lista = itemsListaTipo();
+                indiceTipoActivo = Math.min(indiceTipoActivo + 1, lista.length - 1);
+                pintarActivoTipo();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                indiceTipoActivo = Math.max(indiceTipoActivo - 1, 0);
+                pintarActivoTipo();
+            } else if (e.key === 'Enter') {
+                if (visible && indiceTipoActivo >= 0) {
+                    e.preventDefault();
+                    seleccionarItemTipo(itemsListaTipo()[indiceTipoActivo]);
+                }
+            } else if (e.key === 'Escape') {
+                listaTipoEq.style.display = 'none';
+            }
         });
     }
 
@@ -1339,14 +1471,55 @@
         inputPers.required = esOtro;
     }
 
+    function tipoEquipoActualNombre() {
+        if (inputNuevoTipo && inputNuevoTipo.value.trim()) {
+            return inputNuevoTipo.value.trim().toUpperCase();
+        }
+        return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
+    }
+
+    function sugerirMarcaAccesorio(accesorio) {
+        const inputTipo = accesorio.querySelector('.tipo-accesorio');
+        const inputMarca = accesorio.querySelector('[name*="[marca]"]');
+        if (!inputTipo || !inputMarca) return;
+        const tipoAcc = inputTipo.value.trim().toUpperCase();
+        if (!tipoAcc || tipoAcc === 'OTRO') return;
+        const clave = tipoEquipoActualNombre() + '|' + tipoAcc;
+        const marcaSugerida = ultimasMarcasAccesorio[clave];
+        if (marcaSugerida && !String(inputMarca.value || '').trim()) {
+            inputMarca.value = String(marcaSugerida).toUpperCase();
+        }
+    }
+
     function configurarCombobox(accesorio) {
         const input = accesorio.querySelector('.tipo-accesorio');
         const lista = accesorio.querySelector('.lista-tipos-accesorio');
         if (!input || !lista) return;
+        let indiceAcc = -1;
+
+        function itemsAcc() {
+            return Array.from(lista.querySelectorAll('div'));
+        }
+
+        function pintarActivoAcc() {
+            itemsAcc().forEach(function (el, i) {
+                el.style.backgroundColor = i === indiceAcc ? '#d1e7dd' : '';
+            });
+            const act = itemsAcc()[indiceAcc];
+            if (act) act.scrollIntoView({ block: 'nearest' });
+        }
+
+        function elegirTipoAcc(texto) {
+            input.value = String(texto).toUpperCase();
+            lista.style.display = 'none';
+            actualizarTipoPersonalizado(accesorio);
+            sugerirMarcaAccesorio(accesorio);
+        }
 
         function mostrarLista() {
             const texto = input.value.trim().toUpperCase();
             lista.innerHTML = '';
+            indiceAcc = -1;
             (tiposAccesorios || []).filter(function (tipo) {
                 return String(tipo).toUpperCase().includes(texto);
             }).forEach(function (tipo) {
@@ -1356,9 +1529,7 @@
                 opcion.textContent = tipo;
                 opcion.addEventListener('mousedown', function (event) {
                     event.preventDefault();
-                    input.value = String(tipo).toUpperCase();
-                    lista.style.display = 'none';
-                    actualizarTipoPersonalizado(accesorio);
+                    elegirTipoAcc(tipo);
                 });
                 lista.appendChild(opcion);
             });
@@ -1368,9 +1539,7 @@
             opcionOtro.textContent = 'OTRO';
             opcionOtro.addEventListener('mousedown', function (event) {
                 event.preventDefault();
-                input.value = 'OTRO';
-                lista.style.display = 'none';
-                actualizarTipoPersonalizado(accesorio);
+                elegirTipoAcc('OTRO');
             });
             lista.appendChild(opcionOtro);
             lista.style.display = 'block';
@@ -1382,6 +1551,25 @@
         });
         input.addEventListener('focus', mostrarLista);
         input.addEventListener('click', mostrarLista);
+        input.addEventListener('keydown', function (e) {
+            const items = itemsAcc();
+            const visible = lista.style.display !== 'none' && items.length;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (!visible) mostrarLista();
+                indiceAcc = Math.min(indiceAcc + 1, itemsAcc().length - 1);
+                pintarActivoAcc();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                indiceAcc = Math.max(indiceAcc - 1, 0);
+                pintarActivoAcc();
+            } else if (e.key === 'Enter' && visible && indiceAcc >= 0) {
+                e.preventDefault();
+                elegirTipoAcc(itemsAcc()[indiceAcc].textContent);
+            } else if (e.key === 'Escape') {
+                lista.style.display = 'none';
+            }
+        });
     }
 
     if (container) {
@@ -1447,8 +1635,44 @@
             const botonEliminar = event.target.closest('.btn-eliminar-accesorio');
             if (!botonEliminar) return;
             const accesorio = botonEliminar.closest('.accesorio-item');
-            if (accesorio) accesorio.remove();
-            actualizarMensaje();
+            if (!accesorio) return;
+
+            function quitar() {
+                accesorio.remove();
+                actualizarMensaje();
+            }
+
+            function accesorioConDatos(item) {
+                const tipo = ((item.querySelector('.tipo-accesorio') || {}).value || '').trim();
+                const pers = ((item.querySelector('.tipo-personalizado') || {}).value || '').trim();
+                const marca = ((item.querySelector('[name*="[marca]"]') || {}).value || '').trim();
+                const serie = ((item.querySelector('[name*="[num_serie]"]') || {}).value || '').trim();
+                const obs = ((item.querySelector('[name*="[observaciones]"]') || {}).value || '').trim();
+                return !!(tipo || pers || marca || serie || obs);
+            }
+
+            if (!accesorioConDatos(accesorio)) {
+                quitar();
+                return;
+            }
+
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '¿Eliminar accesorio?',
+                    text: 'Esta acción no se puede deshacer.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Sí, eliminar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true
+                }).then(function (r) {
+                    if (r.isConfirmed) quitar();
+                });
+            } else if (confirm('¿Eliminar accesorio?')) {
+                quitar();
+            }
         });
     }
 
@@ -1496,18 +1720,59 @@
                 return;
             }
 
-            const ubicacionCampo = document.getElementById('ubicacion_id');
-            if (!ubicacionCampo || ubicacionCampo.value.trim() === '') {
-                event.preventDefault();
-                mostrarErrorCampo(ubicacionCampo, 'Seleccione una ubicación.');
-                return;
+            const camposReq = [
+                ['num_serie', 'El número de serie es obligatorio.'],
+                ['marca', 'La marca es obligatoria.'],
+                ['ubicacion_id', 'Seleccione una ubicación.'],
+                ['fecha_registro', 'La fecha de registro es obligatoria.']
+            ];
+            for (const par of camposReq) {
+                const c = document.getElementById(par[0]);
+                if (!c || String(c.value || '').trim() === '') {
+                    event.preventDefault();
+                    mostrarErrorCampo(c, par[1]);
+                    return;
+                }
+            }
+            if (laptopBox && laptopBox.style.display !== 'none') {
+                const lap = [
+                    ['procesador', 'El procesador es obligatorio.'],
+                    ['ram', 'La memoria RAM es obligatoria.'],
+                    ['disco_duro', 'El disco duro es obligatorio.']
+                ];
+                for (const par of lap) {
+                    const c = document.getElementById(par[0]);
+                    if (!c || String(c.value || '').trim() === '') {
+                        event.preventDefault();
+                        mostrarErrorCampo(c, par[1]);
+                        return;
+                    }
+                }
             }
 
-            const fechaCampo = document.getElementById('fecha_registro');
-            if (!fechaCampo || fechaCampo.value.trim() === '') {
-                event.preventDefault();
-                mostrarErrorCampo(fechaCampo, 'La fecha de registro es obligatoria.');
-                return;
+            const filasAcc = this.querySelectorAll('.accesorio-item');
+            for (const item of filasAcc) {
+                const tipoInp = item.querySelector('.tipo-accesorio');
+                const persInp = item.querySelector('.tipo-personalizado');
+                const marcaInp = item.querySelector('[name*="[marca]"]');
+                const serieInp = item.querySelector('[name*="[num_serie]"]');
+                const estadoInp = item.querySelector('[name*="[estado]"]');
+                const tipoTxt = ((tipoInp && tipoInp.value) || '').trim().toUpperCase();
+                const tipoReal = tipoTxt === 'OTRO' ? ((persInp && persInp.value) || '').trim() : tipoTxt;
+                const marcaTxt = ((marcaInp && marcaInp.value) || '').trim();
+                const serieTxt = ((serieInp && serieInp.value) || '').trim();
+                const estadoTxt = ((estadoInp && estadoInp.value) || '').trim();
+                if (!tipoReal && !marcaTxt && !serieTxt) continue;
+                if (!tipoReal || !marcaTxt || !serieTxt || !estadoTxt) {
+                    event.preventDefault();
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error('CADA ACCESORIO DEBE TENER TIPO, MARCA, N.º SERIE Y ESTADO.');
+                    } else {
+                        alert('CADA ACCESORIO DEBE TENER TIPO, MARCA, N.º SERIE Y ESTADO.');
+                    }
+                    (marcaInp || serieInp || tipoInp)?.focus();
+                    return;
+                }
             }
 
             const estadosValidos = ['BUENO', 'REGULAR', 'MALOGRADO'];
