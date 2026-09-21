@@ -221,12 +221,12 @@ class EquipoController extends Controller
         //5. FINALIZAR
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo registrado.')
-->with('toast_tipo', 'exito')
-->with('equipo_resaltado', $equipo->id)
-->with('equipo_accion', 'crear');
+            ->with('toast_tipo', 'exito')
+            ->with('equipo_resaltado', $equipo->id)
+            ->with('equipo_accion', 'crear');
     }
 
-    /**
+    /** 
      * Display the specified resource.
      */
     public function show($id): View
@@ -490,7 +490,10 @@ class EquipoController extends Controller
         }
 
         return redirect()->route('equipos.index')
-            ->with('success', 'Equipo actualizado.')->with('toast_tipo', 'aviso');
+            ->with('success', 'Equipo actualizado.')
+            ->with('toast_tipo', 'aviso')
+            ->with('equipo_resaltado', $equipo->id)
+            ->with('equipo_accion', 'editar');
     }
     public function destroy(Equipo $equipo): RedirectResponse
     {
@@ -498,8 +501,8 @@ class EquipoController extends Controller
 
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo actualizado.')
-->with('toast_tipo', 'aviso')
-->with('equipo_resaltado', $equipo->id)
-->with('equipo_accion', 'editar');
+            ->with('toast_tipo', 'aviso')
+            ->with('equipo_resaltado', $equipo->id)
+            ->with('equipo_accion', 'editar');
     }
 }

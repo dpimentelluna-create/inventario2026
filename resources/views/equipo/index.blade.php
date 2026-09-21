@@ -691,58 +691,17 @@ function cargarPaginaActual() {
     const nuevoEquipo = localStorage.getItem(STORAGE_NUEVO_EQUIPO);
 
     if (nuevoEquipo === '1') {
-
-        localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
-
-        setTimeout(function () {
-    cargarPaginaActual();
-
-    document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
-        a.addEventListener('click', function () {
-            const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
-            sessionStorage.setItem('equipo_accion', 'ver');
-        });
-    });
-
-    const idFlash = @json(session('equipo_resaltado'));
-    const accFlash = @json(session('equipo_accion'));
-    const idVer = sessionStorage.getItem('equipo_resaltado');
-    const accVer = sessionStorage.getItem('equipo_accion');
-    sessionStorage.removeItem('equipo_resaltado');
-    sessionStorage.removeItem('equipo_accion');
-
-    const idFila = idFlash || idVer;
-    const accFila = accFlash || accVer;
-    if (!idFila || !accFila) return;
-
-    const cls = accFila === 'crear' ? 'fila-crear'
-        : accFila === 'editar' ? 'fila-editar'
-        : 'fila-ver';
-
-    function pintar() {
-        const fila = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
-        if (!fila) return false;
-        fila.classList.add(cls);
-        fila.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-        return true;
-    }
-
-    // 1) intenta ahora  2) si no está en esta página, espera el cambio de página
-    if (!pintar()) {
-        setTimeout(function () {
-            if (pintar()) return;
-            const pages = tabla.page.info().pages;
-            if (pages > 0) {
-                tabla.page(pages - 1).draw('page');
-                setTimeout(pintar, 80);
-            }
-        }, 250);
-    }
-}, 200);
-
-        return;
-    }
+    localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
+    setTimeout(function () {
+        const cantidadPaginas = tabla.page.info().pages;
+        if (cantidadPaginas > 0) {
+            const ultimaPagina = cantidadPaginas - 1;
+            tabla.page(ultimaPagina).draw('page');
+            localStorage.setItem(STORAGE_PAGE_KEY, String(ultimaPagina));
+        }
+    }, 100);
+    return;
+}
 
     // Comportamiento normal:
     // recuperar la página donde estaba anteriormente.
@@ -1598,17 +1557,11 @@ window.addEventListener(
 
 
     if (filtrosRecuperados) {
-
         actualizarEncadenados();
-
         actualizarSeries();
-
         actualizarBadge();
-
         tabla.draw();
-
         mostrarCoincidencias();
-
     }
 
 
@@ -1618,39 +1571,80 @@ window.addEventListener(
      * NO HACER SCROLL.
      */
 
-setTimeout(function () {
+    setTimeout(function () {
 
     cargarPaginaActual();
 
+    function pintarFilaEquipo() {
+    const idFila = @json(session('equipo_resaltado')) || sessionStorage.getItem('equipo_resaltado');
+    const accFila = @json(session('equipo_accion')) || sessionStorage.getItem('equipo_accion');
+    sessionStorage.removeItem('equipo_resaltado');
+    sessionStorage.removeItem('equipo_accion');
+    if (!idFila || !accFila) return;
+
+    const cls = accFila === 'crear' ? 'fila-crear'
+        : accFila === 'editar' ? 'fila-editar'
+        : 'fila-ver';
+
+    let nodo = null;
+    tabla.rows({ page: 'all' }).every(function () {
+        const tr = this.node();
+        if (tr && String(tr.getAttribute('data-equipo-id')) === String(idFila)) {
+            nodo = tr;
+        }
+    });
+    if (!nodo) return;
+
+    const indice = tabla.row(nodo).index();
+const porPagina = tabla.page.len();
+const pagina = Math.floor(indice / porPagina);
+tabla.page(pagina).draw('page');
+
+setTimeout(function () {
+    const visible = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
+    if (!visible) return;
+    visible.classList.add(cls);
+    const color = accFila === 'crear' ? '#d4edda'
+        : accFila === 'editar' ? '#fff3cd'
+        : '#cfe2ff';
+    visible.querySelectorAll('td').forEach(function (td) {
+        td.style.backgroundColor = color;
+    });
+    visible.scrollIntoView({
+    behavior: 'smooth',
+    block: 'center',
+    inline: 'nearest'
+});
     setTimeout(function () {
-        const idFlash = @json(session('equipo_resaltado'));
-        const accFlash = @json(session('equipo_accion'));
-        const idVer = sessionStorage.getItem('equipo_resaltado');
-        const accVer = sessionStorage.getItem('equipo_accion');
-        sessionStorage.removeItem('equipo_resaltado');
-        sessionStorage.removeItem('equipo_accion');
+        visible.querySelectorAll('td').forEach(function (td) {
+            td.style.backgroundColor = '';
+        });
+    }, 3000);
+}, 50);
 
-        const idFila = idFlash || idVer;
-        const accFila = accFlash || accVer;
-        if (!idFila || !accFila) return;
+    nodo.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+}
 
-        const fila = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
-        if (!fila) return;
+document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
+    a.addEventListener('click', function () {
+        const partes = a.getAttribute('href').split('/').filter(Boolean);
+        sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
+        sessionStorage.setItem('equipo_accion', 'ver');
+    });
+});
 
-        const cls = accFila === 'crear' ? 'fila-crear'
-            : accFila === 'editar' ? 'fila-editar'
-            : 'fila-ver';
-        fila.classList.add(cls);
-        fila.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }, 80);
+setTimeout(function () {
+    cargarPaginaActual();
+    setTimeout(pintarFilaEquipo, 300);
+}, 200);
 
     document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
-        a.addEventListener('click', function () {
-            const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
-            sessionStorage.setItem('equipo_accion', 'ver');
-        });
+    a.addEventListener('click', function () {
+        const partes = a.getAttribute('href').split('/').filter(Boolean);
+        sessionStorage.setItem('equipo_resaltado', partes.pop());
+        sessionStorage.setItem('equipo_accion', 'ver');
     });
+});
 
 }, 200);
 
@@ -1675,7 +1669,6 @@ setTimeout(function () {
             if (event.key !== 'Enter') return;
 
             event.preventDefault();
-
             aplicarFiltros();
 
         }
@@ -1725,9 +1718,7 @@ setTimeout(function () {
                 tipoElemento === 'textarea' ||
                 tipoElemento === 'select'
             ) {
-
                 return;
-
             }
 
 
@@ -1754,15 +1745,19 @@ setTimeout(function () {
              */
 
             if (botonRegistrar) {
-
                 botonRegistrar.click();
-
             }
-
         }
     );
-
+    console.log('RESALTAR', {
+    flashId: @json(session('equipo_resaltado')),
+    flashAcc: @json(session('equipo_accion')),
+    filas: document.querySelectorAll('#example tbody tr[data-equipo-id]').length
 });
+}); /* FIN DEL LOAD */
+
+window.pintarFilaEquipo = pintarFilaEquipo;
+
 
 function confirmarEliminarFila(form) {
     const fila = form.closest('tr');
@@ -1784,4 +1779,10 @@ function confirmarEliminarFila(form) {
         }, 700);
     });
 }
+
+window.addEventListener('pageshow', function () {
+    if (typeof pintarFilaEquipo === 'function') {
+        setTimeout(pintarFilaEquipo, 200);
+    }
+});
 </script>
