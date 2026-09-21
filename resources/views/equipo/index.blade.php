@@ -174,7 +174,7 @@
         ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y')
         : '-';
                                                                 @endphp
-                                                                <tr>
+                                                                <tr data-equipo-id="{{ $equipo->id }}">
                                                                     <td>{{ $i + 1 }}</td>
                                                                     <td>{{ $equipo->tipoEquipo->nombre ?? '-' }}</td>
                                                                     <td class="text-center">{{ $equipo->num_serie }}</td>
@@ -191,7 +191,7 @@
                                                                     <td class="text-center columna-acciones">
                                                                         <div class="d-flex justify-content-center align-items-center gap-1">
                                                                             <form action="{{ route('equipos.destroy', $equipo->id) }}" method="POST">
-                                                                                <a class="btn btn-info btn-accion"
+                                                                                <a class="btn btn-info btn-accion btn-ver-equipo" 
                                                                                     href="{{ route('equipos.show', $equipo->id) }}">
                                                                                     <i class="fa-solid fa-eye"></i>
                                                                                 </a>
@@ -202,7 +202,7 @@
                                                                                 @csrf
                                                                                 @method('DELETE')
                                                                                 <button type="submit" class="btn btn-danger btn-accion"
-                                                                                    onclick="event.preventDefault(); confirmarEliminar(this.closest('form'));">
+                                                                                    onclick="event.preventDefault(); confirmarEliminarFila(this.closest('form'));"></button>
                                                                                     <i class="fa-solid fa-trash"></i>
                                                                                 </button>
                                                                             </form>
@@ -228,6 +228,20 @@
         vertical-align: middle;
         font-weight: bold;
     }
+
+    @keyframes filaFade {
+    0% { background-color: var(--fila-color); }
+    70% { background-color: var(--fila-color); }
+    100% { background-color: transparent; }
+}
+#example tbody tr.fila-crear  { --fila-color: #d4edda; animation: filaFade 3s ease forwards; }
+#example tbody tr.fila-editar { --fila-color: #fff3cd; animation: filaFade 3s ease forwards; }
+#example tbody tr.fila-ver    { --fila-color: #cfe2ff; animation: filaFade 3s ease forwards; }
+#example tbody tr.fila-borrar {
+    background-color: #f8d7da !important;
+    transition: opacity .6s ease;
+}
+#example tbody tr.fila-borrar.saliendo { opacity: 0; }
 </style>
 
 <script>
@@ -1573,6 +1587,34 @@ window.addEventListener(
 setTimeout(function () {
 
     cargarPaginaActual();
+    
+    const idFlash = @json(session('equipo_resaltado'));
+const accFlash = @json(session('equipo_accion'));
+const idVer = sessionStorage.getItem('equipo_resaltado');
+const accVer = sessionStorage.getItem('equipo_accion');
+sessionStorage.removeItem('equipo_resaltado');
+sessionStorage.removeItem('equipo_accion');
+
+const idFila = idFlash || idVer;
+const accFila = accFlash || accVer;
+if (idFila && accFila) {
+    const fila = document.querySelector('tr[data-equipo-id="' + idFila + '"]');
+    if (fila) {
+        const cls = accFila === 'crear' ? 'fila-crear'
+            : accFila === 'editar' ? 'fila-editar'
+            : 'fila-ver';
+        fila.classList.add(cls);
+        fila.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+}
+
+document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
+    a.addEventListener('click', function () {
+        const partes = a.getAttribute('href').split('/');
+        sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
+        sessionStorage.setItem('equipo_accion', 'ver');
+    });
+});
 
 }, 200);
 
@@ -1685,4 +1727,25 @@ setTimeout(function () {
     );
 
 });
+
+function confirmarEliminarFila(form) {
+    const fila = form.closest('tr');
+    Swal.fire({
+        icon: 'warning',
+        title: '¿Eliminar equipo?',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonText: 'Cancelar',
+        confirmButtonText: 'Sí, eliminar',
+        reverseButtons: true
+    }).then(function (r) {
+        if (!r.isConfirmed) return;
+        if (!fila) { form.submit(); return; }
+        fila.classList.add('fila-borrar');
+        setTimeout(function () {
+            fila.classList.add('saliendo');
+            setTimeout(function () { form.submit(); }, 500);
+        }, 700);
+    });
+}
 </script>

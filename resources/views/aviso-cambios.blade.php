@@ -60,10 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
         confirmarSalida(retroceder);
     });
 
-    window.addEventListener('beforeunload', function (e) {
-        if (!conCambios) return;
-        e.preventDefault();
-        e.returnValue = '';
-    });
+    
 });
 </script>

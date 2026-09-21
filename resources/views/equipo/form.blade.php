@@ -1807,15 +1807,18 @@ function limpiarFormularioMenosSerie() {
                     '1'
                 );
 
-                form.addEventListener('submit', function () {
-                    idsBloqueados.forEach(function (id) {
-                        const el = document.getElementById(id);
-                        if (el) {
-                            el.disabled = false;
-                            el.readOnly = false;
-                        }
-                    });
-                });
+                if (form) {
+    form.addEventListener('submit', function () {
+        idsBloqueados.forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) { el.disabled = false; el.readOnly = false; }
+        });
+
+        @if(!($equipo->exists ?? false))
+        localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
+        @endif
+    });
+}
 
     /*
      * =========================================================
