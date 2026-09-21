@@ -202,7 +202,7 @@
                                                                                 @csrf
                                                                                 @method('DELETE')
                                                                                 <button type="submit" class="btn btn-danger btn-accion"
-                                                                                    onclick="event.preventDefault(); confirmarEliminarFila(this.closest('form'));"></button>
+                                                                                    onclick="event.preventDefault(); confirmarEliminarFila(this.closest('form'));">
                                                                                     <i class="fa-solid fa-trash"></i>
                                                                                 </button>
                                                                             </form>
@@ -229,19 +229,24 @@
         font-weight: bold;
     }
 
-    @keyframes filaFade {
-    0% { background-color: var(--fila-color); }
-    70% { background-color: var(--fila-color); }
-    100% { background-color: transparent; }
-}
-#example tbody tr.fila-crear  { --fila-color: #d4edda; animation: filaFade 3s ease forwards; }
-#example tbody tr.fila-editar { --fila-color: #fff3cd; animation: filaFade 3s ease forwards; }
-#example tbody tr.fila-ver    { --fila-color: #cfe2ff; animation: filaFade 3s ease forwards; }
-#example tbody tr.fila-borrar {
-    background-color: #f8d7da !important;
-    transition: opacity .6s ease;
-}
-#example tbody tr.fila-borrar.saliendo { opacity: 0; }
+    @keyframes filaCrear {
+        0%, 70% { background-color: #d4edda !important; }
+        100% { background-color: transparent; }
+    }
+    @keyframes filaEditar {
+        0%, 70% { background-color: #fff3cd !important; }
+        100% { background-color: transparent; }
+    }
+    @keyframes filaVer {
+        0%, 70% { background-color: #cfe2ff !important; }
+        100% { background-color: transparent; }
+    }
+    #example tbody tr.fila-crear td { animation: filaCrear 3s ease forwards; }
+    #example tbody tr.fila-editar td { animation: filaEditar 3s ease forwards; }
+    #example tbody tr.fila-ver td { animation: filaVer 3s ease forwards; }
+    #example tbody tr.fila-borrar td { background-color: #f8d7da !important; }
+    #example tbody tr.fila-borrar { transition: opacity .6s ease; }
+    #example tbody tr.fila-borrar.saliendo { opacity: 0; }
 </style>
 
 <script>
@@ -690,22 +695,51 @@ function cargarPaginaActual() {
         localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
 
         setTimeout(function () {
+    cargarPaginaActual();
 
-            const cantidadPaginas = tabla.page.info().pages;
+    document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
+        a.addEventListener('click', function () {
+            const partes = a.getAttribute('href').split('/').filter(Boolean);
+            sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
+            sessionStorage.setItem('equipo_accion', 'ver');
+        });
+    });
 
-            if (cantidadPaginas > 0) {
+    const idFlash = @json(session('equipo_resaltado'));
+    const accFlash = @json(session('equipo_accion'));
+    const idVer = sessionStorage.getItem('equipo_resaltado');
+    const accVer = sessionStorage.getItem('equipo_accion');
+    sessionStorage.removeItem('equipo_resaltado');
+    sessionStorage.removeItem('equipo_accion');
 
-                const ultimaPagina = cantidadPaginas - 1;
+    const idFila = idFlash || idVer;
+    const accFila = accFlash || accVer;
+    if (!idFila || !accFila) return;
 
-                tabla.page(ultimaPagina).draw('page');
+    const cls = accFila === 'crear' ? 'fila-crear'
+        : accFila === 'editar' ? 'fila-editar'
+        : 'fila-ver';
 
-                localStorage.setItem(
-                    STORAGE_PAGE_KEY,
-                    String(ultimaPagina)
-                );
+    function pintar() {
+        const fila = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
+        if (!fila) return false;
+        fila.classList.add(cls);
+        fila.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        return true;
+    }
+
+    // 1) intenta ahora  2) si no está en esta página, espera el cambio de página
+    if (!pintar()) {
+        setTimeout(function () {
+            if (pintar()) return;
+            const pages = tabla.page.info().pages;
+            if (pages > 0) {
+                tabla.page(pages - 1).draw('page');
+                setTimeout(pintar, 80);
             }
-
-        }, 100);
+        }, 250);
+    }
+}, 200);
 
         return;
     }
@@ -1587,34 +1621,36 @@ window.addEventListener(
 setTimeout(function () {
 
     cargarPaginaActual();
-    
-    const idFlash = @json(session('equipo_resaltado'));
-const accFlash = @json(session('equipo_accion'));
-const idVer = sessionStorage.getItem('equipo_resaltado');
-const accVer = sessionStorage.getItem('equipo_accion');
-sessionStorage.removeItem('equipo_resaltado');
-sessionStorage.removeItem('equipo_accion');
 
-const idFila = idFlash || idVer;
-const accFila = accFlash || accVer;
-if (idFila && accFila) {
-    const fila = document.querySelector('tr[data-equipo-id="' + idFila + '"]');
-    if (fila) {
+    setTimeout(function () {
+        const idFlash = @json(session('equipo_resaltado'));
+        const accFlash = @json(session('equipo_accion'));
+        const idVer = sessionStorage.getItem('equipo_resaltado');
+        const accVer = sessionStorage.getItem('equipo_accion');
+        sessionStorage.removeItem('equipo_resaltado');
+        sessionStorage.removeItem('equipo_accion');
+
+        const idFila = idFlash || idVer;
+        const accFila = accFlash || accVer;
+        if (!idFila || !accFila) return;
+
+        const fila = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
+        if (!fila) return;
+
         const cls = accFila === 'crear' ? 'fila-crear'
             : accFila === 'editar' ? 'fila-editar'
             : 'fila-ver';
         fila.classList.add(cls);
-        fila.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }
-}
+        fila.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }, 80);
 
-document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
-    a.addEventListener('click', function () {
-        const partes = a.getAttribute('href').split('/');
-        sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
-        sessionStorage.setItem('equipo_accion', 'ver');
+    document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
+        a.addEventListener('click', function () {
+            const partes = a.getAttribute('href').split('/').filter(Boolean);
+            sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
+            sessionStorage.setItem('equipo_accion', 'ver');
+        });
     });
-});
 
 }, 200);
 

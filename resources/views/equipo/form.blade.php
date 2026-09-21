@@ -1196,16 +1196,6 @@ function limpiarFormularioMenosSerie() {
                     mensajeSpecs.style.display = 'block';
                 }
 
-                if (equipoBox && equipoBox.style.display !== 'none') {
-    const desc = document.getElementById('descripcion');
-    if (!desc || !desc.value.trim()) {
-        event.preventDefault();
-        mostrarErrorCampo(desc, 'La descripción es obligatoria.');
-        return;
-    }
-}
-
-
                 // ==========================================
                 // OBTENER DATOS DEL TIPO SELECCIONADO
                 // ==========================================
@@ -1312,24 +1302,6 @@ function limpiarFormularioMenosSerie() {
                     aplicarUltimoRegistro(nombreTipo);
 
                 }
-                
-                const inputSerie = document.getElementById('num_serie');
-if (inputSerie) {
-    inputSerie.addEventListener('input', function () {
-        actualizarBloqueoParte1();
-        if (this.value.trim()) {
-            this.classList.remove('is-invalid');
-            const err = this.parentElement.querySelector('.error-toast-campo');
-            if (err) err.remove();
-        }
-    });
-    inputSerie.addEventListener('blur', function () {
-        actualizarBloqueoParte1();
-        if (!this.value.trim()) {
-            mostrarErrorCampo(this, 'El número de serie es obligatorio.');
-        }
-    });
-}
 
                 // ==========================================
                 // ACTUALIZAR BLOQUEO DE PARTE 1
@@ -1362,27 +1334,13 @@ validarCampoVivo('procesador', 'El procesador es obligatorio.');
 validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
 validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
 
-
-function limpiarFormularioMenosSerie() {
-    ['marca', 'modelo', 'ubicacion_id'].forEach(function (id) { setCampo(id, ''); });
-
-    ['procesador', 'ram', 'disco_duro', 'color_laptop', 'observaciones_laptop'].forEach(function (id) {
-        setCampo(id, '');
-    });
-    setCampo('estado_laptop', 'REGULAR');
-
-    ['descripcion', 'color_equipo', 'observaciones_equipo'].forEach(function (id) {
-        setCampo(id, '');
-    });
-    setCampo('estado_equipo', 'REGULAR');
-
-    if (fechaRegistro) fechaRegistro.value = fechaHoyISO();
-
-    if (container) {
-        container.querySelectorAll('.accesorio-item').forEach(function (item) { item.remove(); });
-        actualizarMensaje();
+    const inputSerie = document.getElementById('num_serie');
+    if (inputSerie) {
+        inputSerie.addEventListener('input', function () {
+            actualizarBloqueoParte1();
+        });
     }
-}
+
 
     function pintarListaTiposEquipo() {
         if (!inputTipoEq || !listaTipoEq) return;
