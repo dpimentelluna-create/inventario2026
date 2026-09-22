@@ -35,10 +35,17 @@
         text-align: center;
         padding: 15px;
     }
+
     .card {
         border: 1px solid #000000;
         border-radius: 6px;
         overflow: hidden;
+    }
+
+    .seccion-bloqueada {
+        opacity: 0.55;
+        pointer-events: none;
+        filter: grayscale(0.2);
     }
 </style>
 @include('aviso-cambios')

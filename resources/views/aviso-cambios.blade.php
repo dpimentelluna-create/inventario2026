@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let conCambios = false;
 
+    const esEdicion = !!form.querySelector('input[name="_method"][value="PUT"], input[name="_method"][value="PATCH"]')
+        || /\/edit(\?|$)/.test(window.location.pathname);
+    if (esEdicion) conCambios = true;
+
     form.addEventListener('input', function () { conCambios = true; });
     form.addEventListener('change', function () { conCambios = true; });
     form.addEventListener('submit', function () { conCambios = false; });
@@ -26,14 +30,16 @@ document.addEventListener('DOMContentLoaded', function () {
             cancelButtonText: 'Seguir editando',
             reverseButtons: true
         }).then(function (r) {
-            if (r.isConfirmed) accion();
+            if (r.isConfirmed) {
+                conCambios = false;
+                accion();
+            }
         });
     }
 
     document.querySelectorAll('a[href]').forEach(function (enlace) {
         const href = enlace.getAttribute('href');
         if (!href || href === '#' || href.startsWith('javascript:')) return;
-
         enlace.addEventListener('click', function (e) {
             if (!conCambios) return;
             e.preventDefault();
@@ -41,25 +47,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // ESC = retroceder (con confirmación si hay cambios sin guardar)
     document.addEventListener('keydown', function (e) {
-        if (e.key !== 'Escape') return;
-        e.preventDefault();
-
-        function retroceder() {
-            if (window.history.length > 1) {
-                window.history.back();
+        if (e.key === 'Escape') {
+            e.preventDefault();
+            function retroceder() {
+                if (window.history.length > 1) window.history.back();
             }
-        }
-
-        if (!conCambios) {
-            retroceder();
+            if (!conCambios) { retroceder(); return; }
+            confirmarSalida(retroceder);
             return;
         }
 
-        confirmarSalida(retroceder);
+        const recarga = e.key === 'F5' ||
+            ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'));
+
+        if (!recarga || !conCambios) return;
+
+        e.preventDefault();
+        confirmarSalida(function () { window.location.reload(); });
     });
 
-    
+    window.addEventListener('beforeunload', function (e) {
+        if (!conCambios) return;
+        e.preventDefault();
+        e.returnValue = '';
+    });
 });
 </script>

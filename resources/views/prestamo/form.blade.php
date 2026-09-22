@@ -276,7 +276,7 @@
 
     <div class="col-md-12">
 
-        <div class="card mb-4">
+        <div class="card mb-4" id="card_parte2_prestamo">
             <div class="card-header encabezado-verde">
                 <h5 class="mb-0">
                     <i class="bi bi-pc-display"></i>
@@ -2747,18 +2747,14 @@ function mostrarCamposBusqueda() {
         const parte1Ok = parte1Completa();
         const hayEq = hayEquiposSeleccionados();
 
-        const wrap2 = document.querySelector('#resultados_equipos')?.closest('.card-body')
-            || document.querySelector('#resultados_equipos')?.closest('.card');
-        const wrap3 = document.getElementById('equipos_seleccionados');
+        const card2 = document.getElementById('card_parte2_prestamo');
+        const card3 = document.getElementById('card_parte3_prestamo');
 
-        if (wrap2) {
-            wrap2.style.opacity = parte1Ok ? '1' : '0.55';
-            wrap2.style.pointerEvents = parte1Ok ? 'auto' : 'none';
+        if (card2) {
+            card2.classList.toggle('seccion-bloqueada', !parte1Ok);
         }
-        if (wrap3) {
-            const ok3 = parte1Ok && hayEquiposSeleccionados();
-            wrap3.style.opacity = ok3 ? '1' : '0.55';
-            wrap3.style.pointerEvents = ok3 ? 'auto' : 'none';
+        if (card3) {
+            card3.classList.toggle('seccion-bloqueada', !(parte1Ok && hayEq));
         }
 
         if (!parte1Ok) {
