@@ -1,40 +1,26 @@
+{{-- INICIO FORM --}}
 <div class="row padding-1 p-1">
 
-    {{-- ========================================================= --}}
     {{-- PARTE 1 — DATOS DEL PRÉSTAMO --}}
-    {{-- ========================================================= --}}
 
     <div class="col-md-12">
-
         <div class="card mb-4">
-
             <div class="card-header encabezado-verde">
-
                 <h5 class="mb-0">
-
                     <i class="bi bi-clipboard-check"></i>
-
                     PARTE 1 — DATOS DEL PRÉSTAMO
-
                 </h5>
-
             </div>
 
-
             <div class="card-body">
-
                 <div class="row">
 
                     {{-- SOLICITANTE O DOCENTE --}}
                     <div class="col-md-6 mb-3">
-
                         <label for="docente_id" class="form-label">
-
                             SOLICITANTE
                             <span class="text-danger">*</span>
-
                         </label>
-
 
                         <div class="position-relative">
 
@@ -45,7 +31,9 @@
                             {{-- BUSCADOR --}}
                             <input type="text" id="buscar_docente"
                                 class="form-control @error('docente_id') is-invalid @enderror"
-                                placeholder="Escribir nombre o apellido..." autocomplete="off" value="{{ old(
+                                placeholder="Escribir nombre o apellido..." 
+                                autocomplete="off" 
+                                value="{{ old(
     'buscar_docente',
     $prestamo->exists && $prestamo->docente
     ? $prestamo->docente->apellidos . ' ' . $prestamo->docente->nombres
@@ -53,12 +41,15 @@
 ) }}" required>
 
                             {{-- RESULTADOS --}}
-                            <div id="resultados_docentes" class="list-group position-absolute w-100 shadow-sm" style="
-                                        z-index: 1050; 
-                                        display: none;
-                                        max-height: 220px;
-                                        overflow-y: auto;
-                                        background: white;"></div>
+                            <div id="resultados_docentes" class="list-group position-absolute w-100 shadow-sm" 
+                            
+                            style=" z-index: 1050; 
+                                    display: none;
+                                    max-height: 220px;
+                                    overflow-y: auto;
+                                    background: white;">
+
+                            </div>
 
                         </div>
 
@@ -70,10 +61,7 @@
 
                     </div>
 
-
-                    {{-- ========================================================= --}}
                     {{-- CARGO DEL SOLICITANTE --}}
-                    {{-- ========================================================= --}}
 
                     <div class="col-md-6 mb-3">
 
@@ -92,9 +80,7 @@
 
                     </div>
 
-                    {{-- ========================================================= --}}
                     {{-- FORMULARIO NUEVO DOCENTE --}}
-                    {{-- ========================================================= --}}
 
                     <div class="modal fade" id="modalNuevoDocente" tabindex="-1"
                         aria-labelledby="modalNuevoDocenteLabel" aria-hidden="true">
@@ -158,7 +144,6 @@
                                 </div>
 
                                 <div class="modal-footer">
-
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                         CANCELAR
                                     </button>
@@ -167,7 +152,6 @@
                                         <i class="bi bi-save"></i>
                                         REGISTRAR DOCENTE
                                     </button>
-
                                 </div>
 
                             </div>
@@ -177,144 +161,107 @@
 
                     {{-------------- FECHA -----------------}}
                     <div class="col-md-4 mb-3">
-
+                    
                         <label for="fecha" class="form-label">
-
                             FECHA
                             <span class="text-danger">*</span>
-
                         </label>
-
-
+                    
                         <div class="input-group">
-
-                            <input type="date" name="fecha" id="fecha"
-                                class="form-control @error('fecha') is-invalid @enderror" value="{{ old(
+                            <input type="date" name="fecha" id="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old(
     'fecha',
     $prestamo->fecha
     ? $prestamo->fecha->format('Y-m-d')
     : now()->format('Y-m-d')
 ) }}" required>
-
+                    
                             <button type="button" class="btn btn-outline-success" id="btn_hoy">
                                 <i class="bi bi-calendar-check"></i>
                                 HOY
                             </button>
-
                         </div>
-
+                    
                         @error('fecha')
-
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
-
                         @enderror
-
+                    
                     </div>
 
-                   
+
                     {{-- HORA INICIO --}}
-<div class="col-md-4 mb-3">
+                    <div class="col-md-4 mb-3">
 
-    <label for="hora_inicio_texto" class="form-label">
-        HORA INICIO
-        <span class="text-danger">*</span>
-    </label>
+                        <label for="hora_inicio_texto" class="form-label">
+                            HORA INICIO
+                            <span class="text-danger">*</span>
+                        </label>
 
-    {{-- Campo visible --}}
-    <input
-        type="text"
-        id="hora_inicio_texto"
-        class="form-control @error('hora_inicio') is-invalid @enderror"
-        value="{{ old(
+                        {{-- Campo visible --}}
+                        <input type="text" id="hora_inicio_texto"
+                            class="form-control @error('hora_inicio') is-invalid @enderror" value="{{ old(
     'hora_inicio',
     $prestamo->hora_inicio
     ? date('h:i A', strtotime($prestamo->hora_inicio))
     : ''
-) }}"
-        placeholder="00:00 AM"
-        maxlength="8"
-        autocomplete="off"
-        inputmode="numeric"
-        required
-    >
+) }}" placeholder="00:00 AM" maxlength="8" autocomplete="off" inputmode="numeric" required>
 
-    {{-- Valor que realmente recibe Laravel --}}
-    <input
-        type="hidden"
-        name="hora_inicio"
-        id="hora_inicio"
-        value="{{ old(
+                        {{-- Valor que realmente recibe Laravel --}}
+                        <input type="hidden" name="hora_inicio" id="hora_inicio" value="{{ old(
     'hora_inicio',
     $prestamo->hora_inicio
     ? substr($prestamo->hora_inicio, 0, 5)
     : ''
-) }}"
-    >
+) }}">
 
-    <small class="text-muted">
-        HORARIO: 06:00 AM - 04:00 PM
-    </small>
+                        <small class="text-muted">
+                            HORARIO: 06:00 AM - 04:00 PM
+                        </small>
 
-    @error('hora_inicio')
-        <div class="invalid-feedback d-block">
-            {{ $message }}
-        </div>
-    @enderror
+                        @error('hora_inicio')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
 
-</div>
+                    </div>
 
+                    {{-- HORA FINAL --}}
+                    <div class="col-md-4 mb-3">
 
-                   
-{{-- HORA FINAL --}}
-<div class="col-md-4 mb-3">
+                        <label for="hora_fin_texto" class="form-label">
+                            HORA FINAL
+                        </label>
 
-    <label for="hora_fin_texto" class="form-label">
-        HORA FINAL
-    </label>
-
-    {{-- Campo visible --}}
-    <input
-        type="text"
-        id="hora_fin_texto"
-        class="form-control @error('hora_fin') is-invalid @enderror"
-        value="{{ old(
+                        {{-- Campo visible --}}
+                        <input type="text" id="hora_fin_texto"
+                            class="form-control @error('hora_fin') is-invalid @enderror" value="{{ old(
     'hora_fin',
     $prestamo->hora_fin
     ? date('h:i A', strtotime($prestamo->hora_fin))
     : ''
-) }}"
-        placeholder="00:00 AM"
-        maxlength="8"
-        autocomplete="off"
-        inputmode="numeric"
-    >
+) }}" placeholder="00:00 AM" maxlength="8" autocomplete="off" inputmode="numeric">
 
-    {{-- Valor que realmente recibe Laravel --}}
-    <input
-        type="hidden"
-        name="hora_fin"
-        id="hora_fin"
-        value="{{ old(
+                        {{-- Valor que realmente recibe Laravel --}}
+                        <input type="hidden" name="hora_fin" id="hora_fin" value="{{ old(
     'hora_fin',
     $prestamo->hora_fin
     ? substr($prestamo->hora_fin, 0, 5)
     : ''
-) }}"
-    >
+) }}">
 
-    <small class="text-muted">
-        DEJAR VACÍO SI EL PRÉSTAMO CONTINÚA ACTIVO.
-    </small>
+                        <small class="text-muted">
+                            DEJAR VACÍO SI EL PRÉSTAMO CONTINÚA ACTIVO.
+                        </small>
 
-    @error('hora_fin')
-        <div class="invalid-feedback d-block">
-            {{ $message }}
-        </div>
-    @enderror
+                        @error('hora_fin')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
 
-</div>
+                    </div>
 
                 </div>
 
@@ -324,24 +271,17 @@
 
     </div>
 
-    {{-- ========================================================= --}}
+
     {{-- PARTE 2 — SELECCIÓN DE EQUIPOS --}}
-    {{-- ========================================================= --}}
 
     <div class="col-md-12">
 
         <div class="card mb-4">
-
             <div class="card-header encabezado-verde">
-
                 <h5 class="mb-0">
-
                     <i class="bi bi-pc-display"></i>
-
                     PARTE 2 — SELECCIÓN DE EQUIPOS
-
                 </h5>
-
             </div>
 
 
@@ -369,14 +309,8 @@
                             <label for="buscar_equipo" class="form-label">
                                 BUSCAR EQUIPO
                             </label>
-                            <input
-                                type="text"
-                                id="buscar_equipo"
-                                class="form-control campo-mayusculas"
-                                placeholder="Complete la Parte 1 para buscar equipos..."
-                                autocomplete="off"
-                                disabled
-                            >
+                            <input type="text" id="buscar_equipo" class="form-control campo-mayusculas"
+                                placeholder="Complete la Parte 1 para buscar equipos..." autocomplete="off" disabled>
                         </div>
 
                     </div>
@@ -387,7 +321,9 @@
                         </div>
                     </div>
 
-                    <div id="error_equipos_parte2" class="error-toast-campo alert alert-danger py-1 px-2 small mt-2 mb-0" style="display: none;"></div>
+                    <div id="error_equipos_parte2"
+                        class="error-toast-campo alert alert-danger py-1 px-2 small mt-2 mb-0" style="display: none;">
+                    </div>
 
                 </div>
 
@@ -406,40 +342,26 @@
 
 
 
-    {{-- ========================================================= --}}
     {{-- PARTE 3 — EQUIPOS SELECCIONADOS --}}
-    {{-- ========================================================= --}}
 
     <div class="col-md-12">
 
         <div class="card mb-4">
 
             <div class="card-header encabezado-verde">
-
                 <h5 class="mb-0">
-
                     <i class="bi bi-list-check"></i>
-
                     PARTE 3 — EQUIPOS SELECCIONADOS
-
                 </h5>
-
             </div>
 
 
             <div class="card-body">
 
                 <div id="equipos_seleccionados">
-
-                    <div
-                        id="mensaje_sin_equipos"
-                        class="text-center text-muted py-3"
-                    >
-
+                    <div id="mensaje_sin_equipos" class="text-center text-muted py-3">
                         No hay equipos seleccionados.
-
                     </div>
-
                 </div>
 
             </div>
@@ -448,37 +370,21 @@
 
     </div>
 
-
-
-    {{-- ========================================================= --}}
     {{-- BOTONES --}}
-    {{-- ========================================================= --}}
 
     <div class="col-md-12 mt-2">
 
         <div class="d-flex justify-content-end gap-2">
 
-            <a
-                href="{{ route('prestamos.index') }}"
-                class="btn btn-secondary"
-            >
-
+            <a href="{{ route('prestamos.index') }}" class="btn btn-secondary">
                 <i class="bi bi-x-circle"></i>
-
                 CANCELAR
-
             </a>
 
 
-            <button
-                type="submit"
-                class="btn btn-success"
-            >
-
+            <button type="submit" class="btn btn-success">
                 <i class="bi bi-save"></i>
-
                 {{ $prestamo->exists ? 'ACTUALIZAR PRÉSTAMO' : 'GUARDAR PRÉSTAMO' }}
-
             </button>
 
         </div>
@@ -486,9 +392,12 @@
     </div>
 
 </div>
+{{-- FIN FORM --}}
+
 
 <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
-    <div id="toast_prestamo" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="toast_prestamo" class="toast align-items-center border-0" role="alert" aria-live="assertive"
+        aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body" id="toast_prestamo_texto"></div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
@@ -496,9 +405,7 @@
     </div>
 </div>
 
-{{-- ============================================================= --}}
 {{-- DATOS EXISTENTES PARA EDICIÓN --}}
-{{-- ============================================================= --}}
 
 <script>
 
@@ -567,10 +474,7 @@ $docentesParaJs = $docentes->map(function ($docente) {
 @endphp
 
 
-
-{{-- ============================================================= --}}
 {{-- JAVASCRIPT --}}
-{{-- ============================================================= --}}
 
 <script>
 
@@ -637,6 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    //Funcion mostrarErrorCampo
     function mostrarErrorCampo(campo, mensaje) {
         if (!campo) {
             mostrarToast(mensaje, 'danger');
@@ -663,66 +568,85 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 350);
     }
 
+    //Funcion errorHora
+    function errorHora(campo, mensaje) {
+        if (!campo) return;
+        campo.classList.add('is-invalid');
+        const caja = campo.closest('.mb-3') || campo.parentElement;
+        let aviso = caja.querySelector('.error-hora');
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.className = 'error-hora error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
+            campo.insertAdjacentElement('afterend', aviso);
+        }
+        aviso.textContent = mensaje;
+    }
+
+    //Funcion okHora
+    function okHora(campo) {
+        if (!campo) return;
+        campo.classList.remove('is-invalid');
+        const caja = campo.closest('.mb-3') || campo.parentElement;
+        const aviso = caja ? caja.querySelector('.error-hora') : null;
+        if (aviso) aviso.remove();
+    }
+
+
     let indiceDocenteSeleccionado = -1;
     
     let docentesFiltrados = [];
 
-    /*
+/*
  * =========================================================
  * BUSCADOR DE CARGOS
  * =========================================================
  */
 
-const cargo = document.getElementById('cargo');
+    const cargo = document.getElementById('cargo');
 
-const resultadosCargos =
-    document.getElementById('resultados_cargos');
+    const resultadosCargos =
+        document.getElementById('resultados_cargos');
 
 
-/*
- * Obtener cargos únicos de los docentes
- */
+    /*
+     * Obtener cargos únicos de los docentes
+     */
 
-const cargos = [
-    ...new Set(
-        docentes
-            .map(docente => docente.cargo)
-            .filter(cargo => cargo && cargo.trim() !== '')
-            .map(cargo => cargo.trim())
-    )
-].sort();
+    const cargos = [
+        ...new Set(
+            docentes
+                .map(docente => docente.cargo)
+                .filter(cargo => cargo && cargo.trim() !== '')
+                .map(cargo => cargo.trim())
+        )
+    ].sort();
 
 
 /*
  * BUSCAR CARGO MIENTRAS SE ESCRIBE
  */
+    if (cargo && resultadosCargos) {
 
-if (cargo && resultadosCargos) {
+        cargo.addEventListener(
+            'input',
+            function () {
 
-    cargo.addEventListener(
-        'input',
-        function () {
+                const texto =
+                    this.value.trim().toLowerCase();
 
-            const texto =
-                this.value.trim().toLowerCase();
+                const resultados =
+                    cargos.filter(cargoExistente =>
+                        cargoExistente
+                            .toLowerCase()
+                            .includes(texto)
+                    );
 
-
-            const resultados =
-                cargos.filter(cargoExistente =>
-                    cargoExistente
-                        .toLowerCase()
-                        .includes(texto)
+                mostrarResultadosCargos(
+                    resultados
                 );
-
-
-            mostrarResultadosCargos(
-                resultados
-            );
-
-        }
-    );
-
-}
+            }
+        );
+    }
 
 /*
  * =========================================================
@@ -733,7 +657,6 @@ if (cargo && resultadosCargos) {
 function mostrarResultadosCargos(resultados) {
 
     resultadosCargos.innerHTML = '';
-
 
     /*
      * Si no hay resultados
@@ -746,8 +669,6 @@ function mostrarResultadosCargos(resultados) {
 
         return;
     }
-
-
     /*
      * Mostrar cargos encontrados
      */
@@ -1716,6 +1637,7 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
         }
 
         return;
+        errorHora(campoTexto, 'EL MISMO TEXTO');
     }
 
 
@@ -2020,7 +1942,7 @@ function controlarEntradaHora(campoTexto) {
             }
 
             this.setCustomValidity('');
-
+            okHora(this);
             return;
         }
 
@@ -2309,81 +2231,78 @@ if (horaFinTexto) {
 // VALIDAR QUE HORA FINAL SEA MAYOR QUE HORA INICIO
 // =========================================================
 
-function validarHorasEntreSi() {
+    function validarHorasEntreSi() {
 
-    if (!horaInicioReal || !horaFinReal) {
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // SI NO HAY HORA DE INICIO
-    // NO SE PUEDE COMPARAR
-    // -----------------------------------------------------
-
-    if (!horaInicioReal.value) {
-
-        if (horaFinTexto) {
-            horaFinTexto.setCustomValidity('');
+        if (!horaInicioReal || !horaFinReal) {
+            return;
         }
 
-        return;
-    }
 
+        // -----------------------------------------------------
+        // SI NO HAY HORA DE INICIO
+        // NO SE PUEDE COMPARAR
+        // -----------------------------------------------------
 
-    // -----------------------------------------------------
-    // SI HORA FINAL ESTÁ VACÍA
-    //
-    // SE PERMITE:
-    // significa que el préstamo sigue activo.
-    // -----------------------------------------------------
+        if (!horaInicioReal.value) {
 
-    if (!horaFinReal.value) {
+            if (horaFinTexto) {
+                horaFinTexto.setCustomValidity('');
+            }
 
-        if (horaFinTexto) {
-            horaFinTexto.setCustomValidity('');
+            return;
         }
 
-        return;
+
+        // -----------------------------------------------------
+        // SI HORA FINAL ESTÁ VACÍA
+        //
+        // SE PERMITE:
+        // significa que el préstamo sigue activo.
+        // -----------------------------------------------------
+
+        if (!horaFinReal.value) {
+
+            if (horaFinTexto) {
+                horaFinTexto.setCustomValidity('');
+            }
+
+            return;
+        }
+
+
+        // -----------------------------------------------------
+        // CONVERTIR A MINUTOS PARA COMPARAR
+        // -----------------------------------------------------
+
+        const inicioPartes =
+            horaInicioReal.value.split(':');
+
+        const finPartes =
+            horaFinReal.value.split(':');
+
+
+        const inicioMinutos =
+            (parseInt(inicioPartes[0], 10) * 60) +
+            parseInt(inicioPartes[1], 10);
+
+
+        const finMinutos =
+            (parseInt(finPartes[0], 10) * 60) +
+            parseInt(finPartes[1], 10);
+
+
+        // -----------------------------------------------------
+        // HORA FINAL DEBE SER MAYOR
+        // -----------------------------------------------------
+
+        if (finMinutos <= inicioMinutos) {
+            horaFinTexto.setCustomValidity('LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
+            errorHora(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
+        } else {
+            horaFinTexto.setCustomValidity('');
+            okHora(horaFinTexto);
+        }
     }
-
-
-    // -----------------------------------------------------
-    // CONVERTIR A MINUTOS PARA COMPARAR
-    // -----------------------------------------------------
-
-    const inicioPartes =
-        horaInicioReal.value.split(':');
-
-    const finPartes =
-        horaFinReal.value.split(':');
-
-
-    const inicioMinutos =
-        (parseInt(inicioPartes[0], 10) * 60) +
-        parseInt(inicioPartes[1], 10);
-
-
-    const finMinutos =
-        (parseInt(finPartes[0], 10) * 60) +
-        parseInt(finPartes[1], 10);
-
-
-    // -----------------------------------------------------
-    // HORA FINAL DEBE SER MAYOR
-    // -----------------------------------------------------
-
-    if (finMinutos <= inicioMinutos) {
-
-        horaFinTexto.setCustomValidity(
-            'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.'
-        );
-
-    } else {
-
-        horaFinTexto.setCustomValidity('');
-    }
-}
 
 
 // =========================================================
@@ -2669,11 +2588,9 @@ function parte1Completa() {
                 ></div>
 
                 <div class="mt-2 text-muted">
-
                     Buscando equipos...
-
                 </div>
-
+                
             </div>
 
         `;
@@ -2734,9 +2651,7 @@ function parte1Completa() {
             resultados.innerHTML = `
 
                 <div class="alert alert-danger">
-
                     Ocurrió un error al buscar los equipos.
-
                 </div>
 
             `;
@@ -2758,9 +2673,7 @@ function parte1Completa() {
             resultados.innerHTML = `
 
                 <div class="alert alert-warning">
-
                     No se encontraron equipos.
-
                 </div>
 
             `;
@@ -2825,7 +2738,6 @@ function parte1Completa() {
                             <span>
 
                                 ${equipo.marca ?? ''}
-
                                 ${equipo.modelo ?? ''}
 
                             </span>
