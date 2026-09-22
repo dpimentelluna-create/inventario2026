@@ -9,14 +9,28 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                            <span id="card_title">PRÉSTAMOS</span>
-                            <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo" class="btn btn-primary btn-sm">
-                                Registrar Nuevo
-                            </a>
-                        </div>
-                    </div>
+                    <div class="card-header"> <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"> <span id="card_title">PRÉSTAMOS</span>
+    <div class="d-flex align-items-center gap-2 ms-auto">
+        <a href="{{ route('prestamos.create') }}"
+           id="btn_nuevo_prestamo"
+           class="btn btn-primary btn-sm">
+            Registrar Nuevo
+        </a>
+
+        <a href="{{ route('prestamos.export.excel') }}"
+           class="btn btn-success btn-sm">
+            <i class="fa-solid fa-file-excel"></i> EXCEL
+        </a>
+
+        <a href="{{ route('prestamos.export.pdf') }}"
+           class="btn btn-danger btn-sm"
+           target="_blank">
+            <i class="fa-solid fa-file-pdf"></i> PDF
+        </a>
+    </div>
+</div>
+
+</div>
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-2">
                             <span id="mensaje_coincidencias" class="text-success fw-bold me-auto" style="visibility:hidden;">&nbsp;</span>
@@ -109,14 +123,14 @@
                                 <tbody>
                                     @foreach ($prestamos as $i => $prestamo)
                                         @php
-                                            $nombreSol = trim(($prestamo->docente->apellidos ?? '').' '.($prestamo->docente->nombres ?? ''));
-                                            $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
-                                            $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
-                                            $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
-                                            $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
-                                                $eq = $pe->equipo;
-                                                return trim(($eq->tipoEquipo->nombre ?? '').' '.($eq->marca ?? '').' '.($eq->num_serie ?? ''));
-                                            })->implode(' | ');
+    $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
+    $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
+    $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
+    $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
+    $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
+        $eq = $pe->equipo;
+        return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
+    })->implode(' | ');
                                         @endphp
                                         <tr data-prestamo-id="{{ $prestamo->id }}"
                                             data-solicitante="{{ strtoupper($nombreSol) }}"
@@ -153,11 +167,13 @@
                                             <td class="text-center columna-acciones">
                                                 <div class="d-flex justify-content-center align-items-center gap-1">
                                                     <form action="{{ route('prestamos.destroy', $prestamo->id) }}" method="POST">
-                                                        <a class="btn btn-info btn-accion" href="{{ route('prestamos.show', $prestamo->id) }}"><i class="fa-solid fa-eye"></i></a>
+                                                        <a class="btn btn-info btn-accion btn-ver-prestamo" href="{{ route('prestamos.show', $prestamo->id) }}">
+                                                            <i class="fa-solid fa-eye"></i>
+                                                        </a>
                                                         <a class="btn btn-warning btn-accion" href="{{ route('prestamos.edit', $prestamo->id) }}"><i class="fa-solid fa-pen-to-square"></i></a>
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-accion" onclick="event.preventDefault(); confirmarEliminar(this.closest('form'));">
+                                                        <button type="submit" class="btn btn-danger btn-accion" onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -183,7 +199,22 @@
         vertical-align: middle;
         font-weight: bold;
     }
-    #example tbody td { vertical-align: middle !important; }
+
+    #example tbody td {
+        vertical-align: middle !important;
+    }
+
+    .fila-crear td {
+        background-color: #d4edda !important;
+    }
+
+    .fila-editar td {
+        background-color: #fff3cd !important;
+    }
+
+    .fila-ver td {
+        background-color: #cfe2ff !important;
+    }
 </style>
 
 <script>
@@ -359,5 +390,100 @@ window.addEventListener('load', function () {
     restaurarFiltros();
     actualizarBadge();
     if (filtrosActivos()) aplicarFiltros();
+
+        const PAG_KEY = 'prestamos_pagina';
+
+    tabla.on('page.dt', function () {
+        localStorage.setItem(PAG_KEY, tabla.page());
+    });
+
+    const pagGuardada = parseInt(localStorage.getItem(PAG_KEY) || '0', 10);
+    if (!isNaN(pagGuardada)) {
+        tabla.page(pagGuardada).draw('page');
+    }
+
+    function pintarFilaPrestamo() {
+        const idFila = @json(session('prestamo_resaltado')) || sessionStorage.getItem('prestamo_resaltado');
+        const accFila = @json(session('prestamo_accion')) || sessionStorage.getItem('prestamo_accion');
+        sessionStorage.removeItem('prestamo_resaltado');
+        sessionStorage.removeItem('prestamo_accion');
+        if (!idFila || !accFila) return;
+
+        let nodo = null;
+        tabla.rows({ page: 'all' }).every(function () {
+            const tr = this.node();
+            if (tr && String(tr.getAttribute('data-prestamo-id')) === String(idFila)) nodo = tr;
+        });
+        if (!nodo) return;
+
+        const pagina = Math.floor(tabla.row(nodo).index() / tabla.page.len());
+        tabla.page(pagina).draw('page');
+        localStorage.setItem(PAG_KEY, pagina);
+
+        setTimeout(function () {
+            const visible = document.querySelector('#example tbody tr[data-prestamo-id="' + idFila + '"]');
+            if (!visible) return;
+            const color = accFila === 'crear' ? '#d4edda'
+                : accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
+            visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = color; });
+            visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function () {
+                visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = ''; });
+            }, 4000);
+        }, 50);
+    }
+
+    document.querySelectorAll('.btn-ver-prestamo').forEach(function (a) {
+        a.addEventListener('click', function () {
+            const partes = a.getAttribute('href').split('/').filter(Boolean);
+            sessionStorage.setItem('prestamo_resaltado', partes.pop());
+            sessionStorage.setItem('prestamo_accion', 'ver');
+        });
+    });
+
+    setTimeout(pintarFilaPrestamo, 300);
+    window.pintarFilaPrestamo = pintarFilaPrestamo;
+
 });
+
+function confirmarEliminarPrestamo(form) {
+    if (!form) return;
+    const fila = form.closest('tr');
+
+    function enviar() {
+        if (fila) {
+            fila.querySelectorAll('td').forEach(function (td) {
+                td.style.backgroundColor = '#f8d7da';
+            });
+            fila.style.transition = 'opacity 0.4s';
+            setTimeout(function () { fila.style.opacity = '0'; }, 200);
+            setTimeout(function () { form.submit(); }, 700);
+        } else {
+            form.submit();
+        }
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Eliminar préstamo?',
+            text: 'Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(function (r) {
+            if (r.isConfirmed) enviar();
+        });
+    } else if (confirm('¿Eliminar préstamo?')) {
+        enviar();
+    }
+}
+
+window.addEventListener('pageshow', function () {
+    if (typeof pintarFilaPrestamo === 'function') setTimeout(pintarFilaPrestamo, 200);
+});
+
 </script>

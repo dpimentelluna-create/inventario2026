@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
+use Barryvdh\DomPDF\Facade\Pdf;
+
+
 class PrestamoController extends Controller
 {
     /**
@@ -79,40 +82,18 @@ class PrestamoController extends Controller
         PrestamoRequest $request
     ): RedirectResponse {
 
-        DB::transaction(function () use ($request) {
+        $prestamo = DB::transaction(function () use ($request) {
 
-            /*
-         * =====================================================
-         * 1. DETERMINAR ESTADO DEL PRÉSTAMO
-         * =====================================================
-         *
-         * Si existe hora_fin:
-         *      TERMINADO
-         *
-         * Si no existe:
-         *      ACTIVO
-         */
             $estadoPrestamo = $request->filled('hora_fin')
                 ? 'TERMINADO'
                 : 'ACTIVO';
 
-
-            /*
-         * =====================================================
-         * 2. CREAR PRÉSTAMO
-         * =====================================================
-         */
             $prestamo = Prestamo::create([
                 'docente_id' => $request->docente_id,
-
                 'cargo' => $request->cargo,
-
                 'fecha' => $request->fecha,
-
                 'hora_inicio' => $request->hora_inicio,
-
                 'hora_fin' => $request->hora_fin,
-
                 'estado' => $estadoPrestamo,
             ]);
 
@@ -283,10 +264,10 @@ class PrestamoController extends Controller
 
 
         return Redirect::route('prestamos.index')
-            ->with(
-                'success',
-                'Préstamo registrado correctamente.'
-            )->with('success', 'Préstamo registrado.')->with('toast_tipo', 'exito');
+            ->with('success', 'Préstamo registrado.')
+            ->with('toast_tipo', 'exito')
+            ->with('prestamo_resaltado', $prestamo->id)
+            ->with('prestamo_accion', 'crear');
     }
 
     /**
@@ -510,11 +491,11 @@ class PrestamoController extends Controller
         });
 
 
-        return Redirect::route('prestamos.index')
-            ->with(
-                'success',
-                'Préstamo actualizado correctamente.'
-            )->with('success', 'Préstamo actualizado.')->with('toast_tipo', 'aviso');
+        return redirect()->route('prestamos.index')
+            ->with('success', 'Préstamo modificado.')
+            ->with('toast_tipo', 'exito')
+            ->with('prestamo_resaltado', $prestamo->id)
+            ->with('prestamo_accion', 'editar');
     }
 
 
@@ -532,9 +513,11 @@ class PrestamoController extends Controller
             ->with(
                 'success',
                 'Préstamo eliminado correctamente.'
-            )->with('success', 'Préstamo eliminado.')->with('toast_tipo', 'error');
+            )->with('success', 'Préstamo eliminado.')
+            ->with('toast_tipo', 'error')
+            ->with('prestamo_resaltado', $prestamo->id)
+            ->with('prestamo_accion', 'eliminar');
     }
-
     /**
      * Obtener equipos según tipo
      */
@@ -690,5 +673,55 @@ class PrestamoController extends Controller
                 'cargo' => $docente->cargo,
             ],
         ]);
+    }
+
+    public function exportExcel()
+    {
+        $prestamos = Prestamo::with(['docente', 'prestamoEquipos.equipo.tipoEquipo'])
+            ->latest('fecha')->get();
+
+        $filas = [];
+        $filas[] = ['SOLICITANTE', 'CARGO', 'EQUIPOS', 'FECHA', 'HORA INICIO', 'HORA FIN', 'ESTADO'];
+
+        foreach ($prestamos as $p) {
+            $nombre = trim(($p->docente->apellidos ?? '') . ' ' . ($p->docente->nombres ?? ''));
+            $equipos = $p->prestamoEquipos->map(function ($pe) {
+                $eq = $pe->equipo;
+                return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' N/S ' . ($eq->num_serie ?? ''));
+            })->implode(' | ');
+
+            $filas[] = [
+                mb_strtoupper($nombre),
+                mb_strtoupper($p->cargo ?? ''),
+                mb_strtoupper($equipos),
+                optional($p->fecha)->format('d-m-Y'),
+                $p->hora_inicio ? substr($p->hora_inicio, 0, 5) : '',
+                $p->hora_fin ? substr($p->hora_fin, 0, 5) : '',
+                $p->estado,
+            ];
+        }
+
+        $csv = '';
+        foreach ($filas as $fila) {
+            $csv .= implode(';', array_map(function ($c) {
+                return '"' . str_replace('"', '""', $c) . '"';
+            }, $fila)) . "\n";
+        }
+
+        return response("\xEF\xBB\xBF" . $csv)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="prestamos.csv"');
+    }
+
+    public function exportPdf()
+    {
+        $prestamos = Prestamo::with(['docente', 'prestamoEquipos.equipo.tipoEquipo'])
+            ->latest('fecha')
+            ->get();
+
+        $pdf = Pdf::loadView('prestamo.export-pdf', compact('prestamos'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('prestamos.pdf');
     }
 }
