@@ -346,7 +346,7 @@
 
     <div class="col-md-12">
 
-        <div class="card mb-4">
+        <div class="card mb-4" id="card_parte3_prestamo">
 
             <div class="card-header encabezado-verde">
                 <h5 class="mb-0">
@@ -591,9 +591,78 @@ document.addEventListener('DOMContentLoaded', function () {
         if (aviso) aviso.remove();
     }
 
+    function marcarError(campo, mensaje) {
+        if (!campo) return;
+        campo.classList.add('is-invalid');
+        const caja = campo.closest('.mb-3') || campo.parentElement;
+        if (!caja) return;
+        let aviso = caja.querySelector('.error-toast-campo');
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
+            campo.insertAdjacentElement('afterend', aviso);
+        }
+        aviso.textContent = mensaje;
+    }
+
+    function limpiarErrorCampo(campo) {
+        if (!campo) return;
+        campo.classList.remove('is-invalid');
+        const caja = campo.closest('.mb-3') || campo.parentElement;
+        const aviso = caja ? caja.querySelector('.error-toast-campo') : null;
+        if (aviso) aviso.remove();
+    }
+
+    function validarCampoVivo(id, mensaje, extra) {
+        const campo = document.getElementById(id);
+        if (!campo) return;
+        campo.addEventListener('blur', function () {
+            if (typeof extra === 'function') {
+                extra(this);
+                return;
+            }
+            if (!this.value.trim()) marcarError(this, mensaje);
+        });
+        campo.addEventListener('input', function () {
+            if (this.value.trim()) limpiarErrorCampo(this);
+        });
+        campo.addEventListener('change', function () {
+            if (this.value.trim()) limpiarErrorCampo(this);
+        });
+    }
+
+    validarCampoVivo('buscar_docente', 'Seleccione un solicitante.');
+    //validarCampoVivo('cargo', 'El cargo es obligatorio.');
+    validarCampoVivo('fecha', 'La fecha es obligatoria.');
+
+    validarCampoVivo('hora_inicio_texto', 'La hora de inicio es obligatoria.', function (campo) {
+        procesarHora(campo, document.getElementById('hora_inicio'), true);
+        const hidden = document.getElementById('hora_inicio');
+        if (!hidden || !hidden.value) {
+            marcarError(campo, campo.value.trim()
+                ? 'INGRESE UNA HORA VALIDA (06:00 AM - 04:00 PM).'
+                : 'La hora de inicio es obligatoria.');
+        } else {
+            limpiarErrorCampo(campo);
+            okHora(campo);
+        }
+        validarHorasEntreSi();
+    });
+
+    validarCampoVivo('hora_fin_texto', '', function (campo) {
+        procesarHora(campo, document.getElementById('hora_fin'), false);
+        const hidden = document.getElementById('hora_fin');
+        if (campo.value.trim() && (!hidden || !hidden.value)) {
+            marcarError(campo, 'INGRESE UNA HORA VALIDA (06:00 AM - 04:00 PM).');
+        } else {
+            limpiarErrorCampo(campo);
+            okHora(campo);
+        }
+        validarHorasEntreSi();
+    });
+
 
     let indiceDocenteSeleccionado = -1;
-    
     let docentesFiltrados = [];
 
 /*
@@ -1149,10 +1218,17 @@ function seleccionarDocente(docente) {
      * Reiniciar selección
      */
 
-    indiceDocenteSeleccionado =
-        -1;
+    indiceDocenteSeleccionado = -1;
 
+    limpiarErrorCampo(buscarDocente);
+    if (campoCargo) limpiarErrorCampo(campoCargo);
+
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
 }
+
+
 
 /*
  * =========================================================
@@ -1160,76 +1236,31 @@ function seleccionarDocente(docente) {
  * =========================================================
  */
 
-buscarDocente.addEventListener(
-    'input',
-    function () {
+ buscarDocente.addEventListener('input', function () {
 
-        const texto =
-            this.value
-                .trim()
-                .toLowerCase();
+    const texto = this.value.trim().toLowerCase();
 
-
-        /*
-         * Al modificar el texto,
-         * el ID anterior deja de ser válido.
-         */
-
-        docenteId.value = '';
-
-        const campoCargo =
-            document.getElementById('cargo');
-
-        if (campoCargo) {
-            campoCargo.value = '';
-        }
-
-
-        /*
-         * Si está vacío, ocultar resultados.
-         */
-
-        if (texto === '') {
-
-            resultadosDocentes.innerHTML = '';
-
-            resultadosDocentes.style.display =
-                'none';
-
-            return;
-        }
-
-
-        /*
-         * Filtrar docentes
-         */
-
-        const resultados =
-            docentes.filter(function (docente) {
-
-                const nombreCompleto =
-                    `${docente.apellidos} ${docente.nombres}`
-                        .toLowerCase();
-
-
-                return nombreCompleto.includes(
-                    texto
-                );
-
-            });
-
-
-        /*
-         * Mostrar resultados
-         */
-
-        mostrarResultadosDocentes(
-            resultados
-        );
-
+    docenteId.value = '';
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
     }
-);
 
+    const campoCargo = document.getElementById('cargo');
+    if (campoCargo) campoCargo.value = '';
+
+    if (texto === '') {
+        resultadosDocentes.innerHTML = '';
+        resultadosDocentes.style.display = 'none';
+        return;
+    }
+
+    const resultados = docentes.filter(function (docente) {
+        const nombreCompleto = `${docente.apellidos} ${docente.nombres}`.toLowerCase();
+        return nombreCompleto.includes(texto);
+    });
+
+    mostrarResultadosDocentes(resultados);
+});
 
 /*
  * =========================================================
@@ -1615,280 +1646,101 @@ function convertirA24(horas, minutos, periodo) {
 }
 
 
-// ---------------------------------------------------------
-// PROCESAR HORA AL SALIR DEL CAMPO
-// ---------------------------------------------------------
-function procesarHora(campoTexto, campoReal, obligatorio) {
+    function procesarHora(campoTexto, campoReal, obligatorio) {
 
-    if (!campoTexto || !campoReal) return;
+        if (!campoTexto || !campoReal) return;
 
-    let valor = campoTexto.value.trim().toUpperCase();
-
-    if (valor === '') {
-
-        campoReal.value = '';
-
-        if (obligatorio) {
-            campoTexto.setCustomValidity(
-                'LA HORA DE INICIO ES OBLIGATORIA.'
-            );
-        } else {
-            campoTexto.setCustomValidity('');
+        function fallar(mensaje) {
+            campoReal.value = '';
+            marcarError(campoTexto, mensaje);
         }
 
-        return;
-        errorHora(campoTexto, 'EL MISMO TEXTO');
-    }
+        let valor = campoTexto.value.trim().toUpperCase();
 
-
-    // -----------------------------------------------------
-    // DETECTAR AM / PM
-    // -----------------------------------------------------
-
-    let periodo = '';
-
-    if (valor.includes('AM')) {
-        periodo = 'AM';
-    }
-
-    if (valor.includes('PM')) {
-        periodo = 'PM';
-    }
-
-
-    // Eliminar AM / PM
-    valor = valor
-        .replace(/AM/g, '')
-        .replace(/PM/g, '')
-        .trim();
-
-
-    // -----------------------------------------------------
-    // SEPARAR HORA Y MINUTOS
-    // -----------------------------------------------------
-
-    let horas;
-    let minutos;
-
-
-    if (valor.includes(':')) {
-
-        const partes = valor.split(':');
-
-        if (partes.length !== 2) {
-
+        if (valor === '') {
             campoReal.value = '';
-
-            campoTexto.setCustomValidity(
-                'FORMATO INVÁLIDO. EJEMPLO: 2:10'
-            );
-
+            if (obligatorio) {
+                marcarError(campoTexto, 'LA HORA DE INICIO ES OBLIGATORIA.');
+            } else {
+                limpiarErrorCampo(campoTexto);
+            }
             return;
         }
 
-        horas = parseInt(partes[0], 10);
-        minutos = parseInt(partes[1], 10);
+        let periodo = '';
+        if (valor.includes('AM')) periodo = 'AM';
+        if (valor.includes('PM')) periodo = 'PM';
 
-    } else {
+        valor = valor.replace(/AM/g, '').replace(/PM/g, '').trim();
 
-        const numeros = valor.replace(/\D/g, '');
+        let horas;
+        let minutos;
 
-        if (numeros.length === 3) {
-
-            horas = parseInt(
-                numeros.substring(0, 1),
-                10
-            );
-
-            minutos = parseInt(
-                numeros.substring(1, 3),
-                10
-            );
-
-        } else if (numeros.length === 4) {
-
-            horas = parseInt(
-                numeros.substring(0, 2),
-                10
-            );
-
-            minutos = parseInt(
-                numeros.substring(2, 4),
-                10
-            );
-
+        if (valor.includes(':')) {
+            const partes = valor.split(':');
+            if (partes.length !== 2) {
+                fallar('INGRESE UNA HORA VALIDA. EJ: 8:00 AM');
+                return;
+            }
+            horas = parseInt(partes[0], 10);
+            minutos = parseInt(partes[1], 10);
         } else {
+            const numeros = valor.replace(/\D/g, '');
+            if (numeros.length === 3) {
+                horas = parseInt(numeros.substring(0, 1), 10);
+                minutos = parseInt(numeros.substring(1, 3), 10);
+            } else if (numeros.length === 4) {
+                horas = parseInt(numeros.substring(0, 2), 10);
+                minutos = parseInt(numeros.substring(2, 4), 10);
+            } else if (numeros.length === 1 || numeros.length === 2) {
+                horas = parseInt(numeros, 10);
+                minutos = 0;
+            } else {
+                fallar('INGRESE UNA HORA VALIDA. EJ: 8:00 AM');
+                return;
+            }
+        }
 
-            campoReal.value = '';
-
-            campoTexto.setCustomValidity(
-                'INGRESA LA HORA. EJEMPLO: 2:10'
-            );
-
+        if (Number.isNaN(horas) || Number.isNaN(minutos) || minutos < 0 || minutos > 59) {
+            fallar('INGRESE UNA HORA VALIDA.');
             return;
         }
-    }
 
+        if (periodo === '') {
+            if (horas >= 6 && horas <= 11) periodo = 'AM';
+            else if (horas === 12) periodo = 'PM';
+            else if (horas >= 1 && horas <= 4) periodo = 'PM';
+            else {
+                fallar('EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.');
+                return;
+            }
+        }
 
-    // -----------------------------------------------------
-    // VALIDAR NÚMEROS
-    // -----------------------------------------------------
-
-    if (
-        Number.isNaN(horas) ||
-        Number.isNaN(minutos)
-    ) {
-
-        campoReal.value = '';
-
-        campoTexto.setCustomValidity(
-            'INGRESA UNA HORA VÁLIDA.'
-        );
-
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // VALIDAR MINUTOS
-    // -----------------------------------------------------
-
-    if (minutos < 0 || minutos > 59) {
-
-        campoReal.value = '';
-
-        campoTexto.setCustomValidity(
-            'LOS MINUTOS DEBEN ESTAR ENTRE 00 Y 59.'
-        );
-
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // SI NO ESCRIBIÓ AM / PM
-    // -----------------------------------------------------
-    //
-    // REGLA DEL SISTEMA:
-    //
-    // 06:00 - 11:59 = AM
-    // 12:00 - 12:59 = PM
-    // 01:00 - 04:00 = PM
-    //
-    // Por eso:
-    // 2:10 -> 02:10 PM
-    // 8:30 -> 08:30 AM
-    // 11:45 -> 11:45 AM
-    // 12:00 -> 12:00 PM
-    // 3:30 -> 03:30 PM
-    // -----------------------------------------------------
-
-    if (periodo === '') {
-
-        if (horas >= 6 && horas <= 11) {
-
-            periodo = 'AM';
-
-        } else if (horas === 12) {
-
-            periodo = 'PM';
-
-        } else if (horas >= 1 && horas <= 4) {
-
-            periodo = 'PM';
-
-        } else {
-
-            campoReal.value = '';
-
-            campoTexto.setCustomValidity(
-                'EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.'
-            );
-
+        if (horas < 1 || horas > 12) {
+            fallar('LA HORA DEBE ESTAR ENTRE 01 Y 12.');
             return;
         }
+
+        const hora24 = convertirA24(horas, minutos, periodo);
+        const partes24 = hora24.split(':');
+        const horas24 = parseInt(partes24[0], 10);
+        const minutos24 = parseInt(partes24[1], 10);
+        const totalMinutos = (horas24 * 60) + minutos24;
+
+        if (totalMinutos < (6 * 60) || totalMinutos > (16 * 60)) {
+            fallar('EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.');
+            return;
+        }
+
+        campoTexto.value = convertirHora12(horas24, minutos24);
+        campoReal.value = hora24;
+        limpiarErrorCampo(campoTexto);
+
+        campoReal.dispatchEvent(new Event('change'));
+        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+            actualizarEstadoBuscadorEquipos();
+        }
     }
-
-
-    // -----------------------------------------------------
-    // VALIDAR RANGO DE HORAS
-    // -----------------------------------------------------
-
-    if (horas < 1 || horas > 12) {
-
-        campoReal.value = '';
-
-        campoTexto.setCustomValidity(
-            'LA HORA DEBE ESTAR ENTRE 01 Y 12.'
-        );
-
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // CONVERTIR A 24 HORAS
-    // -----------------------------------------------------
-
-    const hora24 = convertirA24(
-        horas,
-        minutos,
-        periodo
-    );
-
-
-    const partes24 = hora24.split(':');
-
-    const horas24 = parseInt(partes24[0], 10);
-    const minutos24 = parseInt(partes24[1], 10);
-
-
-    // -----------------------------------------------------
-    // VALIDAR HORARIO DEL SISTEMA
-    // -----------------------------------------------------
-
-    const totalMinutos =
-        (horas24 * 60) + minutos24;
-
-    const minimo =
-        (6 * 60);
-
-    const maximo =
-        (16 * 60);
-
-
-    if (
-        totalMinutos < minimo ||
-        totalMinutos > maximo
-    ) {
-
-        campoReal.value = '';
-
-        campoTexto.setCustomValidity(
-            'EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.'
-        );
-
-        return;
-    }
-
-
-    // -----------------------------------------------------
-    // FORMATO FINAL
-    // -----------------------------------------------------
-
-    campoTexto.value =
-        convertirHora12(horas24, minutos24);
-
-    campoReal.value = hora24;
-
-    campoTexto.setCustomValidity('');
-
-    campoReal.dispatchEvent(new Event('change'));
-
-    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
-        actualizarEstadoBuscadorEquipos();
-    }
-}
 
 
 // =========================================================
@@ -2176,60 +2028,27 @@ function controlarEntradaHora(campoTexto) {
     });
 }
 
-
-
-
-
 // =========================================================
-// HORA INICIO
+// HORA INICIO / HORA FINAL
+// (el blur lo aplica validarCampoVivo)
 // =========================================================
 
 controlarEntradaHora(horaInicioTexto);
 
-if (horaInicioTexto) {
-
-    horaInicioTexto.addEventListener(
-        'blur',
-        function () {
-
-            procesarHora(
-                horaInicioTexto,
-                horaInicioReal,
-                true
-            );
-
-            validarHorasEntreSi();
+if (horaInicioTexto && horaInicioReal) {
+    horaInicioTexto.addEventListener('input', function () {
+        horaInicioReal.value = '';
+        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+            actualizarEstadoBuscadorEquipos();
         }
-    );
+    });
 }
-
-
-// =========================================================
-// HORA FINAL
-// =========================================================
 
 controlarEntradaHora(horaFinTexto);
 
-if (horaFinTexto) {
-
-    horaFinTexto.addEventListener(
-        'blur',
-        function () {
-
-            procesarHora(
-                horaFinTexto,
-                horaFinReal,
-                false
-            );
-
-            validarHorasEntreSi();
-        }
-    );
-}
-
-// =========================================================
-// VALIDAR QUE HORA FINAL SEA MAYOR QUE HORA INICIO
-// =========================================================
+    // =========================================================
+    // VALIDAR QUE HORA FINAL SEA MAYOR QUE HORA INICIO
+    // =========================================================
 
     function validarHorasEntreSi() {
 
@@ -2296,11 +2115,9 @@ if (horaFinTexto) {
         // -----------------------------------------------------
 
         if (finMinutos <= inicioMinutos) {
-            horaFinTexto.setCustomValidity('LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
-            errorHora(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
+            marcarError(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
         } else {
-            horaFinTexto.setCustomValidity('');
-            okHora(horaFinTexto);
+            limpiarErrorCampo(horaFinTexto);
         }
     }
 
@@ -2468,67 +2285,18 @@ if (formularioPrestamo) {
  * =========================================================
  */
 
-function parte1Completa() {
+    function parte1Completa() {
+        const docente = document.getElementById('docente_id');
+        const cargo = document.getElementById('cargo');
+        const fecha = document.getElementById('fecha');
+        const horaInicio = document.getElementById('hora_inicio');
 
-    const docente =
-        document.getElementById('docente_id');
-
-    const cargo =
-        document.getElementById('cargo');
-
-    const fecha =
-        document.getElementById('fecha');
-
-    const horaInicio =
-        document.getElementById('hora_inicio');
-
-
-    /*
-     * DOCENTE:
-     * Debe existir un ID real seleccionado.
-     */
-
-    if (!docente || docente.value.trim() === '') {
-
-        return false;
+        if (!docente || docente.value.trim() === '') return false;
+        if (!cargo || cargo.value.trim() === '') return false;
+        if (!fecha || fecha.value.trim() === '') return false;
+        if (!horaInicio || horaInicio.value.trim() === '') return false;
+        return true;
     }
-
-
-    /*
-     * CARGO
-     */
-
-    if (!cargo || cargo.value.trim() === '') {
-
-        return false;
-    }
-
-
-    /*
-     * FECHA
-     */
-
-    if (!fecha || fecha.value.trim() === '') {
-
-        return false;
-    }
-
-
-    /*
-     * HORA INICIO
-     */
-
-    if (
-        !horaInicio ||
-        horaInicio.value.trim() === ''
-    ) {
-
-        return false;
-    }
-
-
-    return true;
-}
 
 
     /* ========================================================= */
@@ -2973,16 +2741,23 @@ function mostrarCamposBusqueda() {
     }
 }
 
+//Funcion actualizarEstadoBuscadorEquipos: bloquea o desbloquea el buscador de equipos según si la Parte 1 está completa y si hay equipos seleccionados.
+
     function actualizarEstadoBuscadorEquipos() {
         const parte1Ok = parte1Completa();
+        const hayEq = hayEquiposSeleccionados();
         const card2 = document.querySelector('#resultados_equipos')?.closest('.card');
         const card3 = document.getElementById('equipos_seleccionados')?.closest('.card');
 
-        [card2, card3].forEach(function (card) {
-            if (!card) return;
-            card.style.opacity = parte1Ok ? '1' : '0.55';
-            card.style.pointerEvents = parte1Ok ? 'auto' : 'none';
-        });
+        if (card2) {
+            card2.style.opacity = parte1Ok ? '1' : '0.55';
+            card2.style.pointerEvents = parte1Ok ? 'auto' : 'none';
+        }
+        if (card3) {
+            const ok3 = parte1Ok && hayEq;
+            card3.style.opacity = ok3 ? '1' : '0.55';
+            card3.style.pointerEvents = ok3 ? 'auto' : 'none';
+        }
 
         if (!parte1Ok) {
             if (panelBusquedaEquipos) {
@@ -3038,6 +2813,18 @@ function mostrarCamposBusqueda() {
             buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
         }
     }
+
+    ['docente_id', 'cargo', 'fecha', 'hora_inicio'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('change', actualizarEstadoBuscadorEquipos);
+        el.addEventListener('input', actualizarEstadoBuscadorEquipos);
+    });
+
+    document.getElementById('hora_inicio_texto')
+        ?.addEventListener('blur', actualizarEstadoBuscadorEquipos);
+
+    actualizarEstadoBuscadorEquipos();
 
     if (btnAgregarEquipo) {
         btnAgregarEquipo.addEventListener('click', function () {
@@ -3227,8 +3014,9 @@ actualizarEstadoBuscadorEquipos();
         ].filter(Boolean).join('  |  ');
 
         const accesorioResumen = accesorios[0] || null;
+        
         const resumenAccesorio = accesorioResumen
-            ? [accesorioResumen.tipo ?? 'SIN TIPO', accesorioResumen.num_serie ?? 'S/N']
+            ? [accesorioResumen.tipo ?? 'SIN TIPO', accesorioResumen.marca ?? '', accesorioResumen.num_serie ?? 'S/N']
                 .filter(Boolean)
                 .join('  |  ')
             : '';
@@ -3249,10 +3037,10 @@ actualizarEstadoBuscadorEquipos();
                     </strong>
 
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-menos">
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-menos" style="display: none;">
                             VER MENOS
                         </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-mas" style="display: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-mas">
                             VER MÁS
                         </button>
                         <button type="button" class="btn btn-danger btn-sm quitar-equipo">
@@ -3281,7 +3069,7 @@ actualizarEstadoBuscadorEquipos();
                     `}
                 </div>
 
-                <div class="detalle-equipo">
+                <div class="detalle-equipo style="display: none;">
 
                 <div class="row g-3">
 
@@ -3618,7 +3406,7 @@ actualizarEstadoBuscadorEquipos();
             mostrarErrorCampo(campo, mensaje);
         }
     }
-
+    
 });
 
 </script>
