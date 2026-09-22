@@ -1635,7 +1635,7 @@ document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
 
 setTimeout(function () {
     cargarPaginaActual();
-    setTimeout(pintarFilaEquipo, 300);
+    setTimeout(pintarFilaEquipo, 400);
 }, 200);
 
     document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
