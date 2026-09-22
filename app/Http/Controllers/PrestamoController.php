@@ -23,13 +23,34 @@ class PrestamoController extends Controller
     public function index(Request $request): View
     {
         $prestamos = Prestamo::with([
-        'docente',
-        'prestamoEquipos.equipo.tipoEquipo',
-        'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
-    ])->latest('fecha')->get();
+            'docente',
+            'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+        ])->latest('fecha')->get();
 
-    return view('prestamo.index', compact('prestamos'));
+        $filtroSolicitantes = Docente::orderBy('apellidos')
+            ->orderBy('nombres')
+            ->get()
+            ->map(function ($d) {
+                return mb_strtoupper(trim($d->apellidos . ' ' . $d->nombres), 'UTF-8');
+            })
+            ->filter()
+            ->unique()
+            ->values();
+
+        $filtroCargos = Prestamo::whereNotNull('cargo')
+            ->where('cargo', '!=', '')
+            ->distinct()
+            ->orderBy('cargo')
+            ->pluck('cargo');
+
+        return view('prestamo.index', compact(
+            'prestamos',
+            'filtroSolicitantes',
+            'filtroCargos'
+        ));
     }
+
 
     /**
      * Mostrar formulario para crear préstamo
@@ -259,7 +280,7 @@ class PrestamoController extends Controller
         });
 
 
-        
+
 
         return Redirect::route('prestamos.index')
             ->with(
@@ -494,7 +515,6 @@ class PrestamoController extends Controller
                 'success',
                 'Préstamo actualizado correctamente.'
             )->with('success', 'Préstamo actualizado.')->with('toast_tipo', 'aviso');
-
     }
 
 
@@ -645,30 +665,30 @@ class PrestamoController extends Controller
         return response()->json($equipos);
     }
     public function registrarDocente(Request $request)
-{
-    $request->validate([
-        'nombres' => 'required|string|max:100',
-        'apellidos' => 'required|string|max:100',
-        'cargo' => 'required|string|max:100',
-    ]);
+    {
+        $request->validate([
+            'nombres' => 'required|string|max:100',
+            'apellidos' => 'required|string|max:100',
+            'cargo' => 'required|string|max:100',
+        ]);
 
-    $docente = Docente::create([
-        'nombres' => mb_strtoupper(trim($request->nombres), 'UTF-8'),
-        'apellidos' => mb_strtoupper(trim($request->apellidos), 'UTF-8'),
-        'cargo' => mb_strtoupper(trim($request->cargo), 'UTF-8'),
-        'dni' => null,
-        'correo' => null,
-        'celular' => null,
-    ]);
+        $docente = Docente::create([
+            'nombres' => mb_strtoupper(trim($request->nombres), 'UTF-8'),
+            'apellidos' => mb_strtoupper(trim($request->apellidos), 'UTF-8'),
+            'cargo' => mb_strtoupper(trim($request->cargo), 'UTF-8'),
+            'dni' => null,
+            'correo' => null,
+            'celular' => null,
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'docente' => [
-            'id' => $docente->id,
-            'nombres' => $docente->nombres,
-            'apellidos' => $docente->apellidos,
-            'cargo' => $docente->cargo,
-        ],
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'docente' => [
+                'id' => $docente->id,
+                'nombres' => $docente->nombres,
+                'apellidos' => $docente->apellidos,
+                'cargo' => $docente->cargo,
+            ],
+        ]);
+    }
 }

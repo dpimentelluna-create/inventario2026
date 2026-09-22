@@ -56,7 +56,7 @@
                             <div id="resultados_docentes" class="list-group position-absolute w-100 shadow-sm" style="
                                         z-index: 1050; 
                                         display: none;
-                                        max-height: 240px;
+                                        max-height: 220px;
                                         overflow-y: auto;
                                         background: white;"></div>
 
@@ -228,11 +228,11 @@
         id="hora_inicio_texto"
         class="form-control @error('hora_inicio') is-invalid @enderror"
         value="{{ old(
-            'hora_inicio',
-            $prestamo->hora_inicio
-            ? date('h:i A', strtotime($prestamo->hora_inicio))
-            : ''
-        ) }}"
+    'hora_inicio',
+    $prestamo->hora_inicio
+    ? date('h:i A', strtotime($prestamo->hora_inicio))
+    : ''
+) }}"
         placeholder="00:00 AM"
         maxlength="8"
         autocomplete="off"
@@ -246,15 +246,15 @@
         name="hora_inicio"
         id="hora_inicio"
         value="{{ old(
-            'hora_inicio',
-            $prestamo->hora_inicio
-            ? substr($prestamo->hora_inicio, 0, 5)
-            : ''
-        ) }}"
+    'hora_inicio',
+    $prestamo->hora_inicio
+    ? substr($prestamo->hora_inicio, 0, 5)
+    : ''
+) }}"
     >
 
     <small class="text-muted">
-        HORARIO: 06:30 AM - 03:30 PM
+        HORARIO: 06:00 AM - 04:00 PM
     </small>
 
     @error('hora_inicio')
@@ -280,11 +280,11 @@
         id="hora_fin_texto"
         class="form-control @error('hora_fin') is-invalid @enderror"
         value="{{ old(
-            'hora_fin',
-            $prestamo->hora_fin
-            ? date('h:i A', strtotime($prestamo->hora_fin))
-            : ''
-        ) }}"
+    'hora_fin',
+    $prestamo->hora_fin
+    ? date('h:i A', strtotime($prestamo->hora_fin))
+    : ''
+) }}"
         placeholder="00:00 AM"
         maxlength="8"
         autocomplete="off"
@@ -297,11 +297,11 @@
         name="hora_fin"
         id="hora_fin"
         value="{{ old(
-            'hora_fin',
-            $prestamo->hora_fin
-            ? substr($prestamo->hora_fin, 0, 5)
-            : ''
-        ) }}"
+    'hora_fin',
+    $prestamo->hora_fin
+    ? substr($prestamo->hora_fin, 0, 5)
+    : ''
+) }}"
     >
 
     <small class="text-muted">
@@ -381,7 +381,7 @@
 
                     </div>
 
-                    <div id="resultados_equipos" class="mt-2">
+                    <div id="resultados_equipos" class="mt-2" style="max-height:220px; overflow-y:auto;">
                         <div class="text-muted text-center py-3">
                             Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.
                         </div>
@@ -1849,9 +1849,9 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
     //
     // REGLA DEL SISTEMA:
     //
-    // 06:30 - 11:59 = AM
+    // 06:00 - 11:59 = AM
     // 12:00 - 12:59 = PM
-    // 01:00 - 03:30 = PM
+    // 01:00 - 04:00 = PM
     //
     // Por eso:
     // 2:10 -> 02:10 PM
@@ -1871,7 +1871,7 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
 
             periodo = 'PM';
 
-        } else if (horas >= 1 && horas <= 3) {
+        } else if (horas >= 1 && horas <= 4) {
 
             periodo = 'PM';
 
@@ -1880,7 +1880,7 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
             campoReal.value = '';
 
             campoTexto.setCustomValidity(
-                'EL HORARIO PERMITIDO ES DE 06:30 AM A 03:30 PM.'
+                'EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.'
             );
 
             return;
@@ -1929,10 +1929,10 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
         (horas24 * 60) + minutos24;
 
     const minimo =
-        (6 * 60) + 30;
+        (6 * 60);
 
     const maximo =
-        (15 * 60) + 30;
+        (16 * 60);
 
 
     if (
@@ -1943,7 +1943,7 @@ function procesarHora(campoTexto, campoReal, obligatorio) {
         campoReal.value = '';
 
         campoTexto.setCustomValidity(
-            'EL HORARIO PERMITIDO ES DE 06:30 AM A 03:30 PM.'
+            'EL HORARIO PERMITIDO ES DE 06:00 AM A 04:00 PM.'
         );
 
         return;
@@ -2394,6 +2394,16 @@ const formularioPrestamo = horaInicioTexto
     ? horaInicioTexto.closest('form')
     : null;
 
+formularioPrestamo.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter') return;
+    if (e.target && e.target.tagName === 'TEXTAREA') return;
+    e.preventDefault();
+
+    const abierta = document.querySelector(
+        '#resultados_docentes .list-group-item-action, #resultados_equipos .list-group-item-action, #resultados_cargos .list-group-item-action'
+    );
+    if (abierta) abierta.click();
+});
 
 if (formularioPrestamo) {
 
@@ -3051,79 +3061,87 @@ function mostrarCamposBusqueda() {
     }
 }
 
-function actualizarEstadoBuscadorEquipos() {
-    const parte1Ok = parte1Completa();
+    function actualizarEstadoBuscadorEquipos() {
+        const parte1Ok = parte1Completa();
+        const card2 = document.querySelector('#resultados_equipos')?.closest('.card');
+        const card3 = document.getElementById('equipos_seleccionados')?.closest('.card');
 
-    if (!parte1Ok) {
+        [card2, card3].forEach(function (card) {
+            if (!card) return;
+            card.style.opacity = parte1Ok ? '1' : '0.55';
+            card.style.pointerEvents = parte1Ok ? 'auto' : 'none';
+        });
+
+        if (!parte1Ok) {
+            if (panelBusquedaEquipos) {
+                panelBusquedaEquipos.style.display = 'block';
+            }
+            if (wrapBtnAgregarEquipo) {
+                wrapBtnAgregarEquipo.style.display = 'none';
+            }
+            if (tipoEquipo) {
+                tipoEquipo.disabled = true;
+                tipoEquipo.value = '';
+            }
+            if (buscarEquipo) {
+                buscarEquipo.disabled = true;
+                buscarEquipo.value = '';
+                buscarEquipo.placeholder = 'Complete la Parte 1 para buscar equipos...';
+            }
+            if (resultados) {
+                resultados.innerHTML = `
+                <div class="text-muted text-center py-3">
+                    Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.
+                </div>
+            `;
+            }
+            return;
+        }
+
+        if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display === 'none') {
+            if (wrapBtnAgregarEquipo) {
+                wrapBtnAgregarEquipo.style.display = 'block';
+            }
+            return;
+        }
+
+        if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display !== 'none') {
+            if (tipoEquipo) tipoEquipo.disabled = false;
+            if (buscarEquipo) {
+                buscarEquipo.disabled = false;
+                buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+            }
+            return;
+        }
+
         if (panelBusquedaEquipos) {
             panelBusquedaEquipos.style.display = 'block';
         }
         if (wrapBtnAgregarEquipo) {
             wrapBtnAgregarEquipo.style.display = 'none';
         }
-        if (tipoEquipo) {
-            tipoEquipo.disabled = true;
-            tipoEquipo.value = '';
-        }
-        if (buscarEquipo) {
-            buscarEquipo.disabled = true;
-            buscarEquipo.value = '';
-            buscarEquipo.placeholder = 'Complete la Parte 1 para buscar equipos...';
-        }
-        if (resultados) {
-            resultados.innerHTML = `
-                <div class="text-muted text-center py-3">
-                    Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.
-                </div>
-            `;
-        }
-        return;
-    }
-
-    if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display === 'none') {
-        if (wrapBtnAgregarEquipo) {
-            wrapBtnAgregarEquipo.style.display = 'block';
-        }
-        return;
-    }
-
-    if (hayEquiposSeleccionados() && panelBusquedaEquipos && panelBusquedaEquipos.style.display !== 'none') {
         if (tipoEquipo) tipoEquipo.disabled = false;
         if (buscarEquipo) {
             buscarEquipo.disabled = false;
             buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
         }
-        return;
     }
 
-    if (panelBusquedaEquipos) {
-        panelBusquedaEquipos.style.display = 'block';
+    if (btnAgregarEquipo) {
+        btnAgregarEquipo.addEventListener('click', function () {
+            if (!parte1Completa()) {
+                alert('Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.');
+                return;
+            }
+            mostrarCamposBusqueda();
+            if (tipoEquipo) tipoEquipo.disabled = false;
+            if (buscarEquipo) {
+                buscarEquipo.disabled = false;
+                buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+                buscarEquipo.focus();
+            }
+        });
     }
-    if (wrapBtnAgregarEquipo) {
-        wrapBtnAgregarEquipo.style.display = 'none';
-    }
-    if (tipoEquipo) tipoEquipo.disabled = false;
-    if (buscarEquipo) {
-        buscarEquipo.disabled = false;
-        buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
-    }
-}
-
-if (btnAgregarEquipo) {
-    btnAgregarEquipo.addEventListener('click', function () {
-        if (!parte1Completa()) {
-            alert('Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.');
-            return;
-        }
-        mostrarCamposBusqueda();
-        if (tipoEquipo) tipoEquipo.disabled = false;
-        if (buscarEquipo) {
-            buscarEquipo.disabled = false;
-            buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
-            buscarEquipo.focus();
-        }
-    });
-}
 
 /*
  * Revisar cambios en los campos de la Parte 1
