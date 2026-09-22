@@ -2746,17 +2746,19 @@ function mostrarCamposBusqueda() {
     function actualizarEstadoBuscadorEquipos() {
         const parte1Ok = parte1Completa();
         const hayEq = hayEquiposSeleccionados();
-        const card2 = document.querySelector('#resultados_equipos')?.closest('.card');
-        const card3 = document.getElementById('equipos_seleccionados')?.closest('.card');
 
-        if (card2) {
-            card2.style.opacity = parte1Ok ? '1' : '0.55';
-            card2.style.pointerEvents = parte1Ok ? 'auto' : 'none';
+        const wrap2 = document.querySelector('#resultados_equipos')?.closest('.card-body')
+            || document.querySelector('#resultados_equipos')?.closest('.card');
+        const wrap3 = document.getElementById('equipos_seleccionados');
+
+        if (wrap2) {
+            wrap2.style.opacity = parte1Ok ? '1' : '0.55';
+            wrap2.style.pointerEvents = parte1Ok ? 'auto' : 'none';
         }
-        if (card3) {
-            const ok3 = parte1Ok && hayEq;
-            card3.style.opacity = ok3 ? '1' : '0.55';
-            card3.style.pointerEvents = ok3 ? 'auto' : 'none';
+        if (wrap3) {
+            const ok3 = parte1Ok && hayEquiposSeleccionados();
+            wrap3.style.opacity = ok3 ? '1' : '0.55';
+            wrap3.style.pointerEvents = ok3 ? 'auto' : 'none';
         }
 
         if (!parte1Ok) {
@@ -3014,7 +3016,7 @@ actualizarEstadoBuscadorEquipos();
         ].filter(Boolean).join('  |  ');
 
         const accesorioResumen = accesorios[0] || null;
-        
+
         const resumenAccesorio = accesorioResumen
             ? [accesorioResumen.tipo ?? 'SIN TIPO', accesorioResumen.marca ?? '', accesorioResumen.num_serie ?? 'S/N']
                 .filter(Boolean)
@@ -3058,7 +3060,7 @@ actualizarEstadoBuscadorEquipos();
 
                 <input type="hidden" name="equipos[${indice}][equipo_id]" value="${equipo.id}">
 
-                <div class="resumen-equipo mb-0" style="display: none;">
+                <div class="resumen-equipo mb-0">
                     <label class="form-label small mb-1">EQUIPO</label>
                     <input type="text" class="form-control form-control-sm mb-2" value="${resumenEquipo}" readonly>
                     ${resumenAccesorio ? `
@@ -3069,7 +3071,7 @@ actualizarEstadoBuscadorEquipos();
                     `}
                 </div>
 
-                <div class="detalle-equipo style="display: none;">
+                <div class="detalle-equipo" style="display: none;">
 
                 <div class="row g-3">
 
@@ -3158,6 +3160,7 @@ actualizarEstadoBuscadorEquipos();
 
         actualizarEventosQuitarEquipo();
         actualizarEventosVerMasMenos();
+        actualizarEstadoBuscadorEquipos();
     }
 
     function actualizarEventosVerMasMenos() {
@@ -3199,72 +3202,47 @@ actualizarEstadoBuscadorEquipos();
             .forEach(boton => {
 
                 boton.onclick = function () {
+    const equipo = this.closest('.equipo-seleccionado');
+    if (!equipo) return;
 
-                    const equipo =
-                        this.closest(
-                            '.equipo-seleccionado'
-                        );
+    function quitar() {
+        const equipoId = equipo.dataset.equipoId;
+        equiposSeleccionados.delete(String(equipoId));
+        equipo.remove();
+        mostrarToast('Equipo eliminado', 'danger');
+        renumerarEquipos();
+        actualizarEstadoBuscadorEquipos();
 
+        const equipos = document.querySelectorAll('.equipo-seleccionado');
+        if (equipos.length === 0) {
+            contenedor.innerHTML = `
+                <div id="mensaje_sin_equipos" class="text-center text-muted py-3">
+                    No hay equipos seleccionados.
+                </div>`;
+            if (wrapBtnAgregarEquipo) wrapBtnAgregarEquipo.style.display = 'none';
+            if (panelBusquedaEquipos) panelBusquedaEquipos.style.display = 'block';
+            actualizarEstadoBuscadorEquipos();
+        }
+    }
 
-                    if (!equipo) {
-
-                        return;
-
-                    }
-
-
-                    const equipoId =
-                        equipo.dataset.equipoId;
-
-
-                    equiposSeleccionados.delete(
-                        String(equipoId)
-                    );
-
-
-                    equipo.remove();
-
-                    mostrarToast('Equipo eliminado', 'danger');
-
-                    renumerarEquipos();
-
-
-                    const equipos =
-                        document.querySelectorAll(
-                            '.equipo-seleccionado'
-                        );
-
-
-                    if (equipos.length === 0) {
-
-                        contenedor.innerHTML = `
-
-                            <div
-                                id="mensaje_sin_equipos"
-                                class="
-                                    text-center
-                                    text-muted
-                                    py-3
-                                "
-                            >
-
-                                No hay equipos seleccionados.
-
-                            </div>
-
-                        `;
-
-                        if (wrapBtnAgregarEquipo) {
-                            wrapBtnAgregarEquipo.style.display = 'none';
-                        }
-                        if (panelBusquedaEquipos) {
-                            panelBusquedaEquipos.style.display = 'block';
-                        }
-                        actualizarEstadoBuscadorEquipos();
-
-                    }
-
-                };
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Quitar equipo?',
+            text: 'Se quitará del préstamo.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, quitar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(function (r) {
+            if (r.isConfirmed) quitar();
+        });
+    } else if (confirm('¿Quitar equipo?')) {
+        quitar();
+    }
+};
 
             });
 
@@ -3408,5 +3386,4 @@ actualizarEstadoBuscadorEquipos();
     }
     
 });
-
 </script>
