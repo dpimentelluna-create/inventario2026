@@ -15,24 +15,35 @@
     <table>
         <thead>
             <tr>
-                <th>Solicitante</th><th>Cargo</th><th>Equipos</th>
-                <th>Fecha</th><th>Inicio</th><th>Fin</th><th>Estado</th>
+                <th>Solicitante</th>
+                <th>Cargo</th>
+                <th>Equipos</th>
+                <th>Fecha</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Estado</th>
             </tr>
         </thead>
         <tbody>
             @foreach ($prestamos as $p)
                 <tr>
-                    <td>{{ strtoupper(($p->docente->apellidos ?? '').' '.($p->docente->nombres ?? '')) }}</td>
+                    <td>{{ strtoupper(($p->docente->apellidos ?? '') . ' ' . ($p->docente->nombres ?? '')) }}</td>
                     <td>{{ $p->cargo }}</td>
                     <td>
                         @foreach ($p->prestamoEquipos as $pe)
-                            {{ $pe->equipo->tipoEquipo->nombre ?? '' }}
-                            {{ $pe->equipo->num_serie ?? '' }}<br>
+                            <strong>{{ $pe->equipo->tipoEquipo->nombre ?? '' }}</strong><br>
+                            MARCA: {{ $pe->equipo->marca ?? '' }}<br>
+                            MODELO: {{ $pe->equipo->modelo ?? '' }}<br>
+                            N.º SERIE: {{ $pe->equipo->num_serie ?? '' }}
+
+                            @if (!$loop->last)
+                                <hr>
+                            @endif
                         @endforeach
                     </td>
                     <td>{{ optional($p->fecha)->format('d-m-Y') }}</td>
-                    <td>{{ $p->hora_inicio ? substr($p->hora_inicio,0,5) : '' }}</td>
-                    <td>{{ $p->hora_fin ? substr($p->hora_fin,0,5) : '' }}</td>
+                    <td>{{ $p->hora_inicio ? substr($p->hora_inicio, 0, 5) : '' }}</td>
+                    <td>{{ $p->hora_fin ? substr($p->hora_fin, 0, 5) : '' }}</td>
                     <td>{{ $p->estado }}</td>
                 </tr>
             @endforeach
