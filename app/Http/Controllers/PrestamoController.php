@@ -82,6 +82,7 @@ class PrestamoController extends Controller
         PrestamoRequest $request
     ): RedirectResponse {
 
+        // CORRECCIÓN: Asignamos el resultado de la transacción a $prestamo para retornarlo
         $prestamo = DB::transaction(function () use ($request) {
 
             $estadoPrestamo = $request->filled('hora_fin')
@@ -143,9 +144,6 @@ class PrestamoController extends Controller
              * =================================================
              * 4. CREAR SNAPSHOT DEL EQUIPO
              * =================================================
-             *
-             * Al crear un préstamo, usamos el estado real
-             * actual del equipo.
              */
                 $prestamoEquipo = PrestamoEquipo::create([
                     'prestamo_id' => $prestamo->id,
@@ -166,9 +164,6 @@ class PrestamoController extends Controller
              * 5. SI EL PRÉSTAMO SE CREA TERMINADO
              *    ACTUALIZAR ESTADO REAL DEL EQUIPO
              * =================================================
-             *
-             * En este caso sí usamos el estado enviado
-             * desde el formulario.
              */
                 if ($estadoPrestamo === 'TERMINADO') {
 
@@ -192,10 +187,10 @@ class PrestamoController extends Controller
 
 
                     /*
-                 * Como el préstamo terminó inmediatamente,
-                 * el snapshot debe representar el estado
-                 * final registrado.
-                 */
+                  * Como el préstamo terminó inmediatamente,
+                  * el snapshot debe representar el estado
+                  * final registrado.
+                  */
                     $prestamoEquipo->update([
                         'estado' =>
                         $equipoData['estado'],
@@ -258,10 +253,10 @@ class PrestamoController extends Controller
                     }
                 }
             }
+
+            // CORRECCIÓN: Retornamos el objeto préstamo para que salga de la transacción
+            return $prestamo;
         });
-
-
-
 
         return Redirect::route('prestamos.index')
             ->with('success', 'Préstamo registrado.')
@@ -319,27 +314,10 @@ class PrestamoController extends Controller
 
         DB::transaction(function () use ($request, $prestamo) {
 
-            /*
-         * =====================================================
-         * 1. DETERMINAR ESTADO DEL PRÉSTAMO
-         * =====================================================
-         *
-         * Si existe hora_fin:
-         *      TERMINADO
-         *
-         * Si no existe:
-         *      ACTIVO
-         */
             $estadoPrestamo = $request->filled('hora_fin')
                 ? 'TERMINADO'
                 : 'ACTIVO';
 
-
-            /*
-         * =====================================================
-         * 2. ACTUALIZAR DATOS PRINCIPALES
-         * =====================================================
-         */
             $prestamo->update([
                 'docente_id' => $request->docente_id,
                 'cargo' => $request->cargo,
@@ -349,52 +327,17 @@ class PrestamoController extends Controller
                 'estado' => $estadoPrestamo,
             ]);
 
-
-            /*
-         * =====================================================
-         * 3. ELIMINAR EQUIPOS Y ACCESORIOS ANTERIORES
-         * =====================================================
-         *
-         * Los accesorios se eliminan automáticamente por
-         * ON DELETE CASCADE.
-         *
-         * IMPORTANTE:
-         * Esto NO elimina el equipo real ni sus accesorios.
-         * Solo elimina el snapshot de este préstamo.
-         */
             $prestamo->prestamoEquipos()->delete();
 
-
-            /*
-         * =====================================================
-         * 4. REGISTRAR LOS EQUIPOS ACTUALES DEL PRÉSTAMO
-         * =====================================================
-         */
             foreach ($request->equipos as $equipoData) {
 
-                /*
-             * Crear snapshot del equipo.
-             */
                 $prestamoEquipo = PrestamoEquipo::create([
                     'prestamo_id' => $prestamo->id,
-
-                    'equipo_id' =>
-                    $equipoData['equipo_id'],
-
-                    'estado' =>
-                    $equipoData['estado'],
-
-                    'observacion' =>
-                    $equipoData['observacion'] ?? null,
+                    'equipo_id' => $equipoData['equipo_id'],
+                    'estado' => $equipoData['estado'],
+                    'observacion' => $equipoData['observacion'] ?? null,
                 ]);
 
-
-                /*
-             * =================================================
-             * 5. SI EL PRÉSTAMO TERMINÓ
-             *    ACTUALIZAR ESTADO REAL DEL EQUIPO
-             * =================================================
-             */
                 if ($estadoPrestamo === 'TERMINADO') {
 
                     $equipo = Equipo::with([
@@ -404,84 +347,34 @@ class PrestamoController extends Controller
                         $equipoData['equipo_id']
                     );
 
-
-                    /*
-                 * Laptop
-                 */
                     if ($equipo->especificacionesLaptops) {
-
-                        $equipo
-                            ->especificacionesLaptops
-                            ->update([
-                                'estado' =>
-                                $equipoData['estado'],
-                            ]);
-                    }
-
-
-                    /*
-                 * Otro tipo de equipo
-                 */ elseif ($equipo->especificacionesEquipo) {
-
-                        $equipo
-                            ->especificacionesEquipo
-                            ->update([
-                                'estado' =>
-                                $equipoData['estado'],
-                            ]);
+                        $equipo->especificacionesLaptops->update([
+                            'estado' => $equipoData['estado'],
+                        ]);
+                    } elseif ($equipo->especificacionesEquipo) {
+                        $equipo->especificacionesEquipo->update([
+                            'estado' => $equipoData['estado'],
+                        ]);
                     }
                 }
 
-
-                /*
-             * =================================================
-             * 6. REGISTRAR ACCESORIOS DEL EQUIPO
-             * =================================================
-             */
                 if (!empty($equipoData['accesorios'])) {
 
-                    foreach (
-                        $equipoData['accesorios']
-                        as $accesorioData
-                    ) {
+                    foreach ($equipoData['accesorios'] as $accesorioData) {
 
-                        /*
-                     * Crear snapshot del accesorio.
-                     */
-                        $prestamoAccesorio =
-                            PrestamoAccesorio::create([
-                                'prestamo_equipo_id' =>
-                                $prestamoEquipo->id,
+                        $prestamoAccesorio = PrestamoAccesorio::create([
+                            'prestamo_equipo_id' => $prestamoEquipo->id,
+                            'accesorio_equipo_id' => $accesorioData['accesorio_equipo_id'],
+                            'estado' => $accesorioData['estado'],
+                            'observacion' => $accesorioData['observacion'] ?? null,
+                        ]);
 
-                                'accesorio_equipo_id' =>
-                                $accesorioData['accesorio_equipo_id'],
-
-                                'estado' =>
-                                $accesorioData['estado'],
-
-                                'observacion' =>
-                                $accesorioData['observacion'] ?? null,
-                            ]);
-
-
-                        /*
-                     * =================================================
-                     * 7. SI EL PRÉSTAMO TERMINÓ
-                     *    ACTUALIZAR ESTADO REAL DEL ACCESORIO
-                     * =================================================
-                     */
                         if ($estadoPrestamo === 'TERMINADO') {
-
-                            $accesorio =
-                                $prestamoAccesorio
-                                ->accesorioEquipo;
-
+                            $accesorio = $prestamoAccesorio->accesorioEquipo;
 
                             if ($accesorio) {
-
                                 $accesorio->update([
-                                    'estado' =>
-                                    $accesorioData['estado'],
+                                    'estado' => $accesorioData['estado'],
                                 ]);
                             }
                         }
@@ -490,15 +383,12 @@ class PrestamoController extends Controller
             }
         });
 
-
         return redirect()->route('prestamos.index')
             ->with('success', 'Préstamo modificado.')
             ->with('toast_tipo', 'exito')
             ->with('prestamo_resaltado', $prestamo->id)
             ->with('prestamo_accion', 'editar');
     }
-
-
 
     /**
      * Eliminar préstamo
@@ -510,14 +400,12 @@ class PrestamoController extends Controller
         $prestamo->delete();
 
         return Redirect::route('prestamos.index')
-            ->with(
-                'success',
-                'Préstamo eliminado correctamente.'
-            )->with('success', 'Préstamo eliminado.')
+            ->with('success', 'Préstamo eliminado.')
             ->with('toast_tipo', 'error')
             ->with('prestamo_resaltado', $prestamo->id)
             ->with('prestamo_accion', 'eliminar');
     }
+
     /**
      * Obtener equipos según tipo
      */
@@ -565,31 +453,21 @@ class PrestamoController extends Controller
             'accesoriosEquipos'
         ]);
 
-        /*
-     * FILTRO POR TIPO DE EQUIPO
-     */
         if ($request->filled('tipo_equipo_id')) {
-
             $query->where(
                 'tipo_equipo_id',
                 $request->tipo_equipo_id
             );
         }
 
-        /*
-     * BÚSQUEDA GLOBAL
-     */
         if ($request->filled('buscar')) {
-
             $terminos = preg_split(
                 '/\s+/',
                 trim($request->buscar)
             );
 
             foreach ($terminos as $termino) {
-
                 $query->where(function ($q) use ($termino) {
-
                     $q->where(
                         'marca',
                         'LIKE',
@@ -606,7 +484,6 @@ class PrestamoController extends Controller
                             "%{$termino}%"
                         )
                         ->orWhereHas('tipoEquipo', function ($q) use ($termino) {
-
                             $q->where(
                                 'nombre',
                                 'LIKE',
@@ -617,9 +494,6 @@ class PrestamoController extends Controller
             }
         }
 
-        /*
-     * OBTENER EQUIPOS
-     */
         $equipos = $query
             ->select(
                 'id',
@@ -630,11 +504,6 @@ class PrestamoController extends Controller
             )
             ->get()
             ->map(function ($equipo) {
-
-                /*
-             * El estado real se obtiene desde la
-             * especificación correspondiente.
-             */
                 $estadoActual =
                     $equipo->especificacionesLaptops?->estado
                     ?? $equipo->especificacionesEquipo?->estado
@@ -647,6 +516,7 @@ class PrestamoController extends Controller
 
         return response()->json($equipos);
     }
+
     public function registrarDocente(Request $request)
     {
         $request->validate([
