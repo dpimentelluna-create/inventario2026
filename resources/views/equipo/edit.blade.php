@@ -25,7 +25,7 @@
 
             <div class="card shadow-sm">
                 <div class="card-body bg-white">
-                    <form method="POST" action="{{ route('equipos.update', $equipo->id) }}" role="form">
+                    <form method="POST" action="{{ route('equipos.update', $equipo->id) }}" role="form" novalidate>
                         @method('PATCH')
                         @csrf
                         @include('equipo.form')

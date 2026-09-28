@@ -175,7 +175,7 @@
         : '-';
                                                                 @endphp
                                                                 <tr data-equipo-id="{{ $equipo->id }}">
-                                                                    <td>{{ $i + 1 }}</td>
+                                                                    <td>{{ $equipo->id }}</td>
                                                                     <td>{{ $equipo->tipoEquipo->nombre ?? '-' }}</td>
                                                                     <td class="text-center">{{ $equipo->num_serie }}</td>
                                                                     <td>{{ $equipo->marca }}</td>
@@ -254,7 +254,11 @@ window.addEventListener('load', function () {
 
     if (typeof $ === 'undefined' || !$.fn.DataTable) return;
 
-    const tabla = $('#example').DataTable();
+    const tabla = $.fn.DataTable.isDataTable('#example')
+    ? $('#example').DataTable()
+    : $('#example').DataTable();
+
+tabla.order([[7, 'desc']]).draw();
 
     const STORAGE_KEY = 'equipos_filtros_estado';
 

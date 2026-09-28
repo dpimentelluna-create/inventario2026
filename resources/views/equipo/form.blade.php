@@ -228,20 +228,15 @@
                             id="fecha_registro"
                             class="form-control @error('fecha_registro') is-invalid @enderror"
                             value="{{ old(
-                                'fecha_registro',
-                                $equipo->fecha_registro
-                                ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
-                                : now()->format('Y-m-d')
-                            ) }}"
+    'fecha_registro',
+    $equipo->fecha_registro
+    ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
+    : now()->format('Y-m-d')
+) }}"
                             required
                         >
 
-                        <button
-                            type="button"
-                            id="btn_fecha_hoy"
-                            class="btn btn-outline-success"
-                        >
-                            <i class="bi bi-calendar-check"></i>
+                        <button type="button" id="btn_fecha_hoy" class="btn btn-outline-secondary">
                             HOY
                         </button>
 
@@ -832,16 +827,9 @@
                 CANCELAR
             </a>
 
-            <button
-                type="submit"
-                class="btn btn-success"
-                id="btn_guardar_equipo"
-            >
-                <i class="bi bi-save"></i>
-
-                {{ $equipo->exists ? 'ACTUALIZAR EQUIPO' : 'GUARDAR EQUIPO' }}
-
-            </button>
+            <button type="submit" class="btn btn-primary">
+    {{ $equipo->exists ? 'ACTUALIZAR' : 'GUARDAR' }}
+</button>
 
         </div>
 
@@ -910,6 +898,7 @@
      * =========================================================
      */
 
+     /*
     function mostrarToast(mensaje, tipo) {
         const toastEl = document.getElementById('toast_equipo');
         const textoEl = document.getElementById('toast_equipo_texto');
@@ -923,7 +912,7 @@
 
         const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
         toast.show();
-    }
+    }*/
 
     function limpiarErroresCampos() {
         document.querySelectorAll('.error-toast-campo').forEach(function (el) {
@@ -934,31 +923,34 @@
         });
     }
 
-    function mostrarErrorCampo(campo, mensaje) {
-        if (!campo) {
-            mostrarToast(mensaje, 'danger');
-            return;
-        }
-
-        campo.classList.add('is-invalid');
-
-        const contenedor = campo.closest('.mb-3') || campo.parentElement;
-        if (contenedor) {
-            let aviso = contenedor.querySelector('.error-toast-campo');
-            if (!aviso) {
-                aviso = document.createElement('div');
-                aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
-                campo.insertAdjacentElement('afterend', aviso);
-            }
-            aviso.textContent = mensaje;
-        }
-
-        mostrarToast(mensaje, 'danger');
-        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(function () {
-            campo.focus();
-        }, 350);
+    function marcarError(campo, mensaje) {
+    if (!campo) return;
+    campo.classList.add('is-invalid');
+    const contenedor = campo.closest('.mb-3') || campo.parentElement;
+    if (!contenedor) return;
+    let aviso = contenedor.querySelector('.error-toast-campo');
+    if (!aviso) {
+        aviso = document.createElement('div');
+        aviso.className = 'error-toast-campo text-danger small mt-1 mb-0';
+        campo.insertAdjacentElement('afterend', aviso);
     }
+    aviso.textContent = mensaje;
+}
+
+function limpiarErrorCampo(campo) {
+    if (!campo) return;
+    campo.classList.remove('is-invalid');
+    const err = (campo.closest('.mb-3') || campo.parentElement)?.querySelector('.error-toast-campo');
+    if (err) err.remove();
+}
+
+function mostrarErrorCampo(campo, mensaje) {
+    marcarError(campo, mensaje);
+    if (campo) {
+        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () { campo.focus(); }, 200);
+    }
+}
 
     const tiposEquipoData = [
         @foreach($tiposequipo as $id => $nombre)
@@ -1020,12 +1012,20 @@
     if (fechaRegistro && !fechaRegistro.value) {
         fechaRegistro.value = fechaHoyISO();
     }
+
+    //BOTON HOY FECHA REGISTRO SUBMIT
     if (btnHoy && fechaRegistro) {
-        btnHoy.addEventListener('click', function () {
-            fechaRegistro.value = fechaHoyISO();
-            mostrarEspecificaciones();
-        });
-    }
+    btnHoy.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const hoy = new Date();
+        const yyyy = hoy.getFullYear();
+        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dd = String(hoy.getDate()).padStart(2, '0');
+        fechaRegistro.value = yyyy + '-' + mm + '-' + dd;
+        limpiarErrorCampo(fechaRegistro);
+    });
+}
     if (fechaRegistro) {
         fechaRegistro.addEventListener('input', mostrarEspecificaciones);
         fechaRegistro.addEventListener('change', mostrarEspecificaciones);
@@ -1297,16 +1297,11 @@ function limpiarFormularioMenosSerie() {
     const campo = document.getElementById(id);
     if (!campo) return;
     campo.addEventListener('blur', function () {
-        if (!this.value.trim()) {
-            mostrarErrorCampo(this, mensaje);
-        }
+        if (!this.value.trim()) marcarError(this, mensaje);
+        else limpiarErrorCampo(this);
     });
     campo.addEventListener('input', function () {
-        if (this.value.trim()) {
-            this.classList.remove('is-invalid');
-            const err = (this.closest('.mb-3') || this.parentElement).querySelector('.error-toast-campo');
-            if (err) err.remove();
-        }
+        if (this.value.trim()) limpiarErrorCampo(this);
     });
 }
 
@@ -1768,96 +1763,56 @@ validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
      * =========================================================
      */
 
-    if (form) {
-
-        form.addEventListener('submit', function (event) {
-
-            limpiarErroresCampos();
-
-            const tipoIdCampo = document.getElementById('tipo_equipo_id');
-
-            if (!inputTipoEq || inputTipoEq.value.trim() === '' || !tipoIdCampo || tipoIdCampo.value.trim() === '') {
-                event.preventDefault();
-                mostrarErrorCampo(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
-                return;
-            }
-
-            const camposReq = [
-                ['num_serie', 'El número de serie es obligatorio.'],
-                ['marca', 'La marca es obligatoria.'],
-                ['ubicacion_id', 'Seleccione una ubicación.'],
-                ['fecha_registro', 'La fecha de registro es obligatoria.']
-            ];
-            for (const par of camposReq) {
-                const c = document.getElementById(par[0]);
-                if (!c || String(c.value || '').trim() === '') {
-                    event.preventDefault();
-                    mostrarErrorCampo(c, par[1]);
-                    return;
-                }
-            }
-            if (laptopBox && laptopBox.style.display !== 'none') {
-                const lap = [
-                    ['procesador', 'El procesador es obligatorio.'],
-                    ['ram', 'La memoria RAM es obligatoria.'],
-                    ['disco_duro', 'El disco duro es obligatorio.']
-                ];
-                for (const par of lap) {
-                    const c = document.getElementById(par[0]);
-                    if (!c || String(c.value || '').trim() === '') {
-                        event.preventDefault();
-                        mostrarErrorCampo(c, par[1]);
-                        return;
-                    }
-                }
-            }
-
-            const filasAcc = this.querySelectorAll('.accesorio-item');
-            for (const item of filasAcc) {
-                const tipoInp = item.querySelector('.tipo-accesorio');
-                const persInp = item.querySelector('.tipo-personalizado');
-                const marcaInp = item.querySelector('[name*="[marca]"]');
-                const serieInp = item.querySelector('[name*="[num_serie]"]');
-                const estadoInp = item.querySelector('[name*="[estado]"]');
-                const tipoTxt = ((tipoInp && tipoInp.value) || '').trim().toUpperCase();
-                const tipoReal = tipoTxt === 'OTRO' ? ((persInp && persInp.value) || '').trim() : tipoTxt;
-                const marcaTxt = ((marcaInp && marcaInp.value) || '').trim();
-                const serieTxt = ((serieInp && serieInp.value) || '').trim();
-                const estadoTxt = ((estadoInp && estadoInp.value) || '').trim();
-                if (!tipoReal && !marcaTxt && !serieTxt) continue;
-                if (!tipoReal || !marcaTxt || !serieTxt || !estadoTxt) {
-                    event.preventDefault();
-                    if (typeof toastr !== 'undefined') {
-                        toastr.error('CADA ACCESORIO DEBE TENER TIPO, MARCA, N.º SERIE Y ESTADO.');
-                    } else {
-                        alert('CADA ACCESORIO DEBE TENER TIPO, MARCA, N.º SERIE Y ESTADO.');
-                    }
-                    (marcaInp || serieInp || tipoInp)?.focus();
-                    return;
-                }
-            }
-
-            const estadosValidos = ['BUENO', 'REGULAR', 'MALOGRADO'];
-            const estadosAccesorios = this.querySelectorAll(
-                'select[name*="accesorios"][name$="[estado]"], input[name*="accesorios"][name$="[estado]"]'
-            );
-            for (const campo of estadosAccesorios) {
-                const valor = (campo.value || '').toUpperCase().trim();
-                if (!estadosValidos.includes(valor)) {
-                    event.preventDefault();
-                    mostrarToast('Hay accesorios con estado inválido o vacío.', 'danger');
-                    campo.focus();
-                    return;
-                }
-            }
-
-            if (!this.checkValidity()) {
-                event.preventDefault();
-                this.reportValidity();
-                return;
-            }
+        if (form) {
+    form.addEventListener('submit', function (event) {
+        this.querySelectorAll('[disabled]').forEach(function (el) {
+            el.disabled = false;
         });
-    }
+
+        limpiarErroresCampos();
+
+        let primero = null;
+
+        function exigir(campo, mensaje) {
+            if (!campo || String(campo.value || '').trim() === '') {
+                marcarError(campo, mensaje);
+                if (!primero) primero = campo;
+                return;
+            }
+            limpiarErrorCampo(campo);
+        }
+
+        const tipoId = document.getElementById('tipo_equipo_id');
+        const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
+        const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
+        if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
+            exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
+        }
+
+        exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
+        exigir(document.getElementById('marca'), 'La marca es obligatoria.');
+        exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
+        exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
+
+        const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
+        const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
+
+        if (laptopVisible) {
+            exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
+            exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
+            exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
+        }
+        if (equipoVisible) {
+            exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
+        }
+
+        if (primero) {
+            event.preventDefault();
+            primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(function () { primero.focus(); }, 200);
+        }
+    });
+}
 
     mostrarEspecificaciones();
 
