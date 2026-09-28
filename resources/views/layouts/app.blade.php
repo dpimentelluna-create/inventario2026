@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="dark">
-
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,6 +20,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+    <script>
+        (function () {
+            const t = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', t);
+        })();
+    </script>
 
     <!--ESTILOS GENERALES Y DISEÑO DE BARRA LATERAL Y LOADER-->
     <style>
@@ -315,14 +321,6 @@
             border-color: #334155;
         }
     </style>
-
-    <!-- Script inicial para evitar parpadeos al cargar -->
-    <script>
-        (function () {
-            const storedTheme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.setAttribute('data-bs-theme', storedTheme);
-        })();
-    </script>
 </head>
 
 <body>
@@ -350,111 +348,135 @@
     </div>
 
     <div id="app">
-        <div id="app-container">
-            <!-- BARRA LATERAL ESTILO GEMINI -->
-            <nav id="sidebar" class="p-3 d-flex flex-column justify-content-between shadow-sm">
-                <div>
-                    <!-- Cabecera de la Barra Lateral -->
-                    <div class="d-flex align-items-center mb-4 px-1">
-                        <button id="sidebar-toggle" class="btn btn-sm btn-outline-secondary rounded-circle me-2 btn-accion" title="Ocultar/Mostrar menú">
-                            <i class="bi bi-list"></i>
-                        </button>
-                        <span class="brand-text fs-6 fw-bold text-truncate" style="user-select: none;">
-                            {{ config('app.name', 'Laravel') }}
-                        </span>
-                    </div>
-
-                    <!-- Enlaces de navegación -->
-                    <div class="nav flex-column">
-                        <a href="{{ url('/home') }}" class="sidebar-link {{ request()->routeIs('home') || request()->is('/') ? 'active' : '' }}" title="Inicio">
-                            <i class="bi bi-house-door me-3 fs-5"></i>
-                            <span class="sidebar-text">Inicio</span>
-                        </a>
-
-                        <a href="{{ route('prestamos.index') }}" class="sidebar-link {{ request()->routeIs('prestamos.*') ? 'active' : '' }}" title="Préstamos">
-                            <i class="bi bi-journal-check me-3 fs-5"></i>
-                            <span class="sidebar-text">Préstamos</span>
-                        </a>
-
-                        <a href="{{ route('equipos.index') }}" class="sidebar-link {{ request()->routeIs('equipos.*') ? 'active' : '' }}" title="Equipos">
-                            <i class="bi bi-laptop me-3 fs-5"></i>
-                            <span class="sidebar-text">Equipos</span>
-                        </a>
-
-                        <a href="{{ route('accesorios-equipo.index') }}" class="sidebar-link {{ request()->routeIs('accesorios-equipo.*') ? 'active' : '' }}" title="Accesorios Equipo">
-                            <i class="bi bi-mouse me-3 fs-5"></i>
-                            <span class="sidebar-text">Accesorios Equipo</span>
-                        </a>
-
-                        <a href="{{ route('docentes.index') }}" class="sidebar-link {{ request()->routeIs('docentes.*') ? 'active' : '' }}" title="Solicitantes">
-                            <i class="bi bi-people me-3 fs-5"></i>
-                            <span class="sidebar-text">Solicitantes</span>
-                        </a>
-
-                        <a href="{{ route('tipos-equipo.index') }}" class="sidebar-link {{ request()->routeIs('tipos-equipo.*') ? 'active' : '' }}" title="Tipos Equipos">
-                            <i class="bi bi-tags me-3 fs-5"></i>
-                            <span class="sidebar-text">Tipos Equipos</span>
-                        </a>
-
-                        <a href="{{ route('ubicaciones.index') }}" class="sidebar-link {{ request()->routeIs('ubicaciones.*') ? 'active' : '' }}" title="Ubicaciones">
-                            <i class="bi bi-geo-alt me-3 fs-5"></i>
-                            <span class="sidebar-text">Ubicaciones</span>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Pie de la Barra Lateral -->
-                <div class="pt-3 border-top mt-3">
-                    @auth
-                        <div class="d-flex align-items-center mb-2 px-1">
-                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" style="width: 35px; height: 35px; font-weight: bold;">
-                                {{ substr(Auth::user()->name, 0, 1) }}
-                            </div>
-                            <span class="user-name-text small fw-semibold text-truncate">{{ Auth::user()->name }}</span>
+        @auth
+            <div id="app-container">
+                <!-- BARRA LATERAL ESTILO GEMINI -->
+                <nav id="sidebar" class="p-3 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <!-- Cabecera de la Barra Lateral -->
+                        <div class="d-flex align-items-center mb-4 px-1">
+                            <button id="sidebar-toggle" class="btn btn-sm btn-outline-secondary rounded-circle me-2 btn-accion"
+                                title="Ocultar/Mostrar menú">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <span class="brand-text fs-6 fw-bold text-truncate" style="user-select: none;">
+                                {{ config('app.name', 'Laravel') }}
+                            </span>
                         </div>
-                    @endauth
 
-                    <div class="d-flex align-items-center justify-content-between px-1">
-                        <!-- Botón de Modo Oscuro / Claro -->
-                        <button id="btn-switch-theme" class="btn btn-outline-secondary btn-sm rounded-circle btn-accion" title="Cambiar modo de color">
-                            <i id="theme-icon" class="bi bi-sun-fill"></i>
-                        </button>
-
-                        @auth
-                            <!-- Botón de Cerrar Sesión -->
-                            <a class="btn btn-outline-danger btn-sm rounded-circle btn-accion" href="{{ route('logout') }}" 
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();" title="Cerrar sesión">
-                                <i class="bi bi-box-arrow-right"></i>
+                        <!-- Enlaces de navegación -->
+                        <div class="nav flex-column">
+                            <a href="{{ url('/home') }}"
+                                class="sidebar-link {{ request()->routeIs('home') || request()->is('/') ? 'active' : '' }}"
+                                title="Inicio">
+                                <i class="bi bi-house-door me-3 fs-5"></i>
+                                <span class="sidebar-text">Inicio</span>
                             </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        @else
-                            <!-- Botones de Iniciar Sesión y Registrarse Compactos -->
-                            <div class="auth-buttons-container d-flex gap-1">
-                                @if (Route::has('login'))
-                                    <a class="btn btn-outline-primary btn-sm px-2 py-1 text-decoration-none d-flex align-items-center" href="{{ route('login') }}" title="Iniciar sesión" style="font-size: 0.75rem;">
-                                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
-                                    </a>
-                                @endif
-                                @if (Route::has('register'))
-                                    <a class="btn btn-outline-success btn-sm px-2 py-1 text-decoration-none d-flex align-items-center" href="{{ route('register') }}" title="Registrarse" style="font-size: 0.75rem;">
-                                        <i class="bi bi-person-plus me-1"></i> Registro
-                                    </a>
-                                @endif
+
+                            <a href="{{ route('prestamos.index') }}"
+                                class="sidebar-link {{ request()->routeIs('prestamos.*') ? 'active' : '' }}" title="Préstamos">
+                                <i class="bi bi-journal-check me-3 fs-5"></i>
+                                <span class="sidebar-text">Préstamos</span>
+                            </a>
+
+                            <a href="{{ route('equipos.index') }}"
+                                class="sidebar-link {{ request()->routeIs('equipos.*') ? 'active' : '' }}" title="Equipos">
+                                <i class="bi bi-laptop me-3 fs-5"></i>
+                                <span class="sidebar-text">Equipos</span>
+                            </a>
+
+                            <a href="{{ route('accesorios-equipo.index') }}"
+                                class="sidebar-link {{ request()->routeIs('accesorios-equipo.*') ? 'active' : '' }}"
+                                title="Accesorios Equipo">
+                                <i class="bi bi-mouse me-3 fs-5"></i>
+                                <span class="sidebar-text">Accesorios Equipo</span>
+                            </a>
+
+                            <a href="{{ route('docentes.index') }}"
+                                class="sidebar-link {{ request()->routeIs('docentes.*') ? 'active' : '' }}"
+                                title="Solicitantes">
+                                <i class="bi bi-people me-3 fs-5"></i>
+                                <span class="sidebar-text">Solicitantes</span>
+                            </a>
+
+                            <a href="{{ route('tipos-equipo.index') }}"
+                                class="sidebar-link {{ request()->routeIs('tipos-equipo.*') ? 'active' : '' }}"
+                                title="Tipos Equipos">
+                                <i class="bi bi-tags me-3 fs-5"></i>
+                                <span class="sidebar-text">Tipos Equipos</span>
+                            </a>
+
+                            <a href="{{ route('ubicaciones.index') }}"
+                                class="sidebar-link {{ request()->routeIs('ubicaciones.*') ? 'active' : '' }}"
+                                title="Ubicaciones">
+                                <i class="bi bi-geo-alt me-3 fs-5"></i>
+                                <span class="sidebar-text">Ubicaciones</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Pie de la Barra Lateral -->
+                    <div class="pt-3 border-top mt-3">
+                        @auth
+                            <div class="d-flex align-items-center mb-2 px-1">
+                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                                    style="width: 35px; height: 35px; font-weight: bold;">
+                                    {{ substr(Auth::user()->name, 0, 1) }}
+                                </div>
+                                <span class="user-name-text small fw-semibold text-truncate">{{ Auth::user()->name }}</span>
                             </div>
                         @endauth
-                    </div>
-                </div>
-            </nav>
 
-            <!-- CONTENEDOR PRINCIPAL DERECHO -->
-            <div id="content-wrapper">
-                <main class="py-4 px-4 flex-grow-1">
-                    @yield('content')
-                </main>
+                        <div class="d-flex align-items-center justify-content-between px-1">
+                            <!-- Botón de Modo Oscuro / Claro -->
+                            <button id="btn-switch-theme" class="btn btn-outline-secondary btn-sm rounded-circle btn-accion"
+                                title="Cambiar modo de color">
+                                <i id="theme-icon" class="bi bi-sun-fill"></i>
+                            </button>
+
+                            @auth
+                                <!-- Botón de Cerrar Sesión -->
+                                <a class="btn btn-outline-danger btn-sm rounded-circle btn-accion" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                    title="Cerrar sesión">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            @else
+                                <!-- Botones de Iniciar Sesión y Registrarse Compactos -->
+                                <div class="auth-buttons-container d-flex gap-1">
+                                    @if (Route::has('login'))
+                                        <a class="btn btn-outline-primary btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
+                                            href="{{ route('login') }}" title="Iniciar sesión" style="font-size: 0.75rem;">
+                                            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                                        </a>
+                                    @endif
+                                    @if (Route::has('register'))
+                                        <a class="btn btn-outline-success btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
+                                            href="{{ route('register') }}" title="Registrarse" style="font-size: 0.75rem;">
+                                            <i class="bi bi-person-plus me-1"></i> Registro
+                                        </a>
+                                    @endif
+                                </div>
+                            @endauth
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- CONTENEDOR PRINCIPAL DERECHO -->
+                <div id="content-wrapper">
+                    <main class="py-4 px-4 flex-grow-1">
+                        @yield('content')
+                    </main>
+                </div>
             </div>
-        </div>
+        @else
+            <main class="py-5">
+                @yield('content')
+            </main>
+        @endauth
     </div>
     
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -472,14 +494,21 @@
             }, 300);
         });
 
-        document.addEventListener('click', function(e) {
-            const link = e.target.closest('a');
-            if (link && link.href && !link.getAttribute('href').startsWith('#') && !link.getAttribute('target') && !link.getAttribute('onclick')) {
-                const loader = document.getElementById('page-loader');
-                loader.style.display = 'flex';
-                loader.style.opacity = '1';
-            }
-        });
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a');
+        if (!link || !link.href) return;
+        if (link.target === '_blank') return;
+        if (link.getAttribute('href').startsWith('#')) return;
+        if (link.hasAttribute('onclick')) return;
+        if (link.getAttribute('href').includes('export')) return;
+
+        const sameHost = link.hostname === window.location.hostname;
+        if (!sameHost) return;
+
+        const loader = document.getElementById('page-loader');
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+    });
 
         document.addEventListener('submit', function() {
             const loader = document.getElementById('page-loader');
@@ -571,8 +600,8 @@
     </script>
 
     @php
-    $mensajeToast = session('success') ?? session('error') ?? session('warning');
-    $tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
+$mensajeToast = session('success') ?? session('error') ?? session('warning');
+$tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
     @endphp
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

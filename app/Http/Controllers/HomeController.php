@@ -17,7 +17,7 @@ class HomeController extends Controller
     public function __construct()
     {
         // ELIMINAMOS O COMENTAMOS EL MIDDLEWARE 'auth' PARA QUE SEA PÚBLICO O DIRECTO
-        // $this->middleware('auth');
+        $this->middleware('auth');
     }
 
     /**
@@ -27,24 +27,32 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // Conteos para las tarjetas estadísticas del Inicio
         $totalEquipos = Equipo::count();
-        $equiposBuenos = Equipo::where('estado', 'like', '%bueno%')
-                               ->orWhere('estado', 'like', '%operativo%')
-                               ->count();
-        $equiposMalogrados = Equipo::where('estado', 'like', '%malogrado%')
-                                  ->orWhere('estado', 'like', '%mantenimiento%')
-                                  ->orWhere('estado', 'like', '%dañado%')
-                                  ->count();
-        
-        $prestamosActivos = Prestamo::where('estado', 'activo')->count();
+
+        $equiposBuenos = Equipo::whereHas('especificacionesLaptops', function ($q) {
+            $q->where('estado', 'BUENO');
+        })
+            ->orWhereHas('especificacionesEquipo', function ($q) {
+                $q->where('estado', 'BUENO');
+            })
+            ->count();
+
+        $equiposMalogrados = Equipo::whereHas('especificacionesLaptops', function ($q) {
+            $q->where('estado', 'MALOGRADO');
+        })
+            ->orWhereHas('especificacionesEquipo', function ($q) {
+                $q->where('estado', 'MALOGRADO');
+            })
+            ->count();
+
+        $prestamosActivos = Prestamo::where('estado', 'ACTIVO')->count();
         $totalDocentes = Docente::count();
 
         return view('home', compact(
-            'totalEquipos', 
-            'equiposBuenos', 
-            'equiposMalogrados', 
-            'prestamosActivos', 
+            'totalEquipos',
+            'equiposBuenos',
+            'equiposMalogrados',
+            'prestamosActivos',
             'totalDocentes'
         ));
     }
