@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Equipo;
-use App\Models\TiposEquipo;
-use App\Models\Ubicacione;
-use App\Models\EspecificacionesLaptop;
-use App\Models\EspecificacionesEquipo;
 use Illuminate\Http\Request;
+use App\Models\Equipo;
+use App\Models\Prestamo;
+use App\Models\Docente;
 
 class HomeController extends Controller
 {
@@ -18,54 +16,36 @@ class HomeController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth');
+        // ELIMINAMOS O COMENTAMOS EL MIDDLEWARE 'auth' PARA QUE SEA PÚBLICO O DIRECTO
+        // $this->middleware('auth');
     }
 
     /**
      * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index()
     {
-        // Total de equipos
+        // Conteos para las tarjetas estadísticas del Inicio
         $totalEquipos = Equipo::count();
-
-        // Equipos por estado
-        $regulares = EspecificacionesLaptop::where('estado', 'Regular')->count()
-        + EspecificacionesEquipo::where('estado', 'Regular')->count();
-
-        $malogrados = EspecificacionesLaptop::where('estado', 'Malogrado')->count()
-        + EspecificacionesEquipo::where('estado', 'Malogrado')->count();
-
-        $buenos = EspecificacionesLaptop::where('estado', 'Bueno')->count()
-        + EspecificacionesEquipo::where('estado', 'Bueno')->count();
+        $equiposBuenos = Equipo::where('estado', 'like', '%bueno%')
+                               ->orWhere('estado', 'like', '%operativo%')
+                               ->count();
+        $equiposMalogrados = Equipo::where('estado', 'like', '%malogrado%')
+                                  ->orWhere('estado', 'like', '%mantenimiento%')
+                                  ->orWhere('estado', 'like', '%dañado%')
+                                  ->count();
         
-        // Cantidad de equipos por tipo
-        $equiposPorTipo = TiposEquipo::withCount('equipos')
-            ->orderBy('nombre')
-            ->get();
+        $prestamosActivos = Prestamo::where('estado', 'activo')->count();
+        $totalDocentes = Docente::count();
 
-        // Cantidad de equipos por ubicación
-        $equiposPorUbicacion = Ubicacione::withCount('equipos')
-            ->orderBy('nombre')
-            ->get();
-
-        // Últimos 5 equipos registrados
-        $ultimosEquipos = Equipo::with([
-            'tipoEquipo',
-            'ubicacione'
-        ])
-        ->orderBy('created_at', 'desc')
-        ->take(5)
-        ->get();
-
-    return view('home', compact(
-    'totalEquipos',
-    'buenos',
-    'regulares',
-    'malogrados',
-    'equiposPorTipo',
-    'equiposPorUbicacion',
-    'ultimosEquipos'
+        return view('home', compact(
+            'totalEquipos', 
+            'equiposBuenos', 
+            'equiposMalogrados', 
+            'prestamosActivos', 
+            'totalDocentes'
         ));
     }
 }

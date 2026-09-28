@@ -1,281 +1,144 @@
 @extends('layouts.app')
 
 @section('content')
-
 <div class="container-fluid">
-
-    {{-- TÍTULO --}}
-    <div class="mb-4">
-        <h2 class="fw-bold">Dashboard de Inventario</h2>
-        <p class="text-muted">
-            Resumen general de los equipos registrados
-        </p>
-    </div>
-
-
-    {{-- ========================= --}}
-    {{-- TARJETAS PRINCIPALES --}}
-    {{-- ========================= --}}
-
-    <div class="row">
-
-        {{-- TOTAL --}}
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Total de Equipos</h6>
-                    <h2 class="fw-bold">
-                        {{ $totalEquipos }}
-                    </h2>
-                </div>
-            </div>
-        </div>
-
-
-        {{-- BUENOS --}}
-<div class="col-md-3 mb-3">
-    <div class="card shadow-sm border-0">
-        <div class="card-body">
-            <h6 class="text-muted">Buenos</h6>
-            <h2 class="fw-bold text-success">
-                {{ $buenos }}
-            </h2>
+    <!-- TÍTULO DE BIENVENIDA -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 fw-bold mb-1">
+                <i class="bi bi-speedometer2 me-2 text-primary"></i> Panel de Control (Inicio)
+            </h1>
+            <p class="text-muted">Resumen general del estado de los equipos e inventario institucional.</p>
         </div>
     </div>
-</div>
 
-        {{-- REGULARES --}}
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
+    <!-- TARJETAS ESTADÍSTICAS PRINCIPALES -->
+    <div class="row g-4 mb-4">
+        <!-- Total Equipos -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
                 <div class="card-body">
-                    <h6 class="text-muted">Regulares</h6>
-                    <h2 class="fw-bold text-warning">
-                        {{ $regulares }}
-                    </h2>
-                </div>
-            </div>
-        </div>
-
-
-        {{-- MALOGRADOS --}}
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h6 class="text-muted">Malogrados</h6>
-                    <h2 class="fw-bold text-danger">
-                        {{ $malogrados }}
-                    </h2>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-
-    {{-- ========================= --}}
-    {{-- EQUIPOS POR TIPO --}}
-    {{-- ========================= --}}
-
-    <div class="row mt-2">
-
-        <div class="col-md-7 mb-3">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        Equipos por Tipo
-                    </h5>
-                </div>
-
-                <div class="card-body">
-
-                    <div class="table-responsive">
-
-                        <table class="table table-hover">
-
-                            <thead>
-                                <tr>
-                                    <th>Tipo de Equipo</th>
-                                    <th class="text-center">Cantidad</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-
-                                @foreach($equiposPorTipo as $tipo)
-
-                                    <tr>
-
-                                        <td>
-                                            {{ $tipo->nombre }}
-                                        </td>
-
-                                        <td class="text-center">
-                                            <span class="badge bg-primary">
-                                                {{ $tipo->equipos_count }}
-                                            </span>
-                                        </td>
-
-                                    </tr>
-
-                                @endforeach
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        {{-- ========================= --}}
-        {{-- EQUIPOS POR UBICACIÓN --}}
-        {{-- ========================= --}}
-
-        <div class="col-md-5 mb-3">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">
-                        Equipos por Ubicación
-                    </h5>
-                </div>
-
-                <div class="card-body">
-
-                    @foreach($equiposPorUbicacion as $ubicacion)
-
-                        <div class="d-flex justify-content-between
-                                    align-items-center mb-3">
-
-                            <span>
-                                {{ $ubicacion->nombre }}
-                            </span>
-
-                            <span class="badge bg-secondary">
-                                {{ $ubicacion->equipos_count }}
-                            </span>
-
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-uppercase text-muted fw-semibold mb-0 small">Total Equipos</h6>
+                        <div class="p-2 bg-primary bg-opacity-15 rounded-circle text-primary fs-4 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-laptop"></i>
                         </div>
-
-                    @endforeach
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- ========================= --}}
-    {{-- ÚLTIMOS EQUIPOS --}}
-    {{-- ========================= --}}
-
-    <div class="row mt-2">
-
-        <div class="col-md-12">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header bg-white">
-
-                    <h5 class="mb-0">
-                        Últimos Equipos Registrados
-                    </h5>
-
-                </div>
-
-                <div class="card-body">
-
-                    <div class="table-responsive">
-
-                        <table class="table table-hover">
-
-                            <thead>
-
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Marca</th>
-                                    <th>Modelo</th>
-                                    <th>N.º Serie</th>
-                                    <th>Ubicación</th>
-                                    <th>Estado</th>
-                                    <th>Fecha</th>
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                @forelse($ultimosEquipos as $equipo)
-
-                                    <tr>
-
-                                        <td>
-                                            {{ $equipo->tipoEquipo->nombre ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->marca }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->modelo ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->num_serie ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->ubicacione->nombre ?? '-' }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->estado }}
-                                        </td>
-
-                                        <td>
-                                            {{ $equipo->created_at ? $equipo->created_at->format('d/m/Y') : '-' }}
-                                        </td>
-
-                                    </tr>
-
-                                @empty
-
-                                    <tr>
-                                        <td colspan="7"
-                                            class="text-center text-muted">
-                                            No hay equipos registrados.
-                                        </td>
-                                    </tr>
-
-                                @endforelse
-
-                            </tbody>
-
-                        </table>
-
                     </div>
-
+                    <h2 class="fw-bold mb-1">{{ $totalEquipos ?? 0 }}</h2>
+                    <p class="text-muted small mb-0"><i class="bi bi-arrow-right text-primary me-1"></i> Registrados en el sistema</p>
                 </div>
-
             </div>
-
         </div>
 
+        <!-- Equipos Operativos -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-uppercase text-muted fw-semibold mb-0 small">Equipos Operativos</h6>
+                        <div class="p-2 bg-success bg-opacity-15 rounded-circle text-success fs-4 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-success">{{ $equiposBuenos ?? 0 }}</h2>
+                    <p class="text-muted small mb-0"><i class="bi bi-check text-success me-1"></i> En buen estado y disponibles</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Malogrados / Averiados -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-uppercase text-muted fw-semibold mb-0 small">Malogrados / Averiados</h6>
+                        <div class="p-2 bg-danger bg-opacity-15 rounded-circle text-danger fs-4 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-danger">{{ $equiposMalogrados ?? 0 }}</h2>
+                    <p class="text-muted small mb-0"><i class="bi bi-tools text-danger me-1"></i> Requieren atención técnica</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Préstamos Activos -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h6 class="text-uppercase text-muted fw-semibold mb-0 small">Préstamos Activos</h6>
+                        <div class="p-2 bg-warning bg-opacity-15 rounded-circle text-warning fs-4 d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
+                            <i class="bi bi-journal-arrow-up"></i>
+                        </div>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-warning">{{ $prestamosActivos ?? 0 }}</h2>
+                    <p class="text-muted small mb-0"><i class="bi bi-clock text-warning me-1"></i> Equipos actualmente prestados</p>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- SECCIÓN DE ACCESO RÁPIDO E INFORMACIÓN -->
+    <div class="row g-4">
+        <!-- Acceso Rápido -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-lightning-charge text-warning me-2"></i> Acceso Rápido</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{{ route('prestamos.index') ?? '#' }}" class="card text-decoration-none border shadow-sm h-100 action-card">
+                                <div class="card-body d-flex align-items-center p-3">
+                                    <div class="p-3 bg-primary text-white rounded me-3 fs-4">
+                                        <i class="bi bi-journal-check"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Préstamos</h6>
+                                        <p class="text-muted small mb-0">Registrar salidas o devoluciones de equipos.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ route('equipos.index') ?? '#' }}" class="card text-decoration-none border shadow-sm h-100 action-card">
+                                <div class="card-body d-flex align-items-center p-3">
+                                    <div class="p-3 bg-success text-white rounded me-3 fs-4">
+                                        <i class="bi bi-laptop"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">Equipos</h6>
+                                        <p class="text-muted small mb-0">Ver listado de máquinas y estados.</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Tarjeta de Información -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-info-circle text-primary me-2"></i> Información</h5>
+                </div>
+                <div class="card-body px-4 pb-4 d-flex flex-column justify-content-between">
+                    <p class="text-muted small">
+                        Bienvenido al sistema de control de inventario y préstamos. Utilice la barra lateral izquierda para navegar rápidamente entre los diferentes módulos y mantener el registro actualizado.
+                    </p>
+                    <div class="p-3 bg-light rounded border-0 mt-3">
+                        <div class="d-flex align-items-center text-muted small">
+                            <i class="bi bi-shield-check text-success me-2 fs-5"></i>
+                            <span>Sesión iniciada correctamente como <strong>Usuario</strong>.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 @endsection
