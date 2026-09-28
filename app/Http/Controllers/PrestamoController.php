@@ -62,7 +62,8 @@ class PrestamoController extends Controller
     {
         $prestamo = new Prestamo();
 
-        $tiposEquipo = TiposEquipo::orderBy('nombre')->get();
+        $tiposEquipo = TiposEquipo::whereHas('equipos')
+        ->orderBy('nombre')->get();
 
         $docentes = Docente::orderBy('apellidos')
             ->orderBy('nombres')
@@ -291,7 +292,8 @@ class PrestamoController extends Controller
             'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
         ])->findOrFail($id);
 
-        $tiposEquipo = TiposEquipo::orderBy('nombre')->get();
+        $tiposEquipo = TiposEquipo::whereHas('equipos')
+        ->orderBy('nombre')->get();
 
         $docentes = Docente::orderBy('apellidos')
             ->orderBy('nombres')

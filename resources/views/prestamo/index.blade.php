@@ -140,7 +140,7 @@
                                             data-hora-inicio="{{ $hIni }}"
                                             data-hora-fin="{{ $hFin }}"
                                             data-estado="{{ strtoupper($prestamo->estado ?? '') }}">
-                                            <td>{{ $i + 1 }}</td>
+                                            <td>{{ $prestamo->id }}</td>
                                             <td>{{ strtoupper($nombreSol) ?: '-' }}</td>
                                             <td>{{ strtoupper($prestamo->cargo ?? '-') }}</td>
                                             <td>
@@ -220,7 +220,22 @@
 <script>
 window.addEventListener('load', function () {
     if (typeof $ === 'undefined' || !$.fn.DataTable) return;
-    const tabla = $('#example').DataTable();
+
+    const tabla = $.fn.DataTable.isDataTable('#example')
+        ? $('#example').DataTable()
+        : $('#example').DataTable({
+            pageLength: 10,
+            lengthMenu: [5, 10, 25, 100],
+            language: {
+                lengthMenu: "Mostrar _MENU_ registros por página",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
+                search: "Buscar:",
+                zeroRecords: "No se encontraron registros",
+                infoEmpty: "No hay registros disponibles",
+                infoFiltered: "(filtrado de _MAX_ registros en total)",
+            }
+        });
+    tabla.order([[4, 'desc'], [5, 'desc']]).draw();
     const STORAGE_KEY = 'prestamos_filtros_estado';
     const panel = document.getElementById('panel_filtros');
     const btnToggle = document.getElementById('btn_toggle_filtros');

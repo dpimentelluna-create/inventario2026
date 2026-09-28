@@ -344,7 +344,7 @@
             <div class="dot"></div>
             <div class="dot"></div>
         </div>
-        <div class="loading-text">loading......</div>
+        <div class="loading-text">Cargando......</div>
     </div>
 
     <div id="app">
@@ -485,37 +485,53 @@
     <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script>
     
     <!-- Script para ocultar y mostrar el loader -->
-    <script>
-        window.addEventListener('load', function() {
-            const loader = document.getElementById('page-loader');
-            loader.style.opacity = '0';
-            setTimeout(function() {
-                loader.style.display = 'none';
-            }, 300);
-        });
+<script>
+(function () {
+    const loader = document.getElementById('page-loader');
+    if (!loader) return;
+
+    function ocultarLoader() {
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none';
+        setTimeout(function () {
+            loader.style.display = 'none';
+        }, 200);
+    }
+
+    function mostrarLoader() {
+        if (document.querySelector('.swal2-container')) return;
+        loader.style.display = 'flex';
+        loader.style.pointerEvents = 'auto';
+        loader.style.opacity = '1';
+    }
+
+    window.addEventListener('load', ocultarLoader);
+    window.addEventListener('pageshow', ocultarLoader);
+    window.addEventListener('popstate', ocultarLoader);
 
     document.addEventListener('click', function (e) {
         const link = e.target.closest('a');
-        if (!link || !link.href) return;
+        if (!link) return;
+
+        const href = link.getAttribute('href') || '';
+        if (!href || href === '#' || href.startsWith('#') || href.startsWith('javascript:')) return;
         if (link.target === '_blank') return;
-        if (link.getAttribute('href').startsWith('#')) return;
+        if (link.hasAttribute('download')) return;
+        if (href.indexOf('export') !== -1) return;
         if (link.hasAttribute('onclick')) return;
-        if (link.getAttribute('href').includes('export')) return;
+        if (link.hostname && link.hostname !== window.location.hostname) return;
+        if (document.querySelector('.swal2-container')) return;
 
-        const sameHost = link.hostname === window.location.hostname;
-        if (!sameHost) return;
-
-        const loader = document.getElementById('page-loader');
-        loader.style.display = 'flex';
-        loader.style.opacity = '1';
+        mostrarLoader();
     });
 
-        document.addEventListener('submit', function() {
-            const loader = document.getElementById('page-loader');
-            loader.style.display = 'flex';
-            loader.style.opacity = '1';
-        });
-    </script>
+    document.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
+        if (document.querySelector('.swal2-container')) return;
+        mostrarLoader();
+    });
+})();
+</script>
 
     <!-- Script para alternar el tema y colapsar la barra lateral -->
     <script>
@@ -557,22 +573,22 @@
     </script>
 
     <script>
-        if(document.querySelector('#example')) {
-            new DataTable('#example', {
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 100],
-                responsive: true,
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros por página",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
-                    search: "Buscar:",
-                    zeroRecords: "No se encontraron registros",
-                    infoEmpty: "No hay registros disponibles",
-                    infoFiltered: "(filtrado de _MAX_ registros en total)",
-                }
-            });
-        }
-    </script>
+    if (document.querySelector('#example') && !$.fn.DataTable.isDataTable('#example')) {
+        new DataTable('#example', {
+            pageLength: 10,
+            lengthMenu: [5, 10, 25, 100],
+            responsive: true,
+            language: {
+                lengthMenu: "Mostrar _MENU_ registros por página",
+                info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
+                search: "Buscar:",
+                zeroRecords: "No se encontraron registros",
+                infoEmpty: "No hay registros disponibles",
+                infoFiltered: "(filtrado de _MAX_ registros en total)",
+            }
+        });
+    }
+</script>
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>

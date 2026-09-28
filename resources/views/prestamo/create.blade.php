@@ -1,4 +1,7 @@
+
+<title>Registrar Préstamo</title>
 @extends('layouts.app')
+
 
 @section('template_title')
     Registrar Préstamo
