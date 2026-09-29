@@ -29,7 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 class Equipo extends Model
 {
     protected $table = 'equipos';
-    protected $perPage = 20;
+    //protected $perPage = 20;
 
     /**
      * The attributes that are mass assignable.

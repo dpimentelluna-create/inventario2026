@@ -5,7 +5,6 @@
 {{-- @section('template_title')
     Préstamos
 @endsection--}}
-
 @section('content')
     <div class="container-fluid">
         <div class="row">
@@ -13,52 +12,54 @@
                 <div class="card">
 
                     <div class="card-header">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span id="card_title" class="fw-bold">
-            <i class="bi bi-journal-check me-2 fs-5"></i>
-            PRÉSTAMOS</span>
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span id="card_title" class="fw-bold">
+                                <i class="bi bi-journal-check me-2 fs-5"></i>
+                                PRÉSTAMOS</span>
 
-            
 
-        <div class="d-flex align-items-center gap-2">
-            <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
-               class="btn btn-primary btn-sm">
-                <i class="fa-solid fa-plus"></i> Registrar Nuevo
-            </a>
 
-            <div class="btn-group">
-                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fa-solid fa-download"></i> Exportar
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li>
-                        <a class="dropdown-item" href="{{ route('prestamos.export.excel') }}">
-                            <i class="fa-solid fa-file-excel text-success"></i> Excel
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item" href="{{ route('prestamos.export.pdf') }}" target="_blank">
-                            <i class="fa-solid fa-file-pdf text-danger"></i> PDF
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
+                                    class="btn btn-primary btn-sm">
+                                    <i class="fa-solid fa-plus"></i> Registrar Nuevo
+                                </a>
 
-<div class="card-body">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
-                <i class="fa-solid fa-filter"></i> FILTROS
-                <span id="badge_filtros" class="badge bg-success ms-1 d-none">0</span>
-            </button>
-            <span id="mensaje_coincidencias" class="text-success fw-bold" style="visibility:hidden;">&nbsp;</span>
-        </div>
-    </div>
-    
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-download"></i> Exportar
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('prestamos.export.excel') }}">
+                                                <i class="fa-solid fa-file-excel text-success"></i> Excel
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('prestamos.export.pdf') }}"
+                                                target="_blank">
+                                                <i class="fa-solid fa-file-pdf text-danger"></i> PDF
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
+                                    <i class="fa-solid fa-filter"></i> FILTROS
+                                    <span id="badge_filtros" class="badge bg-success ms-1 d-none">0</span>
+                                </button>
+                                <span id="mensaje_coincidencias" class="text-success fw-bold"
+                                    style="visibility:hidden;">&nbsp;</span>
+                            </div>
+                        </div>
+
 
                         <div id="panel_filtros" class="border rounded p-3 mb-3 bg-light" style="display:none;">
                             <div class="row g-2">
@@ -190,7 +191,8 @@
                                                 @endforelse
                                             </td>
                                             <td class="text-center">
-                                                {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}</td>
+                                                {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}
+                                            </td>
                                             <td class="text-center">{{ $hIni ?: '-' }}</td>
                                             <td class="text-center">{{ $hFin ?: '—' }}</td>
                                             <td class="text-center">
@@ -256,7 +258,6 @@
     .fila-ver td {
         background-color: #cfe2ff !important;
     }
-    
 </style>
 
 <script>

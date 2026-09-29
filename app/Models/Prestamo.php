@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Prestamo extends Model
 {
+    protected $table = 'prestamos';
     protected $perPage = 20;
 
     protected $fillable = [
