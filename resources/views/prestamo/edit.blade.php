@@ -1,3 +1,4 @@
+<title>Editar Préstamo</title>
 @extends('layouts.app')
 
 @section('template_title')

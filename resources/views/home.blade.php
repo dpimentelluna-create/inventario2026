@@ -1,3 +1,4 @@
+<title> Panel de Control - Inicio</title>
 @extends('layouts.app')
 
 @section('content')

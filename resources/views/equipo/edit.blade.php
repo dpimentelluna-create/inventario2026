@@ -1,3 +1,4 @@
+<title>Editar Equipo</title>
 @extends('layouts.app')
 
 @section('template_title')

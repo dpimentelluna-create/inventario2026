@@ -1,50 +1,75 @@
+<title>Préstamos</title>
+
 @extends('layouts.app')
 
-@section('template_title')
+{{-- @section('template_title')
     Préstamos
-@endsection
+@endsection--}}
 
 @section('content')
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header"> <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"> <span id="card_title">PRÉSTAMOS</span>
-    <div class="d-flex align-items-center gap-2 ms-auto">
-        <a href="{{ route('prestamos.create') }}"
-           id="btn_nuevo_prestamo"
-           class="btn btn-primary btn-sm">
-            Registrar Nuevo
-        </a>
 
-        <a href="{{ route('prestamos.export.excel') }}"
-           class="btn btn-success btn-sm">
-            <i class="fa-solid fa-file-excel"></i> EXCEL
-        </a>
+                    <div class="card-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span id="card_title" class="fw-bold">
+            <i class="bi bi-journal-check me-2 fs-5"></i>
+            PRÉSTAMOS</span>
 
-        <a href="{{ route('prestamos.export.pdf') }}"
-           class="btn btn-danger btn-sm"
-           target="_blank">
-            <i class="fa-solid fa-file-pdf"></i> PDF
-        </a>
+            
+
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
+               class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i> Registrar Nuevo
+            </a>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-download"></i> Exportar
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="{{ route('prestamos.export.excel') }}">
+                            <i class="fa-solid fa-file-excel text-success"></i> Excel
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{{ route('prestamos.export.pdf') }}" target="_blank">
+                            <i class="fa-solid fa-file-pdf text-danger"></i> PDF
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
 
-</div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <span id="mensaje_coincidencias" class="text-success fw-bold me-auto" style="visibility:hidden;">&nbsp;</span>
-                            <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm ms-auto">
-                                FILTROS <span id="badge_filtros" class="badge bg-success ms-1 d-none">0</span>
-                            </button>
-                        </div>
+<div class="card-body">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
+                <i class="fa-solid fa-filter"></i> FILTROS
+                <span id="badge_filtros" class="badge bg-success ms-1 d-none">0</span>
+            </button>
+            <span id="mensaje_coincidencias" class="text-success fw-bold" style="visibility:hidden;">&nbsp;</span>
+        </div>
+    </div>
+    
+
                         <div id="panel_filtros" class="border rounded p-3 mb-3 bg-light" style="display:none;">
                             <div class="row g-2">
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">SOLICITANTE</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_solicitante" class="form-control form-control-sm campo-mayusculas" list="lista_filtro_solicitante" placeholder="TODOS" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo" data-target="filtro_solicitante"><i class="fa-solid fa-xmark"></i></button>
+                                        <input type="text" id="filtro_solicitante"
+                                            class="form-control form-control-sm campo-mayusculas"
+                                            list="lista_filtro_solicitante" placeholder="TODOS" autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_solicitante"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                     <datalist id="lista_filtro_solicitante">
                                         @foreach ($filtroSolicitantes ?? [] as $nombre)
@@ -55,8 +80,11 @@
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">CARGO</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_cargo" class="form-control form-control-sm campo-mayusculas" list="lista_filtro_cargo" placeholder="TODOS" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo" data-target="filtro_cargo"><i class="fa-solid fa-xmark"></i></button>
+                                        <input type="text" id="filtro_cargo"
+                                            class="form-control form-control-sm campo-mayusculas" list="lista_filtro_cargo"
+                                            placeholder="TODOS" autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_cargo"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                     <datalist id="lista_filtro_cargo">
                                         @foreach ($filtroCargos ?? [] as $cargo)
@@ -67,8 +95,11 @@
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">EQUIPO</label>
                                     <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_equipo" class="form-control form-control-sm campo-mayusculas" list="lista_filtro_equipo" placeholder="NOMBRE O N.º SERIE (3 CAR.)" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo" data-target="filtro_equipo"><i class="fa-solid fa-xmark"></i></button>
+                                        <input type="text" id="filtro_equipo"
+                                            class="form-control form-control-sm campo-mayusculas" list="lista_filtro_equipo"
+                                            placeholder="NOMBRE O N.º SERIE (3 CAR.)" autocomplete="off">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_equipo"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                     <datalist id="lista_filtro_equipo"></datalist>
                                 </div>
@@ -80,15 +111,18 @@
                                             <option value="ACTIVO">ACTIVO</option>
                                             <option value="TERMINADO">TERMINADO</option>
                                         </select>
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo" data-target="filtro_estado"><i class="fa-solid fa-xmark"></i></button>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_estado"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
                                     <label class="form-label fw-bold text-success">FECHA</label>
                                     <div class="input-group input-group-sm">
                                         <input type="date" id="filtro_fecha" class="form-control form-control-sm">
-                                        <button type="button" id="btn_filtro_hoy" class="btn btn-outline-success btn-sm">HOY</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo" data-target="filtro_fecha"><i class="fa-solid fa-xmark"></i></button>
+                                        <button type="button" id="btn_filtro_hoy"
+                                            class="btn btn-outline-success btn-sm">HOY</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_fecha"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4 col-lg-3">
@@ -100,8 +134,10 @@
                                     <input type="time" id="filtro_hora_fin" class="form-control form-control-sm">
                                 </div>
                                 <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                                    <button type="button" id="btn_aplicar_filtros" class="btn btn-success btn-sm">APLICAR</button>
-                                    <button type="button" id="btn_limpiar_filtros" class="btn btn-outline-secondary btn-sm">LIMPIAR</button>
+                                    <button type="button" id="btn_aplicar_filtros"
+                                        class="btn btn-success btn-sm">APLICAR</button>
+                                    <button type="button" id="btn_limpiar_filtros"
+                                        class="btn btn-outline-secondary btn-sm">LIMPIAR</button>
                                 </div>
                             </div>
                         </div>
@@ -123,22 +159,20 @@
                                 <tbody>
                                     @foreach ($prestamos as $i => $prestamo)
                                         @php
-    $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
-    $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
-    $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
-    $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
-    $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
-        $eq = $pe->equipo;
-        return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
-    })->implode(' | ');
+                                            $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
+                                            $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
+                                            $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
+                                            $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
+                                            $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
+                                                $eq = $pe->equipo;
+                                                return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
+                                            })->implode(' | ');
                                         @endphp
                                         <tr data-prestamo-id="{{ $prestamo->id }}"
                                             data-solicitante="{{ strtoupper($nombreSol) }}"
                                             data-cargo="{{ strtoupper($prestamo->cargo ?? '') }}"
-                                            data-equipos="{{ strtoupper($textoEquipos) }}"
-                                            data-fecha="{{ $fechaIso }}"
-                                            data-hora-inicio="{{ $hIni }}"
-                                            data-hora-fin="{{ $hFin }}"
+                                            data-equipos="{{ strtoupper($textoEquipos) }}" data-fecha="{{ $fechaIso }}"
+                                            data-hora-inicio="{{ $hIni }}" data-hora-fin="{{ $hFin }}"
                                             data-estado="{{ strtoupper($prestamo->estado ?? '') }}">
                                             <td>{{ $prestamo->id }}</td>
                                             <td>{{ strtoupper($nombreSol) ?: '-' }}</td>
@@ -148,13 +182,15 @@
                                                     <div class="mb-1">
                                                         {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? '' }}
                                                         {{ $prestamoEquipo->equipo->marca ?? '' }}
-                                                        <small class="text-muted">N/S: {{ $prestamoEquipo->equipo->num_serie ?? '-' }}</small>
+                                                        <small class="text-muted">N/S:
+                                                            {{ $prestamoEquipo->equipo->num_serie ?? '-' }}</small>
                                                     </div>
                                                 @empty
                                                     —
                                                 @endforelse
                                             </td>
-                                            <td class="text-center">{{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}</td>
+                                            <td class="text-center">
+                                                {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}</td>
                                             <td class="text-center">{{ $hIni ?: '-' }}</td>
                                             <td class="text-center">{{ $hFin ?: '—' }}</td>
                                             <td class="text-center">
@@ -166,14 +202,19 @@
                                             </td>
                                             <td class="text-center columna-acciones">
                                                 <div class="d-flex justify-content-center align-items-center gap-1">
-                                                    <form action="{{ route('prestamos.destroy', $prestamo->id) }}" method="POST">
-                                                        <a class="btn btn-info btn-accion btn-ver-prestamo" href="{{ route('prestamos.show', $prestamo->id) }}">
+                                                    <form action="{{ route('prestamos.destroy', $prestamo->id) }}"
+                                                        method="POST">
+                                                        <a class="btn btn-info btn-accion btn-ver-prestamo"
+                                                            href="{{ route('prestamos.show', $prestamo->id) }}">
                                                             <i class="fa-solid fa-eye"></i>
                                                         </a>
-                                                        <a class="btn btn-warning btn-accion" href="{{ route('prestamos.edit', $prestamo->id) }}"><i class="fa-solid fa-pen-to-square"></i></a>
+                                                        <a class="btn btn-warning btn-accion"
+                                                            href="{{ route('prestamos.edit', $prestamo->id) }}"><i
+                                                                class="fa-solid fa-pen-to-square"></i></a>
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger btn-accion" onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
+                                                        <button type="submit" class="btn btn-danger btn-accion"
+                                                            onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
                                                             <i class="fa-solid fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -215,6 +256,7 @@
     .fila-ver td {
         background-color: #cfe2ff !important;
     }
+    
 </style>
 
 <script>
@@ -224,8 +266,9 @@ window.addEventListener('load', function () {
     const tabla = $.fn.DataTable.isDataTable('#example')
         ? $('#example').DataTable()
         : $('#example').DataTable({
-            pageLength: 10,
-            lengthMenu: [5, 10, 25, 100],
+    dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
+    pageLength: 10,
+    lengthMenu: [5, 10, 25, 100],
             language: {
                 lengthMenu: "Mostrar _MENU_ registros por página",
                 info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
