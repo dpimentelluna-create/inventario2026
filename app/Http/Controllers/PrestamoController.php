@@ -547,43 +547,192 @@ class PrestamoController extends Controller
         ]);
     }
 
-    public function exportExcel()
-    {
-        $prestamos = Prestamo::with(['docente', 'prestamoEquipos.equipo.tipoEquipo'])
-            ->latest('fecha')->get();
+    public function exportExcel(Request $request)
+{
+    $ids = $request->input('ids', []);
 
-        $filas = [];
-        $filas[] = ['SOLICITANTE', 'CARGO', 'EQUIPOS', 'FECHA', 'HORA INICIO', 'HORA FIN', 'ESTADO'];
-
-        foreach ($prestamos as $p) {
-            $nombre = trim(($p->docente->apellidos ?? '') . ' ' . ($p->docente->nombres ?? ''));
-            $equipos = $p->prestamoEquipos->map(function ($pe) {
-                $eq = $pe->equipo;
-                return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' N/S ' . ($eq->num_serie ?? ''));
-            })->implode(' | ');
-
-            $filas[] = [
-                mb_strtoupper($nombre),
-                mb_strtoupper($p->cargo ?? ''),
-                mb_strtoupper($equipos),
-                optional($p->fecha)->format('d-m-Y'),
-                $p->hora_inicio ? substr($p->hora_inicio, 0, 5) : '',
-                $p->hora_fin ? substr($p->hora_fin, 0, 5) : '',
-                $p->estado,
-            ];
-        }
-
-        $csv = '';
-        foreach ($filas as $fila) {
-            $csv .= implode(';', array_map(function ($c) {
-                return '"' . str_replace('"', '""', $c) . '"';
-            }, $fila)) . "\n";
-        }
-
-        return response("\xEF\xBB\xBF" . $csv)
-            ->header('Content-Type', 'text/csv; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="prestamos.csv"');
+    if (empty($ids)) {
+        return back()->with('error', 'No hay registros para exportar.');
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | NORMALIZAR IDS
+    |--------------------------------------------------------------------------
+    */
+
+    $ids = array_map('intval', $ids);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OBTENER LOS PRÉSTAMOS
+    |--------------------------------------------------------------------------
+    */
+
+    $prestamosEncontrados = Prestamo::with([
+        'docente',
+        'prestamoEquipos.equipo.tipoEquipo',
+        'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+    ])
+        ->whereIn('id', $ids)
+        ->get()
+        ->keyBy('id');
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESPETAR EL ORDEN DEL DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    $prestamos = collect();
+
+    foreach ($ids as $id) {
+
+        if ($prestamosEncontrados->has($id)) {
+
+            $prestamos->push(
+                $prestamosEncontrados->get($id)
+            );
+
+        }
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENCABEZADOS
+    |--------------------------------------------------------------------------
+    */
+
+    $filas = [];
+
+    $filas[] = [
+        'SOLICITANTE',
+        'CARGO',
+        'EQUIPOS',
+        'FECHA',
+        'HORA INICIO',
+        'HORA FIN',
+        'ESTADO'
+    ];
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GENERAR FILAS
+    |--------------------------------------------------------------------------
+    */
+
+    foreach ($prestamos as $p) {
+
+        $nombre = trim(
+            ($p->docente->apellidos ?? '') . ' ' .
+            ($p->docente->nombres ?? '')
+        );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | EQUIPOS
+        |--------------------------------------------------------------------------
+        */
+
+        $equipos = $p->prestamoEquipos
+            ->map(function ($pe) {
+
+                $eq = $pe->equipo;
+
+                return trim(
+                    ($eq->tipoEquipo->nombre ?? '') . ' ' .
+                    ($eq->marca ?? '') .
+                    ' N/S ' .
+                    ($eq->num_serie ?? '')
+                );
+
+            })
+            ->implode(' | ');
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AGREGAR FILA
+        |--------------------------------------------------------------------------
+        */
+
+        $filas[] = [
+            mb_strtoupper($nombre, 'UTF-8'),
+
+            mb_strtoupper(
+                $p->cargo ?? '',
+                'UTF-8'
+            ),
+
+            mb_strtoupper(
+                $equipos,
+                'UTF-8'
+            ),
+
+            $p->fecha
+                ? \Carbon\Carbon::parse($p->fecha)->format('d-m-Y')
+                : '',
+
+            $p->hora_inicio
+                ? substr($p->hora_inicio, 0, 5)
+                : '',
+
+            $p->hora_fin
+                ? substr($p->hora_fin, 0, 5)
+                : '',
+
+            mb_strtoupper(
+                $p->estado ?? '',
+                'UTF-8'
+            ),
+        ];
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | GENERAR CSV COMPATIBLE CON EXCEL
+    |--------------------------------------------------------------------------
+    */
+
+    $csv = '';
+
+    foreach ($filas as $fila) {
+
+        $csv .= implode(';', array_map(
+            function ($c) {
+
+                return '"' .
+                    str_replace('"', '""', $c) .
+                    '"';
+
+            },
+            $fila
+        )) . "\n";
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESCARGAR ARCHIVO
+    |--------------------------------------------------------------------------
+    */
+
+    return response("\xEF\xBB\xBF" . $csv)
+        ->header(
+            'Content-Type',
+            'text/csv; charset=UTF-8'
+        )
+        ->header(
+            'Content-Disposition',
+            'attachment; filename="prestamos.csv"'
+        );
+}
 
     public function exportPdf(Request $request)
     {

@@ -29,9 +29,9 @@ Préstamos
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('prestamos.export.excel') }}">
+                                            <button type="button" class="dropdown-item" id="btn_exportar_excel">
                                                 <i class="fa-solid fa-file-excel text-success"></i> Excel
-                                            </a>
+                                            </button>
                                         </li>
                                         <li>
                                             <button type="button" class="dropdown-item" id="btn_exportar_pdf">
@@ -310,6 +310,129 @@ window.addEventListener('load', function () {
         });
     tabla.order([[4, 'desc'], [5, 'desc']]).draw();
 
+    //EXPORTAR EXCEL
+    document.getElementById('btn_exportar_excel').addEventListener('click', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | OBTENER REGISTROS SEGÚN EL DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    const ids = [];
+
+    tabla.rows({
+        search: 'applied',
+        order: 'applied'
+    }).every(function () {
+
+        const tr = this.node();
+
+        if (!tr) return;
+
+        const id = tr.getAttribute('data-prestamo-id');
+
+        if (id) {
+            ids.push(id);
+        }
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDAR
+    |--------------------------------------------------------------------------
+    */
+
+    if (ids.length === 0) {
+
+        if (typeof toastr !== 'undefined') {
+
+            toastr.warning(
+                'NO HAY PRÉSTAMOS PARA EXPORTAR.'
+            );
+
+        } else {
+
+            alert(
+                'NO HAY PRÉSTAMOS PARA EXPORTAR.'
+            );
+
+        }
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREAR FORMULARIO TEMPORAL
+    |--------------------------------------------------------------------------
+    */
+
+    const form = document.createElement('form');
+
+    form.method = 'POST';
+
+    form.action = '{{ route('prestamos.export.excel') }}';
+
+    form.target = '_blank';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOKEN CSRF
+    |--------------------------------------------------------------------------
+    */
+
+    const csrf = document.createElement('input');
+
+    csrf.type = 'hidden';
+
+    csrf.name = '_token';
+
+    csrf.value = '{{ csrf_token() }}';
+
+    form.appendChild(csrf);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENVIAR IDS EN EL ORDEN DEL DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    ids.forEach(function (id) {
+
+        const input = document.createElement('input');
+
+        input.type = 'hidden';
+
+        input.name = 'ids[]';
+
+        input.value = id;
+
+        form.appendChild(input);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENVIAR
+    |--------------------------------------------------------------------------
+    */
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+    form.remove();
+
+});
+
+//EXPORTAR PDF
     document.getElementById('btn_exportar_pdf').addEventListener('click', function () {
 
     /*
