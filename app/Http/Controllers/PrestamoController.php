@@ -63,7 +63,7 @@ class PrestamoController extends Controller
         $prestamo = new Prestamo();
 
         $tiposEquipo = TiposEquipo::whereHas('equipos')
-        ->orderBy('nombre')->get();
+            ->orderBy('nombre')->get();
 
         $docentes = Docente::orderBy('apellidos')
             ->orderBy('nombres')
@@ -293,7 +293,7 @@ class PrestamoController extends Controller
         ])->findOrFail($id);
 
         $tiposEquipo = TiposEquipo::whereHas('equipos')
-        ->orderBy('nombre')->get();
+            ->orderBy('nombre')->get();
 
         $docentes = Docente::orderBy('apellidos')
             ->orderBy('nombres')
@@ -585,14 +585,42 @@ class PrestamoController extends Controller
             ->header('Content-Disposition', 'attachment; filename="prestamos.csv"');
     }
 
-    public function exportPdf()
+    public function exportPdf(Request $request)
     {
-        $prestamos = Prestamo::with(['docente', 'prestamoEquipos.equipo.tipoEquipo'])
-            ->latest('fecha')
-            ->get();
+        $ids = $request->input('ids', []);
 
-        $pdf = Pdf::loadView('prestamo.export-pdf', compact('prestamos'))
-            ->setPaper('a4', 'landscape');
+        if (empty($ids)) {
+            return back()->with('error', 'No hay registros para exportar.');
+        }
+
+        $ids = array_map('intval', $ids);
+
+        $prestamosEncontrados = Prestamo::with([
+            'docente',
+            'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        /*
+    |--------------------------------------------------------------------------
+    | RESPETAR EXACTAMENTE EL ORDEN ENVIADO POR DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+        $prestamos = collect($ids)
+            ->map(function ($id) use ($prestamosEncontrados) {
+                return $prestamosEncontrados->get($id);
+            })
+            ->filter()
+            ->values();
+
+        $pdf = Pdf::loadView(
+            'prestamo.export-pdf',
+            compact('prestamos')
+        )->setPaper('a4', 'landscape');
 
         return $pdf->download('prestamos.pdf');
     }

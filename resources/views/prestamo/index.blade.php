@@ -3,7 +3,7 @@
 @extends('layouts.app')
 
 {{-- @section('template_title')
-    Préstamos
+Préstamos
 @endsection--}}
 @section('content')
     <div class="container-fluid">
@@ -17,17 +17,14 @@
                                 <i class="bi bi-journal-check me-2 fs-5"></i>
                                 PRÉSTAMOS</span>
 
-
-
                             <div class="d-flex align-items-center gap-2">
-                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
-                                    class="btn btn-primary btn-sm">
+                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo" class="btn btn-primary btn-sm">
                                     <i class="fa-solid fa-plus"></i> Registrar Nuevo
                                 </a>
 
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
                                         <i class="fa-solid fa-download"></i> Exportar
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
@@ -37,10 +34,9 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('prestamos.export.pdf') }}"
-                                                target="_blank">
+                                            <button type="button" class="dropdown-item" id="btn_exportar_pdf">
                                                 <i class="fa-solid fa-file-pdf text-danger"></i> PDF
-                                            </a>
+                                            </button>
                                         </li>
                                     </ul>
                                 </div>
@@ -126,14 +122,31 @@
                                             data-target="filtro_fecha"><i class="fa-solid fa-xmark"></i></button>
                                     </div>
                                 </div>
+
                                 <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">HORA INICIO</label>
-                                    <input type="time" id="filtro_hora_inicio" class="form-control form-control-sm">
+                                    <label class="form-label fw-bold text-success">HORARIO DESDE</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="time" id="filtro_hora_inicio" class="form-control form-control-sm"
+                                            min="06:00" max="16:00">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_hora_inicio">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
+
                                 <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">HORA FINAL</label>
-                                    <input type="time" id="filtro_hora_fin" class="form-control form-control-sm">
+                                    <label class="form-label fw-bold text-success">HORARIO HASTA</label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="time" id="filtro_hora_fin" class="form-control form-control-sm"
+                                            min="06:00" max="16:00">
+                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
+                                            data-target="filtro_hora_fin">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
+
                                 <div class="col-12 d-flex justify-content-end gap-2 mt-2">
                                     <button type="button" id="btn_aplicar_filtros"
                                         class="btn btn-success btn-sm">APLICAR</button>
@@ -160,14 +173,24 @@
                                 <tbody>
                                     @foreach ($prestamos as $i => $prestamo)
                                         @php
-                                            $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
-                                            $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
-                                            $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
-                                            $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
-                                            $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
-                                                $eq = $pe->equipo;
-                                                return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
-                                            })->implode(' | ');
+    $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
+    $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
+
+    $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
+    $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
+
+    $hIniMostrar = $hIni
+        ? \Carbon\Carbon::createFromFormat('H:i', $hIni)->format('h:i A')
+        : '';
+
+    $hFinMostrar = $hFin
+        ? \Carbon\Carbon::createFromFormat('H:i', $hFin)->format('h:i A')
+        : '';
+
+    $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
+        $eq = $pe->equipo;
+        return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
+    })->implode(' | ');
                                         @endphp
                                         <tr data-prestamo-id="{{ $prestamo->id }}"
                                             data-solicitante="{{ strtoupper($nombreSol) }}"
@@ -193,8 +216,13 @@
                                             <td class="text-center">
                                                 {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}
                                             </td>
-                                            <td class="text-center">{{ $hIni ?: '-' }}</td>
-                                            <td class="text-center">{{ $hFin ?: '—' }}</td>
+                                            <td class="text-center" data-order="{{ $hIni }}">
+                                                {{ $hIniMostrar ?: '-' }}
+                                            </td>
+
+                                            <td class="text-center" data-order="{{ $hFin }}">
+                                                {{ $hFinMostrar ?: '—' }}
+                                            </td>
                                             <td class="text-center">
                                                 @if (($prestamo->estado ?? '') === 'ACTIVO')
                                                     <span class="badge bg-success">ACTIVO</span>
@@ -260,6 +288,7 @@
     }
 </style>
 
+{{-- INICIO SCRIPT --}}
 <script>
 window.addEventListener('load', function () {
     if (typeof $ === 'undefined' || !$.fn.DataTable) return;
@@ -280,6 +309,115 @@ window.addEventListener('load', function () {
             }
         });
     tabla.order([[4, 'desc'], [5, 'desc']]).draw();
+
+    document.getElementById('btn_exportar_pdf').addEventListener('click', function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | OBTENER FILAS SEGÚN EL ESTADO ACTUAL DE DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    const ids = [];
+
+    tabla.rows({
+        search: 'applied',
+        order: 'applied'
+    }).every(function () {
+
+        const tr = this.node();
+
+        if (!tr) return;
+
+        const id = tr.getAttribute('data-prestamo-id');
+
+        if (id) {
+            ids.push(id);
+        }
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | VALIDAR
+    |--------------------------------------------------------------------------
+    */
+
+    if (ids.length === 0) {
+
+        if (typeof toastr !== 'undefined') {
+            toastr.warning('NO HAY PRÉSTAMOS PARA EXPORTAR.');
+        } else {
+            alert('NO HAY PRÉSTAMOS PARA EXPORTAR.');
+        }
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREAR FORMULARIO TEMPORAL
+    |--------------------------------------------------------------------------
+    */
+
+    const form = document.createElement('form');
+
+    form.method = 'POST';
+    form.action = '{{ route('prestamos.export.pdf') }}';
+    form.target = '_blank';
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | TOKEN CSRF
+    |--------------------------------------------------------------------------
+    */
+
+    const csrf = document.createElement('input');
+
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = '{{ csrf_token() }}';
+
+    form.appendChild(csrf);
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENVIAR IDS EN EL ORDEN DEL DATATABLE
+    |--------------------------------------------------------------------------
+    */
+
+    ids.forEach(function (id) {
+
+        const input = document.createElement('input');
+
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+
+        form.appendChild(input);
+
+    });
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ENVIAR
+    |--------------------------------------------------------------------------
+    */
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+    form.remove();
+
+});
+
+
+
     const STORAGE_KEY = 'prestamos_filtros_estado';
     const panel = document.getElementById('panel_filtros');
     const btnToggle = document.getElementById('btn_toggle_filtros');
@@ -367,25 +505,60 @@ window.addEventListener('load', function () {
         if (eq && !(fila.getAttribute('data-equipos') || '').includes(eq)) return false;
         if (est && (fila.getAttribute('data-estado') || '') !== est) return false;
         if (fec && (fila.getAttribute('data-fecha') || '') !== fec) return false;
+        
         const filaHi = fila.getAttribute('data-hora-inicio') || '';
         const filaHf = fila.getAttribute('data-hora-fin') || '';
-        const ref = filaHi || filaHf;
-        if (hi && ref && ref < hi) return false;
-        if (hf && ref && ref > hf) return false;
+
+        // Si se establece un rango completo,
+        // solamente se muestran préstamos TERMINADOS.
+        if (hf && !filaHf) return false;
+
+        // Filtrar por hora de inicio
+        if (hi && filaHi && filaHi < hi) return false;
+
+        // Filtrar por hora final
+        if (hf && filaHf && filaHf > hf) return false;
+
         return true;
     });
+    
+    //Funcion aplicar filtros con validacion de hora
     function aplicarFiltros() {
-        const hi = hora(campos.horaInicio);
-        const hf = hora(campos.horaFin);
-        if (hi && hf && hf < hi) {
-            if (typeof toastr !== 'undefined') toastr.error('LA HORA FINAL NO PUEDE SER MENOR QUE LA HORA INICIO.');
-            return;
+    const hi = hora(campos.horaInicio);
+    const hf = hora(campos.horaFin);
+
+    const HORA_MINIMA = '06:00';
+    const HORA_MAXIMA = '16:00';
+
+    // Validar hora desde
+    if (hi && (hi < HORA_MINIMA || hi > HORA_MAXIMA)) {
+        if (typeof toastr !== 'undefined') {
+            toastr.error('LA HORA DESDE DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
         }
-        guardarFiltros();
-        actualizarBadge();
-        tabla.draw();
-        mostrarCoincidencias();
+        return;
     }
+
+    // Validar hora hasta
+    if (hf && (hf < HORA_MINIMA || hf > HORA_MAXIMA)) {
+        if (typeof toastr !== 'undefined') {
+            toastr.error('LA HORA HASTA DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
+        }
+        return;
+    }
+
+    // Validar que hasta no sea menor que desde
+    if (hi && hf && hf < hi) {
+        if (typeof toastr !== 'undefined') {
+            toastr.error('LA HORA HASTA NO PUEDE SER MENOR QUE LA HORA DESDE.');
+        }
+        return;
+    }
+
+    guardarFiltros();
+    actualizarBadge();
+    tabla.draw();
+    mostrarCoincidencias();
+}
 
     function aplicarYScroll() {
         aplicarFiltros();

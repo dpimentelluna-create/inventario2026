@@ -75,8 +75,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('prestamos/export/excel', [PrestamoController::class, 'exportExcel'])
         ->name('prestamos.export.excel');
-    Route::get('prestamos/export/pdf', [PrestamoController::class, 'exportPdf'])
-        ->name('prestamos.export.pdf');
+    Route::post('/prestamos/export/pdf', [PrestamoController::class, 'exportPdf'])
+    ->name('prestamos.export.pdf');
 
     Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
 });
