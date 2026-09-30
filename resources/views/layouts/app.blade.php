@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light">
 <head>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -57,7 +59,7 @@
             white-space: nowrap;
         }
 
-        /* --- LAYOUT DE BARRA LATERAL --- */
+        /* --- LAYOUT DE BARRA LATERAL FIJA --- */
         #app-container {
             display: flex;
             width: 100%;
@@ -70,7 +72,13 @@
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
             z-index: 1000;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            padding: 1rem 0.75rem !important;
         }
 
         #sidebar.collapsed {
@@ -78,10 +86,11 @@
             min-width: 72px;
         }
 
+        /* Modificaciones cuando la barra lateral está colapsada */
         #sidebar.collapsed .sidebar-text,
-        #sidebar.collapsed .user-name-text,
         #sidebar.collapsed .brand-text,
-        #sidebar.collapsed .auth-buttons-container {
+        #sidebar.collapsed .auth-buttons-container,
+        #sidebar.collapsed .user-name-text {
             display: none !important;
         }
 
@@ -96,10 +105,20 @@
             font-size: 1.25rem;
         }
 
+        /* Ajuste del perfil de usuario colapsado para mostrar solo el avatar centrado */
+        #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
+            justify-content: center;
+            padding: 0;
+        }
+
+        #sidebar.collapsed .user-dropdown-container .dropdown-toggle .rounded-circle {
+            margin-right: 0 !important;
+        }
+
         .sidebar-link {
             display: flex;
             align-items: center;
-            padding: 0.65rem 1rem;
+            padding: 0.6rem 0.75rem;
             border-radius: 0.5rem;
             text-decoration: none;
             transition: background-color 0.2s;
@@ -350,11 +369,11 @@
     <div id="app">
         @auth
             <div id="app-container">
-                <!-- BARRA LATERAL ESTILO GEMINI -->
-                <nav id="sidebar" class="p-3 d-flex flex-column justify-content-between shadow-sm">
+                <!-- BARRA LATERAL -->
+                <nav id="sidebar" class="shadow-sm">
                     <div>
                         <!-- Cabecera de la Barra Lateral -->
-                        <div class="d-flex align-items-center mb-4 px-1">
+                        <div class="d-flex align-items-center mb-3 px-1">
                             <button id="sidebar-toggle" class="btn btn-sm btn-outline-secondary rounded-circle me-2 btn-accion"
                                 title="Ocultar/Mostrar menú">
                                 <i class="bi bi-list"></i>
@@ -416,52 +435,58 @@
                     </div>
 
                     <!-- Pie de la Barra Lateral -->
-                    <div class="pt-3 border-top mt-3">
-                        @auth
-                            <div class="d-flex align-items-center mb-2 px-1">
-                                <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
-                                    style="width: 35px; height: 35px; font-weight: bold;">
-                                    {{ substr(Auth::user()->name, 0, 1) }}
-                                </div>
-                                <span class="user-name-text small fw-semibold text-truncate">{{ Auth::user()->name }}</span>
-                            </div>
-                        @endauth
-
-                        <div class="d-flex align-items-center justify-content-between px-1">
+                    <div class="pt-2 border-top mt-2 flex-shrink-0">
+                        <div class="d-flex align-items-center justify-content-between px-1 mb-2">
                             <!-- Botón de Modo Oscuro / Claro -->
                             <button id="btn-switch-theme" class="btn btn-outline-secondary btn-sm rounded-circle btn-accion"
                                 title="Cambiar modo de color">
                                 <i id="theme-icon" class="bi bi-sun-fill"></i>
                             </button>
+                        </div>
 
-                            @auth
-                                <!-- Botón de Cerrar Sesión -->
-                                <a class="btn btn-outline-danger btn-sm rounded-circle btn-accion" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                    title="Cerrar sesión">
-                                    <i class="bi bi-box-arrow-right"></i>
+                        @auth
+                            <!-- Menú Desplegable (Dropdown) al hacer clic en el Usuario -->
+                            <div class="dropdown user-dropdown-container px-1">
+                                <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle py-1" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false" title="{{ Auth::user()->name }}">
+                                    <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                                        style="width: 32px; height: 32px; font-weight: bold; font-size: 14px;">
+                                        {{ substr(Auth::user()->name, 0, 1) }}
+                                    </div>
+                                    <span class="user-name-text small fw-semibold text-truncate">{{ Auth::user()->name }}</span>
                                 </a>
-                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser">
+                                    <li>
+                                      <a class="dropdown-item text-gray-300 d-flex align-items-center p-2 rounded" 
+   href="{{ route('logout') }}"
+   onclick="confirmarCierreSesion(event, document.getElementById('logout-form-dropdown'));"
+   title="Cerrar sesión">
+    
+    <i class="bi bi-box-arrow-right text-lg"></i> 
+    
+    <span class="ms-2 text-truncate" x-show="sidebarOpen">Cerrar sesión</span>
+</a>
+                                    </li>
+                                </ul>
+                                <form id="logout-form-dropdown" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
                                 </form>
-                            @else
-                                <!-- Botones de Iniciar Sesión y Registrarse Compactos -->
-                                <div class="auth-buttons-container d-flex gap-1">
-                                    @if (Route::has('login'))
-                                        <a class="btn btn-outline-primary btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
-                                            href="{{ route('login') }}" title="Iniciar sesión" style="font-size: 0.75rem;">
-                                            <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
-                                        </a>
-                                    @endif
-                                    @if (Route::has('register'))
-                                        <a class="btn btn-outline-success btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
-                                            href="{{ route('register') }}" title="Registrarse" style="font-size: 0.75rem;">
-                                            <i class="bi bi-person-plus me-1"></i> Registro
-                                        </a>
-                                    @endif
-                                </div>
-                            @endauth
-                        </div>
+                            </div>
+                        @else
+                            <div class="auth-buttons-container d-flex flex-column gap-1 px-1">
+                                @if (Route::has('login'))
+                                    <a class="btn btn-outline-primary btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
+                                        href="{{ route('login') }}" title="Iniciar sesión" style="font-size: 0.75rem;">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                                    </a>
+                                @endif
+                                @if (Route::has('register'))
+                                    <a class="btn btn-outline-success btn-sm px-2 py-1 text-decoration-none d-flex align-items-center"
+                                        href="{{ route('register') }}" title="Registrarse" style="font-size: 0.75rem;">
+                                        <i class="bi bi-person-plus me-1"></i> Registro
+                                    </a>
+                                @endif
+                            </div>
+                        @endauth
                     </div>
                 </nav>
 
@@ -613,11 +638,33 @@
             });
             return false;
         }
+
+        function confirmarCierreSesion(event, form) {
+            event.preventDefault();
+            const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            Swal.fire({
+                title: '¿Deseas cerrar sesión?',
+                text: 'Tendrás que iniciar sesión nuevamente para ingresar.',
+                icon: 'question',
+                background: isDark ? '#1e293b' : '#ffffff',
+                color: isDark ? '#e2e8f0' : '#334155',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, cerrar sesión',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then(function (result) {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
     </script>
 
     @php
-$mensajeToast = session('success') ?? session('error') ?? session('warning');
-$tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
+    $mensajeToast = session('success') ?? session('error') ?? session('warning');
+    $tipoToast = session('toast_tipo', session('success') ? 'exito' : 'error');
     @endphp
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>

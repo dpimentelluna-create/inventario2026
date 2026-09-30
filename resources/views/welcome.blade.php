@@ -1,678 +1,209 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Sistema de Gestión de Inventario Tecnologia</title>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 10% 20%, rgba(25, 135, 84, 0.18), transparent 30%),
-                radial-gradient(circle at 90% 80%, rgba(13, 110, 253, 0.15), transparent 30%),
-                linear-gradient(135deg, #f5fff8 0%, #eef7f2 50%, #f8fbff 100%);
-            color: #1f2937;
-            overflow-x: hidden;
-        }
-
-        /* =====================================================
-           BARRA SUPERIOR
-        ===================================================== */
-
-        .topbar {
-            width: 100%;
-            padding: 18px 6%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            background: rgba(255, 255, 255, 0.80);
-            backdrop-filter: blur(12px);
-            position: relative;
-            z-index: 10;
-        }
-
-        .institution {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .institution-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
-            background: #198754;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 8px 20px rgba(25, 135, 84, 0.25);
-        }
-
-        .institution-text strong {
-            display: block;
-            font-size: 15px;
-            color: #123d2b;
-            letter-spacing: .04em;
-        }
-
-        .institution-text span {
-            font-size: 12px;
-            color: #6b7280;
-        }
-
-        .area-label {
-            padding: 9px 15px;
-            border-radius: 30px;
-            background: #e8f7ef;
-            color: #198754;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: .04em;
-        }
-
-        /* =====================================================
-           CONTENEDOR PRINCIPAL
-        ===================================================== */
-
-        .hero {
-            width: 88%;
-            max-width: 1250px;
-            margin: 55px auto 0;
-
-            display: grid;
-            grid-template-columns: 1.1fr .9fr;
-            gap: 60px;
-            align-items: center;
-        }
-
-        /* =====================================================
-           CONTENIDO PRINCIPAL
-        ===================================================== */
-
-        .hero-content {
-            animation: aparecer .8s ease;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-
-            padding: 8px 14px;
-            border-radius: 30px;
-
-            background: #e8f7ef;
-            color: #198754;
-
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: .05em;
-
-            margin-bottom: 20px;
-        }
-
-        .hero h1 {
-            font-size: clamp(38px, 5vw, 68px);
-            line-height: 1.03;
-            color: #123d2b;
-            margin-bottom: 22px;
-        }
-
-        .hero h1 span {
-            color: #198754;
-        }
-
-        .hero-description {
-            max-width: 650px;
-            color: #667085;
-            font-size: 17px;
-            line-height: 1.7;
-            margin-bottom: 30px;
-        }
-
-        /* =====================================================
-           BOTONES
-        ===================================================== */
-
-        .buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            text-decoration: none;
-            padding: 13px 22px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            transition: .25s ease;
-        }
-
-        .btn-primary {
-            background: #198754;
-            color: white;
-            box-shadow: 0 8px 20px rgba(25, 135, 84, .22);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            background: #157347;
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #198754;
-            border: 1px solid #d7e8df;
-        }
-
-        .btn-secondary:hover {
-            transform: translateY(-2px);
-            background: #f5faf7;
-        }
-
-        /* =====================================================
-           LOGO / PANEL DERECHO
-        ===================================================== */
-
-        .visual {
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .logo-card {
-            width: 390px;
-            min-height: 390px;
-
-            border-radius: 35px;
-
-            background: rgba(255, 255, 255, .82);
-            border: 1px solid rgba(25, 135, 84, .14);
-
-            box-shadow:
-                0 25px 70px rgba(30, 70, 50, .12);
-
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-
-            position: relative;
-            z-index: 2;
-
-            animation: flotar 5s ease-in-out infinite;
-        }
-
-        .logo-placeholder {
-            width: 170px;
-            height: 170px;
-
-            border-radius: 30px;
-
-            background: linear-gradient(135deg, #198754, #32a96f);
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            color: white;
-            font-size: 75px;
-
-            box-shadow:
-                0 20px 45px rgba(25, 135, 84, .30);
-
-            margin-bottom: 25px;
-        }
-
-        .logo-card h2 {
-            color: #123d2b;
-            font-size: 20px;
-            text-align: center;
-        }
-
-        .logo-card p {
-            color: #7a8694;
-            font-size: 13px;
-            margin-top: 8px;
-            text-align: center;
-        }
-
-        /* =====================================================
-           ELEMENTOS DECORATIVOS
-        ===================================================== */
-
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            z-index: 1;
-        }
-
-        .circle-one {
-            width: 110px;
-            height: 110px;
-            background: rgba(25, 135, 84, .12);
-            top: -30px;
-            right: -25px;
-        }
-
-        .circle-two {
-            width: 75px;
-            height: 75px;
-            background: rgba(13, 110, 253, .10);
-            bottom: -25px;
-            left: -30px;
-        }
-
-        /* =====================================================
-           TARJETAS
-        ===================================================== */
-
-        .modules {
-            width: 88%;
-            max-width: 1250px;
-            margin: 70px auto 40px;
-
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-        }
-
-        .module {
-            background: rgba(255, 255, 255, .82);
-            border: 1px solid rgba(0, 0, 0, .06);
-
-            border-radius: 18px;
-            padding: 22px;
-
-            transition: .25s ease;
-        }
-
-        .module:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, .08);
-        }
-
-        .module-icon {
-            width: 45px;
-            height: 45px;
-
-            border-radius: 12px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: #e8f7ef;
-            color: #198754;
-
-            font-size: 21px;
-
-            margin-bottom: 15px;
-        }
-
-        .module h3 {
-            font-size: 16px;
-            color: #123d2b;
-            margin-bottom: 7px;
-        }
-
-        .module p {
-            color: #7a8694;
-            font-size: 12px;
-            line-height: 1.5;
-        }
-
-        /* =====================================================
-           PIE
-        ===================================================== */
-
-        footer {
-            width: 88%;
-            max-width: 1250px;
-            margin: 35px auto 25px;
-
-            padding-top: 20px;
-
-            border-top: 1px solid rgba(0, 0, 0, .08);
-
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-
-            color: #8a939d;
-            font-size: 11px;
-        }
-
-        /* =====================================================
-           ANIMACIONES
-        ===================================================== */
-
-        @keyframes aparecer {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes flotar {
-            0%, 100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
-
-        @media (max-width: 900px) {
-
-            .hero {
-                grid-template-columns: 1fr;
-                text-align: center;
-                gap: 35px;
-            }
-
-            .hero-description {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .buttons {
-                justify-content: center;
-            }
-
-            .modules {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .visual {
-                order: -1;
-            }
-
-            .logo-card {
-                width: 330px;
-                min-height: 330px;
-            }
-        }
-
-        @media (max-width: 600px) {
-
-            .topbar {
-                padding: 15px 5%;
-            }
-
-            .area-label {
-                display: none;
-            }
-
-            .hero {
-                width: 90%;
-                margin-top: 35px;
-            }
-
-            .modules {
-                width: 90%;
-                grid-template-columns: 1fr;
-                margin-top: 45px;
-            }
-
-            .logo-card {
-                width: 280px;
-                min-height: 280px;
-            }
-
-            .logo-placeholder {
-                width: 120px;
-                height: 120px;
-                font-size: 50px;
-            }
-
-            footer {
-                width: 90%;
-                flex-direction: column;
-            }
-
-            /*estilos para el logo del colegio en la sección de presentación*/
-        }
-    .logo-colegio img {
-    width: 300px;
-    height: 300px;
-    object-fit: contain;
-}
-    </style>
+    <title>Sistema de Gestión de Inventario - IE. 88021 Alfonso Ugarte</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-[#f0f4f1] text-gray-800 font-sans min-h-screen flex flex-col justify-between">
 
-<body>
-
-    {{-- =====================================================
-         BARRA SUPERIOR
-    ====================================================== --}}
-
-    <header class="topbar">
-
-        <div class="institution">
-
-            <div class="institution-icon">
-                🏫
-            </div>
-
-            <div class="institution-text">
-                <strong>IE. 88021 ALFONSO UGARTE</strong>
-                <span>Institución Educativa</span>
-            </div>
-
-        </div>
-
-        <div class="area-label">
-            COORDINACIÓN EN INNOVACIÓN Y SOPORTE TECNÓLOGICO
-        </div>
-
-    </header>
-
-
-    {{-- =====================================================
-         PRESENTACIÓN
-    ====================================================== --}}
-
-    <main>
-
-        <section class="hero">
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container mx-auto px-6 py-10 flex-grow flex flex-col justify-center">
         
-            <div class="hero-content">
-        
-                <div class="tag">
-                    💻 SISTEMA INSTITUCIONAL
-                </div>
-        
-                <h1>
-                    Gestión de
-                    <span>Equipos</span>
-                    y Préstamos
+        <!-- SECCIÓN SUPERIOR (Hero: Título, Botones e Insignia Oficial) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center mb-10">
+            
+            <!-- Columna Izquierda: Título de la Institución y Botones -->
+            <div class="lg:col-span-7 space-y-6">
+                <h1 class="text-5xl sm:text-6xl font-extrabold text-[#0d7a46] leading-[1.12] tracking-tight">
+                    Gestión de<br>Equipos y<br>Préstamos
                 </h1>
-        
-                <p class="hero-description">
-                    Sistema web desarrollado para facilitar el registro,
-                    control y seguimiento de los equipos tecnológicos
-                    utilizados dentro de la institución educativa.
+
+                <p class="text-gray-600 text-base max-w-lg leading-relaxed">
+                    Sistema web desarrollado para facilitar el registro, control y seguimiento de los equipos tecnológicos utilizados dentro de la institución educativa.
                 </p>
-        
-                <div class="buttons">
-        
-                    <a href="{{ route('login') }}" class="btn btn-primary">
-                        INGRESAR AL SISTEMA →
+
+                <!-- Botones de Acción -->
+                <div class="flex flex-wrap items-center gap-4 pt-2">
+                    <!-- Botón 1: Ingresar al Sistema -->
+                    <a href="{{ route('login') }}" 
+                       class="bg-[#128a52] hover:bg-[#0e7042] text-white font-semibold text-sm px-6 py-3.5 rounded-lg shadow-sm transition duration-200 flex items-center gap-2 uppercase tracking-wide">
+                        INGRESAR AL SISTEMA &rarr;
                     </a>
-        
-                    <a href="#modulos" class="btn btn-secondary">
+
+                    <!-- Botón 2: Conocer el Sistema (Filtro para las 4 tarjetas) -->
+                    <button type="button" 
+                            onclick="toggleCuatroModulos()" 
+                            class="bg-white hover:bg-gray-50 text-[#128a52] border border-gray-200 font-semibold text-sm px-6 py-3.5 rounded-lg shadow-sm transition duration-200 uppercase tracking-wide cursor-pointer">
                         CONOCER EL SISTEMA
-                    </a>
-        
+                    </button>
                 </div>
-        
             </div>
-        
-        
-            {{-- =================================================
-            LOGO
-            ================================================== --}}
-        
-            <div class="visual">
-        
-                <div class="circle circle-one"></div>
-                <div class="circle circle-two"></div>
-        
-                <div class="logo-card">
-        
-                    <div class="logo-colegio">
-                        <img src="{{ asset('logo/logo.jpg') }}" alt="Logo del colegio">
+
+            <!-- Columna Derecha: Tarjeta de la Insignia de la I.E. N° 88021 "ALFONSO UGARTE" -->
+            <div class="lg:col-span-5 flex justify-center lg:justify-end">
+                <div class="bg-white/90 backdrop-blur-sm p-8 rounded-3xl shadow-sm border border-gray-100 max-w-sm w-full text-center">
+                    
+                    <!-- INSIGNIA VECTORIAL EXACTA DE LA I.E. 88021 ALFONSO UGARTE -->
+                    <div class="w-52 h-auto mx-auto mb-4 drop-shadow-md">
+                        <svg viewBox="0 0 240 300" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Borde dorado y fondo azul principal -->
+                            <path d="M 10 20 L 230 20 L 230 160 C 230 230, 120 285, 120 285 C 120 285, 10 230, 10 160 Z" fill="#1d4ed8" stroke="#f59e0b" stroke-width="7" stroke-linejoin="round"/>
+                            
+                            <!-- Franja Superior Roja -->
+                            <path d="M 14 24 L 226 24 L 226 78 L 14 78 Z" fill="#dc2626"/>
+                            
+                            <!-- Texto 'I' izquierda y 'E' derecha -->
+                            <text x="38" y="62" text-anchor="middle" fill="#ffffff" font-weight="900" font-size="30" font-family="sans-serif">I</text>
+                            <text x="202" y="62" text-anchor="middle" fill="#ffffff" font-weight="900" font-size="30" font-family="sans-serif">E</text>
+                            
+                            <!-- Recuadro Blanco Central '88021' -->
+                            <rect x="68" y="34" width="104" height="38" rx="4" fill="#ffffff"/>
+                            <text x="120" y="62" text-anchor="middle" fill="#000000" font-weight="900" font-size="22" font-family="sans-serif" letter-spacing="1">88021</text>
+
+                            <!-- Cinta Amarilla 'ALFONSO UGARTE' -->
+                            <path d="M 12 78 Q 120 102 228 78 L 218 116 Q 120 138 22 116 Z" fill="#facc15" stroke="#d97706" stroke-width="2"/>
+                            <path id="textPathUgarte" d="M 25 106 Q 120 128 215 106" fill="none"/>
+                            <text font-weight="900" font-size="16" font-family="sans-serif" fill="#000000">
+                                <textPath href="#textPathUgarte" startOffset="50%" text-anchor="middle">ALFONSO UGARTE</textPath>
+                            </text>
+
+                            <!-- Laureles Verdes -->
+                            <path d="M 42 155 Q 32 195 72 225" stroke="#16a34a" stroke-width="12" fill="none" stroke-linecap="round"/>
+                            <path d="M 198 155 Q 208 195 168 225" stroke="#16a34a" stroke-width="12" fill="none" stroke-linecap="round"/>
+
+                            <!-- Busto de Alfonso Ugarte -->
+                            <g transform="translate(120, 178)">
+                                <!-- Uniforme Militar -->
+                                <path d="M -36 36 L -30 10 C -20 0, 20 0, 30 10 L 36 36 Z" fill="#1e293b"/>
+                                <path d="M -22 12 L -6 26 M 22 12 L 6 26 M 0 10 L 0 36" stroke="#facc15" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Rostro -->
+                                <ellipse cx="0" cy="-8" rx="14" ry="16" fill="#fdba74"/>
+                                <path d="M -8 -2 Q 0 4 8 -2" stroke="#0f172a" stroke-width="3" fill="none"/>
+                                <!-- Gorra Militar -->
+                                <path d="M -18 -18 L 18 -18 L 22 -12 L -22 -12 Z" fill="#000000"/>
+                                <path d="M -16 -18 C -16 -30, 16 -30, 16 -18 Z" fill="#1d4ed8"/>
+                                <rect x="-16" y="-22" width="32" height="4" fill="#facc15"/>
+                            </g>
+
+                            <!-- Cinta Inferior 'NVO. CHIMBOTE' -->
+                            <path d="M 25 218 L 120 262 L 215 218 L 200 242 L 120 282 L 40 242 Z" fill="#facc15" stroke="#d97706" stroke-width="2"/>
+                            <path id="textPathNvo" d="M 35 238 L 110 272" fill="none"/>
+                            <path id="textPathChimbote" d="M 130 272 L 205 238" fill="none"/>
+                            <text font-weight="900" font-size="13" font-family="sans-serif" fill="#000000">
+                                <textPath href="#textPathNvo" startOffset="50%" text-anchor="middle">NVO.</textPath>
+                            </text>
+                            <text font-weight="900" font-size="13" font-family="sans-serif" fill="#000000">
+                                <textPath href="#textPathChimbote" startOffset="50%" text-anchor="middle">CHIMBOTE</textPath>
+                            </text>
+                        </svg>
                     </div>
-        
-                    {{--
-                    <div class="logo-placeholder">
-                        🏫
-                    </div>--}}
-        
-                    <h2>
+                    
+                    <h2 class="font-extrabold text-gray-800 text-base uppercase tracking-wide mb-1">
                         IE. 88021 ALFONSO UGARTE
                     </h2>
-        
-                    <p>
-                        COORDINACIÓN EN INNOVACIÓN Y <br>
-                        SOPORTE TECNÓLOGICO
+                    <p class="text-[11px] text-gray-400 font-medium uppercase tracking-wider leading-snug">
+                        COORDINACIÓN EN INNOVACIÓN Y<br>SOPORTE TECNOLÓGICO
                     </p>
-        
                 </div>
-        
             </div>
-        
-        </section>
 
+        </div>
 
-        {{-- =====================================================
-             MÓDULOS
-        ====================================================== --}}
-
-        <section class="modules" id="modulos">
-
-            <div class="module">
-
-                <div class="module-icon">
-                    💻
+        <!-- SECCIÓN DE LAS 4 TARJETAS DEL INVENTARIO (Ocultas inicialmente) -->
+        <div id="seccionModulos" class="hidden opacity-0 translate-y-4 transition-all duration-500 ease-in-out grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- 1. EQUIPOS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4 text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
                 </div>
-
-                <h3>
-                    EQUIPOS
-                </h3>
-
-                <p>
-                    Registro y administración de los equipos
-                    tecnológicos de la institución.
+                <h3 class="font-bold text-gray-800 text-sm uppercase mb-2 tracking-wide">EQUIPOS</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">
+                    Registro y administración de los equipos tecnológicos de la institución.
                 </p>
-
             </div>
 
-
-            <div class="module">
-
-                <div class="module-icon">
-                    📋
+            <!-- 2. PRÉSTAMOS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4 text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
                 </div>
-
-                <h3>
-                    PRÉSTAMOS
-                </h3>
-
-                <p>
-                    Control de préstamos, responsables,
-                    fechas y devolución de equipos.
+                <h3 class="font-bold text-gray-800 text-sm uppercase mb-2 tracking-wide">PRÉSTAMOS</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">
+                    Control de préstamos, responsables, fechas y devolución de equipos.
                 </p>
-
             </div>
 
-
-            <div class="module">
-
-                <div class="module-icon">
-                    🔌
+            <!-- 3. ACCESORIOS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4 text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
                 </div>
-
-                <h3>
-                    ACCESORIOS
-                </h3>
-
-                <p>
-                    Gestión de accesorios asociados a cada
-                    equipo tecnológico.
+                <h3 class="font-bold text-gray-800 text-sm uppercase mb-2 tracking-wide">ACCESORIOS</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">
+                    Gestión de accesorios asociados a cada equipo tecnológico.
                 </p>
-
             </div>
 
-
-            <div class="module">
-
-                <div class="module-icon">
-                    📊
+            <!-- 4. CONTROL -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition duration-300">
+                <div class="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-4 text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
                 </div>
-
-                <h3>
-                    CONTROL
-                </h3>
-
-                <p>
-                    Información organizada para facilitar
-                    la gestión y seguimiento tecnológico.
+                <h3 class="font-bold text-gray-800 text-sm uppercase mb-2 tracking-wide">CONTROL</h3>
+                <p class="text-gray-500 text-xs leading-relaxed">
+                    Información organizada para facilitar la gestión y seguimiento tecnológico.
                 </p>
-
             </div>
 
-        </section>
+        </div>
 
     </main>
 
-
-    {{-- =====================================================
-         PIE
-    ====================================================== --}}
-
-    <footer>
-
-        <span>
-            SISTEMA DE GESTIÓN DE EQUIPOS Y PRÉSTAMOS
-        </span>
-
-        <span>
-            COORDINACIÓN EN INNOVACIÓN Y 
-            SOPORTE TECNÓLOGICO
-        </span>
-
-        <span>
-            © {{ date('Y') }} - IE. 88021 ALFONSO UGARTE
-        </span>
-
+    <!-- FOOTER INFERIOR -->
+    <footer class="w-full border-t border-gray-200/60 py-4 text-[11px] text-gray-400 font-medium bg-transparent">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-2">
+            <span>SISTEMA DE GESTIÓN DE EQUIPOS Y PRÉSTAMOS</span>
+            <span>COORDINACIÓN EN INNOVACIÓN Y SOPORTE TECNOLÓGICO</span>
+            <span>© 2026 · IE. 88021 ALFONSO UGARTE</span>
+        </div>
     </footer>
 
+    <!-- SCRIPT DE JAVASCRIPT PARA EL FILTRO / TOGGLE -->
+    <script>
+        function toggleCuatroModulos() {
+            const seccion = document.getElementById('seccionModulos');
+            
+            if (seccion.classList.contains('hidden')) {
+                // Muestra las 4 tarjetas con suave animación de entrada
+                seccion.classList.remove('hidden');
+                setTimeout(() => {
+                    seccion.classList.remove('opacity-0', 'translate-y-4');
+                    seccion.classList.add('opacity-100', 'translate-y-0');
+                }, 20);
+                
+                // Hace desplazamiento suave hacia las tarjetas
+                seccion.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                // Oculta las 4 tarjetas
+                seccion.classList.remove('opacity-100', 'translate-y-0');
+                seccion.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    seccion.classList.add('hidden');
+                }, 300);
+            }
+        }
+    </script>
 </body>
 </html>
