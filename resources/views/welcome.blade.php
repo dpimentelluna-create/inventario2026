@@ -488,7 +488,7 @@
         </div>
 
         <div class="area-label">
-            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+            COORDINACIÓN EN INNOVACIÓN Y SOPORTE TECNÓLOGICO
         </div>
 
     </header>
@@ -560,8 +560,8 @@
                     </h2>
         
                     <p>
-                        COORDINACIÓN Y SERVICIO<br>
-                        DE TECNOLOGÍA
+                        COORDINACIÓN EN INNOVACIÓN Y <br>
+                        SOPORTE TECNÓLOGICO
                     </p>
         
                 </div>
@@ -664,7 +664,8 @@
         </span>
 
         <span>
-            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+            COORDINACIÓN EN INNOVACIÓN Y 
+            SOPORTE TECNÓLOGICO
         </span>
 
         <span>
