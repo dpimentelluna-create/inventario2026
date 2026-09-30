@@ -1,651 +1,411 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
-
     <style>
         @page {
             size: A4 landscape;
-            margin: 10px 12px 12px 12px;
+            margin: 138px 12px 18px 12px;
+            /* margen superior */
         }
-    
+
         body {
             font-family: DejaVu Sans, sans-serif;
-            font-size: 9px;
+            font-size: 12px;
             color: #000;
             margin: 0;
             padding: 0;
         }
-    
-        /* =========================================================
-               ENCABEZADO GENERAL
-            ========================================================= */
-    
+
+        /* ---------- Header fijo ---------- */
+        .encabezado-general {
+            position: fixed;
+            top: -128px;
+            left: 0;
+            right: 0;
+            height: 125px;
+        }
+
         .encabezado {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 6px;
+            margin: 0 0 2px 0;
         }
-    
+
         .encabezado td {
             border: none;
             vertical-align: middle;
+            padding: 0;
         }
-    
-        .logo {
-            width: 45px;
-            height: 45px;
-            object-fit: contain;
+
+        .logo-izquierdo {
+            width: 9%;
+            text-align: center;
         }
-    
-        .logo-izquierdo,
+
         .logo-derecho {
-            width: 13%;
-            height: 45px;
+            width: 18%;
             text-align: center;
         }
-    
-        .espacio-logo {
-            width: 100%;
-            height: 40px;
-            text-align: center;
-            vertical-align: middle;
-            font-size: 7px;
-            color: #777;
+
+        .logo {
+            width: 48px;
+            height: 48px;
         }
-    
+
+        .logo-grande {
+            width: 72px;
+            height: 72px;
+        }
+
         .titulo-centro {
-            width: 74%;
+            width: 73%;
             text-align: center;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            vertical-align: middle;
         }
-    
-        /* =========================================================
-               RESPONSABLE / CARGO
-            ========================================================= */
-    
+
+        /* Bloque RESPONSABLE / CARGO */
         .cabecera-datos {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 7px;
+            margin: 0;
+            table-layout: fixed;
         }
-    
+
         .cabecera-datos td {
             border: 1px solid #000;
-            padding: 4px;
-            height: 20px;
+            padding: 2px 4px;
             vertical-align: middle;
+            height: 15px;
         }
-    
+
+        .cab-vacio-izq {
+            width: 3%;
+            border: none !important;
+            padding: 0 !important;
+        }
+
         .cabecera-label {
-            width: 10%;
+            width: 11%;
             background-color: #D6A84F;
             font-weight: bold;
             text-align: center;
+            font-size: 8.5px;
         }
-    
+
         .cabecera-valor {
-            width: 40%;
+            width: 28.5%;
+            font-size: 9px;
         }
-    
-        /* =========================================================
-               TABLA PRINCIPAL
-            ========================================================= */
-    
+
+        .cab-vacio-der {
+            width: 18%;
+            border: none !important;
+            padding: 0 !important;
+        }
+
+        /* Subtítulo */
+        .subtitulo {
+    width: 100%;
+    text-align: left;
+    font-size: 11px;
+    font-weight: bold;
+    margin: 7px 0 1px 0;   /* ← más espacio arriba + poco espacio abajo */
+    padding: 0;
+}
+
+        .espacio-antes-tabla {
+            height: 0;
+        }
+
+        /* ---------- Tabla principal ---------- */
         .tabla-principal {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
-    
+
+        .tabla-principal thead {
+            display: table-header-group;
+        }
+
         .tabla-principal th,
         .tabla-principal td {
             border: 1px solid #000;
             vertical-align: middle;
         }
-    
+
         .tabla-principal th {
             background-color: #90EE90;
-            font-size: 9px;
+            font-size: 9.5px;
             font-weight: bold;
             text-align: center;
-            padding: 3px;
-            height: 27px;
+            padding: 3px 2px;
         }
-    
+
         .tabla-principal td {
-            font-size: 8.5px;
-            padding: 3px;
-            height: 23px;
+            font-size: 9.5px;
+            padding: 3px 2px;
         }
-    
-        /* =========================================================
-               ANCHOS DE COLUMNAS
-            ========================================================= */
-    
+
+        .fila-prestamo {
+            page-break-inside: avoid;
+        }
+
         .col-numero {
             width: 3%;
             text-align: center;
         }
-    
+
         .col-nombre {
-            width: 17%;
+            width: 16%;
         }
-    
+
         .col-cargo {
-            width: 14%;
+            width: 11%;
         }
-    
+
         .col-equipo {
-            width: 34%;
+            width: 30%;
         }
-    
+
         .col-fecha {
             width: 7%;
             text-align: center;
         }
-    
+
         .col-hora {
             width: 7%;
             text-align: center;
         }
-    
+
         .col-estado {
-            width: 11%;
+            width: 8%;
+            text-align: center;
         }
-    
-        /* =========================================================
-               CONTENIDO
-            ========================================================= */
-    
+
+        .col-observacion {
+            width: 14%;
+        }
+
         .texto-centro {
             text-align: center;
         }
-    
-        .equipo {
-            margin-bottom: 2px;
+
+        .estado {
+            font-weight: bold;
         }
-    
+
+        .equipo {
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
         .equipo:last-child {
             margin-bottom: 0;
         }
-    
+
         .accesorio {
-            margin-left: 7px;
-            font-size: 8px;
+            margin-left: 6px;
+            font-size: 9.5px;
+            line-height: 1.15;
         }
-    
-        .observacion {
-            margin-top: 2px;
-            font-size: 8px;
+
+        .observacion-equipo {
+            margin-bottom: 3px;
+            line-height: 1.2;
         }
-    
-        .fila-vacia td {
-            height: 23px;
+
+        .observacion-accesorio {
+            margin-left: 6px;
+            font-size: 9.5px;
+            line-height: 1.15;
+        }
+
+        .separador {
+            border-bottom: 1px solid #999;
+            margin: 2px 0;
         }
     </style>
 </head>
 
 <body>
 
-    {{-- =========================================================
-         ENCABEZADO CON ESPACIO PARA LOGOS
-    ========================================================== --}}
+    {{-- Header fijo --}}
+    <div class="encabezado-general">
+        <table class="encabezado">
+            <tr>
+                <td class="logo-izquierdo">
+                    <img src="{{ public_path('logo/jorgada.jpg') }}" class="logo" alt="Logo">
+                </td>
+                <td class="titulo-centro">
+                    FORMATO PARA PRESTAMO DE EQUIPOS TECNOLOGICOS
+                </td>
+                <td class="logo-derecho">
+                    <img src="{{ public_path('logo/logo.jpg') }}" class="logo-grande" alt="Logo">
+                </td>
+            </tr>
+        </table>
 
-    <table class="encabezado">
-        <tr>
+        <table class="cabecera-datos">
+            <tr>
+                <td class="cab-vacio-izq"></td>
+                <td class="cabecera-label">RESPONSABLE</td>
+                <td class="cabecera-valor">ING. MICHAEL CABOS OLIVARES</td>
+                <td class="cabecera-label">CARGO</td>
+                <td class="cabecera-valor">COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO</td>
+                <td class="cab-vacio-der"></td>
+            </tr>
+        </table>
 
-            {{-- LOGO IZQUIERDO --}}
-            <td class="logo-izquierdo">
-                <img src="{{ public_path('logo/logo.jpg') }}" class="logo" alt="Logo del colegio">
-            </td>
+        {{-- Subtítulo --}}
+        <div class="subtitulo">
+            DATOS DEL SOLICITANTE Y EQUIPO TECNOLOGICO
+        </div>
 
-            {{-- TÍTULO --}}
-            <td class="titulo-centro">
-                FORMATO PARA PRESTAMO DE EQUIPOS TECNOLOGICOS
-            </td>
+        <div class="espacio-antes-tabla"></div>
 
-            {{-- LOGO DERECHO --}}
-            <td class="logo-derecho">
-                <img src="{{ public_path('logo/logo.jpg') }}" class="logo" alt="Logo del colegio">
-            </td>
+    </div>
 
-        </tr>
-    </table>
-
-
-    {{-- =========================================================
-         RESPONSABLE Y CARGO
-    ========================================================== --}}
-
-    <table class="cabecera-datos">
-        <tr>
-
-            <td class="cabecera-label">
-                RESPONSABLE
-            </td>
-
-            <td class="cabecera-valor">
-                ING. MICHAEL CABOS OLIVARES
-            </td>
-
-            <td class="cabecera-label">
-                CARGO
-            </td>
-
-            <td class="cabecera-valor">
-                COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO
-            </td>
-
-        </tr>
-    </table>
-
-
-    {{-- =========================================================
-         TABLA PRINCIPAL
-    ========================================================== --}}
 
     <table class="tabla-principal">
-
         <thead>
             <tr>
-
-                <th class="col-numero">
-                    N°
-                </th>
-
-                <th class="col-nombre">
-                    APELLIDOS Y NOMBRES
-                </th>
-
-                <th class="col-cargo">
-                    CARGO
-                </th>
-
-                <th class="col-equipo">
-                    EQUIPO TECNOLOGICO
-                </th>
-
-                <th class="col-fecha">
-                    FECHA
-                </th>
-
-                <th class="col-hora">
-                    HORA<br>DESDE
-                </th>
-
-                <th class="col-hora">
-                    HORA<br>HASTA
-                </th>
-
-                <th class="col-estado">
-                    ESTADO U<br>OBSERVACION
-                </th>
-
+                <th class="col-numero">N°</th>
+                <th class="col-nombre">APELLIDOS Y NOMBRES</th>
+                <th class="col-cargo">CARGO</th>
+                <th class="col-equipo">EQUIPO TECNOLOGICO</th>
+                <th class="col-fecha">FECHA</th>
+                <th class="col-hora">HORA<br>DESDE</th>
+                <th class="col-hora">HORA<br>HASTA</th>
+                <th class="col-estado">ESTADO</th>
+                <th class="col-observacion">OBSERVACION</th>
             </tr>
         </thead>
-
-
         <tbody>
-
-            {{-- =================================================
-                 REGISTROS
-            ================================================== --}}
-
             @foreach ($prestamos as $indice => $p)
-
                 @php
+                    $nombreSolicitante = mb_strtoupper(trim(($p->docente->apellidos ?? '') . ' ' . ($p->docente->nombres ?? '')), 'UTF-8');
+                    $cargoSolicitante = mb_strtoupper($p->cargo ?? '', 'UTF-8');
+                    $estado = mb_strtoupper($p->estado ?? '', 'UTF-8');
 
-    /*
-    |--------------------------------------------------------------------------
-    | SOLICITANTE
-    |--------------------------------------------------------------------------
-    */
+                    $fechaMostrar = '-';
+                    if ($p->fecha) {
+                        try {
+                            $fechaMostrar = \Carbon\Carbon::parse($p->fecha)->format('d/m/Y');
+                        } catch (\Exception $e) {
+                            $fechaMostrar = $p->fecha;
+                        }
+                    }
 
-    $nombreSolicitante = trim(
-        ($p->docente->apellidos ?? '') . ' ' .
-        ($p->docente->nombres ?? '')
-    );
+                    $horaInicioMostrar = '-';
+                    if ($p->hora_inicio) {
+                        try {
+                            $horaInicioMostrar = \Carbon\Carbon::createFromFormat('H:i', substr($p->hora_inicio, 0, 5))->format('h:i A');
+                        } catch (\Exception $e) {
+                            $horaInicioMostrar = substr($p->hora_inicio, 0, 5);
+                        }
+                    }
 
-    $nombreSolicitante = mb_strtoupper(
-        $nombreSolicitante,
-        'UTF-8'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | CARGO
-    |--------------------------------------------------------------------------
-    */
-
-    $cargoSolicitante = mb_strtoupper(
-        $p->cargo ?? '',
-        'UTF-8'
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | FECHA
-    |--------------------------------------------------------------------------
-    */
-
-    $fechaMostrar = '';
-
-    if ($p->fecha) {
-        try {
-            $fechaMostrar = \Carbon\Carbon::parse(
-                $p->fecha
-            )->format('d/m/Y');
-        } catch (\Exception $e) {
-            $fechaMostrar = $p->fecha;
-        }
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | HORA DESDE
-    |--------------------------------------------------------------------------
-    */
-
-    $horaInicioMostrar = '';
-
-    if ($p->hora_inicio) {
-        try {
-
-            $horaInicio = substr(
-                $p->hora_inicio,
-                0,
-                5
-            );
-
-            $horaInicioMostrar =
-                \Carbon\Carbon::createFromFormat(
-                    'H:i',
-                    $horaInicio
-                )->format('h:i A');
-
-        } catch (\Exception $e) {
-
-            $horaInicioMostrar = substr(
-                $p->hora_inicio,
-                0,
-                5
-            );
-
-        }
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | HORA HASTA
-    |--------------------------------------------------------------------------
-    */
-
-    $horaFinMostrar = '';
-
-    if ($p->hora_fin) {
-        try {
-
-            $horaFin = substr(
-                $p->hora_fin,
-                0,
-                5
-            );
-
-            $horaFinMostrar =
-                \Carbon\Carbon::createFromFormat(
-                    'H:i',
-                    $horaFin
-                )->format('h:i A');
-
-        } catch (\Exception $e) {
-
-            $horaFinMostrar = substr(
-                $p->hora_fin,
-                0,
-                5
-            );
-
-        }
-    }
-
+                    $horaFinMostrar = '-';
+                    if ($p->hora_fin) {
+                        try {
+                            $horaFinMostrar = \Carbon\Carbon::createFromFormat('H:i', substr($p->hora_fin, 0, 5))->format('h:i A');
+                        } catch (\Exception $e) {
+                            $horaFinMostrar = substr($p->hora_fin, 0, 5);
+                        }
+                    }
                 @endphp
 
+                <tr class="fila-prestamo">
+                    <td class="col-numero texto-centro">{{ sprintf('%02d', $indice + 1) }}</td>
+                    <td class="col-nombre">{{ $nombreSolicitante ?: '-' }}</td>
+                    <td class="col-cargo">{{ $cargoSolicitante ?: '-' }}</td>
 
-                <tr>
-
-                    {{-- N° --}}
-                    <td class="col-numero texto-centro">
-                        {{ sprintf('%02d', $indice + 1) }}
-                    </td>
-
-
-                    {{-- APELLIDOS Y NOMBRES --}}
-                    <td class="col-nombre">
-                        {{ $nombreSolicitante }}
-                    </td>
-
-
-                    {{-- CARGO DEL SOLICITANTE --}}
-                    <td class="col-cargo">
-                        {{ $cargoSolicitante ?: '-' }}
-                    </td>
-
-
-                    {{-- EQUIPOS --}}
                     <td class="col-equipo">
-
                         @forelse ($p->prestamoEquipos as $prestamoEquipo)
-
                             @php
-
-        $equipo = $prestamoEquipo->equipo;
-
-        $tipoEquipo = mb_strtoupper(
-            $equipo->tipoEquipo->nombre ?? '',
-            'UTF-8'
-        );
-
-        $marca = mb_strtoupper(
-            $equipo->marca ?? '',
-            'UTF-8'
-        );
-
-        $modelo = mb_strtoupper(
-            $equipo->modelo ?? '',
-            'UTF-8'
-        );
-
-        $serie = mb_strtoupper(
-            $equipo->num_serie ?? '',
-            'UTF-8'
-        );
-
+                                $equipo = $prestamoEquipo->equipo;
+                                $tipoEquipo = mb_strtoupper($equipo->tipoEquipo->nombre ?? '', 'UTF-8');
+                                $marca = mb_strtoupper($equipo->marca ?? '', 'UTF-8');
+                                $modelo = mb_strtoupper($equipo->modelo ?? '', 'UTF-8');
+                                $serie = mb_strtoupper($equipo->num_serie ?? '', 'UTF-8');
                             @endphp
 
-
                             <div class="equipo">
-
                                 <strong>EQUIPO:</strong>
-                                {{ $tipoEquipo }}
-
-                                @if ($marca)
-                                    + {{ $marca }}
-                                @endif
-
-                                @if ($modelo)
-                                    + {{ $modelo }}
-                                @endif
-
-                                @if ($serie)
-                                    + N/S {{ $serie }}
-                                @endif
-
-
-                                {{-- ACCESORIOS --}}
-                                @if ($prestamoEquipo->prestamoAccesorios->count())
-
-                                    @foreach (
-                $prestamoEquipo->prestamoAccesorios
-                as $prestamoAccesorio
-            )
-
-                                        @php
-
-                $accesorio =
-                    $prestamoAccesorio->accesorioEquipo;
-
-                $tipoAccesorio =
-                    mb_strtoupper(
-                        $accesorio->tipo ?? '',
-                        'UTF-8'
-                    );
-
-                $marcaAccesorio =
-                    mb_strtoupper(
-                        $accesorio->marca ?? '',
-                        'UTF-8'
-                    );
-
-                $serieAccesorio =
-                    mb_strtoupper(
-                        $accesorio->num_serie ?? '',
-                        'UTF-8'
-                    );
-
-                                        @endphp
-
-
-                                        <div class="accesorio">
-
-                                            <strong>ACCESORIO:</strong>
-                                            {{ $tipoAccesorio }}
-
-                                            @if ($marcaAccesorio)
-                                                + {{ $marcaAccesorio }}
-                                            @endif
-
-                                            @if ($serieAccesorio)
-                                                + N/S {{ $serieAccesorio }}
-                                            @endif
-
-                                        </div>
-
-                                    @endforeach
-
-                                @endif
-
+                                {{ $tipoEquipo ?: '-' }}
+                                @if ($marca) | {{ $marca }} @endif
+                                @if ($modelo) | {{ $modelo }} @endif
+                                @if ($serie) | N/S {{ $serie }} @endif
                             </div>
 
+                            @foreach ($prestamoEquipo->prestamoAccesorios as $prestamoAccesorio)
+                                @php
+                                    $accesorio = $prestamoAccesorio->accesorioEquipo;
+                                    $tipoAcc = mb_strtoupper($accesorio->tipo ?? '', 'UTF-8');
+                                    $marcaAcc = mb_strtoupper($accesorio->marca ?? '', 'UTF-8');
+                                    $serieAcc = mb_strtoupper($accesorio->num_serie ?? '', 'UTF-8');
+                                @endphp
+                                <div class="accesorio">
+                                    <strong>ACCESORIO:</strong>
+                                    {{ $tipoAcc ?: '-' }}
+                                    @if ($marcaAcc) | {{ $marcaAcc }} @endif
+                                    @if ($serieAcc) | N/S {{ $serieAcc }} @endif
+                                </div>
+                            @endforeach
+
+                            @if (!$loop->last)
+                                <div class="separador"></div>
+                            @endif
                         @empty
-
                             -
-
                         @endforelse
-
                     </td>
 
+                    <td class="col-fecha texto-centro">{{ $fechaMostrar }}</td>
+                    <td class="col-hora texto-centro">{{ $horaInicioMostrar }}</td>
+                    <td class="col-hora texto-centro">{{ $horaFinMostrar }}</td>
+                    <td class="col-estado"><span class="estado">{{ $estado ?: '-' }}</span></td>
 
-                    {{-- FECHA --}}
-                    <td class="col-fecha texto-centro">
-                        {{ $fechaMostrar ?: '-' }}
-                    </td>
+                    <td class="col-observacion">
+                        @php $tieneObs = false; @endphp
+                        @foreach ($p->prestamoEquipos as $prestamoEquipo)
+                            @php
+                                $obsEq = mb_strtoupper(trim($prestamoEquipo->observacion ?? ''), 'UTF-8');
+                                $tipoEq = mb_strtoupper($prestamoEquipo->equipo->tipoEquipo->nombre ?? '', 'UTF-8');
+                            @endphp
+                            @if ($obsEq)
+                                @php $tieneObs = true; @endphp
+                                <div class="observacion-equipo">
+                                    <strong>EQUIPO:</strong> {{ $tipoEq }} | {{ $obsEq }}
+                                </div>
+                            @endif
 
-
-                    {{-- HORA DESDE --}}
-                    <td class="col-hora texto-centro">
-                        {{ $horaInicioMostrar ?: '-' }}
-                    </td>
-
-
-                    {{-- HORA HASTA --}}
-                    <td class="col-hora texto-centro">
-                        {{ $horaFinMostrar ?: '-' }}
-                    </td>
-
-
-                    {{-- ESTADO / OBSERVACIÓN --}}
-                    <td class="col-estado">
-
-                        @php
-
-    $estado = mb_strtoupper(
-        $p->estado ?? '',
-        'UTF-8'
-    );
-
-    $observacion = mb_strtoupper(
-        $p->observacion ?? '',
-        'UTF-8'
-    );
-
-                        @endphp
-
-
-                        @if ($estado)
-                            <strong>{{ $estado }}</strong>
-                        @endif
-
-
-                        @if ($observacion)
-
-                            <div class="observacion">
-                                OBS: {{ $observacion }}
-                            </div>
-
-                        @endif
-
-
-                        @if (!$estado && !$observacion)
+                            @foreach ($prestamoEquipo->prestamoAccesorios as $pa)
+                                @php
+                                    $obsAcc = mb_strtoupper(trim($pa->observacion ?? ''), 'UTF-8');
+                                    $tipoAcc = mb_strtoupper($pa->accesorioEquipo->tipo ?? '', 'UTF-8');
+                                @endphp
+                                @if ($obsAcc)
+                                    @php $tieneObs = true; @endphp
+                                    <div class="observacion-accesorio">
+                                        <strong>ACCESORIO:</strong> {{ $tipoAcc }} | {{ $obsAcc }}
+                                    </div>
+                                @endif
+                            @endforeach
+                        @endforeach
+                        @if (!$tieneObs)
                             -
                         @endif
-
                     </td>
-
                 </tr>
-
             @endforeach
-
-
-            {{-- =================================================
-                 FILAS VACÍAS HASTA COMPLETAR 20
-            ================================================== --}}
-
-            @for ($i = $prestamos->count(); $i < 20; $i++)
-
-                <tr class="fila-vacia">
-
-                    <td class="texto-centro">
-                        {{ sprintf('%02d', $i + 1) }}
-                    </td>
-
-                    <td></td>
-
-                    <td></td>
-
-                    <td></td>
-
-                    <td></td>
-
-                    <td></td>
-
-                    <td></td>
-
-                    <td></td>
-
-                </tr>
-
-            @endfor
-
         </tbody>
-
     </table>
 
 </body>
+
 </html>
