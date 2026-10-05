@@ -51,28 +51,18 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
 
                                         {{-- EXCEL --}}
-                                        <li>
-                                            <a class="dropdown-item">
-
-                                                {{-- Ruta pendiente --}}
-                                                {{-- href="{{ route('equipos.export.excel') }}" --}}
-
-                                                <i class="fa-solid fa-file-excel text-success"></i>
-                                                Excel
-
-                                            </a>
-                                        </li>
+                                        <a class="dropdown-item" href="#" id="btn_exportar_excel">
+    <i class="fa-solid fa-file-excel text-success"></i>
+    Excel
+</a>
 
                                         {{-- PDF --}}
                                         <li>
-                                            <a class="dropdown-item" {{-- href="{{ route('equipos.export.pdf') }}" --}}
-                                                target="_blank">
-
-                                                <i class="fa-solid fa-file-pdf text-danger"></i>
-                                                PDF
-
-                                            </a>
-                                        </li>
+    <a class="dropdown-item" href="#" id="btn_exportar_pdf">
+        <i class="fa-solid fa-file-pdf text-danger"></i>
+        PDF
+    </a>
+</li>
 
                                     </ul>
                                 </div>
@@ -567,6 +557,147 @@ window.addEventListener('load', function () {
                 infoFiltered: "(filtrado de _MAX_ registros en total)"
             }
         });
+
+        // =========================================================
+// EXPORTAR EQUIPOS A PDF
+// =========================================================
+
+$('#btn_exportar_pdf').on('click', function (e) {
+
+    e.preventDefault();
+
+    const ids = [];
+
+    // Obtener los equipos actualmente filtrados y ordenados
+    tabla.rows({
+        search: 'applied',
+        order: 'applied'
+    }).every(function () {
+
+        const tr = this.node();
+
+        if (!tr) {
+            return;
+        }
+
+        const id = tr.getAttribute('data-equipo-id');
+
+        if (id) {
+            ids.push(id);
+        }
+
+    });
+
+
+    // Verificar si existen equipos
+    if (ids.length === 0) {
+
+        alert('NO HAY EQUIPOS PARA EXPORTAR.');
+
+        return;
+    }
+
+
+    // Crear formulario temporal
+    const form = document.createElement('form');
+
+    form.method = 'POST';
+    form.action = '{{ route('equipos.export.pdf') }}';
+    form.target = '_blank';
+
+
+    // CSRF
+    const csrf = document.createElement('input');
+
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = '{{ csrf_token() }}';
+
+    form.appendChild(csrf);
+
+
+    // Agregar IDs
+    ids.forEach(function (id) {
+
+        const input = document.createElement('input');
+
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+
+        form.appendChild(input);
+
+    });
+
+
+    // Enviar formulario
+    document.body.appendChild(form);
+
+    form.submit();
+
+    form.remove();
+
+});
+
+$('#btn_exportar_excel').on('click', function (e) {
+    e.preventDefault();
+
+    const ids = [];
+
+    tabla.rows({
+        search: 'applied',
+        order: 'applied'
+    }).every(function () {
+
+        const tr = this.node();
+
+        if (!tr) return;
+
+        const id = tr.getAttribute('data-equipo-id');
+
+        if (id) {
+            ids.push(id);
+        }
+    });
+
+    if (ids.length === 0) {
+        alert('NO HAY EQUIPOS PARA EXPORTAR.');
+        return;
+    }
+
+    const form = document.createElement('form');
+
+    form.method = 'POST';
+    form.action = '{{ route('equipos.export.excel') }}';
+    form.target = '_blank';
+
+    const csrf = document.createElement('input');
+
+    csrf.type = 'hidden';
+    csrf.name = '_token';
+    csrf.value = '{{ csrf_token() }}';
+
+    form.appendChild(csrf);
+
+    ids.forEach(function (id) {
+
+        const input = document.createElement('input');
+
+        input.type = 'hidden';
+        input.name = 'ids[]';
+        input.value = id;
+
+        form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+    form.remove();
+});
+
+
 
     // Ordenar por FECHA de forma descendente
     tabla.order([[7, 'desc']]).draw();

@@ -574,9 +574,11 @@ class PrestamoController extends Controller
         ->filter()
         ->values();
 
+    $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g:ia') . '.xlsx';
+
     return \Maatwebsite\Excel\Facades\Excel::download(
         new \App\Exports\PrestamosExport($prestamos),
-        'prestamos.xlsx'
+        $nombreArchivo
     );
 }
 
@@ -617,6 +619,8 @@ class PrestamoController extends Controller
             compact('prestamos')
         )->setPaper('a4', 'landscape');
 
-        return $pdf->download('prestamos.pdf');
+        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+
+        return $pdf->download($nombreArchivo);
     }
 }

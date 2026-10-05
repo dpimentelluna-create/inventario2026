@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\EquipoRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
 
 class EquipoController extends Controller
 {
@@ -505,4 +507,74 @@ class EquipoController extends Controller
             ->with('equipo_resaltado', $equipo->id)
             ->with('equipo_accion', 'eliminar');
     }
+
+    public function exportPdf(Request $request)
+{
+    $ids = $request->input('ids', []);
+
+    if (empty($ids)) {
+        return response()->json([
+            'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
+        ], 422);
+    }
+
+    $equiposEncontrados = Equipo::with([
+        'tipoEquipo',
+        'ubicacione',
+        'especificacionesLaptops',
+        'especificacionesEquipo',
+        'accesoriosEquipos',
+    ])
+        ->whereIn('id', $ids)
+        ->get()
+        ->keyBy('id');
+
+    // Mantener exactamente el orden enviado desde DataTables
+    $equipos = collect($ids)
+        ->map(fn ($id) => $equiposEncontrados->get($id))
+        ->filter()
+        ->values();
+
+    $pdf = Pdf::loadView('equipo.export-pdf', compact('equipos'))
+        ->setPaper('a4', 'landscape');
+
+    $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+
+    return $pdf->download($nombreArchivo);
+}
+
+public function exportExcel(Request $request)
+{
+    $ids = $request->input('ids', []);
+
+    if (empty($ids)) {
+        return response()->json([
+            'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
+        ], 422);
+    }
+
+    $equiposEncontrados = Equipo::with([
+        'tipoEquipo',
+        'ubicacione',
+        'especificacionesLaptops',
+        'especificacionesEquipo',
+        'accesoriosEquipos',
+    ])
+        ->whereIn('id', $ids)
+        ->get()
+        ->keyBy('id');
+
+    $equipos = collect($ids)
+        ->map(fn ($id) => $equiposEncontrados->get($id))
+        ->filter()
+        ->values();
+
+    $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
+
+    return Excel::download(
+        new \App\Exports\EquiposExport($equipos),
+        $nombreArchivo
+    );
+}
+
 }

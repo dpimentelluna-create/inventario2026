@@ -37,6 +37,11 @@ Route::middleware('auth')->group(function () {
     //EQUIPOS
     Route::post('/equipos/{equipo}/accesorios', [EquipoController::class, 'guardarAccesorios'])
         ->name('equipos.accesorios.store');
+    Route::post('/equipos/export/pdf', [EquipoController::class, 'exportPdf'])
+        ->name('equipos.export.pdf');
+    Route::post('/equipos/export-excel', [EquipoController::class, 'exportExcel'])
+        ->name('equipos.export.excel');
+
     Route::resource('equipos', App\Http\Controllers\EquipoController::class);
 
     //ESPECIFICACIONES LAPTOP
@@ -61,18 +66,14 @@ Route::middleware('auth')->group(function () {
         '/prestamos/registrar-docente',
         [PrestamoController::class, 'registrarDocente']
     )->name('prestamos.registrarDocente');
-
-
     Route::get(
         '/prestamos/equipos-por-tipo/{tipoId}',
         [PrestamoController::class, 'equiposPorTipo']
     )->name('prestamos.equiposPorTipo');
-
     Route::get(
         '/prestamos/buscar-equipos',
         [PrestamoController::class, 'buscarEquipos']
     )->name('prestamos.buscarEquipos');
-
     Route::post('/prestamos/export/excel', [PrestamoController::class, 'exportExcel'])
     ->name('prestamos.export.excel');
     Route::post('/prestamos/export/pdf', [PrestamoController::class, 'exportPdf'])
