@@ -28,6 +28,9 @@ class PrestamosExport implements FromCollection, WithEvents, WithStyles, WithCol
 
         // Fila vacía para el título (se llena en AfterSheet)
         $rows->push(['', '', '', '', '', '', '', '', '']);
+        
+        // Fila vacía para el título (se llena en AfterSheet)
+        $rows->push(['', '', '', '', '', '', '', '', '']);
 
         // Fila RESPONSABLE / CARGO (se llena en AfterSheet)
         $rows->push(['', '', '', '', '', '', '', '', '']);
@@ -84,53 +87,189 @@ class PrestamosExport implements FromCollection, WithEvents, WithStyles, WithCol
                 }
             }
 
-            // Equipos + Accesorios (con saltos de línea)
-            $equiposTexto = [];
-            foreach ($p->prestamoEquipos as $pe) {
-                $eq = $pe->equipo;
-                $tipo   = mb_strtoupper($eq->tipoEquipo->nombre ?? '', 'UTF-8');
-                $marca  = mb_strtoupper($eq->marca ?? '', 'UTF-8');
-                $modelo = mb_strtoupper($eq->modelo ?? '', 'UTF-8');
-                $serie  = mb_strtoupper($eq->num_serie ?? '', 'UTF-8');
+            // =========================================================
+// EQUIPOS + ACCESORIOS
+// Cada equipo y sus accesorios forman un bloque.
+// Se deja una línea vacía entre equipos.
+// =========================================================
 
-                $linea = 'EQUIPO: ' . ($tipo ?: '-');
-                if ($marca)  $linea .= ' | ' . $marca;
-                if ($modelo) $linea .= ' | ' . $modelo;
-                if ($serie)  $linea .= ' | N/S ' . $serie;
-                $equiposTexto[] = $linea;
+$bloquesEquipos = [];
 
-                foreach ($pe->prestamoAccesorios as $pa) {
-                    $acc = $pa->accesorioEquipo;
-                    $tipoAcc  = mb_strtoupper($acc->tipo ?? '', 'UTF-8');
-                    $marcaAcc = mb_strtoupper($acc->marca ?? '', 'UTF-8');
-                    $serieAcc = mb_strtoupper($acc->num_serie ?? '', 'UTF-8');
+foreach ($p->prestamoEquipos as $pe) {
 
-                    $lineaAcc = 'ACCESORIO: ' . ($tipoAcc ?: '-');
-                    if ($marcaAcc) $lineaAcc .= ' | ' . $marcaAcc;
-                    if ($serieAcc) $lineaAcc .= ' | N/S ' . $serieAcc;
-                    $equiposTexto[] = $lineaAcc;
-                }
-            }
-            $equiposCelda = !empty($equiposTexto) ? implode("\n", $equiposTexto) : '-';
+    $eq = $pe->equipo;
 
-            // Observaciones (con saltos de línea)
-            $obsTexto = [];
-            foreach ($p->prestamoEquipos as $pe) {
-                $obsEq = mb_strtoupper(trim($pe->observacion ?? ''), 'UTF-8');
-                $tipoEq = mb_strtoupper($pe->equipo->tipoEquipo->nombre ?? '', 'UTF-8');
-                if ($obsEq) {
-                    $obsTexto[] = 'EQUIPO: ' . $tipoEq . ' | ' . $obsEq;
-                }
+    $tipo = mb_strtoupper(
+        $eq->tipoEquipo->nombre ?? '',
+        'UTF-8'
+    );
 
-                foreach ($pe->prestamoAccesorios as $pa) {
-                    $obsAcc = mb_strtoupper(trim($pa->observacion ?? ''), 'UTF-8');
-                    $tipoAcc = mb_strtoupper($pa->accesorioEquipo->tipo ?? '', 'UTF-8');
-                    if ($obsAcc) {
-                        $obsTexto[] = 'ACCESORIO: ' . $tipoAcc . ' | ' . $obsAcc;
-                    }
-                }
-            }
-            $obsCelda = !empty($obsTexto) ? implode("\n", $obsTexto) : '-';
+    $marca = mb_strtoupper(
+        $eq->marca ?? '',
+        'UTF-8'
+    );
+
+    $modelo = mb_strtoupper(
+        $eq->modelo ?? '',
+        'UTF-8'
+    );
+
+    $serie = mb_strtoupper(
+        $eq->num_serie ?? '',
+        'UTF-8'
+    );
+
+
+    // -----------------------------------------
+    // EQUIPO
+    // -----------------------------------------
+
+    $bloque = [];
+
+    $lineaEquipo = 'EQUIPO: ' . ($tipo ?: '-');
+
+    if ($marca) {
+        $lineaEquipo .= ' | ' . $marca;
+    }
+
+    if ($modelo) {
+        $lineaEquipo .= ' | ' . $modelo;
+    }
+
+    if ($serie) {
+        $lineaEquipo .= ' | N/S ' . $serie;
+    }
+
+    $bloque[] = $lineaEquipo;
+
+
+    // -----------------------------------------
+    // ACCESORIOS DEL EQUIPO
+    // -----------------------------------------
+
+    foreach ($pe->prestamoAccesorios as $pa) {
+
+        $acc = $pa->accesorioEquipo;
+
+        $tipoAcc = mb_strtoupper(
+            $acc->tipo ?? '',
+            'UTF-8'
+        );
+
+        $marcaAcc = mb_strtoupper(
+            $acc->marca ?? '',
+            'UTF-8'
+        );
+
+        $serieAcc = mb_strtoupper(
+            $acc->num_serie ?? '',
+            'UTF-8'
+        );
+
+
+        $lineaAcc = 'ACCESORIO: ' . ($tipoAcc ?: '-');
+
+        if ($marcaAcc) {
+            $lineaAcc .= ' | ' . $marcaAcc;
+        }
+
+        if ($serieAcc) {
+            $lineaAcc .= ' | N/S ' . $serieAcc;
+        }
+
+        $bloque[] = $lineaAcc;
+    }
+
+
+    // Guardamos el equipo con todos sus accesorios
+    $bloquesEquipos[] = implode("\n", $bloque);
+}
+
+
+// Línea vacía entre cada equipo
+$equiposCelda = !empty($bloquesEquipos)
+    ? implode("\n\n", $bloquesEquipos)
+    : '-';
+
+            // =========================================================
+// OBSERVACIONES
+// Cada equipo y sus accesorios forman un bloque.
+// Se deja una línea vacía entre equipos.
+// =========================================================
+
+$bloquesObservaciones = [];
+
+foreach ($p->prestamoEquipos as $pe) {
+
+    $bloqueObservacion = [];
+
+    $obsEq = mb_strtoupper(
+        trim($pe->observacion ?? ''),
+        'UTF-8'
+    );
+
+    $tipoEq = mb_strtoupper(
+        $pe->equipo->tipoEquipo->nombre ?? '',
+        'UTF-8'
+    );
+
+
+    // -----------------------------------------
+    // OBSERVACIÓN DEL EQUIPO
+    // -----------------------------------------
+
+    if ($obsEq) {
+
+        $bloqueObservacion[] =
+            'EQUIPO: ' .
+            ($tipoEq ?: '-') .
+            ' | ' .
+            $obsEq;
+    }
+
+
+    // -----------------------------------------
+    // OBSERVACIONES DE ACCESORIOS
+    // -----------------------------------------
+
+    foreach ($pe->prestamoAccesorios as $pa) {
+
+        $obsAcc = mb_strtoupper(
+            trim($pa->observacion ?? ''),
+            'UTF-8'
+        );
+
+        $tipoAcc = mb_strtoupper(
+            $pa->accesorioEquipo->tipo ?? '',
+            'UTF-8'
+        );
+
+
+        if ($obsAcc) {
+
+            $bloqueObservacion[] =
+                'ACCESORIO: ' .
+                ($tipoAcc ?: '-') .
+                ' | ' .
+                $obsAcc;
+        }
+    }
+
+
+    // Solo agregamos el bloque si tiene contenido
+    if (!empty($bloqueObservacion)) {
+
+        $bloquesObservaciones[] =
+            implode("\n", $bloqueObservacion);
+    }
+}
+
+
+// Línea vacía entre las observaciones de cada equipo
+$obsCelda = !empty($bloquesObservaciones)
+    ? implode("\n\n", $bloquesObservaciones)
+    : '-';
+
 
             $rows->push([
                 sprintf('%02d', $indice + 1),
@@ -189,112 +328,224 @@ class PrestamosExport implements FromCollection, WithEvents, WithStyles, WithCol
                 ]);
                 $sheet->getRowDimension(1)->setRowHeight(22);
 
-                // ===== FILA 2: RESPONSABLE / CARGO =====
-                $sheet->setCellValue('A2', 'RESPONSABLE');
-                $sheet->setCellValue('B2', 'ING. MICHAEL CABOS OLIVARES');
-                $sheet->mergeCells('B2:C2');
-                $sheet->setCellValue('D2', 'CARGO');
-                $sheet->setCellValue('E2', 'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO');
-                $sheet->mergeCells('E2:I2');
+                // =========================================================
+// FILA 2: RESPONSABLE / CARGO
+// =========================================================
 
-                $sheet->getStyle('A2')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 9],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFD6A84F'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                    ],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
+// RESPONSABLE → B
+$sheet->setCellValue('B2', 'RESPONSABLE');
 
-                $sheet->getStyle('B2:C2')->applyFromArray([
-                    'font' => ['size' => 9],
-                    'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
+// ING. MICHAEL... → C:D
+$sheet->setCellValue(
+    'C2',
+    'ING. MICHAEL CABOS OLIVARES'
+);
 
-                $sheet->getStyle('D2')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 9],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FFD6A84F'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                    ],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
+$sheet->mergeCells('C2:D2');
 
-                $sheet->getStyle('E2:I2')->applyFromArray([
-                    'font' => ['size' => 9],
-                    'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
+// CARGO → E
+$sheet->setCellValue('E2', 'CARGO');
 
-                $sheet->getRowDimension(2)->setRowHeight(18);
+// COORDINADOR... → F:I
+$sheet->setCellValue(
+    'F2',
+    'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO'
+);
 
-                // ===== FILA 3: SUBTÍTULO =====
-                $sheet->mergeCells('A3:I3');
-                $sheet->setCellValue('A3', 'DATOS DEL SOLICITANTE Y EQUIPO TECNOLOGICO');
-                $sheet->getStyle('A3')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 11],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
-                $sheet->getRowDimension(3)->setRowHeight(18);
+$sheet->mergeCells('F2:I2');
 
-                // ===== FILA 4: ENCABEZADOS DE TABLA =====
-                $sheet->getStyle('A4:I4')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 9],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['argb' => 'FF90EE90'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                        'wrapText'   => true,
-                    ],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
-                ]);
-                $sheet->getRowDimension(4)->setRowHeight(22);
 
-                // ===== DATOS (filas 5 en adelante) =====
-                if ($highestRow >= 5) {
-                    $sheet->getStyle('A5:I' . $highestRow)->applyFromArray([
-                        'font' => ['size' => 9],
-                        'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
-                            'wrapText' => true,
-                        ],
-                        'borders' => [
-                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                        ],
-                    ]);
+// ---------------------------------------------------------
+// ESTILO RESPONSABLE
+// ---------------------------------------------------------
 
-                    // Centrar columnas numéricas / fecha / horas / estado
-                    $sheet->getStyle('A5:A' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                    $sheet->getStyle('E5:H' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                }
+$sheet->getStyle('B2')->applyFromArray([
+    'font' => [
+        'bold' => true,
+        'size' => 9,
+    ],
+    'fill' => [
+        'fillType' => Fill::FILL_SOLID,
+        'startColor' => [
+            'argb' => 'FFD6A84F',
+        ],
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_CENTER,
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+]);
+
+
+// ---------------------------------------------------------
+// VALOR RESPONSABLE → C:D
+// ---------------------------------------------------------
+
+$sheet->getStyle('C2:D2')->applyFromArray([
+    'font' => [
+        'size' => 9,
+    ],
+    'alignment' => [
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+]);
+
+
+// ---------------------------------------------------------
+// ESTILO CARGO
+// ---------------------------------------------------------
+
+$sheet->getStyle('E2')->applyFromArray([
+    'font' => [
+        'bold' => true,
+        'size' => 9,
+    ],
+    'fill' => [
+        'fillType' => Fill::FILL_SOLID,
+        'startColor' => [
+            'argb' => 'FFD6A84F',
+        ],
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_CENTER,
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+]);
+
+
+// ---------------------------------------------------------
+// VALOR CARGO → F:I
+// ---------------------------------------------------------
+
+$sheet->getStyle('F2:I2')->applyFromArray([
+    'font' => [
+        'size' => 9,
+    ],
+    'alignment' => [
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+]);
+
+$sheet->getRowDimension(2)->setRowHeight(18);
+
+
+
+// =========================================================
+// FILA 3: VACÍA
+// =========================================================
+
+// La fila 3 queda completamente vacía.
+// Se utiliza como separación visual entre el encabezado
+// y la información de la tabla.
+
+$sheet->getRowDimension(3)->setRowHeight(8);
+
+
+// =========================================================
+// FILA 4: SUBTÍTULO
+// =========================================================
+
+$sheet->mergeCells('B4:I4');
+
+$sheet->setCellValue(
+    'B4',
+    'DATOS DEL SOLICITANTE Y EQUIPO TECNOLOGICO'
+);
+
+$sheet->getStyle('B4:I4')->applyFromArray([
+    'font' => [
+        'bold' => true,
+        'size' => 11,
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_LEFT,
+        'vertical' => Alignment::VERTICAL_CENTER,
+    ],
+]);
+
+$sheet->getRowDimension(4)->setRowHeight(18);
+
+
+// =========================================================
+// FILA 5: ENCABEZADOS DE LA TABLA
+// =========================================================
+
+$sheet->getStyle('A5:I5')->applyFromArray([
+    'font' => [
+        'bold' => true,
+        'size' => 9,
+    ],
+    'fill' => [
+        'fillType' => Fill::FILL_SOLID,
+        'startColor' => [
+            'argb' => 'FF90EE90',
+        ],
+    ],
+    'alignment' => [
+        'horizontal' => Alignment::HORIZONTAL_CENTER,
+        'vertical' => Alignment::VERTICAL_CENTER,
+        'wrapText' => true,
+    ],
+    'borders' => [
+        'allBorders' => [
+            'borderStyle' => Border::BORDER_THIN,
+        ],
+    ],
+]);
+
+$sheet->getRowDimension(5)->setRowHeight(22);
+
+                // ===== DATOS (filas 6 en adelante) =====
+                if ($highestRow >= 6) {
+
+    $sheet->getStyle('A6:I' . $highestRow)->applyFromArray([
+        'font' => [
+            'size' => 9,
+        ],
+        'alignment' => [
+            'vertical' => Alignment::VERTICAL_TOP,
+            'wrapText' => true,
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => Border::BORDER_THIN,
+            ],
+        ],
+    ]);
+
+    // N°
+    $sheet->getStyle('A6:A' . $highestRow)
+        ->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+    // FECHA, HORAS Y ESTADO
+    $sheet->getStyle('E6:H' . $highestRow)
+        ->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+}   
 
                 // Ajustar altura de filas de datos según contenido
-                for ($row = 5; $row <= $highestRow; $row++) {
+                for ($row = 6; $row <= $highestRow; $row++) {
                     $sheet->getRowDimension($row)->setRowHeight(-1); // auto
                 }
             },
