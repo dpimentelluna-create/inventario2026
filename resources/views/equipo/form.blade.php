@@ -138,7 +138,7 @@
                     <label for="marca" class="form-label">
                         MARCA
                         <span class="text-danger">*</span>
-                    </label>
+                    </label>    
 
                     <input
                         type="text"
@@ -1039,6 +1039,12 @@
             const serie = document.getElementById('num_serie');
             if (!serie || serie.value.trim() === '') return false;
 
+            const marca = document.getElementById('marca');
+            if (!marca || marca.value.trim() === '') return false;
+
+            const modelo = document.getElementById('modelo');
+            if (!modelo || modelo.value.trim() === '') return false;
+
             const ubicacion = document.getElementById('ubicacion_id');
             if (!ubicacion || ubicacion.value.trim() === '') return false;
 
@@ -1054,6 +1060,12 @@
 
                 const serie = document.getElementById('num_serie');
                 if (!serie || serie.value.trim() === '') faltan.push('NÚMERO DE SERIE');
+
+                const marca = document.getElementById('marca');
+                if (!marca || marca.value.trim() === '') faltan.push('MARCA');
+
+                const modelo = document.getElementById('modelo');
+                if (!modelo || modelo.value.trim() === '') faltan.push('MODELO');
 
                 const ubicacion = document.getElementById('ubicacion_id');
                 if (!ubicacion || ubicacion.value.trim() === '') faltan.push('UBICACIÓN');
@@ -1129,7 +1141,12 @@
             }
             if (container) {
                 container.querySelectorAll('input, select, textarea, button').forEach(function (el) {
+                    if (el.classList.contains('btn-eliminar-accesorio')) return;
                     el.disabled = !specsOk;
+                });
+                container.querySelectorAll('.btn-eliminar-accesorio').forEach(function (btn) {
+                    btn.disabled = false;
+                    btn.style.pointerEvents = 'auto';
                 });
             }
 
@@ -1343,6 +1360,12 @@
             });
         }
 
+        ['marca', 'modelo'].forEach(function (id) {
+            const campo = document.getElementById(id);
+            if (!campo) return;
+            campo.addEventListener('input', actualizarBloqueoParte1);
+        });
+
 
         function pintarListaTiposEquipo() {
             if (!inputTipoEq || !listaTipoEq) return;
@@ -1401,9 +1424,6 @@
 
         function seleccionarItemTipo(item) {
             if (!item) return;
-
-            const serie = document.getElementById('num_serie');
-            if (serie) setTimeout(function () { serie.focus(); }, 50);
 
             const texto = item.textContent.trim().toUpperCase();
             if (texto === 'OTRO') {
@@ -1569,6 +1589,13 @@
                 campo.addEventListener('input', revisar);
                 campo.addEventListener('change', revisar);*/
                 campo.addEventListener('blur', function () {
+                    if (this.classList.contains('tipo-personalizado')) {
+                        const tipo = accesorio.querySelector('.tipo-accesorio');
+                        if (!tipo || tipo.value.trim().toUpperCase() !== 'OTRO') {
+                            limpiar(this);
+                            return;
+                        }
+                    }
                     if (!this.value.trim()) errorEn(this, par[1]);
                     else limpiar(this);
                 });
@@ -1776,23 +1803,11 @@
         });
 
         const form = inputTipoEq ? inputTipoEq.closest('form') : null;
-        localStorage.setItem(
+        /*localStorage.setItem(
             'equipos_filtros_nuevo_equipo',
             '1'
-        );
-
-        if (form) {
-            form.addEventListener('submit', function () {
-                idsBloqueados.forEach(function (id) {
-                    const el = document.getElementById(id);
-                    if (el) { el.disabled = false; el.readOnly = false; }
-                });
-
-                @if(!($equipo->exists ?? false))
-                    localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
-                @endif
-    });
-        }
+        );*/
+        
 
         /*
          * =========================================================
@@ -1802,84 +1817,90 @@
          */
 
         if (form) {
-            form.addEventListener('submit', function (event) {
-                this.querySelectorAll('[disabled]').forEach(function (el) {
-                    el.disabled = false;
-                });
+                form.addEventListener('submit', function (event) {
+                    this.querySelectorAll('[disabled]').forEach(function (el) {
+                        el.disabled = false;
+                    });
 
-                limpiarErroresCampos();
+                    limpiarErroresCampos();
 
-                let primero = null;
+                    let primero = null;
 
-                function exigir(campo, mensaje) {
-                    if (!campo || String(campo.value || '').trim() === '') {
-                        marcarError(campo, mensaje);
-                        if (!primero) primero = campo;
-                        return;
-                    }
-                    limpiarErrorCampo(campo);
-                }
-
-                const tipoId = document.getElementById('tipo_equipo_id');
-                const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
-                const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
-                if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
-                    exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
-                }
-
-                exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
-                exigir(document.getElementById('marca'), 'La marca es obligatoria.');
-                exigir(document.getElementById('modelo'), 'El modelo es obligatorio.');
-                exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
-                exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
-
-                const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
-                const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
-
-                if (laptopVisible) {
-                    exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
-                    exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
-                    exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
-                }
-                if (equipoVisible) {
-                    exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
-                }
-
-                if (container) {
-                    container.querySelectorAll('.accesorio-item').forEach(function (fila) {
-                        const tipo = fila.querySelector('.tipo-accesorio');
-                        const personalizado = fila.querySelector('.tipo-personalizado');
-                        const marca = fila.querySelector('[name*="[marca]"]');
-                        const serie = fila.querySelector('[name*="[num_serie]"]');
-                        const estado = fila.querySelector('[name*="[estado]"]');
-                        const tipoTxt = tipo ? tipo.value.trim().toUpperCase() : '';
-                        const marcaTxt = marca ? marca.value.trim() : '';
-                        const serieTxt = serie ? serie.value.trim() : '';
-
-                        if (!tipoTxt && !marcaTxt && !serieTxt) {
-                            exigir(tipo, 'Complete el accesorio o elimínelo antes de guardar.');
-                            exigir(marca, 'La marca del accesorio es obligatoria.');
-                            exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                    function exigir(campo, mensaje) {
+                        if (!campo || String(campo.value || '').trim() === '') {
+                            marcarError(campo, mensaje);
+                            if (!primero) primero = campo;
                             return;
                         }
+                        limpiarErrorCampo(campo);
+                    }
 
-                        exigir(tipo, 'El tipo del accesorio es obligatorio.');
-                        if (tipoTxt === 'OTRO') {
-                            exigir(personalizado, 'Especifique el tipo de accesorio.');
-                        }
-                        exigir(marca, 'La marca del accesorio es obligatoria.');
-                        exigir(serie, 'El número de serie del accesorio es obligatorio.');
-                        exigir(estado, 'El estado del accesorio es obligatorio.');
-                    });
-                }
+                    const tipoId = document.getElementById('tipo_equipo_id');
+                    const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
+                    const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
+                    if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
+                        exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
+                    }
 
-                if (primero) {
-                    event.preventDefault();
-                    primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    setTimeout(function () { primero.focus(); }, 200);
-                }
+                    exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
+                    exigir(document.getElementById('marca'), 'La marca es obligatoria.');
+                    exigir(document.getElementById('modelo'), 'El modelo es obligatorio.');
+                    exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
+                    exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
+
+                    const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
+                    const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
+
+                    if (laptopVisible) {
+                        exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
+                        exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
+                        exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
+                    }
+                    if (equipoVisible) {
+                        exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
+                    }
+
+                    if (container) {
+                        container.querySelectorAll('.accesorio-item').forEach(function (fila) {
+                            const tipo = fila.querySelector('.tipo-accesorio');
+                            const personalizado = fila.querySelector('.tipo-personalizado');
+                            const marca = fila.querySelector('[name*="[marca]"]');
+                            const serie = fila.querySelector('[name*="[num_serie]"]');
+                            const estado = fila.querySelector('[name*="[estado]"]');
+                            const tipoTxt = tipo ? tipo.value.trim().toUpperCase() : '';
+                            const marcaTxt = marca ? marca.value.trim() : '';
+                            const serieTxt = serie ? serie.value.trim() : '';
+
+                            if (!tipoTxt && !marcaTxt && !serieTxt) {
+                                exigir(tipo, 'Complete el accesorio o elimínelo antes de guardar.');
+                                exigir(marca, 'La marca del accesorio es obligatoria.');
+                                exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                                return;
+                            }
+
+                            exigir(tipo, 'El tipo del accesorio es obligatorio.');
+                            if (tipoTxt === 'OTRO') {
+                                exigir(personalizado, 'Especifique el tipo de accesorio.');
+                            }
+                            exigir(marca, 'La marca del accesorio es obligatoria.');
+                            exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                            exigir(estado, 'El estado del accesorio es obligatorio.');
+                        });
+                    }
+
+                    if (primero) {
+                        event.preventDefault();
+                        actualizarBloqueoParte1();
+                        primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(function () { primero.focus(); }, 200);
+                        return;
+                    }
+                    @if(!($equipo->exists ?? false))
+                        localStorage.setItem('equipos_filtros_nuevo_equipo', '1');
+                        localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
+                    @endif
             });
-        }
+            }
 
         mostrarEspecificaciones();
 
