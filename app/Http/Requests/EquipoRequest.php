@@ -63,8 +63,33 @@ class EquipoRequest extends FormRequest
             'color_equipo' => ['nullable', 'string'],
             'estado_equipo' => ['nullable', Rule::in(['BUENO', 'REGULAR', 'MALOGRADO'])],
             'observaciones_equipo' => ['nullable', 'string'],
+
+            'accesorios' => ['nullable', 'array'],
+            'accesorios.*.tipo' => ['nullable', 'string', 'max:100'],
+            'accesorios.*.tipo_personalizado' => ['nullable', 'string', 'max:100', 'required_if:accesorios.*.tipo,OTRO'],
+            'accesorios.*.marca' => ['nullable', 'string', 'max:80', 'required_with:accesorios.*.tipo'],
+            'accesorios.*.num_serie' => ['nullable', 'string', 'max:100', 'required_with:accesorios.*.tipo'],
+            'accesorios.*.estado' => ['nullable', Rule::in(['BUENO', 'REGULAR', 'MALOGRADO']), 'required_with:accesorios.*.tipo'],
+            'accesorios.*.observaciones' => ['nullable', 'string'],
         ];
     }
+    
+    public function withValidator($validator): void
+{
+    $validator->after(function ($validator) {
+        foreach ($this->input('accesorios', []) as $i => $fila) {
+            $tipo = trim((string) ($fila['tipo'] ?? ''));
+            $marca = trim((string) ($fila['marca'] ?? ''));
+            $serie = trim((string) ($fila['num_serie'] ?? ''));
+            if ($tipo === '' && $marca === '' && $serie === '') {
+                $validator->errors()->add(
+                    "accesorios.$i.tipo",
+                    'Complete el accesorio o elimínelo antes de guardar.'
+                );
+            }
+        }
+    });
+}
 
     public function messages(): array
     {
@@ -74,6 +99,11 @@ class EquipoRequest extends FormRequest
             'num_serie.required' => 'El número de serie es obligatorio.',
             'tipo_equipo_id.required_without' => 'Seleccione un tipo de equipo o registre uno nuevo.',
             'nuevo_tipo_equipo.required_without' => 'Especifique el nuevo tipo de equipo.',
+
+            'accesorios.*.marca.required_with' => 'La marca del accesorio es obligatoria.',
+            'accesorios.*.num_serie.required_with' => 'El número de serie del accesorio es obligatorio.',
+            'accesorios.*.estado.required_with' => 'El estado del accesorio es obligatorio.',
+            'accesorios.*.tipo_personalizado.required_if' => 'Especifique el tipo de accesorio.',
         ];
     }
 

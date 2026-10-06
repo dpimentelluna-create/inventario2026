@@ -111,6 +111,7 @@
 
                     <label for="num_serie" class="form-label">
                         NÚMERO DE SERIE
+                        <span class="text-danger">*</span>
                     </label>
 
                     <input
@@ -136,6 +137,7 @@
 
                     <label for="marca" class="form-label">
                         MARCA
+                        <span class="text-danger">*</span>
                     </label>
 
                     <input
@@ -161,6 +163,7 @@
 
                     <label for="modelo" class="form-label">
                         MODELO
+                        <span class="text-danger">*</span>
                     </label>
 
                     <input
@@ -197,7 +200,7 @@
                     >
 
                         <option value="">
-                            SELECCIONE UNA UBICACIÓN
+                            -- SELECCIONE UNA UBICACIÓN --
                         </option>
 
                         @foreach($ubicacione as $id => $nombre)
@@ -324,6 +327,7 @@
 
                         <label for="procesador" class="form-label">
                             PROCESADOR
+                            <span class="text-danger">*</span>
                         </label>
 
                         <input
@@ -343,6 +347,7 @@
 
                         <label for="ram" class="form-label">
                             MEMORIA RAM
+                            <span class="text-danger">*</span>
                         </label>
 
                         <input
@@ -362,6 +367,7 @@
 
                         <label for="disco_duro" class="form-label">
                             DISCO DURO
+                            <span class="text-danger">*</span>
                         </label>
 
                         <input
@@ -400,6 +406,7 @@
 
                         <label for="estado_laptop" class="form-label">
                             ESTADO
+                            <span class="text-danger">*</span>
                         </label>
 
                         <select
@@ -477,6 +484,7 @@
 
                         <label for="descripcion" class="form-label">
                             DESCRIPCIÓN
+                            <span class="text-danger">*</span>
                         </label>
 
                         <input
@@ -515,6 +523,7 @@
 
                         <label for="estado_equipo" class="form-label">
                             ESTADO
+                            <span class="text-danger">*</span>
                         </label>
 
                         <select
@@ -639,6 +648,7 @@
 
                                     <label class="form-label">
                                         TIPO
+                                        <span class="text-danger">*</span>
                                     </label>
 
                                     <div class="position-relative">
@@ -692,6 +702,7 @@
 
                                     <label class="form-label">
                                         MARCA
+                                        <span class="text-danger">*</span>
                                     </label>
 
                                     <input
@@ -710,6 +721,7 @@
 
                                     <label class="form-label">
                                         NÚMERO DE SERIE
+                                        <span class="text-danger">*</span>
                                     </label>
 
                                     <input
@@ -728,6 +740,7 @@
 
                                     <label class="form-label">
                                         ESTADO
+                                        <span class="text-danger">*</span>
                                     </label>
 
                                     <select
@@ -885,769 +898,784 @@
 
 </div>
 
-    <script>
-        
-        document.addEventListener('DOMContentLoaded', function () {
-
-    function aMayusculas(campo) {
-        if (!campo) return;
-        const start = campo.selectionStart;
-        const end = campo.selectionEnd;
-        campo.value = campo.value.toUpperCase();
-        if (typeof start === 'number') campo.setSelectionRange(start, end);
-    }
-
-    document.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
-        campo.addEventListener('input', function () { aMayusculas(this); });
-    });
-
-    /*
-     * =========================================================
-     * NOTIFICACIONES Y VALIDACIÓN DE CAMPOS
-     * (mismo formato usado en prestamo/form.blade.php)
-     * =========================================================
-     */
-
-     /*
-    function mostrarToast(mensaje, tipo) {
-        const toastEl = document.getElementById('toast_equipo');
-        const textoEl = document.getElementById('toast_equipo_texto');
-        if (!toastEl || !textoEl) {
-            return;
-        }
-
-        textoEl.textContent = mensaje;
-        toastEl.classList.remove('text-bg-success', 'text-bg-danger', 'text-bg-primary');
-        toastEl.classList.add(tipo === 'danger' ? 'text-bg-danger' : 'text-bg-success');
-
-        const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 3000 });
-        toast.show();
-    }*/
-
-    function limpiarErroresCampos() {
-        document.querySelectorAll('.error-toast-campo').forEach(function (el) {
-            el.remove();
+{{-- SCRIPT JS --}}
+<script src="{{ asset('js/form-validaciones.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        FormValidacion.init({
+            toastId: 'toast_equipo',
+            textoId: 'toast_equipo_texto',
+            toastEnCampo: false,
+            focusDelay: 200
         });
-        document.querySelectorAll('.is-invalid').forEach(function (el) {
-            el.classList.remove('is-invalid');
-        });
-    }
 
-    function marcarError(campo, mensaje) {
-    if (!campo) return;
-    campo.classList.add('is-invalid');
-    const contenedor = campo.closest('.mb-3') || campo.parentElement;
-    if (!contenedor) return;
-    let aviso = contenedor.querySelector('.error-toast-campo');
-    if (!aviso) {
-        aviso = document.createElement('div');
-        aviso.className = 'error-toast-campo text-danger small mt-1 mb-0';
-        campo.insertAdjacentElement('afterend', aviso);
-    }
-    aviso.textContent = mensaje;
-}
+        const aMayusculas = FormValidacion.aMayusculas;
+        const limpiarErroresCampos = FormValidacion.limpiarErroresCampos;
+        const marcarError = FormValidacion.marcarError;
+        const limpiarErrorCampo = FormValidacion.limpiarErrorCampo;
+        const mostrarErrorCampo = FormValidacion.mostrarErrorCampo;
+        const validarCampoVivo = FormValidacion.validarCampoVivo;
 
-function limpiarErrorCampo(campo) {
-    if (!campo) return;
-    campo.classList.remove('is-invalid');
-    const err = (campo.closest('.mb-3') || campo.parentElement)?.querySelector('.error-toast-campo');
-    if (err) err.remove();
-}
+        FormValidacion.bindMayusculas(document);
 
-function mostrarErrorCampo(campo, mensaje) {
-    marcarError(campo, mensaje);
-    if (campo) {
-        campo.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        setTimeout(function () { campo.focus(); }, 200);
-    }
-}
-
-    const tiposEquipoData = [
-        @foreach($tiposequipo as $id => $nombre)
-            { id: {{ (int) $id }}, nombre: @json($nombre) },
-        @endforeach
+        const tiposEquipoData = [
+            @foreach($tiposequipo as $id => $nombre)
+                { id: {{ (int) $id }}, nombre: @json($nombre) },
+            @endforeach
     ];
 
-    const inputTipoEq = document.getElementById('buscar_tipo_equipo');
-    const hiddenTipoEq = document.getElementById('tipo_equipo_id');
-    let indiceTipoActivo = -1;
-    const listaTipoEq = document.getElementById('lista_tipos_equipo');
-    const wrapNuevoTipo = document.getElementById('wrap_nuevo_tipo_equipo');
-    const inputNuevoTipo = document.getElementById('nuevo_tipo_equipo');
-    const laptopBox = document.getElementById('especificaciones-laptop');
-    const equipoBox = document.getElementById('especificaciones-equipo');
-    const mensajeSpecs = document.getElementById('mensaje-especificaciones');
-    const fechaRegistro = document.getElementById('fecha_registro');
-    const btnHoy = document.getElementById('btn_fecha_hoy');
-    const container = document.getElementById('accesorios-container');
-    const botonAgregar = document.getElementById('agregar-accesorio');
-    const mensajeVacio = document.getElementById('sin-accesorios');
-    const cardParte3 = botonAgregar ? botonAgregar.closest('.card') : null;
-    const bloqueoParte2 = document.getElementById('bloqueo-parte2');
-    const bloqueoParte3 = document.getElementById('bloqueo-parte3');
-    const cardParte2 = mensajeSpecs ? mensajeSpecs.closest('.card') : null;
-    const tiposAccesorios = @json($tiposAccesorios ?? []);
-    const ultimasMarcasAccesorio = @json($ultimasMarcasAccesorio ?? []);
-    const ultimosPorTipo = @json($ultimosPorTipo ?? []);
-    const ultimasMarcasAccesorios = @json($ultimasMarcasAccesorios ?? []);
-    const idsBloqueados = ['num_serie', 'marca', 'modelo', 'ubicacion_id', 'fecha_registro', 'btn_fecha_hoy'];
+        const inputTipoEq = document.getElementById('buscar_tipo_equipo');
 
-    function aplicarUltimoRegistro(nombreTipo) {
-        const data = ultimosPorTipo[String(nombreTipo || '').toUpperCase()];
-        if (!data) return;
-        const mapa = {
-            marca: data.marca,
-            modelo: data.modelo,
-            procesador: data.procesador,
-            ram: data.ram,
-            disco_duro: data.disco_duro,
-            color_laptop: data.color,
-            descripcion: data.descripcion,
-            color_equipo: data.color
-        };
-        Object.keys(mapa).forEach(function (id) {
-            const el = document.getElementById(id);
-            if (!el || String(el.value || '').trim()) return;
-            if (mapa[id]) el.value = mapa[id];
-        });
-    }
+        /* Flujo para cursor al inicializar el formulario*/
+        const esEdicion = @json((bool) ($equipo->exists ?? false));
 
-    function fechaHoyISO() {
-        const d = new Date();
-        return d.getFullYear() + '-' +
-            String(d.getMonth() + 1).padStart(2, '0') + '-' +
-            String(d.getDate()).padStart(2, '0');
-    }
+        if (!esEdicion && inputTipoEq) {
+            setTimeout(function () { inputTipoEq.focus(); }, 150);
+        }
 
-    if (fechaRegistro && !fechaRegistro.value) {
-        fechaRegistro.value = fechaHoyISO();
-    }
+        const hiddenTipoEq = document.getElementById('tipo_equipo_id');
+        let indiceTipoActivo = -1;
+        const listaTipoEq = document.getElementById('lista_tipos_equipo');
+        const wrapNuevoTipo = document.getElementById('wrap_nuevo_tipo_equipo');
+        const inputNuevoTipo = document.getElementById('nuevo_tipo_equipo');
+        const laptopBox = document.getElementById('especificaciones-laptop');
+        const equipoBox = document.getElementById('especificaciones-equipo');
+        const mensajeSpecs = document.getElementById('mensaje-especificaciones');
+        const fechaRegistro = document.getElementById('fecha_registro');
+        const btnHoy = document.getElementById('btn_fecha_hoy');
+        const container = document.getElementById('accesorios-container');
+        const botonAgregar = document.getElementById('agregar-accesorio');
+        const mensajeVacio = document.getElementById('sin-accesorios');
+        const cardParte3 = botonAgregar ? botonAgregar.closest('.card') : null;
+        const bloqueoParte2 = document.getElementById('bloqueo-parte2');
+        const bloqueoParte3 = document.getElementById('bloqueo-parte3');
+        const cardParte2 = mensajeSpecs ? mensajeSpecs.closest('.card') : null;
+        const tiposAccesorios = @json($tiposAccesorios ?? []);
+        const ultimasMarcasAccesorio = @json($ultimasMarcasAccesorio ?? []);
+        const ultimosPorTipo = @json($ultimosPorTipo ?? []);
+        const ultimasMarcasAccesorios = @json($ultimasMarcasAccesorios ?? []);
+        const idsBloqueados = ['num_serie', 'marca', 'modelo', 'ubicacion_id', 'fecha_registro', 'btn_fecha_hoy'];
 
-    //BOTON HOY FECHA REGISTRO SUBMIT
-    if (btnHoy && fechaRegistro) {
-    btnHoy.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const hoy = new Date();
-        const yyyy = hoy.getFullYear();
-        const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-        const dd = String(hoy.getDate()).padStart(2, '0');
-        fechaRegistro.value = yyyy + '-' + mm + '-' + dd;
-        limpiarErrorCampo(fechaRegistro);
-    });
-}
-    if (fechaRegistro) {
-        fechaRegistro.addEventListener('input', mostrarEspecificaciones);
-        fechaRegistro.addEventListener('change', mostrarEspecificaciones);
-    }
-    const inputUbicacionEq = document.getElementById('ubicacion_id');
-    if (inputUbicacionEq) {
-        inputUbicacionEq.addEventListener('change', mostrarEspecificaciones);
-    }
+        function aplicarUltimoRegistro(nombreTipo) {
+            const data = ultimosPorTipo[String(nombreTipo || '').toUpperCase()];
+            if (!data) return;
+            const mapa = {
+                marca: data.marca,
+                modelo: data.modelo,
+                procesador: data.procesador,
+                ram: data.ram,
+                disco_duro: data.disco_duro,
+                color_laptop: data.color,
+                descripcion: data.descripcion,
+                color_equipo: data.color
+            };
+            Object.keys(mapa).forEach(function (id) {
+                const el = document.getElementById(id);
+                if (!el || String(el.value || '').trim()) return;
+                if (!mapa[id]) return;
+                el.value = mapa[id];
+                limpiarErrorCampo(el);
+            });
+        }
 
-    function tipoEquipoListo() {
-        if (hiddenTipoEq && String(hiddenTipoEq.value).trim() !== '') return true;
-        return !!(
-            inputTipoEq &&
-            inputTipoEq.value.trim().toUpperCase() === 'OTRO' &&
-            inputNuevoTipo &&
-            inputNuevoTipo.value.trim() !== ''
-        );
-    }
+        function fechaHoyISO() {
+            const d = new Date();
+            return d.getFullYear() + '-' +
+                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                String(d.getDate()).padStart(2, '0');
+        }
 
-    /*
-     * =========================================================
-     * PARTE 1 COMPLETA (TIPO + UBICACIÓN + FECHA)
-     * (mismo criterio usado en prestamo/form.blade.php)
-     * =========================================================
-     */
+        if (fechaRegistro && !fechaRegistro.value) {
+            fechaRegistro.value = fechaHoyISO();
+        }
 
-    function parte1Completa() {
-    if (!tipoEquipoListo()) return false;
+        //BOTON HOY FECHA REGISTRO SUBMIT
+        if (btnHoy && fechaRegistro) {
+            btnHoy.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const hoy = new Date();
+                const yyyy = hoy.getFullYear();
+                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                const dd = String(hoy.getDate()).padStart(2, '0');
+                fechaRegistro.value = yyyy + '-' + mm + '-' + dd;
+                limpiarErrorCampo(fechaRegistro);
+                mostrarEspecificaciones();
+                actualizarBloqueoParte1();
+            });
+        }
+        if (fechaRegistro) {
+            fechaRegistro.addEventListener('input', mostrarEspecificaciones);
+            fechaRegistro.addEventListener('change', mostrarEspecificaciones);
+        }
+        const inputUbicacionEq = document.getElementById('ubicacion_id');
+        if (inputUbicacionEq) {
+            inputUbicacionEq.addEventListener('change', function () {
+                mostrarEspecificaciones();
+                pintarUbicacionObligatoria();
+            });
+        }
 
-    const serie = document.getElementById('num_serie');
-    if (!serie || serie.value.trim() === '') return false;
+        function tipoEquipoListo() {
+            if (hiddenTipoEq && String(hiddenTipoEq.value).trim() !== '') return true;
+            return !!(
+                inputTipoEq &&
+                inputTipoEq.value.trim().toUpperCase() === 'OTRO' &&
+                inputNuevoTipo &&
+                inputNuevoTipo.value.trim() !== ''
+            );
+        }
 
-    const ubicacion = document.getElementById('ubicacion_id');
-    if (!ubicacion || ubicacion.value.trim() === '') return false;
+        /*
+         * =========================================================
+         * PARTE 1 COMPLETA (TIPO + UBICACIÓN + FECHA)
+         * (mismo criterio usado en prestamo/form.blade.php)
+         * =========================================================
+         */
 
-    const fecha = document.getElementById('fecha_registro');
-    if (!fecha || fecha.value.trim() === '') return false;
+        function parte1Completa() {
+            if (!tipoEquipoListo()) return false;
 
-    return true;
-}
+            const serie = document.getElementById('num_serie');
+            if (!serie || serie.value.trim() === '') return false;
 
-    function actualizarBloqueoParte1() {
-        const listo = tipoEquipoListo();
+            const ubicacion = document.getElementById('ubicacion_id');
+            if (!ubicacion || ubicacion.value.trim() === '') return false;
 
-        idsBloqueados.forEach(function (id) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (el.tagName === 'SELECT' || el.type === 'button') {
-                el.disabled = !listo;
-            } else {
-                el.readOnly = !listo;
+            const fecha = document.getElementById('fecha_registro');
+            if (!fecha || fecha.value.trim() === '') return false;
+
+            return true;
+        }
+
+        function camposFaltantesParte1() {
+                const faltan = [];
+                if (!tipoEquipoListo()) faltan.push('TIPO DE EQUIPO');
+
+                const serie = document.getElementById('num_serie');
+                if (!serie || serie.value.trim() === '') faltan.push('NÚMERO DE SERIE');
+
+                const ubicacion = document.getElementById('ubicacion_id');
+                if (!ubicacion || ubicacion.value.trim() === '') faltan.push('UBICACIÓN');
+
+                const fecha = document.getElementById('fecha_registro');
+                if (!fecha || fecha.value.trim() === '') faltan.push('FECHA DE REGISTRO');
+
+                return faltan;
             }
-            el.classList.toggle('bg-light', !listo);
-        });
 
-        // ==========================================
-        // PARTE 2 Y 3: SOLO SE HABILITAN
-        // SI LA PARTE 1 ESTÁ COMPLETA Y VÁLIDA
-        // ==========================================
+            function mensajeBloqueoParte1(faltan) {
+                if (faltan.length === 1) {
+                    return 'COMPLETE \'' + faltan[0] + '\' PARA CONTINUAR.';
+                }
+                return 'COMPLETE TODOS LOS CAMPOS DE LA PARTE 1 PARA CONTINUAR.';
+            }
 
-        const completo = parte1Completa();
+        function parte2Completa() {
+            if (!parte1Completa()) return false;
 
-        if (botonAgregar) botonAgregar.disabled = !completo;
-        if (cardParte3) {
-            cardParte3.style.opacity = completo ? '1' : '0.55';
-            cardParte3.style.pointerEvents = completo ? 'auto' : 'none';
+            const laptopVisible = laptopBox && laptopBox.style.display === 'block';
+            const equipoVisible = equipoBox && equipoBox.style.display === 'block';
+
+            function lleno(id) {
+                const el = document.getElementById(id);
+                return !!(el && String(el.value || '').trim() !== '');
+            }
+
+            if (laptopVisible) return lleno('procesador') && lleno('ram') && lleno('disco_duro');
+            if (equipoVisible) return lleno('descripcion');
+            return false;
         }
-        if (cardParte2) {
-            cardParte2.style.opacity = completo ? '1' : '0.55';
-            cardParte2.style.pointerEvents = completo ? 'auto' : 'none';
+
+        function pintarUbicacionObligatoria() {
+            const ubicacion = document.getElementById('ubicacion_id');
+            if (!ubicacion) return;
+            ubicacion.classList.toggle('ubicacion-vacia', ubicacion.value.trim() === '');
         }
 
-        // Aviso de Parte 2: solo aplica cuando YA hay tipo elegido
-        // (si no hay tipo, el mensaje "mensaje-especificaciones" ya lo indica)
-        if (bloqueoParte2) {
-            bloqueoParte2.style.display = (listo && !completo) ? 'block' : 'none';
+        function actualizarBloqueoParte1() {
+            const listo = tipoEquipoListo();
+            const completo = parte1Completa();
+            const specsOk = parte2Completa();
+
+            idsBloqueados.forEach(function (id) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (el.tagName === 'SELECT' || el.type === 'button') {
+                    el.disabled = !listo;
+                } else {
+                    el.readOnly = !listo;
+                }
+                el.classList.toggle('bg-light', !listo);
+            });
+
+            if (cardParte2) {
+                cardParte2.style.opacity = completo ? '1' : '0.55';
+                cardParte2.style.pointerEvents = completo ? 'auto' : 'none';
+            }
+            if (bloqueoParte2) {
+                const faltan = camposFaltantesParte1();
+                bloqueoParte2.textContent = mensajeBloqueoParte1(faltan);
+                bloqueoParte2.style.display = (listo && !completo) ? 'block' : 'none';
+            }
+
+            if (botonAgregar) botonAgregar.disabled = !specsOk;
+            if (cardParte3) {
+                cardParte3.style.opacity = specsOk ? '1' : '0.55';
+                cardParte3.style.pointerEvents = specsOk ? 'auto' : 'none';
+            }
+            if (bloqueoParte3) {
+                bloqueoParte3.style.display = specsOk ? 'none' : 'block';
+            }
+            if (container) {
+                container.querySelectorAll('input, select, textarea, button').forEach(function (el) {
+                    el.disabled = !specsOk;
+                });
+            }
+
+            pintarUbicacionObligatoria();
         }
-        if (bloqueoParte3) {
-            bloqueoParte3.style.display = completo ? 'none' : 'block';
+
+        function textoTipoEquipo() {
+            if (inputNuevoTipo && inputNuevoTipo.value.trim() !== '') {
+                return inputNuevoTipo.value.trim().toUpperCase();
+            }
+            return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
         }
-    }
 
-    function textoTipoEquipo() {
-        if (inputNuevoTipo && inputNuevoTipo.value.trim() !== '') {
-            return inputNuevoTipo.value.trim().toUpperCase();
+        function mostrarCampoNuevoTipo(mostrar) {
+            if (!wrapNuevoTipo || !inputNuevoTipo) return;
+            wrapNuevoTipo.style.display = mostrar ? 'block' : 'none';
+            inputNuevoTipo.required = !!mostrar;
+            if (!mostrar) inputNuevoTipo.value = '';
         }
-        return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
-    }
 
-    function mostrarCampoNuevoTipo(mostrar) {
-        if (!wrapNuevoTipo || !inputNuevoTipo) return;
-        wrapNuevoTipo.style.display = mostrar ? 'block' : 'none';
-        inputNuevoTipo.required = !!mostrar;
-        if (!mostrar) inputNuevoTipo.value = '';
-    }
+        function tipoYaExiste(nombre) {
+            const n = (nombre || '').trim().toUpperCase();
+            if (!n) return null;
+            return tiposEquipoData.find(function (t) {
+                return String(t.nombre).toUpperCase() === n;
+            }) || null;
+        }
 
-    function tipoYaExiste(nombre) {
-        const n = (nombre || '').trim().toUpperCase();
-        if (!n) return null;
-        return tiposEquipoData.find(function (t) {
-            return String(t.nombre).toUpperCase() === n;
-        }) || null;
-    }
+        let ultimoTipoEquipo = '';
 
-    let ultimoTipoEquipo = '';
+        function setCampo(id, valor) {
+            const el = document.getElementById(id);
+            if (el) el.value = valor;
+        }
 
-function setCampo(id, valor) {
-    const el = document.getElementById(id);
-    if (el) el.value = valor;
-}
+        function limpiarAlCambiarTipo() {
+            ['marca', 'modelo'].forEach(function (id) { setCampo(id, ''); });
+            ['procesador', 'ram', 'disco_duro', 'color_laptop', 'observaciones_laptop'].forEach(function (id) {
+                setCampo(id, '');
+            });
+            setCampo('estado_laptop', 'REGULAR');
+            ['descripcion', 'color_equipo', 'observaciones_equipo'].forEach(function (id) {
+                setCampo(id, '');
+            });
+            setCampo('estado_equipo', 'REGULAR');
+            if (container) {
+                container.querySelectorAll('.accesorio-item').forEach(function (item) { item.remove(); });
+                if (typeof actualizarMensaje === 'function') actualizarMensaje();
+            }
+        }
 
-function limpiarAlCambiarTipo() {
-    ['marca', 'modelo'].forEach(function (id) { setCampo(id, ''); });
-    ['procesador', 'ram', 'disco_duro', 'color_laptop', 'observaciones_laptop'].forEach(function (id) {
-        setCampo(id, '');
-    });
-    setCampo('estado_laptop', 'REGULAR');
-    ['descripcion', 'color_equipo', 'observaciones_equipo'].forEach(function (id) {
-        setCampo(id, '');
-    });
-    setCampo('estado_equipo', 'REGULAR');
-    if (container) {
-        container.querySelectorAll('.accesorio-item').forEach(function (item) { item.remove(); });
-        if (typeof actualizarMensaje === 'function') actualizarMensaje();
-    }
-}
+        function limpiarFormularioMenosSerie() {
+            limpiarAlCambiarTipo();
+            setCampo('ubicacion_id', '');
+            if (fechaRegistro && typeof fechaHoyISO === 'function') {
+                fechaRegistro.value = fechaHoyISO();
+            }
+        }
 
-function limpiarFormularioMenosSerie() {
-    limpiarAlCambiarTipo();
-    setCampo('ubicacion_id', '');
-    if (fechaRegistro && typeof fechaHoyISO === 'function') {
-        fechaRegistro.value = fechaHoyISO();
-    }
-}
+        function mostrarEspecificaciones() {
 
-    function mostrarEspecificaciones() {
+            // ==========================================
+            // OCULTAR TODO AL INICIO
+            // ==========================================
 
-                // ==========================================
-                // OCULTAR TODO AL INICIO
-                // ==========================================
+            if (laptopBox) {
+                laptopBox.style.display = 'none';
+            }
+
+            if (equipoBox) {
+                equipoBox.style.display = 'none';
+            }
+
+            if (mensajeSpecs) {
+                mensajeSpecs.style.display = 'block';
+            }
+
+            // ==========================================
+            // OBTENER DATOS DEL TIPO SELECCIONADO
+            // ==========================================
+
+            const tipoId = hiddenTipoEq
+                ? String(hiddenTipoEq.value).trim()
+                : '';
+
+            const tipoTexto = inputTipoEq
+                ? inputTipoEq.value.trim().toUpperCase()
+                : '';
+
+
+            // ==========================================
+            // SI ES "OTRO"
+            // ==========================================
+
+            const esOtro =
+                tipoTexto === 'OTRO' &&
+                inputNuevoTipo &&
+                inputNuevoTipo.value.trim() !== '';
+
+
+            // ==========================================
+            // BUSCAR EL TIPO REAL EN LA LISTA
+            // ==========================================
+
+            let tipoSeleccionado = null;
+
+            if (tipoId !== '') {
+                tipoSeleccionado = tiposEquipoData.find(function (tipo) {
+                    return String(tipo.id) === tipoId;
+                });
+            }
+
+            // ==========================================
+            // SI TODAVÍA NO HAY TIPO SELECCIONADO
+            // ==========================================
+
+            if (!tipoSeleccionado && !esOtro) {
+                if (ultimoTipoEquipo !== '') {
+                    limpiarFormularioMenosSerie();
+                    ultimoTipoEquipo = '';
+                }
+                actualizarBloqueoParte1();
+                return;
+            }
+
+
+            // ==========================================
+            // YA EXISTE UN TIPO
+            // ==========================================
+
+            if (mensajeSpecs) {
+                mensajeSpecs.style.display = 'none';
+            }
+
+
+            // ==========================================
+            // DETERMINAR SI ES LAPTOP
+            // ==========================================
+
+            const nombreTipo = tipoSeleccionado
+                ? String(tipoSeleccionado.nombre).trim().toUpperCase()
+                : (esOtro && inputNuevoTipo ? inputNuevoTipo.value.trim().toUpperCase() : tipoTexto);
+
+            if (nombreTipo && nombreTipo !== 'OTRO' && nombreTipo !== ultimoTipoEquipo) {
+                if (ultimoTipoEquipo !== '') {
+                    limpiarAlCambiarTipo();
+                }
+                ultimoTipoEquipo = nombreTipo;
+            }
+
+            if (nombreTipo === 'LAPTOP') {
 
                 if (laptopBox) {
-                    laptopBox.style.display = 'none';
+                    laptopBox.style.display = 'block';
                 }
-
                 if (equipoBox) {
                     equipoBox.style.display = 'none';
                 }
 
-                if (mensajeSpecs) {
-                    mensajeSpecs.style.display = 'block';
+                aplicarUltimoRegistro(nombreTipo);
+
+            } else {
+
+                // Mostrar especificaciones de otros equipos
+                if (equipoBox) {
+                    equipoBox.style.display = 'block';
                 }
 
-                // ==========================================
-                // OBTENER DATOS DEL TIPO SELECCIONADO
-                // ==========================================
-
-                const tipoId = hiddenTipoEq
-                    ? String(hiddenTipoEq.value).trim()
-                    : '';
-
-                const tipoTexto = inputTipoEq
-                    ? inputTipoEq.value.trim().toUpperCase()
-                    : '';
-
-
-                // ==========================================
-                // SI ES "OTRO"
-                // ==========================================
-
-                const esOtro =
-                    tipoTexto === 'OTRO' &&
-                    inputNuevoTipo &&
-                    inputNuevoTipo.value.trim() !== '';
-
-
-                // ==========================================
-                // BUSCAR EL TIPO REAL EN LA LISTA
-                // ==========================================
-
-                let tipoSeleccionado = null;
-
-                if (tipoId !== '') {
-
-                    tipoSeleccionado = tiposEquipoData.find(function (tipo) {
-
-                        return String(tipo.id) === tipoId;
-
-                    });
-
+                // Ocultar especificaciones de Laptop
+                if (laptopBox) {
+                    laptopBox.style.display = 'none';
                 }
 
-                
+                aplicarUltimoRegistro(nombreTipo);
 
+            }
 
-                // ==========================================
-                // SI TODAVÍA NO HAY TIPO SELECCIONADO
-                // ==========================================
+            // ==========================================
+            // ACTUALIZAR BLOQUEO DE PARTE 1
+            // ==========================================
 
-                if (!tipoSeleccionado && !esOtro) {
-    if (ultimoTipoEquipo !== '') {
-        limpiarFormularioMenosSerie();
-        ultimoTipoEquipo = '';
-    }
-    actualizarBloqueoParte1();
-    return;
-}
-
-
-                // ==========================================
-                // YA EXISTE UN TIPO
-                // ==========================================
-
-                if (mensajeSpecs) {
-                    mensajeSpecs.style.display = 'none';
-                }
-
-
-                // ==========================================
-                // DETERMINAR SI ES LAPTOP
-                // ==========================================
-
-                const nombreTipo = tipoSeleccionado
-                    ? String(tipoSeleccionado.nombre).trim().toUpperCase()
-                    : (esOtro && inputNuevoTipo ? inputNuevoTipo.value.trim().toUpperCase() : tipoTexto);
-
-                if (nombreTipo && nombreTipo !== 'OTRO' && nombreTipo !== ultimoTipoEquipo) {
-                    if (ultimoTipoEquipo !== '') {
-                        limpiarAlCambiarTipo();
-                    }
-                    ultimoTipoEquipo = nombreTipo;
-                }
-
-                if (nombreTipo === 'LAPTOP') {
-
-                    if (laptopBox) {
-                        laptopBox.style.display = 'block';
-                    }
-                    if (equipoBox) {
-                        equipoBox.style.display = 'none';
-                    }
-
-                    aplicarUltimoRegistro(nombreTipo);
-
-                } else {
-
-                    // Mostrar especificaciones de otros equipos
-                    if (equipoBox) {
-                        equipoBox.style.display = 'block';
-                    }
-
-                    // Ocultar especificaciones de Laptop
-                    if (laptopBox) {
-                        laptopBox.style.display = 'none';
-                    }
-
-                    aplicarUltimoRegistro(nombreTipo);
-
-                }
-
-                // ==========================================
-                // ACTUALIZAR BLOQUEO DE PARTE 1
-                // ==========================================
-
-                actualizarBloqueoParte1();
-    }
-
-    function validarCampoVivo(id, mensaje) {
-    const campo = document.getElementById(id);
-    if (!campo) return;
-    campo.addEventListener('blur', function () {
-        if (!this.value.trim()) marcarError(this, mensaje);
-        else limpiarErrorCampo(this);
-    });
-    campo.addEventListener('input', function () {
-        if (this.value.trim()) limpiarErrorCampo(this);
-    });
-}
-
-validarCampoVivo('num_serie', 'El número de serie es obligatorio.');
-validarCampoVivo('marca', 'La marca es obligatoria.');
-validarCampoVivo('descripcion', 'La descripción es obligatoria.');
-validarCampoVivo('procesador', 'El procesador es obligatorio.');
-validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
-validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
-
-    const inputSerie = document.getElementById('num_serie');
-    if (inputSerie) {
-        inputSerie.addEventListener('input', function () {
             actualizarBloqueoParte1();
+        }
+
+
+        validarCampoVivo('num_serie', 'El número de serie es obligatorio.');
+        validarCampoVivo('marca', 'La marca es obligatoria.');
+        validarCampoVivo('modelo', 'El modelo es obligatorio.');
+        validarCampoVivo('descripcion', 'La descripción es obligatoria.');
+        validarCampoVivo('procesador', 'El procesador es obligatorio.');
+        validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
+        validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
+
+        ['procesador', 'ram', 'disco_duro', 'descripcion'].forEach(function (id) {
+            const campo = document.getElementById(id);
+            if (!campo) return;
+            campo.addEventListener('input', actualizarBloqueoParte1);
+            campo.addEventListener('change', actualizarBloqueoParte1);
         });
-    }
+
+        const inputSerie = document.getElementById('num_serie');
+
+        function enfocarSerie() {
+            if (!inputSerie || esEdicion) return;
+            setTimeout(function () { inputSerie.focus(); }, 50);
+        }
+
+        if (inputSerie) {
+            inputSerie.addEventListener('input', function () {
+                actualizarBloqueoParte1();
+            });
+        }
 
 
-    function pintarListaTiposEquipo() {
-        if (!inputTipoEq || !listaTipoEq) return;
-        const texto = inputTipoEq.value.trim().toUpperCase();
-        listaTipoEq.innerHTML = '';
+        function pintarListaTiposEquipo() {
+            if (!inputTipoEq || !listaTipoEq) return;
+            const texto = inputTipoEq.value.trim().toUpperCase();
+            listaTipoEq.innerHTML = '';
 
-        tiposEquipoData.filter(function (tipo) {
-            return String(tipo.nombre).toUpperCase().includes(texto);
-        }).forEach(function (tipo) {
-            const item = document.createElement('div');
-            item.className = 'px-3 py-2';
-            item.style.cursor = 'pointer';
-            item.textContent = tipo.nombre;
-            item.addEventListener('mousedown', function (e) {
+            tiposEquipoData.filter(function (tipo) {
+                return String(tipo.nombre).toUpperCase().includes(texto);
+            }).forEach(function (tipo) {
+                const item = document.createElement('div');
+                item.className = 'px-3 py-2';
+                item.style.cursor = 'pointer';
+                item.textContent = tipo.nombre;
+                item.addEventListener('mousedown', function (e) {
+                    e.preventDefault();
+                    inputTipoEq.value = String(tipo.nombre).toUpperCase();
+                    hiddenTipoEq.value = tipo.id;
+                    mostrarCampoNuevoTipo(false);
+                    listaTipoEq.style.display = 'none';
+
+                    mostrarEspecificaciones();
+                    enfocarSerie();
+                });
+                listaTipoEq.appendChild(item);
+            });
+
+            const otro = document.createElement('div');
+            otro.className = 'px-3 py-2 fw-semibold';
+            otro.style.cursor = 'pointer';
+            otro.textContent = 'OTRO';
+            otro.addEventListener('mousedown', function (e) {
                 e.preventDefault();
-                inputTipoEq.value = String(tipo.nombre).toUpperCase();
-                hiddenTipoEq.value = tipo.id;
-                mostrarCampoNuevoTipo(false);
+                inputTipoEq.value = 'OTRO';
+                hiddenTipoEq.value = '';
+                mostrarCampoNuevoTipo(true);
                 listaTipoEq.style.display = 'none';
+                if (inputNuevoTipo) inputNuevoTipo.focus();
                 mostrarEspecificaciones();
             });
-            listaTipoEq.appendChild(item);
-        });
+            listaTipoEq.appendChild(otro);
+            listaTipoEq.style.display = 'block';
+            indiceTipoActivo = -1;
+        }
 
-        const otro = document.createElement('div');
-        otro.className = 'px-3 py-2 fw-semibold';
-        otro.style.cursor = 'pointer';
-        otro.textContent = 'OTRO';
-        otro.addEventListener('mousedown', function (e) {
-            e.preventDefault();
-            inputTipoEq.value = 'OTRO';
-            hiddenTipoEq.value = '';
-            mostrarCampoNuevoTipo(true);
-            listaTipoEq.style.display = 'none';
-            if (inputNuevoTipo) inputNuevoTipo.focus();
-            mostrarEspecificaciones();
-        });
-        listaTipoEq.appendChild(otro);
-        listaTipoEq.style.display = 'block';
-        indiceTipoActivo = -1;
-    }
+        function itemsListaTipo() {
+            return listaTipoEq ? Array.from(listaTipoEq.querySelectorAll('div')) : [];
+        }
 
-    function itemsListaTipo() {
-        return listaTipoEq ? Array.from(listaTipoEq.querySelectorAll('div')) : [];
-    }
-
-    function pintarActivoTipo() {
-        itemsListaTipo().forEach(function (el, i) {
-            el.style.backgroundColor = i === indiceTipoActivo ? '#d1e7dd' : '';
-        });
-        const act = itemsListaTipo()[indiceTipoActivo];
-        if (act) act.scrollIntoView({ block: 'nearest' });
-    }
-
-    function seleccionarItemTipo(item) {
-        if (!item) return;
-        const texto = item.textContent.trim().toUpperCase();
-        if (texto === 'OTRO') {
-            inputTipoEq.value = 'OTRO';
-            hiddenTipoEq.value = '';
-            mostrarCampoNuevoTipo(true);
-            if (inputNuevoTipo) inputNuevoTipo.focus();
-        } else {
-            const tipo = tiposEquipoData.find(function (t) {
-                return String(t.nombre).toUpperCase() === texto;
+        function pintarActivoTipo() {
+            itemsListaTipo().forEach(function (el, i) {
+                el.style.backgroundColor = i === indiceTipoActivo ? '#d1e7dd' : '';
             });
-            inputTipoEq.value = texto;
-            hiddenTipoEq.value = tipo ? tipo.id : '';
-            mostrarCampoNuevoTipo(false);
-        }
-        listaTipoEq.style.display = 'none';
-        mostrarEspecificaciones();
-    }
-
-    if (inputTipoEq) {
-        inputTipoEq.addEventListener('focus', pintarListaTiposEquipo);
-        inputTipoEq.addEventListener('click', pintarListaTiposEquipo);
-        inputTipoEq.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            hiddenTipoEq.value = '';
-            mostrarCampoNuevoTipo(this.value.trim() === 'OTRO');
-            pintarListaTiposEquipo();
-            mostrarEspecificaciones();
-        });
-        inputTipoEq.addEventListener('keydown', function (e) {
-            const items = itemsListaTipo();
-            const visible = listaTipoEq && listaTipoEq.style.display !== 'none' && items.length;
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (!visible) pintarListaTiposEquipo();
-                const lista = itemsListaTipo();
-                indiceTipoActivo = Math.min(indiceTipoActivo + 1, lista.length - 1);
-                pintarActivoTipo();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                indiceTipoActivo = Math.max(indiceTipoActivo - 1, 0);
-                pintarActivoTipo();
-            } else if (e.key === 'Enter') {
-                if (visible && indiceTipoActivo >= 0) {
-                    e.preventDefault();
-                    seleccionarItemTipo(itemsListaTipo()[indiceTipoActivo]);
-                }
-            } else if (e.key === 'Escape') {
-                listaTipoEq.style.display = 'none';
-            }
-        });
-    }
-
-    if (inputNuevoTipo) {
-        inputNuevoTipo.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            mostrarEspecificaciones();
-        });
-        inputNuevoTipo.addEventListener('blur', function () {
-            const existe = tipoYaExiste(this.value);
-            if (!existe) return;
-            inputTipoEq.value = existe.nombre;
-            hiddenTipoEq.value = existe.id;
-            mostrarCampoNuevoTipo(false);
-            mostrarEspecificaciones();
-            if (typeof toastr !== 'undefined') {
-                toastr.warning('ESE TIPO YA ESTÁ REGISTRADO. SE SELECCIONÓ DE LA LISTA.');
-            }
-        });
-    }
-
-    document.addEventListener('click', function (event) {
-        if (listaTipoEq && inputTipoEq && !inputTipoEq.contains(event.target) && !listaTipoEq.contains(event.target)) {
-            listaTipoEq.style.display = 'none';
-        }
-    });
-
-    let contador = container ? container.querySelectorAll('.accesorio-item').length : 0;
-
-    function actualizarMensaje() {
-        if (!mensajeVacio || !container) return;
-        mensajeVacio.style.display = container.querySelector('.accesorio-item') ? 'none' : 'block';
-    }
-
-    function actualizarTipoPersonalizado(accesorio) {
-        const inputTipo = accesorio.querySelector('.tipo-accesorio');
-        const wrap = accesorio.querySelector('.tipo-personalizado-container');
-        const inputPers = accesorio.querySelector('.tipo-personalizado');
-        if (!inputTipo || !wrap || !inputPers) return;
-        const esOtro = inputTipo.value.trim().toUpperCase() === 'OTRO';
-        wrap.style.display = esOtro ? 'block' : 'none';
-        inputPers.required = esOtro;
-    }
-
-    function tipoEquipoActualNombre() {
-        if (inputNuevoTipo && inputNuevoTipo.value.trim()) {
-            return inputNuevoTipo.value.trim().toUpperCase();
-        }
-        return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
-    }
-
-    function sugerirMarcaAccesorio(accesorio) {
-        const inputTipo = accesorio.querySelector('.tipo-accesorio');
-        const inputMarca = accesorio.querySelector('[name*="[marca]"]');
-        if (!inputTipo || !inputMarca) return;
-        const tipoAcc = inputTipo.value.trim().toUpperCase();
-        if (!tipoAcc || tipoAcc === 'OTRO') return;
-        const clave = tipoEquipoActualNombre() + '|' + tipoAcc;
-        const marcaSugerida = ultimasMarcasAccesorio[clave];
-        if (marcaSugerida && !String(inputMarca.value || '').trim()) {
-            inputMarca.value = String(marcaSugerida).toUpperCase();
-        }
-    }
-
-    function validarFilaAccesorio(accesorio) {
-    function errorEn(campo, mensaje) {
-        if (!campo) return;
-        campo.classList.add('is-invalid');
-        let aviso = campo.parentElement.querySelector('.error-toast-campo');
-        if (!aviso) {
-            aviso = document.createElement('div');
-            aviso.className = 'error-toast-campo alert alert-danger py-1 px-2 small mt-1 mb-0';
-            campo.insertAdjacentElement('afterend', aviso);
-        }
-        aviso.textContent = mensaje;
-    }
-
-    function limpiar(campo) {
-        if (!campo) return;
-        campo.classList.remove('is-invalid');
-        const aviso = campo.parentElement.querySelector('.error-toast-campo');
-        if (aviso) aviso.remove();
-    }
-
-    function reglas() {
-        return [
-            [accesorio.querySelector('.tipo-accesorio'), 'El tipo es obligatorio.'],
-            [accesorio.querySelector('[name*="[marca]"]'), 'La marca es obligatoria.'],
-            [accesorio.querySelector('[name*="[num_serie]"]'), 'El número de serie es obligatorio.'],
-            [accesorio.querySelector('[name*="[estado]"]'), 'El estado es obligatorio.']
-        ];
-    }
-
-    function filaTieneDatos() {
-        return reglas().some(function (par) {
-            const v = ((par[0] && par[0].value) || '').trim().toUpperCase();
-            return v && v !== 'REGULAR';
-        }) || (((accesorio.querySelector('[name*="[observaciones]"]') || {}).value || '').trim() !== '');
-    }
-
-    reglas().forEach(function (par) {
-        const campo = par[0];
-        if (!campo) return;
-        campo.addEventListener('blur', function () {
-            if (!filaTieneDatos()) {
-                limpiar(campo);
-                return;
-            }
-            if (!this.value.trim()) errorEn(this, par[1]);
-        });
-        campo.addEventListener('input', function () {
-            if (this.value.trim()) limpiar(this);
-        });
-        campo.addEventListener('change', function () {
-            if (this.value.trim()) limpiar(this);
-        });
-    });
-}
-
-    function configurarCombobox(accesorio) {
-        const input = accesorio.querySelector('.tipo-accesorio');
-        const lista = accesorio.querySelector('.lista-tipos-accesorio');
-        if (!input || !lista) return;
-        let indiceAcc = -1;
-
-        function itemsAcc() {
-            return Array.from(lista.querySelectorAll('div'));
-        }
-
-        function pintarActivoAcc() {
-            itemsAcc().forEach(function (el, i) {
-                el.style.backgroundColor = i === indiceAcc ? '#d1e7dd' : '';
-            });
-            const act = itemsAcc()[indiceAcc];
+            const act = itemsListaTipo()[indiceTipoActivo];
             if (act) act.scrollIntoView({ block: 'nearest' });
         }
 
-        function elegirTipoAcc(texto) {
-            input.value = String(texto).toUpperCase();
-            lista.style.display = 'none';
-            actualizarTipoPersonalizado(accesorio);
-            sugerirMarcaAccesorio(accesorio);
-        }
+        function seleccionarItemTipo(item) {
+            if (!item) return;
 
-        function mostrarLista() {
-            const texto = input.value.trim().toUpperCase();
-            lista.innerHTML = '';
-            indiceAcc = -1;
-            (tiposAccesorios || []).filter(function (tipo) {
-                return String(tipo).toUpperCase().includes(texto);
-            }).forEach(function (tipo) {
-                const opcion = document.createElement('div');
-                opcion.className = 'px-3 py-2';
-                opcion.style.cursor = 'pointer';
-                opcion.textContent = tipo;
-                opcion.addEventListener('mousedown', function (event) {
-                    event.preventDefault();
-                    elegirTipoAcc(tipo);
+            const serie = document.getElementById('num_serie');
+            if (serie) setTimeout(function () { serie.focus(); }, 50);
+
+            const texto = item.textContent.trim().toUpperCase();
+            if (texto === 'OTRO') {
+                inputTipoEq.value = 'OTRO';
+                hiddenTipoEq.value = '';
+                mostrarCampoNuevoTipo(true);
+                if (inputNuevoTipo) inputNuevoTipo.focus();
+            } else {
+                const tipo = tiposEquipoData.find(function (t) {
+                    return String(t.nombre).toUpperCase() === texto;
                 });
-                lista.appendChild(opcion);
-            });
-            const opcionOtro = document.createElement('div');
-            opcionOtro.className = 'px-3 py-2 fw-semibold';
-            opcionOtro.style.cursor = 'pointer';
-            opcionOtro.textContent = 'OTRO';
-            opcionOtro.addEventListener('mousedown', function (event) {
-                event.preventDefault();
-                elegirTipoAcc('OTRO');
-            });
-            lista.appendChild(opcionOtro);
-            lista.style.display = 'block';
+                inputTipoEq.value = texto;
+                hiddenTipoEq.value = tipo ? tipo.id : '';
+                mostrarCampoNuevoTipo(false);
+            }
+            listaTipoEq.style.display = 'none';
+            mostrarEspecificaciones();
+            if (texto !== 'OTRO') enfocarSerie();
         }
 
-        input.addEventListener('input', function () {
-            mostrarLista();
-            actualizarTipoPersonalizado(accesorio);
-        });
-        input.addEventListener('focus', mostrarLista);
-        input.addEventListener('click', mostrarLista);
-        input.addEventListener('keydown', function (e) {
-            const items = itemsAcc();
-            const visible = lista.style.display !== 'none' && items.length;
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (!visible) mostrarLista();
-                indiceAcc = Math.min(indiceAcc + 1, itemsAcc().length - 1);
-                pintarActivoAcc();
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                indiceAcc = Math.max(indiceAcc - 1, 0);
-                pintarActivoAcc();
-            } else if (e.key === 'Enter' && visible && indiceAcc >= 0) {
-                e.preventDefault();
-                elegirTipoAcc(itemsAcc()[indiceAcc].textContent);
-            } else if (e.key === 'Escape') {
-                lista.style.display = 'none';
+        if (inputTipoEq) {
+            inputTipoEq.addEventListener('focus', pintarListaTiposEquipo);
+            inputTipoEq.addEventListener('click', pintarListaTiposEquipo);
+            inputTipoEq.addEventListener('input', function () {
+                this.value = this.value.toUpperCase();
+                hiddenTipoEq.value = '';
+                mostrarCampoNuevoTipo(this.value.trim() === 'OTRO');
+                pintarListaTiposEquipo();
+                mostrarEspecificaciones();
+            });
+            inputTipoEq.addEventListener('keydown', function (e) {
+                const items = itemsListaTipo();
+                const visible = listaTipoEq && listaTipoEq.style.display !== 'none' && items.length;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (!visible) pintarListaTiposEquipo();
+                    const lista = itemsListaTipo();
+                    indiceTipoActivo = Math.min(indiceTipoActivo + 1, lista.length - 1);
+                    pintarActivoTipo();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    indiceTipoActivo = Math.max(indiceTipoActivo - 1, 0);
+                    pintarActivoTipo();
+                } else if (e.key === 'Enter') {
+                    if (visible && indiceTipoActivo >= 0) {
+                        e.preventDefault();
+                        seleccionarItemTipo(itemsListaTipo()[indiceTipoActivo]);
+                    }
+                } else if (e.key === 'Escape') {
+                    listaTipoEq.style.display = 'none';
+                }
+            });
+        }
+
+        if (inputNuevoTipo) {
+            inputNuevoTipo.addEventListener('input', function () {
+                this.value = this.value.toUpperCase();
+                mostrarEspecificaciones();
+            });
+            inputNuevoTipo.addEventListener('blur', function () {
+                const existe = tipoYaExiste(this.value);
+                if (existe) {
+                    inputTipoEq.value = existe.nombre;
+                    hiddenTipoEq.value = existe.id;
+                    mostrarCampoNuevoTipo(false);
+                    mostrarEspecificaciones();
+                    if (typeof toastr !== 'undefined') {
+                        toastr.warning('ESE TIPO YA ESTÁ REGISTRADO. SE SELECCIONÓ DE LA LISTA.');
+                    }
+                }
+                if (this.value.trim()) enfocarSerie();
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            if (listaTipoEq && inputTipoEq && !inputTipoEq.contains(event.target) && !listaTipoEq.contains(event.target)) {
+                listaTipoEq.style.display = 'none';
             }
         });
-    }
 
-    if (container) {
-        container.querySelectorAll('.accesorio-item').forEach(function (accesorio) {
-            configurarCombobox(accesorio);
-            actualizarTipoPersonalizado(accesorio);
-            validarFilaAccesorio(accesorio);
-        });
-        actualizarMensaje();
+        let contador = container ? container.querySelectorAll('.accesorio-item').length : 0;
 
-        if (botonAgregar) {
-            botonAgregar.addEventListener('click', function () {
-                if (!tipoEquipoListo()) return;
-                const accesorio = document.createElement('div');
-                accesorio.className = 'accesorio-item border rounded p-3 mb-3';
-                accesorio.innerHTML = `
+        function actualizarMensaje() {
+            if (!mensajeVacio || !container) return;
+            mensajeVacio.style.display = container.querySelector('.accesorio-item') ? 'none' : 'block';
+        }
+
+        function actualizarTipoPersonalizado(accesorio) {
+            const inputTipo = accesorio.querySelector('.tipo-accesorio');
+            const wrap = accesorio.querySelector('.tipo-personalizado-container');
+            const inputPers = accesorio.querySelector('.tipo-personalizado');
+            if (!inputTipo || !wrap || !inputPers) return;
+            const esOtro = inputTipo.value.trim().toUpperCase() === 'OTRO';
+            wrap.style.display = esOtro ? 'block' : 'none';
+            inputPers.required = esOtro;
+        }
+
+        function tipoEquipoActualNombre() {
+            if (inputNuevoTipo && inputNuevoTipo.value.trim()) {
+                return inputNuevoTipo.value.trim().toUpperCase();
+            }
+            return (inputTipoEq ? inputTipoEq.value : '').trim().toUpperCase();
+        }
+
+        function sugerirMarcaAccesorio(accesorio) {
+            const inputTipo = accesorio.querySelector('.tipo-accesorio');
+            const inputMarca = accesorio.querySelector('[name*="[marca]"]');
+            if (!inputTipo || !inputMarca) return;
+            const tipoAcc = inputTipo.value.trim().toUpperCase();
+            if (!tipoAcc || tipoAcc === 'OTRO') return;
+            const clave = tipoEquipoActualNombre() + '|' + tipoAcc;
+            const marcaSugerida = ultimasMarcasAccesorio[clave];
+            if (marcaSugerida && !String(inputMarca.value || '').trim()) {
+                inputMarca.value = String(marcaSugerida).toUpperCase();
+            }
+        }
+
+        function validarFilaAccesorio(accesorio) {
+            function errorEn(campo, mensaje) {
+                if (!campo) return;
+                campo.classList.add('is-invalid');
+                let aviso = campo.parentElement.querySelector('.error-toast-campo');
+                if (!aviso) {
+                    aviso = document.createElement('div');
+                    aviso.className = 'error-toast-campo text-danger small mt-1 mb-0';
+                    campo.insertAdjacentElement('afterend', aviso);
+                }
+                aviso.textContent = mensaje;
+            }
+
+            function limpiar(campo) {
+                if (!campo) return;
+                campo.classList.remove('is-invalid');
+                const aviso = campo.parentElement.querySelector('.error-toast-campo');
+                if (aviso) aviso.remove();
+            }
+
+            [
+                [accesorio.querySelector('.tipo-accesorio'), 'El tipo del accesorio es obligatorio.'],
+                [accesorio.querySelector('.tipo-personalizado'), 'Especifique el tipo de accesorio.'],
+                [accesorio.querySelector('[name*="[marca]"]'), 'La marca del accesorio es obligatoria.'],
+                [accesorio.querySelector('[name*="[num_serie]"]'), 'El número de serie del accesorio es obligatorio.'],
+                [accesorio.querySelector('[name*="[estado]"]'), 'El estado del accesorio es obligatorio.']
+            ].forEach(function (par) {
+                const campo = par[0];
+                if (!campo) return;
+
+                function revisar() {
+                    if (campo.classList.contains('tipo-personalizado')) {
+                        const tipo = accesorio.querySelector('.tipo-accesorio');
+                        const esOtro = tipo && tipo.value.trim().toUpperCase() === 'OTRO';
+                        if (!esOtro) {
+                            limpiar(campo);
+                            return;
+                        }
+                    }
+                    if (!campo.value.trim()) errorEn(campo, par[1]);
+                    else limpiar(campo);
+                }
+
+                /*campo.addEventListener('focus', revisar);
+                campo.addEventListener('blur', revisar);
+                campo.addEventListener('input', revisar);
+                campo.addEventListener('change', revisar);*/
+                campo.addEventListener('blur', function () {
+                    if (!this.value.trim()) errorEn(this, par[1]);
+                    else limpiar(this);
+                });
+                campo.addEventListener('input', function () {
+                    if (this.value.trim()) limpiar(this);
+                });
+                campo.addEventListener('change', function () {
+                    if (this.value.trim()) limpiar(this);
+                });
+            });
+        }
+
+        function configurarCombobox(accesorio) {
+            const input = accesorio.querySelector('.tipo-accesorio');
+            const lista = accesorio.querySelector('.lista-tipos-accesorio');
+            if (!input || !lista) return;
+            let indiceAcc = -1;
+
+            function itemsAcc() {
+                return Array.from(lista.querySelectorAll('div'));
+            }
+
+            function pintarActivoAcc() {
+                itemsAcc().forEach(function (el, i) {
+                    el.style.backgroundColor = i === indiceAcc ? '#d1e7dd' : '';
+                });
+                const act = itemsAcc()[indiceAcc];
+                if (act) act.scrollIntoView({ block: 'nearest' });
+            }
+
+            function elegirTipoAcc(texto) {
+                input.value = String(texto).toUpperCase();
+                lista.style.display = 'none';
+                actualizarTipoPersonalizado(accesorio);
+                sugerirMarcaAccesorio(accesorio);
+            }
+
+            function mostrarLista() {
+                const texto = input.value.trim().toUpperCase();
+                lista.innerHTML = '';
+                indiceAcc = -1;
+                (tiposAccesorios || []).filter(function (tipo) {
+                    return String(tipo).toUpperCase().includes(texto);
+                }).forEach(function (tipo) {
+                    const opcion = document.createElement('div');
+                    opcion.className = 'px-3 py-2';
+                    opcion.style.cursor = 'pointer';
+                    opcion.textContent = tipo;
+                    opcion.addEventListener('mousedown', function (event) {
+                        event.preventDefault();
+                        elegirTipoAcc(tipo);
+                    });
+                    lista.appendChild(opcion);
+                });
+                const opcionOtro = document.createElement('div');
+                opcionOtro.className = 'px-3 py-2 fw-semibold';
+                opcionOtro.style.cursor = 'pointer';
+                opcionOtro.textContent = 'OTRO';
+                opcionOtro.addEventListener('mousedown', function (event) {
+                    event.preventDefault();
+                    elegirTipoAcc('OTRO');
+                });
+                lista.appendChild(opcionOtro);
+                lista.style.display = 'block';
+            }
+
+            input.addEventListener('input', function () {
+                mostrarLista();
+                actualizarTipoPersonalizado(accesorio);
+            });
+            input.addEventListener('focus', mostrarLista);
+            input.addEventListener('click', mostrarLista);
+            input.addEventListener('keydown', function (e) {
+                const items = itemsAcc();
+                const visible = lista.style.display !== 'none' && items.length;
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (!visible) mostrarLista();
+                    indiceAcc = Math.min(indiceAcc + 1, itemsAcc().length - 1);
+                    pintarActivoAcc();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    indiceAcc = Math.max(indiceAcc - 1, 0);
+                    pintarActivoAcc();
+                } else if (e.key === 'Enter' && visible && indiceAcc >= 0) {
+                    e.preventDefault();
+                    elegirTipoAcc(itemsAcc()[indiceAcc].textContent);
+                } else if (e.key === 'Escape') {
+                    lista.style.display = 'none';
+                }
+            });
+        }
+
+        if (container) {
+            container.querySelectorAll('.accesorio-item').forEach(function (accesorio) {
+                configurarCombobox(accesorio);
+                actualizarTipoPersonalizado(accesorio);
+                validarFilaAccesorio(accesorio);
+            });
+            actualizarMensaje();
+
+            if (botonAgregar) {
+                botonAgregar.addEventListener('click', function () {
+                    if (!tipoEquipoListo()) return;
+                    const accesorio = document.createElement('div');
+                    accesorio.className = 'accesorio-item border rounded p-3 mb-3';
+                    accesorio.innerHTML = `
                     <div class="row">
                         <div class="col-md-2 mb-3">
                             <label class="form-label">Tipo</label>
@@ -1684,152 +1712,192 @@ validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
                             <button type="button" class="btn btn-danger btn-eliminar-accesorio"><i class="bi bi-trash"></i></button>
                         </div>
                     </div>`;
-                container.appendChild(accesorio);
-                accesorio.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
-                    campo.addEventListener('input', function () { aMayusculas(this); });
+                    container.appendChild(accesorio);
+                    accesorio.querySelectorAll('.campo-mayusculas').forEach(function (campo) {
+                        campo.addEventListener('input', function () { aMayusculas(this); });
+                    });
+                    configurarCombobox(accesorio);
+                    validarFilaAccesorio(accesorio);
+                    contador++;
+                    actualizarMensaje();
                 });
-                configurarCombobox(accesorio);
-                validarFilaAccesorio(accesorio);
-                contador++;
-                actualizarMensaje();
+            }
+
+            container.addEventListener('click', function (event) {
+                const botonEliminar = event.target.closest('.btn-eliminar-accesorio');
+                if (!botonEliminar) return;
+                const accesorio = botonEliminar.closest('.accesorio-item');
+                if (!accesorio) return;
+
+                function quitar() {
+                    accesorio.remove();
+                    actualizarMensaje();
+                }
+
+                function accesorioConDatos(item) {
+                    const tipo = ((item.querySelector('.tipo-accesorio') || {}).value || '').trim();
+                    const pers = ((item.querySelector('.tipo-personalizado') || {}).value || '').trim();
+                    const marca = ((item.querySelector('[name*="[marca]"]') || {}).value || '').trim();
+                    const serie = ((item.querySelector('[name*="[num_serie]"]') || {}).value || '').trim();
+                    const obs = ((item.querySelector('[name*="[observaciones]"]') || {}).value || '').trim();
+                    return !!(tipo || pers || marca || serie || obs);
+                }
+
+                if (!accesorioConDatos(accesorio)) {
+                    quitar();
+                    return;
+                }
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '¿Eliminar accesorio?',
+                        text: 'Esta acción no se puede deshacer.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
+                    }).then(function (r) {
+                        if (r.isConfirmed) quitar();
+                    });
+                } else if (confirm('¿Eliminar accesorio?')) {
+                    quitar();
+                }
             });
         }
 
-        container.addEventListener('click', function (event) {
-            const botonEliminar = event.target.closest('.btn-eliminar-accesorio');
-            if (!botonEliminar) return;
-            const accesorio = botonEliminar.closest('.accesorio-item');
-            if (!accesorio) return;
-
-            function quitar() {
-                accesorio.remove();
-                actualizarMensaje();
-            }
-
-            function accesorioConDatos(item) {
-                const tipo = ((item.querySelector('.tipo-accesorio') || {}).value || '').trim();
-                const pers = ((item.querySelector('.tipo-personalizado') || {}).value || '').trim();
-                const marca = ((item.querySelector('[name*="[marca]"]') || {}).value || '').trim();
-                const serie = ((item.querySelector('[name*="[num_serie]"]') || {}).value || '').trim();
-                const obs = ((item.querySelector('[name*="[observaciones]"]') || {}).value || '').trim();
-                return !!(tipo || pers || marca || serie || obs);
-            }
-
-            if (!accesorioConDatos(accesorio)) {
-                quitar();
-                return;
-            }
-
-            if (typeof Swal !== 'undefined') {
-                Swal.fire({
-                    icon: 'warning',
-                    title: '¿Eliminar accesorio?',
-                    text: 'Esta acción no se puede deshacer.',
-                    showCancelButton: true,
-                    confirmButtonColor: '#dc3545',
-                    cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Sí, eliminar',
-                    cancelButtonText: 'Cancelar',
-                    reverseButtons: true
-                }).then(function (r) {
-                    if (r.isConfirmed) quitar();
-                });
-            } else if (confirm('¿Eliminar accesorio?')) {
-                quitar();
-            }
-        });
-    }
-
-    document.addEventListener('click', function (event) {
-        document.querySelectorAll('.lista-tipos-accesorio').forEach(function (lista) {
-            const accesorio = lista.closest('.accesorio-item');
-            if (accesorio && !accesorio.contains(event.target)) lista.style.display = 'none';
-        });
-    });
-
-            const form = inputTipoEq ? inputTipoEq.closest('form') : null;
-                localStorage.setItem(
-                    'equipos_filtros_nuevo_equipo',
-                    '1'
-                );
-
-                if (form) {
-    form.addEventListener('submit', function () {
-        idsBloqueados.forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) { el.disabled = false; el.readOnly = false; }
+        document.addEventListener('click', function (event) {
+            document.querySelectorAll('.lista-tipos-accesorio').forEach(function (lista) {
+                const accesorio = lista.closest('.accesorio-item');
+                if (accesorio && !accesorio.contains(event.target)) lista.style.display = 'none';
+            });
         });
 
-        @if(!($equipo->exists ?? false))
-        localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
-        @endif
-    });
-}
-
-    /*
-     * =========================================================
-     * VALIDACIÓN AL ENVIAR EL FORMULARIO
-     * (mismo formato usado en prestamo/form.blade.php)
-     * =========================================================
-     */
+        const form = inputTipoEq ? inputTipoEq.closest('form') : null;
+        localStorage.setItem(
+            'equipos_filtros_nuevo_equipo',
+            '1'
+        );
 
         if (form) {
-    form.addEventListener('submit', function (event) {
-        this.querySelectorAll('[disabled]').forEach(function (el) {
-            el.disabled = false;
-        });
+            form.addEventListener('submit', function () {
+                idsBloqueados.forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el) { el.disabled = false; el.readOnly = false; }
+                });
 
-        limpiarErroresCampos();
-
-        let primero = null;
-
-        function exigir(campo, mensaje) {
-            if (!campo || String(campo.value || '').trim() === '') {
-                marcarError(campo, mensaje);
-                if (!primero) primero = campo;
-                return;
-            }
-            limpiarErrorCampo(campo);
-        }
-
-        const tipoId = document.getElementById('tipo_equipo_id');
-        const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
-        const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
-        if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
-            exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
-        }
-
-        exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
-        exigir(document.getElementById('marca'), 'La marca es obligatoria.');
-        exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
-        exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
-
-        const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
-        const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
-
-        if (laptopVisible) {
-            exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
-            exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
-            exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
-        }
-        if (equipoVisible) {
-            exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
-        }
-
-        if (primero) {
-            event.preventDefault();
-            primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(function () { primero.focus(); }, 200);
-        }
+                @if(!($equipo->exists ?? false))
+                    localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
+                @endif
     });
-}
+        }
 
-    mostrarEspecificaciones();
+        /*
+         * =========================================================
+         * VALIDACIÓN AL ENVIAR EL FORMULARIO
+         * (mismo formato usado en prestamo/form.blade.php)
+         * =========================================================
+         */
 
-});
+        if (form) {
+            form.addEventListener('submit', function (event) {
+                this.querySelectorAll('[disabled]').forEach(function (el) {
+                    el.disabled = false;
+                });
+
+                limpiarErroresCampos();
+
+                let primero = null;
+
+                function exigir(campo, mensaje) {
+                    if (!campo || String(campo.value || '').trim() === '') {
+                        marcarError(campo, mensaje);
+                        if (!primero) primero = campo;
+                        return;
+                    }
+                    limpiarErrorCampo(campo);
+                }
+
+                const tipoId = document.getElementById('tipo_equipo_id');
+                const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
+                const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
+                if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
+                    exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
+                }
+
+                exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
+                exigir(document.getElementById('marca'), 'La marca es obligatoria.');
+                exigir(document.getElementById('modelo'), 'El modelo es obligatorio.');
+                exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
+                exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
+
+                const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
+                const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
+
+                if (laptopVisible) {
+                    exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
+                    exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
+                    exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
+                }
+                if (equipoVisible) {
+                    exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
+                }
+
+                if (container) {
+                    container.querySelectorAll('.accesorio-item').forEach(function (fila) {
+                        const tipo = fila.querySelector('.tipo-accesorio');
+                        const personalizado = fila.querySelector('.tipo-personalizado');
+                        const marca = fila.querySelector('[name*="[marca]"]');
+                        const serie = fila.querySelector('[name*="[num_serie]"]');
+                        const estado = fila.querySelector('[name*="[estado]"]');
+                        const tipoTxt = tipo ? tipo.value.trim().toUpperCase() : '';
+                        const marcaTxt = marca ? marca.value.trim() : '';
+                        const serieTxt = serie ? serie.value.trim() : '';
+
+                        if (!tipoTxt && !marcaTxt && !serieTxt) {
+                            exigir(tipo, 'Complete el accesorio o elimínelo antes de guardar.');
+                            exigir(marca, 'La marca del accesorio es obligatoria.');
+                            exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                            return;
+                        }
+
+                        exigir(tipo, 'El tipo del accesorio es obligatorio.');
+                        if (tipoTxt === 'OTRO') {
+                            exigir(personalizado, 'Especifique el tipo de accesorio.');
+                        }
+                        exigir(marca, 'La marca del accesorio es obligatoria.');
+                        exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                        exigir(estado, 'El estado del accesorio es obligatorio.');
+                    });
+                }
+
+                if (primero) {
+                    event.preventDefault();
+                    primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function () { primero.focus(); }, 200);
+                }
+            });
+        }
+
+        mostrarEspecificaciones();
+
+    });
 </script>
 
+{{-- Estilos --}}
 <style>
+    /*
+    .ubicacion-vacia {
+        border-color: #dc3545;
+        color: #dc3545;
+    }
+
+    .ubicacion-vacia option {
+        color: #212529;
+    }*/
+
     /* =====================================================
        COMBOBOX DE TIPOS DE ACCESORIOS
        ===================================================== */
@@ -1893,27 +1961,28 @@ validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
     }
 
     .card,
-.card-body,
-#accesorios-container,
-.accesorio-item,
-.accesorio-item .row {
-    overflow: visible !important;
-}
-.btn-eliminar-accesorio {
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    max-width: 36px !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
+    .card-body,
+    #accesorios-container,
+    .accesorio-item,
+    .accesorio-item .row {
+        overflow: visible !important;
+    }
 
-    padding: 0 !important;
-    margin: 0 !important;
+    .btn-eliminar-accesorio {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        max-width: 36px !important;
+        min-height: 36px !important;
+        max-height: 36px !important;
 
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+        padding: 0 !important;
+        margin: 0 !important;
 
-    flex: 0 0 40px !important;
-}
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+
+        flex: 0 0 40px !important;
+    }
 </style>
