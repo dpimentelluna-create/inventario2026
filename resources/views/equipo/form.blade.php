@@ -1631,6 +1631,10 @@
                 lista.style.display = 'none';
                 actualizarTipoPersonalizado(accesorio);
                 sugerirMarcaAccesorio(accesorio);
+                if (String(texto).toUpperCase() === 'OTRO') {
+                    const personalizado = accesorio.querySelector('.tipo-personalizado');
+                    if (personalizado) setTimeout(function () { personalizado.focus(); }, 50);
+                }
             }
 
             function mostrarLista() {

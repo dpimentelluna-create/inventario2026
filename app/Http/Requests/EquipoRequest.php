@@ -47,7 +47,7 @@ class EquipoRequest extends FormRequest
                 Rule::unique('tipos_equipo', 'nombre'),
             ],
             'marca' => ['required', 'string', 'max:80'],
-            'modelo' => ['nullable', 'string', 'max:100'],
+            'modelo' => ['required', 'string', 'max:100'],
             'num_serie' => ['required', 'string', 'max:100'],
             'ubicacion_id' => ['required', 'exists:ubicaciones,id'],
             'fecha_registro' => ['required', 'date'],
@@ -73,7 +73,7 @@ class EquipoRequest extends FormRequest
             'accesorios.*.observaciones' => ['nullable', 'string'],
         ];
     }
-    
+
     public function withValidator($validator): void
 {
     $validator->after(function ($validator) {
@@ -97,9 +97,10 @@ class EquipoRequest extends FormRequest
             'estado_laptop.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'estado_equipo.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'num_serie.required' => 'El número de serie es obligatorio.',
+            'marca.required' => 'La marca es obligatoria.',
+            'modelo.required' => 'El modelo es obligatorio.',
             'tipo_equipo_id.required_without' => 'Seleccione un tipo de equipo o registre uno nuevo.',
             'nuevo_tipo_equipo.required_without' => 'Especifique el nuevo tipo de equipo.',
-
             'accesorios.*.marca.required_with' => 'La marca del accesorio es obligatoria.',
             'accesorios.*.num_serie.required_with' => 'El número de serie del accesorio es obligatorio.',
             'accesorios.*.estado.required_with' => 'El estado del accesorio es obligatorio.',
@@ -112,7 +113,6 @@ class EquipoRequest extends FormRequest
         if ($valor === null || trim((string) $valor) === '') {
             return null;
         }
-
         return mb_strtoupper(trim((string) $valor), 'UTF-8');
     }
 
