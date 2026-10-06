@@ -361,19 +361,19 @@
                                 @foreach ($equipos as $i => $equipo)
 
                                     @php
-                                        $estado = strtoupper(
-                                            $equipo->especificacionesLaptops->estado
-                                            ?? $equipo->especificacionesEquipo->estado
-                                            ?? ''
-                                        );
+    $estado = strtoupper(
+        $equipo->especificacionesLaptops->estado
+        ?? $equipo->especificacionesEquipo->estado
+        ?? ''
+    );
 
-                                        $fechaIso = $equipo->fecha_registro
-                                            ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
-                                            : '';
+    $fechaIso = $equipo->fecha_registro
+        ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
+        : '';
 
-                                        $fechaVista = $fechaIso
-                                            ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y')
-                                            : '-';
+    $fechaVista = $fechaIso
+        ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y')
+        : '-';
                                     @endphp
 
                                     <tr data-equipo-id="{{ $equipo->id }}">
@@ -412,9 +412,9 @@
 
                                         <td>
                                             {{
-                                                $equipo->especificacionesLaptops->observaciones
-                                                ?? $equipo->especificacionesEquipo->observaciones
-                                                ?? '-'
+        $equipo->especificacionesLaptops->observaciones
+        ?? $equipo->especificacionesEquipo->observaciones
+        ?? '-'
                                             }}
                                         </td>
 
@@ -928,33 +928,24 @@ $('#btn_exportar_excel').on('click', function (e) {
     }
 
     function cargarPaginaActual() {
-        const nuevoEquipo = localStorage.getItem(STORAGE_NUEVO_EQUIPO);
-
-        if (nuevoEquipo === '1') {
-            localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
-            setTimeout(function () {
-                const cantidadPaginas = tabla.page.info().pages;
-                if (cantidadPaginas > 0) {
-                    const ultimaPagina = cantidadPaginas - 1;
-                    tabla.page(ultimaPagina).draw('page');
-                    localStorage.setItem(STORAGE_PAGE_KEY, String(ultimaPagina));
-                }
-            }, 100);
-            return;
-        }
-
-        const paginaGuardada = localStorage.getItem(STORAGE_PAGE_KEY);
-        if (paginaGuardada === null) return;
-
-        const pagina = parseInt(paginaGuardada, 10);
-        if (isNaN(pagina) || pagina < 0) return;
-
-        const paginasDisponibles = tabla.page.info().pages;
-        if (paginasDisponibles === 0) return;
-
-        const paginaFinal = Math.min(pagina, paginasDisponibles - 1);
-        tabla.page(paginaFinal).draw('page');
+    const nuevoEquipo = localStorage.getItem(STORAGE_NUEVO_EQUIPO);
+    if (nuevoEquipo === '1') {
+        localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
+        return;
     }
+
+    const paginaGuardada = localStorage.getItem(STORAGE_PAGE_KEY);
+    if (paginaGuardada === null) return;
+
+    const pagina = parseInt(paginaGuardada, 10);
+    if (isNaN(pagina) || pagina < 0) return;
+
+    const paginasDisponibles = tabla.page.info().pages;
+    if (paginasDisponibles === 0) return;
+
+    const paginaFinal = Math.min(pagina, paginasDisponibles - 1);
+    tabla.page(paginaFinal).draw('page');
+}
 
     tabla.on('page.dt', function () {
         guardarPaginaActual();
@@ -1275,15 +1266,18 @@ $('#btn_exportar_excel').on('click', function (e) {
      * =========================================================
      */
 
-    const filtrosRecuperados = cargarEstadoFiltros();
+    const vieneDeCrear = localStorage.getItem(STORAGE_NUEVO_EQUIPO) === '1'
+    || @json(session('equipo_accion')) === 'crear';
 
-    if (filtrosRecuperados) {
-        actualizarEncadenados();
-        actualizarSeries();
-        actualizarBadge();
-        tabla.draw();
-        mostrarCoincidencias();
-    }
+const filtrosRecuperados = !vieneDeCrear && cargarEstadoFiltros();
+
+if (filtrosRecuperados) {
+    actualizarEncadenados();
+    actualizarSeries();
+    actualizarBadge();
+    tabla.draw();
+    mostrarCoincidencias();
+}
 
     /*
      * =========================================================
@@ -1292,59 +1286,63 @@ $('#btn_exportar_excel').on('click', function (e) {
      */
 
     function pintarFilaEquipo() {
-        const idFila = @json(session('equipo_resaltado')) || sessionStorage.getItem('equipo_resaltado');
-        const accFila = @json(session('equipo_accion')) || sessionStorage.getItem('equipo_accion');
+    const idFila = @json(session('equipo_resaltado')) || sessionStorage.getItem('equipo_resaltado');
+    const accFila = @json(session('equipo_accion')) || sessionStorage.getItem('equipo_accion');
 
-        sessionStorage.removeItem('equipo_resaltado');
-        sessionStorage.removeItem('equipo_accion');
+    sessionStorage.removeItem('equipo_resaltado');
+    sessionStorage.removeItem('equipo_accion');
 
-        if (!idFila || !accFila) return;
+    if (!idFila || !accFila) return;
 
-        const cls = accFila === 'crear' ? 'fila-crear'
-            : accFila === 'editar' ? 'fila-editar'
-            : 'fila-ver';
+    const cls = accFila === 'crear' ? 'fila-crear'
+        : accFila === 'editar' ? 'fila-editar'
+        : 'fila-ver';
 
-        let nodo = null;
-        tabla.rows({ page: 'all' }).every(function () {
-            const tr = this.node();
-            if (tr && String(tr.getAttribute('data-equipo-id')) === String(idFila)) {
-                nodo = tr;
-            }
+    let nodo = null;
+    tabla.rows({ page: 'all' }).every(function () {
+        const tr = this.node();
+        if (tr && String(tr.getAttribute('data-equipo-id')) === String(idFila)) {
+            nodo = tr;
+        }
+    });
+    if (!nodo) return;
+
+    const indiceInterno = tabla.row(nodo).index();
+    const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
+    const posicion = visibles.indexOf(indiceInterno);
+    if (posicion === -1) return;
+
+    const pagina = Math.floor(posicion / tabla.page.len());
+    tabla.page(pagina).draw('page');
+    localStorage.setItem(STORAGE_PAGE_KEY, String(pagina));
+
+    setTimeout(function () {
+        const visible = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
+        if (!visible) return;
+
+        visible.classList.add(cls);
+
+        const color = accFila === 'crear' ? '#d4edda'
+            : accFila === 'editar' ? '#fff3cd'
+            : '#cfe2ff';
+
+        visible.querySelectorAll('td').forEach(function (td) {
+            td.style.backgroundColor = color;
         });
-        if (!nodo) return;
 
-        const indice = tabla.row(nodo).index();
-        const porPagina = tabla.page.len();
-        const pagina = Math.floor(indice / porPagina);
-        tabla.page(pagina).draw('page');
+        visible.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+        });
 
         setTimeout(function () {
-            const visible = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
-            if (!visible) return;
-
-            visible.classList.add(cls);
-
-            const color = accFila === 'crear' ? '#d4edda'
-                : accFila === 'editar' ? '#fff3cd'
-                : '#cfe2ff';
-
             visible.querySelectorAll('td').forEach(function (td) {
-                td.style.backgroundColor = color;
+                td.style.backgroundColor = '';
             });
-
-            visible.scrollIntoView({
-                behavior: 'smooth',
-                block: 'center',
-                inline: 'nearest'
-            });
-
-            setTimeout(function () {
-                visible.querySelectorAll('td').forEach(function (td) {
-                    td.style.backgroundColor = '';
-                });
-            }, 3000);
-        }, 50);
-    }
+        }, 3000);
+    }, 50);
+}
 
     // Exponer para pageshow (bfcache)
     window.pintarFilaEquipo = pintarFilaEquipo;
