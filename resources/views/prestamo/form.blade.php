@@ -2287,6 +2287,10 @@ if (formularioPrestamo) {
 
             return;
         }
+
+        @if(!($prestamo->exists ?? false))
+localStorage.setItem('prestamos_filtros_estado_nuevo_prestamo', '1');
+@endif
     });
 }
 
@@ -2639,59 +2643,59 @@ function validarAccesoriosEquipo(equipo) {
     return errores;
 }
 
-function agregarEquipo(equipo) {
+    function agregarEquipo(equipo) {
 
-    if (!parte1Completa()) {
-    const caja = document.getElementById('error_equipos_parte2');
-    if (caja) {
-        caja.style.display = 'block';
-        caja.textContent = 'Complete y valide la Parte 1 antes de seleccionar un equipo.';
+        if (!parte1Completa()) {
+            const caja = document.getElementById('error_equipos_parte2');
+            if (caja) {
+                caja.style.display = 'block';
+                caja.textContent = 'Complete y valide la Parte 1 antes de seleccionar un equipo.';
+            }
+            return;
+        }
+
+        if (!equipo || !equipo.id) {
+
+            console.error(
+                'Equipo inválido:',
+                equipo
+            );
+
+            return;
+        }
+
+        const erroresAccesorios = validarAccesoriosEquipo(equipo);
+        if (erroresAccesorios.length > 0) {
+            mostrarToast(
+                'No se puede agregar el equipo. Accesorios incompletos: ' + erroresAccesorios.join(' '),
+                'danger'
+            );
+            return;
+        }
+
+        const equipoId =
+            String(equipo.id);
+
+        if (equiposSeleccionados.has(equipoId)) {
+            return;
+        }
+
+
+        /*
+         * Registrar equipo seleccionado.
+         */
+
+        equiposSeleccionados.add(equipoId);
+        mostrarEquipoSeleccionado(equipo);
+        ocultarCamposBusqueda();
+        mostrarToast('Equipo seleccionado', 'success');
+
+        const cards = document.querySelectorAll('.equipo-seleccionado');
+        const ultima = cards[cards.length - 1];
+        if (ultima) {
+            ultima.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
-    return;
-}
-
-    if (!equipo || !equipo.id) {
-
-        console.error(
-            'Equipo inválido:',
-            equipo
-        );
-
-        return;
-    }
-
-    const erroresAccesorios = validarAccesoriosEquipo(equipo);
-    if (erroresAccesorios.length > 0) {
-        mostrarToast(
-            'No se puede agregar el equipo. Accesorios incompletos: ' + erroresAccesorios.join(' '),
-            'danger'
-        );
-        return;
-    }
-
-    const equipoId =
-        String(equipo.id);
-
-    if (equiposSeleccionados.has(equipoId)) {
-        return;
-    }
-
-
-    /*
-     * Registrar equipo seleccionado.
-     */
-
-    equiposSeleccionados.add(equipoId);
-    mostrarEquipoSeleccionado(equipo);
-    ocultarCamposBusqueda();
-    mostrarToast('Equipo seleccionado', 'success');
-
-    const cards = document.querySelectorAll('.equipo-seleccionado');
-    const ultima = cards[cards.length - 1];
-    if (ultima) {
-        ultima.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-}
 
 /*
  * =========================================================

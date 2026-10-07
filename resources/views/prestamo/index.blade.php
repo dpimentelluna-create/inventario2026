@@ -287,558 +287,563 @@ Préstamos
         background-color: #cfe2ff !important;
     }
 </style>
-
 {{-- INICIO SCRIPT --}}
 <script>
-window.addEventListener('load', function () {
-    if (typeof $ === 'undefined' || !$.fn.DataTable) return;
-
-    const tabla = $.fn.DataTable.isDataTable('#example')
-        ? $('#example').DataTable()
-        : $('#example').DataTable({
-    dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
-    pageLength: 10,
-    lengthMenu: [5, 10, 25, 100],
-            language: {
-                lengthMenu: "Mostrar _MENU_ registros por página",
-                info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
-                search: "Buscar:",
-                zeroRecords: "No se encontraron registros",
-                infoEmpty: "No hay registros disponibles",
-                infoFiltered: "(filtrado de _MAX_ registros en total)",
-            }
-        });
-    tabla.order([[4, 'desc'], [5, 'desc']]).draw();
-
-    //EXPORTAR EXCEL
-    document.getElementById('btn_exportar_excel').addEventListener('click', function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | OBTENER REGISTROS SEGÚN EL DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
-    const ids = [];
-
-    tabla.rows({
-        search: 'applied',
-        order: 'applied'
-    }).every(function () {
-
-        const tr = this.node();
-
-        if (!tr) return;
-
-        const id = tr.getAttribute('data-prestamo-id');
-
-        if (id) {
-            ids.push(id);
-        }
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDAR
-    |--------------------------------------------------------------------------
-    */
-
-    if (ids.length === 0) {
-
-        if (typeof toastr !== 'undefined') {
-
-            toastr.warning(
-                'NO HAY PRÉSTAMOS PARA EXPORTAR.'
-            );
-
-        } else {
-
-            alert(
-                'NO HAY PRÉSTAMOS PARA EXPORTAR.'
-            );
-
-        }
-
-        return;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | CREAR FORMULARIO TEMPORAL
-    |--------------------------------------------------------------------------
-    */
-
-    const form = document.createElement('form');
-
-    form.method = 'POST';
-
-    form.action = '{{ route('prestamos.export.excel') }}';
-
-    form.target = '_blank';
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | TOKEN CSRF
-    |--------------------------------------------------------------------------
-    */
-
-    const csrf = document.createElement('input');
-
-    csrf.type = 'hidden';
-
-    csrf.name = '_token';
-
-    csrf.value = '{{ csrf_token() }}';
-
-    form.appendChild(csrf);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENVIAR IDS EN EL ORDEN DEL DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
-    ids.forEach(function (id) {
-
-        const input = document.createElement('input');
-
-        input.type = 'hidden';
-
-        input.name = 'ids[]';
-
-        input.value = id;
-
-        form.appendChild(input);
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENVIAR
-    |--------------------------------------------------------------------------
-    */
-
-    document.body.appendChild(form);
-
-    form.submit();
-
-    form.remove();
-
-});
-
-//EXPORTAR PDF
-    document.getElementById('btn_exportar_pdf').addEventListener('click', function () {
-
-    /*
-    |--------------------------------------------------------------------------
-    | OBTENER FILAS SEGÚN EL ESTADO ACTUAL DE DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
-    const ids = [];
-
-    tabla.rows({
-        search: 'applied',
-        order: 'applied'
-    }).every(function () {
-
-        const tr = this.node();
-
-        if (!tr) return;
-
-        const id = tr.getAttribute('data-prestamo-id');
-
-        if (id) {
-            ids.push(id);
-        }
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | VALIDAR
-    |--------------------------------------------------------------------------
-    */
-
-    if (ids.length === 0) {
-
-        if (typeof toastr !== 'undefined') {
-            toastr.warning('NO HAY PRÉSTAMOS PARA EXPORTAR.');
-        } else {
-            alert('NO HAY PRÉSTAMOS PARA EXPORTAR.');
-        }
-
-        return;
-    }
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | CREAR FORMULARIO TEMPORAL
-    |--------------------------------------------------------------------------
-    */
-
-    const form = document.createElement('form');
-
-    form.method = 'POST';
-    form.action = '{{ route('prestamos.export.pdf') }}';
-    form.target = '_blank';
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | TOKEN CSRF
-    |--------------------------------------------------------------------------
-    */
-
-    const csrf = document.createElement('input');
-
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = '{{ csrf_token() }}';
-
-    form.appendChild(csrf);
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENVIAR IDS EN EL ORDEN DEL DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
-    ids.forEach(function (id) {
-
-        const input = document.createElement('input');
-
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = id;
-
-        form.appendChild(input);
-
-    });
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | ENVIAR
-    |--------------------------------------------------------------------------
-    */
-
-    document.body.appendChild(form);
-
-    form.submit();
-
-    form.remove();
-
-});
-
-
-
-    const STORAGE_KEY = 'prestamos_filtros_estado';
-    const panel = document.getElementById('panel_filtros');
-    const btnToggle = document.getElementById('btn_toggle_filtros');
-    const badge = document.getElementById('badge_filtros');
-    const msg = document.getElementById('mensaje_coincidencias');
-    const listaEquipo = document.getElementById('lista_filtro_equipo');
-    const campos = {
-        solicitante: document.getElementById('filtro_solicitante'),
-        cargo: document.getElementById('filtro_cargo'),
-        equipo: document.getElementById('filtro_equipo'),
-        estado: document.getElementById('filtro_estado'),
-        fecha: document.getElementById('filtro_fecha'),
-        horaInicio: document.getElementById('filtro_hora_inicio'),
-        horaFin: document.getElementById('filtro_hora_fin')
-    };
-    function val(el) { return el ? String(el.value || '').trim().toUpperCase() : ''; }
-    function hora(el) { return (el && el.value) ? el.value : ''; }
-    function filtrosActivos() {
-        let n = 0;
-        Object.keys(campos).forEach(function (k) {
-            if (!campos[k]) return;
-            if (campos[k].value && String(campos[k].value).trim() !== '') n++;
-        });
-        return n;
-    }
-    function actualizarBadge() {
-        if (!badge) return;
-        const n = filtrosActivos();
-        badge.textContent = n;
-        badge.classList.toggle('d-none', n === 0);
-    }
-    function mostrarCoincidencias() {
-        if (!msg) return;
-        if (filtrosActivos() === 0) { msg.style.visibility = 'hidden'; msg.textContent = '\xa0'; return; }
-        const n = tabla.page.info().recordsDisplay;
-        msg.style.visibility = 'visible';
-        msg.textContent = 'SE ENCONTRARON: ' + n + ' COINCIDENCIA' + (n === 1 ? '' : 'S');
-    }
-    function guardarFiltros() {
-        const estado = { panel: panel && panel.style.display !== 'none' };
-        Object.keys(campos).forEach(function (k) { estado[k] = campos[k] ? campos[k].value : ''; });
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
-    }
-    function restaurarFiltros() {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        try {
-            const estado = JSON.parse(raw);
-            Object.keys(campos).forEach(function (k) {
-                if (campos[k] && estado[k] != null) campos[k].value = estado[k];
+    window.addEventListener('load', function () {
+        if (typeof $ === 'undefined' || !$.fn.DataTable) return;
+
+        const tabla = $.fn.DataTable.isDataTable('#example')
+            ? $('#example').DataTable()
+            : $('#example').DataTable({
+                dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
+                pageLength: 10,
+                lengthMenu: [5, 10, 25, 100],
+                language: {
+                    lengthMenu: "Mostrar _MENU_ registros por página",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
+                    search: "Buscar:",
+                    zeroRecords: "No se encontraron registros",
+                    infoEmpty: "No hay registros disponibles",
+                    infoFiltered: "(filtrado de _MAX_ registros en total)",
+                }
             });
-            if (panel && estado.panel) panel.style.display = 'block';
-        } catch (e) {}
-    }
-    function actualizarSugerenciasEquipo() {
-        if (!listaEquipo || !campos.equipo) return;
-        const q = val(campos.equipo);
-        listaEquipo.innerHTML = '';
-        if (q.length < 3) return;
-        const vistos = {};
-        tabla.rows({ page: 'all' }).every(function () {
-            const tr = this.node();
-            const txt = (tr && tr.getAttribute('data-equipos')) || '';
-            if (txt.includes(q) && !vistos[txt]) {
-                vistos[txt] = true;
-                const op = document.createElement('option');
-                op.value = txt;
-                listaEquipo.appendChild(op);
+        tabla.order([[4, 'desc'], [5, 'desc']]).draw();
+
+        //EXPORTAR EXCEL
+        document.getElementById('btn_exportar_excel').addEventListener('click', function () {
+
+            /*
+            |--------------------------------------------------------------------------
+            | OBTENER REGISTROS SEGÚN EL DATATABLE
+            |--------------------------------------------------------------------------
+            */
+
+            const ids = [];
+
+            tabla.rows({
+                search: 'applied',
+                order: 'applied'
+            }).every(function () {
+
+                const tr = this.node();
+
+                if (!tr) return;
+
+                const id = tr.getAttribute('data-prestamo-id');
+
+                if (id) {
+                    ids.push(id);
+                }
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDAR
+            |--------------------------------------------------------------------------
+            */
+
+            if (ids.length === 0) {
+
+                if (typeof toastr !== 'undefined') {
+
+                    toastr.warning(
+                        'NO HAY PRÉSTAMOS PARA EXPORTAR.'
+                    );
+
+                } else {
+
+                    alert(
+                        'NO HAY PRÉSTAMOS PARA EXPORTAR.'
+                    );
+
+                }
+
+                return;
             }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREAR FORMULARIO TEMPORAL
+            |--------------------------------------------------------------------------
+            */
+
+            const form = document.createElement('form');
+
+            form.method = 'POST';
+
+            form.action = '{{ route('prestamos.export.excel') }}';
+
+            form.target = '_blank';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOKEN CSRF
+            |--------------------------------------------------------------------------
+            */
+
+            const csrf = document.createElement('input');
+
+            csrf.type = 'hidden';
+
+            csrf.name = '_token';
+
+            csrf.value = '{{ csrf_token() }}';
+
+            form.appendChild(csrf);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ENVIAR IDS EN EL ORDEN DEL DATATABLE
+            |--------------------------------------------------------------------------
+            */
+
+            ids.forEach(function (id) {
+
+                const input = document.createElement('input');
+
+                input.type = 'hidden';
+
+                input.name = 'ids[]';
+
+                input.value = id;
+
+                form.appendChild(input);
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ENVIAR
+            |--------------------------------------------------------------------------
+            */
+
+            document.body.appendChild(form);
+
+            form.submit();
+
+            form.remove();
+
         });
-    }
-    $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-        if (!settings.nTable || settings.nTable.id !== 'example') return true;
-        const fila = tabla.row(dataIndex).node();
-        if (!fila) return true;
-        const sol = val(campos.solicitante);
-        const car = val(campos.cargo);
-        const eq = val(campos.equipo);
-        const est = val(campos.estado);
-        const fec = campos.fecha ? campos.fecha.value : '';
-        const hi = hora(campos.horaInicio);
-        const hf = hora(campos.horaFin);
-        if (sol && !(fila.getAttribute('data-solicitante') || '').includes(sol)) return false;
-        if (car && !(fila.getAttribute('data-cargo') || '').includes(car)) return false;
-        if (eq && !(fila.getAttribute('data-equipos') || '').includes(eq)) return false;
-        if (est && (fila.getAttribute('data-estado') || '') !== est) return false;
-        if (fec && (fila.getAttribute('data-fecha') || '') !== fec) return false;
-        
-        const filaHi = fila.getAttribute('data-hora-inicio') || '';
-        const filaHf = fila.getAttribute('data-hora-fin') || '';
 
-        // Si se establece un rango completo,
-        // solamente se muestran préstamos TERMINADOS.
-        if (hf && !filaHf) return false;
+        //EXPORTAR PDF
+        document.getElementById('btn_exportar_pdf').addEventListener('click', function () {
 
-        // Filtrar por hora de inicio
-        if (hi && filaHi && filaHi < hi) return false;
+            /*
+            |--------------------------------------------------------------------------
+            | OBTENER FILAS SEGÚN EL ESTADO ACTUAL DE DATATABLE
+            |--------------------------------------------------------------------------
+            */
 
-        // Filtrar por hora final
-        if (hf && filaHf && filaHf > hf) return false;
+            const ids = [];
 
-        return true;
-    });
-    
-    //Funcion aplicar filtros con validacion de hora
-    function aplicarFiltros() {
-    const hi = hora(campos.horaInicio);
-    const hf = hora(campos.horaFin);
+            tabla.rows({
+                search: 'applied',
+                order: 'applied'
+            }).every(function () {
 
-    const HORA_MINIMA = '06:00';
-    const HORA_MAXIMA = '16:00';
+                const tr = this.node();
 
-    // Validar hora desde
-    if (hi && (hi < HORA_MINIMA || hi > HORA_MAXIMA)) {
-        if (typeof toastr !== 'undefined') {
-            toastr.error('LA HORA DESDE DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
+                if (!tr) return;
+
+                const id = tr.getAttribute('data-prestamo-id');
+
+                if (id) {
+                    ids.push(id);
+                }
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | VALIDAR
+            |--------------------------------------------------------------------------
+            */
+
+            if (ids.length === 0) {
+
+                if (typeof toastr !== 'undefined') {
+                    toastr.warning('NO HAY PRÉSTAMOS PARA EXPORTAR.');
+                } else {
+                    alert('NO HAY PRÉSTAMOS PARA EXPORTAR.');
+                }
+
+                return;
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREAR FORMULARIO TEMPORAL
+            |--------------------------------------------------------------------------
+            */
+
+            const form = document.createElement('form');
+
+            form.method = 'POST';
+            form.action = '{{ route('prestamos.export.pdf') }}';
+            form.target = '_blank';
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | TOKEN CSRF
+            |--------------------------------------------------------------------------
+            */
+
+            const csrf = document.createElement('input');
+
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+
+            form.appendChild(csrf);
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ENVIAR IDS EN EL ORDEN DEL DATATABLE
+            |--------------------------------------------------------------------------
+            */
+
+            ids.forEach(function (id) {
+
+                const input = document.createElement('input');
+
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+
+                form.appendChild(input);
+
+            });
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ENVIAR
+            |--------------------------------------------------------------------------
+            */
+
+            document.body.appendChild(form);
+
+            form.submit();
+
+            form.remove();
+
+        });
+
+
+
+        const STORAGE_KEY = 'prestamos_filtros_estado';
+        const panel = document.getElementById('panel_filtros');
+        const btnToggle = document.getElementById('btn_toggle_filtros');
+        const badge = document.getElementById('badge_filtros');
+        const msg = document.getElementById('mensaje_coincidencias');
+        const listaEquipo = document.getElementById('lista_filtro_equipo');
+        const campos = {
+            solicitante: document.getElementById('filtro_solicitante'),
+            cargo: document.getElementById('filtro_cargo'),
+            equipo: document.getElementById('filtro_equipo'),
+            estado: document.getElementById('filtro_estado'),
+            fecha: document.getElementById('filtro_fecha'),
+            horaInicio: document.getElementById('filtro_hora_inicio'),
+            horaFin: document.getElementById('filtro_hora_fin')
+        };
+        function val(el) { return el ? String(el.value || '').trim().toUpperCase() : ''; }
+        function hora(el) { return (el && el.value) ? el.value : ''; }
+        function filtrosActivos() {
+            let n = 0;
+            Object.keys(campos).forEach(function (k) {
+                if (!campos[k]) return;
+                if (campos[k].value && String(campos[k].value).trim() !== '') n++;
+            });
+            return n;
         }
-        return;
-    }
-
-    // Validar hora hasta
-    if (hf && (hf < HORA_MINIMA || hf > HORA_MAXIMA)) {
-        if (typeof toastr !== 'undefined') {
-            toastr.error('LA HORA HASTA DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
+        function actualizarBadge() {
+            if (!badge) return;
+            const n = filtrosActivos();
+            badge.textContent = n;
+            badge.classList.toggle('d-none', n === 0);
         }
-        return;
-    }
-
-    // Validar que hasta no sea menor que desde
-    if (hi && hf && hf < hi) {
-        if (typeof toastr !== 'undefined') {
-            toastr.error('LA HORA HASTA NO PUEDE SER MENOR QUE LA HORA DESDE.');
+        function mostrarCoincidencias() {
+            if (!msg) return;
+            if (filtrosActivos() === 0) { msg.style.visibility = 'hidden'; msg.textContent = '\xa0'; return; }
+            const n = tabla.page.info().recordsDisplay;
+            msg.style.visibility = 'visible';
+            msg.textContent = 'SE ENCONTRARON: ' + n + ' COINCIDENCIA' + (n === 1 ? '' : 'S');
         }
-        return;
-    }
+        function guardarFiltros() {
+            const estado = { panel: panel && panel.style.display !== 'none' };
+            Object.keys(campos).forEach(function (k) { estado[k] = campos[k] ? campos[k].value : ''; });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+        }
+        function restaurarFiltros() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return;
+            try {
+                const estado = JSON.parse(raw);
+                Object.keys(campos).forEach(function (k) {
+                    if (campos[k] && estado[k] != null) campos[k].value = estado[k];
+                });
+                if (panel && estado.panel) panel.style.display = 'block';
+            } catch (e) { }
+        }
+        function actualizarSugerenciasEquipo() {
+            if (!listaEquipo || !campos.equipo) return;
+            const q = val(campos.equipo);
+            listaEquipo.innerHTML = '';
+            if (q.length < 3) return;
+            const vistos = {};
+            tabla.rows({ page: 'all' }).every(function () {
+                const tr = this.node();
+                const txt = (tr && tr.getAttribute('data-equipos')) || '';
+                if (txt.includes(q) && !vistos[txt]) {
+                    vistos[txt] = true;
+                    const op = document.createElement('option');
+                    op.value = txt;
+                    listaEquipo.appendChild(op);
+                }
+            });
+        }
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+            if (!settings.nTable || settings.nTable.id !== 'example') return true;
+            const fila = tabla.row(dataIndex).node();
+            if (!fila) return true;
+            const sol = val(campos.solicitante);
+            const car = val(campos.cargo);
+            const eq = val(campos.equipo);
+            const est = val(campos.estado);
+            const fec = campos.fecha ? campos.fecha.value : '';
+            const hi = hora(campos.horaInicio);
+            const hf = hora(campos.horaFin);
+            if (sol && !(fila.getAttribute('data-solicitante') || '').includes(sol)) return false;
+            if (car && !(fila.getAttribute('data-cargo') || '').includes(car)) return false;
+            if (eq && !(fila.getAttribute('data-equipos') || '').includes(eq)) return false;
+            if (est && (fila.getAttribute('data-estado') || '') !== est) return false;
+            if (fec && (fila.getAttribute('data-fecha') || '') !== fec) return false;
 
-    guardarFiltros();
-    actualizarBadge();
-    tabla.draw();
-    mostrarCoincidencias();
-}
+            const filaHi = fila.getAttribute('data-hora-inicio') || '';
+            const filaHf = fila.getAttribute('data-hora-fin') || '';
 
-    function aplicarYScroll() {
-        aplicarFiltros();
-        const tablaEl = document.getElementById('example');
-        if (tablaEl) tablaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-    function limpiarFiltros() {
-        Object.keys(campos).forEach(function (k) { if (campos[k]) campos[k].value = ''; });
-        localStorage.removeItem(STORAGE_KEY);
-        actualizarBadge();
-        tabla.draw();
-        mostrarCoincidencias();
-    }
-    if (btnToggle) btnToggle.addEventListener('click', function () {
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    });
-    document.getElementById('btn_aplicar_filtros').addEventListener('click', aplicarYScroll);
-    document.getElementById('btn_limpiar_filtros').addEventListener('click', limpiarFiltros);
-    document.getElementById('btn_filtro_hoy').addEventListener('click', function () {
-        const d = new Date();
-        campos.fecha.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-        aplicarFiltros();
-    });
-    document.querySelectorAll('.btn-limpiar-campo').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            const el = document.getElementById(btn.getAttribute('data-target'));
-            if (el) el.value = '';
+            // Si se establece un rango completo,
+            // solamente se muestran préstamos TERMINADOS.
+            if (hf && !filaHf) return false;
+
+            // Filtrar por hora de inicio
+            if (hi && filaHi && filaHi < hi) return false;
+
+            // Filtrar por hora final
+            if (hf && filaHf && filaHf > hf) return false;
+
+            return true;
+        });
+
+        //Funcion aplicar filtros con validacion de hora
+        function aplicarFiltros() {
+            const hi = hora(campos.horaInicio);
+            const hf = hora(campos.horaFin);
+
+            const HORA_MINIMA = '06:00';
+            const HORA_MAXIMA = '16:00';
+
+            // Validar hora desde
+            if (hi && (hi < HORA_MINIMA || hi > HORA_MAXIMA)) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('LA HORA DESDE DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
+                }
+                return;
+            }
+
+            // Validar hora hasta
+            if (hf && (hf < HORA_MINIMA || hf > HORA_MAXIMA)) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('LA HORA HASTA DEBE ESTAR ENTRE LAS 06:00 AM Y 04:00 PM.');
+                }
+                return;
+            }
+
+            // Validar que hasta no sea menor que desde
+            if (hi && hf && hf < hi) {
+                if (typeof toastr !== 'undefined') {
+                    toastr.error('LA HORA HASTA NO PUEDE SER MENOR QUE LA HORA DESDE.');
+                }
+                return;
+            }
+
+            guardarFiltros();
+            actualizarBadge();
+            tabla.draw();
+            mostrarCoincidencias();
+        }
+
+        function aplicarYScroll() {
+            aplicarFiltros();
+            const tablaEl = document.getElementById('example');
+            if (tablaEl) tablaEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function limpiarFiltros() {
+            Object.keys(campos).forEach(function (k) { if (campos[k]) campos[k].value = ''; });
+            localStorage.removeItem(STORAGE_KEY);
+            actualizarBadge();
+            tabla.draw();
+            mostrarCoincidencias();
+        }
+        if (btnToggle) btnToggle.addEventListener('click', function () {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+        document.getElementById('btn_aplicar_filtros').addEventListener('click', aplicarYScroll);
+        document.getElementById('btn_limpiar_filtros').addEventListener('click', limpiarFiltros);
+        document.getElementById('btn_filtro_hoy').addEventListener('click', function () {
+            const d = new Date();
+            campos.fecha.value = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
             aplicarFiltros();
         });
-    });
-    if (campos.equipo) campos.equipo.addEventListener('input', function () {
-        this.value = this.value.toUpperCase();
-        actualizarSugerenciasEquipo();
-    });
-    document.querySelectorAll('.campo-mayusculas').forEach(function (el) {
-        el.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
-    });
-    document.addEventListener('keydown', function (e) {
-        const tag = e.target && e.target.tagName;
-        if (tag && ['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) {
-            if (e.key === 'Enter') { e.preventDefault(); aplicarYScroll(); }
-            return;
-        }
-        if (e.key === '+' || e.key === '=') {
-            e.preventDefault();
-            document.getElementById('btn_nuevo_prestamo').click();
-        }
-        if (e.key === 'f' || e.key === 'F') {
-            e.preventDefault();
-            btnToggle.click();
-            campos.solicitante.focus();
-        }
-    });
+        document.querySelectorAll('.btn-limpiar-campo').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const el = document.getElementById(btn.getAttribute('data-target'));
+                if (el) el.value = '';
+                aplicarFiltros();
+            });
+        });
+        if (campos.equipo) campos.equipo.addEventListener('input', function () {
+            this.value = this.value.toUpperCase();
+            actualizarSugerenciasEquipo();
+        });
+        document.querySelectorAll('.campo-mayusculas').forEach(function (el) {
+            el.addEventListener('input', function () { this.value = this.value.toUpperCase(); });
+        });
+        document.addEventListener('keydown', function (e) {
+            const tag = e.target && e.target.tagName;
+            if (tag && ['INPUT', 'SELECT', 'TEXTAREA'].includes(tag)) {
+                if (e.key === 'Enter') { e.preventDefault(); aplicarYScroll(); }
+                return;
+            }
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                document.getElementById('btn_nuevo_prestamo').click();
+            }
+            if (e.key === 'f' || e.key === 'F') {
+                e.preventDefault();
+                btnToggle.click();
+                campos.solicitante.focus();
+            }
+        });
 
-    Object.keys(campos).forEach(function (k) {
-        if (!campos[k]) return;
-        campos[k].addEventListener('input', aplicarFiltros);
-        campos[k].addEventListener('change', aplicarFiltros);
-    });
+        Object.keys(campos).forEach(function (k) {
+            if (!campos[k]) return;
+            campos[k].addEventListener('input', aplicarFiltros);
+            campos[k].addEventListener('change', aplicarFiltros);
+        });
 
-    restaurarFiltros();
-    actualizarBadge();
-    if (filtrosActivos()) aplicarFiltros();
+        const NUEVO_KEY = 'prestamos_filtros_estado_nuevo_prestamo';
+        const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1'
+            || @json(session('prestamo_accion')) === 'crear';
+
+        if (!vieneDeCrear) {
+            restaurarFiltros();
+            actualizarBadge();
+            if (filtrosActivos()) aplicarFiltros();
+        }
 
         const PAG_KEY = 'prestamos_pagina';
 
-    tabla.on('page.dt', function () {
-        localStorage.setItem(PAG_KEY, tabla.page());
-    });
-
-    const pagGuardada = parseInt(localStorage.getItem(PAG_KEY) || '0', 10);
-    if (!isNaN(pagGuardada)) {
-        tabla.page(pagGuardada).draw('page');
-    }
-
-    function pintarFilaPrestamo() {
-        const idFila = @json(session('prestamo_resaltado')) || sessionStorage.getItem('prestamo_resaltado');
-        const accFila = @json(session('prestamo_accion')) || sessionStorage.getItem('prestamo_accion');
-        sessionStorage.removeItem('prestamo_resaltado');
-        sessionStorage.removeItem('prestamo_accion');
-        if (!idFila || !accFila) return;
-
-        let nodo = null;
-        tabla.rows({ page: 'all' }).every(function () {
-            const tr = this.node();
-            if (tr && String(tr.getAttribute('data-prestamo-id')) === String(idFila)) nodo = tr;
+        tabla.on('page.dt', function () {
+            localStorage.setItem(PAG_KEY, tabla.page());
         });
-        if (!nodo) return;
 
-        const pagina = Math.floor(tabla.row(nodo).index() / tabla.page.len());
-        tabla.page(pagina).draw('page');
-        localStorage.setItem(PAG_KEY, pagina);
+        function pintarFilaPrestamo() {
+            const idFila = @json(session('prestamo_resaltado')) || sessionStorage.getItem('prestamo_resaltado');
+            const accFila = @json(session('prestamo_accion')) || sessionStorage.getItem('prestamo_accion');
+            sessionStorage.removeItem('prestamo_resaltado');
+            sessionStorage.removeItem('prestamo_accion');
+            if (!idFila || !accFila) return;
 
-        setTimeout(function () {
-            const visible = document.querySelector('#example tbody tr[data-prestamo-id="' + idFila + '"]');
-            if (!visible) return;
-            const color = accFila === 'crear' ? '#d4edda'
-                : accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
-            visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = color; });
-            visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(function () {
-                visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = ''; });
-            }, 4000);
-        }, 50);
-    }
-
-    document.querySelectorAll('.btn-ver-prestamo').forEach(function (a) {
-        a.addEventListener('click', function () {
-            const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('prestamo_resaltado', partes.pop());
-            sessionStorage.setItem('prestamo_accion', 'ver');
-        });
-    });
-
-    setTimeout(pintarFilaPrestamo, 300);
-    window.pintarFilaPrestamo = pintarFilaPrestamo;
-
-});
-
-function confirmarEliminarPrestamo(form) {
-    if (!form) return;
-    const fila = form.closest('tr');
-
-    function enviar() {
-        if (fila) {
-            fila.querySelectorAll('td').forEach(function (td) {
-                td.style.backgroundColor = '#f8d7da';
+            let nodo = null;
+            tabla.rows({ page: 'all' }).every(function () {
+                const tr = this.node();
+                if (tr && String(tr.getAttribute('data-prestamo-id')) === String(idFila)) nodo = tr;
             });
-            fila.style.transition = 'opacity 0.4s';
-            setTimeout(function () { fila.style.opacity = '0'; }, 200);
-            setTimeout(function () { form.submit(); }, 700);
-        } else {
-            form.submit();
+            if (!nodo) return;
+
+            const indiceInterno = tabla.row(nodo).index();
+            const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
+            const posicion = visibles.indexOf(indiceInterno);
+            if (posicion === -1) return;
+
+            const pagina = Math.floor(posicion / tabla.page.len());
+            tabla.page(pagina).draw('page');
+            localStorage.setItem(PAG_KEY, String(pagina));
+
+            setTimeout(function () {
+                const visible = document.querySelector('#example tbody tr[data-prestamo-id="' + idFila + '"]');
+                if (!visible) return;
+                const color = accFila === 'crear' ? '#d4edda'
+                    : accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
+                visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = color; });
+                visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function () {
+                    visible.querySelectorAll('td').forEach(function (td) { td.style.backgroundColor = ''; });
+                }, 4000);
+            }, 50);
+        }
+
+        document.querySelectorAll('.btn-ver-prestamo').forEach(function (a) {
+            a.addEventListener('click', function () {
+                const partes = a.getAttribute('href').split('/').filter(Boolean);
+                sessionStorage.setItem('prestamo_resaltado', partes.pop());
+                sessionStorage.setItem('prestamo_accion', 'ver');
+            });
+        });
+
+        setTimeout(pintarFilaPrestamo, 300);
+        window.pintarFilaPrestamo = pintarFilaPrestamo;
+
+    });
+
+    function confirmarEliminarPrestamo(form) {
+        if (!form) return;
+        const fila = form.closest('tr');
+
+        function enviar() {
+            if (fila) {
+                fila.querySelectorAll('td').forEach(function (td) {
+                    td.style.backgroundColor = '#f8d7da';
+                });
+                fila.style.transition = 'opacity 0.4s';
+                setTimeout(function () { fila.style.opacity = '0'; }, 200);
+                setTimeout(function () { form.submit(); }, 700);
+            } else {
+                form.submit();
+            }
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: '¿Eliminar préstamo?',
+                text: 'Esta acción no se puede deshacer.',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then(function (r) {
+                if (r.isConfirmed) enviar();
+            });
+        } else if (confirm('¿Eliminar préstamo?')) {
+            enviar();
         }
     }
 
-    if (typeof Swal !== 'undefined') {
-        Swal.fire({
-            icon: 'warning',
-            title: '¿Eliminar préstamo?',
-            text: 'Esta acción no se puede deshacer.',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true
-        }).then(function (r) {
-            if (r.isConfirmed) enviar();
-        });
-    } else if (confirm('¿Eliminar préstamo?')) {
-        enviar();
-    }
-}
-
-window.addEventListener('pageshow', function () {
-    if (typeof pintarFilaPrestamo === 'function') setTimeout(pintarFilaPrestamo, 200);
-});
+    window.addEventListener('pageshow', function () {
+        if (typeof pintarFilaPrestamo === 'function') setTimeout(pintarFilaPrestamo, 200);
+    });
 
 </script>
