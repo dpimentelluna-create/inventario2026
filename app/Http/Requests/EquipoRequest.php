@@ -48,7 +48,9 @@ class EquipoRequest extends FormRequest
             ],
             'marca' => ['required', 'string', 'max:80'],
             'modelo' => ['required', 'string', 'max:100'],
-            'num_serie' => ['required', 'string', 'max:100'],
+            'num_serie' => ['required', 'string', 'max:100',
+            Rule::unique('equipos', 'num_serie')->ignore($this->route('equipo')),],
+
             'ubicacion_id' => ['required', 'exists:ubicaciones,id'],
             'fecha_registro' => ['required', 'date'],
 
@@ -97,6 +99,7 @@ class EquipoRequest extends FormRequest
             'estado_laptop.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'estado_equipo.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',
             'num_serie.required' => 'El número de serie es obligatorio.',
+            'num_serie.unique' => 'Este número de serie ya está registrado.',
             'marca.required' => 'La marca es obligatoria.',
             'modelo.required' => 'El modelo es obligatorio.',
             'tipo_equipo_id.required_without' => 'Seleccione un tipo de equipo o registre uno nuevo.',
