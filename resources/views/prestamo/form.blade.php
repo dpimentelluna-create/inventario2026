@@ -4,7 +4,7 @@
     {{-- PARTE 1 — DATOS DEL PRÉSTAMO --}}
 
     <div class="col-md-12">
-        <div class="card mb-4">
+        <div class="card mb-4" id = "card_parte1_prestamo">
             <div class="card-header encabezado-verde">
                 <h5 class="mb-0">
                     <i class="bi bi-clipboard-check"></i>
@@ -30,7 +30,7 @@
 
                             {{-- BUSCADOR --}}
                             <input type="text" id="buscar_docente"
-                                class="form-control @error('docente_id') is-invalid @enderror"
+                                class="form-control campo-mayusculas @error('docente_id') is-invalid @enderror" 
                                 placeholder="Escribir nombre o apellido..." 
                                 autocomplete="off" 
                                 value="{{ old(
@@ -43,9 +43,9 @@
                             {{-- RESULTADOS --}}
                             <div id="resultados_docentes" class="list-group position-absolute w-100 shadow-sm" 
                             
-                            style=" z-index: 1050; 
+                            style=" z-index: 2000; 
                                     display: none;
-                                    max-height: 220px;
+                                    max-height: 360px;
                                     overflow-y: auto;
                                     background: white;">
 
@@ -406,7 +406,7 @@
 </div>
 
 {{-- DATOS EXISTENTES PARA EDICIÓN --}}
-
+<script src="{{ asset('js/form-validaciones.js') }}"></script>
 <script>
 
     const prestamosExistentes = {!! json_encode(
@@ -475,7 +475,6 @@ $docentesParaJs = $docentes->map(function ($docente) {
 
 
 {{-- JAVASCRIPT --}}
-
 <script>
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -509,6 +508,43 @@ document.addEventListener('DOMContentLoaded', function () {
     const docentes = @json($docentesParaJs);
 
     const esEdicion = @json((bool) $prestamo->exists);
+
+    FormValidacion.init({
+    toastId: 'toast_prestamo',
+    textoId: 'toast_prestamo_texto',
+    toastEnCampo: true,
+    focusDelay: 350
+});
+FormValidacion.bindMayusculas(document);
+
+const aMayusculas = FormValidacion.aMayusculas;
+
+function solicitanteListo() {
+    return !!(docenteId && String(docenteId.value).trim() !== '');
+}
+
+const idsParte1 = ['cargo', 'fecha', 'btn_hoy', 'hora_inicio_texto', 'hora_fin_texto'];
+
+function actualizarBloqueoParte1() {
+    const listo = solicitanteListo();
+    idsParte1.forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (el.id === 'cargo') {
+            el.readOnly = true;
+        } else if (el.type === 'button' || el.type === 'date') {
+            el.disabled = !listo;
+        } else {
+            el.readOnly = !listo;
+        }
+        el.classList.toggle('bg-light', !listo);
+    });
+}
+
+if (!esEdicion && buscarDocente) {
+    setTimeout(function () { buscarDocente.focus(); }, 150);
+}
+actualizarBloqueoParte1();
 
     function normalizarEstado(estado) {
         const valor = String(estado || '').toUpperCase().trim();
@@ -1089,6 +1125,15 @@ if (btnGuardarNuevoDocente) {
 
             cargo.value = nuevoDocente.cargo;
 
+            buscarDocente.value = `${nuevoDocente.apellidos} ${nuevoDocente.nombres}`.toUpperCase();
+cargo.value = String(nuevoDocente.cargo || '').toUpperCase();
+actualizarBloqueoParte1();
+if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+    actualizarEstadoBuscadorEquipos();
+}
+const horaInicio = document.getElementById('hora_inicio_texto');
+if (!esEdicion && horaInicio) setTimeout(function () { horaInicio.focus(); }, 50);
+
             // Agregar el nuevo cargo a la lista de cargos
             if (
                 !cargos.some(
@@ -1201,6 +1246,13 @@ function seleccionarDocente(docente) {
         campoCargo.dispatchEvent(new Event('change'));
 
     }
+    buscarDocente.value = `${docente.apellidos} ${docente.nombres}`.toUpperCase();
+if (campoCargo) campoCargo.value = String(docente.cargo || '').toUpperCase();
+actualizarBloqueoParte1();
+
+const horaInicio = document.getElementById('hora_inicio_texto');
+if (!esEdicion && horaInicio) setTimeout(function () { horaInicio.focus(); }, 50);
+
 
 
     /*
@@ -1236,11 +1288,11 @@ function seleccionarDocente(docente) {
  * =========================================================
  */
 
- buscarDocente.addEventListener('input', function () {
-
+buscarDocente.addEventListener('input', function () {
     const texto = this.value.trim().toLowerCase();
 
     docenteId.value = '';
+    actualizarBloqueoParte1();
     if (typeof actualizarEstadoBuscadorEquipos === 'function') {
         actualizarEstadoBuscadorEquipos();
     }
@@ -1650,10 +1702,13 @@ function convertirA24(horas, minutos, periodo) {
 
         if (!campoTexto || !campoReal) return;
 
-        function fallar(mensaje) {
-            campoReal.value = '';
-            marcarError(campoTexto, mensaje);
-        }
+    function fallar(mensaje) {
+    campoReal.value = '';
+    marcarError(campoTexto, mensaje);
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
+}
 
         let valor = campoTexto.value.trim().toUpperCase();
 
@@ -1839,23 +1894,6 @@ function controlarEntradaHora(campoTexto) {
 
         const tieneDosPuntos =
             valor.includes(':');
-
-
-        // -------------------------------------------------
-        // FORMATO VISUAL
-        //
-        // IMPORTANTE:
-        // NO FORZAMOS ":" CON UN SOLO DÍGITO.
-        //
-        // Esto permite escribir:
-        //
-        // 2:10
-        // 8:30
-        // 11:45
-        // 12:00
-        //
-        // sin que el cursor se mueva.
-        // -------------------------------------------------
 
         if (tieneDosPuntos) {
 
@@ -2046,80 +2084,48 @@ if (horaInicioTexto && horaInicioReal) {
 
 controlarEntradaHora(horaFinTexto);
 
-    // =========================================================
-    // VALIDAR QUE HORA FINAL SEA MAYOR QUE HORA INICIO
-    // =========================================================
-
-    function validarHorasEntreSi() {
-
-        if (!horaInicioReal || !horaFinReal) {
-            return;
+if (horaFinTexto && horaFinReal) {
+    horaFinTexto.addEventListener('input', function () {
+        horaFinReal.value = '';
+        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+            actualizarEstadoBuscadorEquipos();
         }
+    });
+}
 
-
-        // -----------------------------------------------------
-        // SI NO HAY HORA DE INICIO
-        // NO SE PUEDE COMPARAR
-        // -----------------------------------------------------
-
-        if (!horaInicioReal.value) {
-
-            if (horaFinTexto) {
-                horaFinTexto.setCustomValidity('');
-            }
-
-            return;
+function validarHorasEntreSi() {
+    if (!horaInicioReal || !horaFinReal) {
+        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+            actualizarEstadoBuscadorEquipos();
         }
+        return;
+    }
 
-
-        // -----------------------------------------------------
-        // SI HORA FINAL ESTÁ VACÍA
-        //
-        // SE PERMITE:
-        // significa que el préstamo sigue activo.
-        // -----------------------------------------------------
-
-        if (!horaFinReal.value) {
-
-            if (horaFinTexto) {
-                horaFinTexto.setCustomValidity('');
-            }
-
-            return;
-        }
-
-
-        // -----------------------------------------------------
-        // CONVERTIR A MINUTOS PARA COMPARAR
-        // -----------------------------------------------------
-
-        const inicioPartes =
-            horaInicioReal.value.split(':');
-
-        const finPartes =
-            horaFinReal.value.split(':');
-
-
-        const inicioMinutos =
-            (parseInt(inicioPartes[0], 10) * 60) +
-            parseInt(inicioPartes[1], 10);
-
-
-        const finMinutos =
-            (parseInt(finPartes[0], 10) * 60) +
-            parseInt(finPartes[1], 10);
-
-
-        // -----------------------------------------------------
-        // HORA FINAL DEBE SER MAYOR
-        // -----------------------------------------------------
-
-        if (finMinutos <= inicioMinutos) {
-            marcarError(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
-        } else {
+    if (!horaInicioReal.value || !horaFinReal.value) {
+        if (horaFinTexto && !horaFinTexto.value.trim()) {
             limpiarErrorCampo(horaFinTexto);
         }
+        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+            actualizarEstadoBuscadorEquipos();
+        }
+        return;
     }
+
+    const inicioPartes = horaInicioReal.value.split(':');
+    const finPartes = horaFinReal.value.split(':');
+    const inicioMinutos = (parseInt(inicioPartes[0], 10) * 60) + parseInt(inicioPartes[1], 10);
+    const finMinutos = (parseInt(finPartes[0], 10) * 60) + parseInt(finPartes[1], 10);
+
+    if (finMinutos <= inicioMinutos) {
+        marcarError(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
+    } else {
+        limpiarErrorCampo(horaFinTexto);
+    }
+
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
+}
 
 
 // =========================================================
@@ -2145,6 +2151,11 @@ if (formularioPrestamo) {
 
     formularioPrestamo.addEventListener('submit', function (event) {
 
+        ['fecha', 'btn_hoy'].forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+    });
+    
         limpiarErroresCampos();
 
         const docenteCampo = document.getElementById('docente_id');
@@ -2286,17 +2297,27 @@ if (formularioPrestamo) {
  */
 
     function parte1Completa() {
-        const docente = document.getElementById('docente_id');
-        const cargo = document.getElementById('cargo');
-        const fecha = document.getElementById('fecha');
-        const horaInicio = document.getElementById('hora_inicio');
+    const docente = document.getElementById('docente_id');
+    const cargo = document.getElementById('cargo');
+    const fecha = document.getElementById('fecha');
+    const horaInicio = document.getElementById('hora_inicio');
+    const horaInicioTexto = document.getElementById('hora_inicio_texto');
+    const horaFin = document.getElementById('hora_fin');
+    const horaFinTexto = document.getElementById('hora_fin_texto');
 
-        if (!docente || docente.value.trim() === '') return false;
-        if (!cargo || cargo.value.trim() === '') return false;
-        if (!fecha || fecha.value.trim() === '') return false;
-        if (!horaInicio || horaInicio.value.trim() === '') return false;
-        return true;
+    if (!docente || docente.value.trim() === '') return false;
+    if (!cargo || cargo.value.trim() === '') return false;
+    if (!fecha || fecha.value.trim() === '') return false;
+    if (!horaInicio || horaInicio.value.trim() === '') return false;
+    if (horaInicioTexto && horaInicioTexto.classList.contains('is-invalid')) return false;
+
+    if (horaFinTexto && horaFinTexto.value.trim() !== '') {
+        if (!horaFin || horaFin.value.trim() === '') return false;
+        if (horaFinTexto.classList.contains('is-invalid')) return false;
     }
+
+    return true;
+}
 
 
     /* ========================================================= */
@@ -2547,9 +2568,7 @@ if (formularioPrestamo) {
 
 
         html += `
-
             </div>
-
         `;
 
 
@@ -2591,7 +2610,7 @@ if (formularioPrestamo) {
 
     }
 
-    /* ========================================================= */
+/* ========================================================= */
 /* AGREGAR EQUIPO */
 /* ========================================================= */
 
@@ -2622,24 +2641,14 @@ function validarAccesoriosEquipo(equipo) {
 
 function agregarEquipo(equipo) {
 
-    /*
-     * Primero verificar que la Parte 1
-     * esté completamente llena.
-     */
-
     if (!parte1Completa()) {
-
-        alert(
-            'Complete primero los datos obligatorios de la Parte 1: DOCENTE, CARGO, FECHA y HORA INICIO.'
-        );
-
-        return;
+    const caja = document.getElementById('error_equipos_parte2');
+    if (caja) {
+        caja.style.display = 'block';
+        caja.textContent = 'Complete y valide la Parte 1 antes de seleccionar un equipo.';
     }
-
-
-    /*
-     * Verificar que el equipo sea válido.
-     */
+    return;
+}
 
     if (!equipo || !equipo.id) {
 
@@ -2660,19 +2669,8 @@ function agregarEquipo(equipo) {
         return;
     }
 
-
-    /*
-     * Obtener ID del equipo.
-     */
-
     const equipoId =
         String(equipo.id);
-
-
-    /*
-     * Evitar seleccionar el mismo equipo
-     * más de una vez.
-     */
 
     if (equiposSeleccionados.has(equipoId)) {
         return;
@@ -2684,11 +2682,8 @@ function agregarEquipo(equipo) {
      */
 
     equiposSeleccionados.add(equipoId);
-
     mostrarEquipoSeleccionado(equipo);
-
     ocultarCamposBusqueda();
-
     mostrarToast('Equipo seleccionado', 'success');
 
     const cards = document.querySelectorAll('.equipo-seleccionado');
@@ -3383,3 +3378,27 @@ actualizarEstadoBuscadorEquipos();
     
 });
 </script>
+<style>
+    #card_parte1_prestamo,
+    #card_parte1_prestamo .card-body,
+    #card_parte1_prestamo .row,
+    #card_parte1_prestamo .col-md-6 {
+        overflow: visible !important;
+    }
+
+    #resultados_docentes {
+        position: absolute !important;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        max-height: 360px;
+        overflow-y: auto;
+        z-index: 2000 !important;
+        background: white;
+    }
+
+    .seccion-bloqueada {
+        opacity: 0.55;
+        pointer-events: none;
+    }
+</style>
