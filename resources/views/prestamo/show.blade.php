@@ -7,535 +7,263 @@
 @endsection
 
 @section('content')
+        @php
+    $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
+    $fechaVista = $prestamo->fecha
+        ? \Carbon\Carbon::parse($prestamo->fecha)->format('d-m-Y')
+        : '—';
+    $hIni = $prestamo->hora_inicio
+        ? \Carbon\Carbon::parse($prestamo->hora_inicio)->format('h:i A')
+        : '—';
+    $hFin = $prestamo->hora_fin
+        ? \Carbon\Carbon::parse($prestamo->hora_fin)->format('h:i A')
+        : 'ACTIVO';
 
-    <section class="content container-fluid">
+    $equipos = $prestamo->prestamoEquipos;
+    $totalEquipos = $equipos->count();
+    $totalAccesorios = $equipos->sum(fn($pe) => $pe->prestamoAccesorios->count());
+    $malogrados = $equipos->filter(fn($pe) => strtoupper($pe->estado ?? '') === 'MALOGRADO')->count()
+        + $equipos->sum(fn($pe) => $pe->prestamoAccesorios->filter(fn($a) => strtoupper($a->estado ?? '') === 'MALOGRADO')->count());
 
-        <div class="row">
+    $borde = function ($estado) {
+        $estado = strtoupper($estado ?? '');
+        if ($estado === 'MALOGRADO')
+            return 'borde-malogrado';
+        if ($estado === 'REGULAR')
+            return 'borde-regular';
+        if ($estado === 'BUENO')
+            return 'borde-bueno';
+        return 'borde-neutro';
+    };
+        @endphp
 
-            <div class="col-md-12">
-
-                <div class="card">
-
-                    {{-- ENCABEZADO --}}
-                    <div class="card-header" style="
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                        ">
-
-                        <div>
-                            <span class="card-title">
-                                {{ __('Detalle del Préstamo') }}
-                            </span>
-                        </div>
-
-                        <div>
-
-                            <a class="btn btn-primary btn-sm" href="{{ route('prestamos.index') }}">
-                                <i class="fa fa-arrow-left"></i>
-                                Volver
-                            </a>
-
-                            <a class="btn btn-success btn-sm" href="{{ route('prestamos.edit', $prestamo->id) }}">
-                                <i class="fa fa-edit"></i>
-                                Editar
-                            </a>
-
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
-                                <i class="fa fa-print"></i>
-                                Imprimir
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="card-body bg-white">
-
-                        {{-- ========================================== --}}
-                        {{-- INFORMACIÓN DEL PRÉSTAMO --}}
-                        {{-- ========================================== --}}
-
-                        <div class="card mb-4">
-
-                            <div class="card-header">
-                                <strong>
-                                    Información del préstamo
-                                </strong>
+        <section class="content container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span class="card-title fw-bold">DETALLE DEL PRÉSTAMO</span>
+                            <div class="d-flex gap-2 no-print">
+                                <a class="btn btn-primary btn-sm" href="{{ route('prestamos.index') }}">
+                                    <i class="fa fa-arrow-left"></i> Volver
+                                </a>
+                                <a class="btn btn-success btn-sm" href="{{ route('prestamos.edit', $prestamo->id) }}">
+                                    <i class="fa fa-edit"></i> Editar
+                                </a>
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
+                                    <i class="fa fa-print"></i> Imprimir
+                                </button>
                             </div>
+                        </div>
 
-                            <div class="card-body">
-
-                                <div class="row">
-
-                                    {{-- DOCENTE --}}
-                                    <div class="col-md-6 mb-3">
-
-                                        <strong>
-                                            Apellidos y nombres:
-                                        </strong>
-
-                                        <br>
-
-                                        {{ $prestamo->docente->apellidos ?? '' }}
-                                        {{ $prestamo->docente->nombres ?? '' }}
-
+                        <div class="card-body bg-white">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-3">
+                                    <div class="bloque-dato">
+                                        <div class="etiqueta"><i class="bi bi-person"></i> SOLICITANTE</div>
+                                        <div class="valor">{{ $nombreSol ?: '—' }}</div>
+                                        <div class="subvalor">{{ $prestamo->cargo ?: 'SIN CARGO' }}</div>
                                     </div>
-
-
-                                    {{-- CARGO --}}
-                                    <div class="col-md-6 mb-3">
-
-                                        <strong>
-                                            Cargo:
-                                        </strong>
-
-                                        <br>
-
-                                        {{ $prestamo->cargo }}
-
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="bloque-dato">
+                                        <div class="etiqueta"><i class="bi bi-calendar"></i> FECHA</div>
+                                        <div class="valor">{{ $fechaVista }}</div>
                                     </div>
-
-
-                                    {{-- FECHA --}}
-                                    <div class="col-md-4 mb-3">
-
-                                        <strong>
-                                            Fecha:
-                                        </strong>
-
-                                        <br>
-
-                                        {{ $prestamo->fecha
-        ? $prestamo->fecha->format('d-m-Y')
-        : ''
-                                        }}
-
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="bloque-dato">
+                                        <div class="etiqueta"><i class="bi bi-clock"></i> HORARIO</div>
+                                        <div class="valor">{{ $hIni }} → {{ $hFin }}</div>
                                     </div>
-
-
-                                    {{-- HORA INICIO --}}
-                                    <div class="col-md-4 mb-3">
-
-                                        <strong>
-                                            Hora de inicio:
-                                        </strong>
-
-                                        <br>
-
-                                        {{ $prestamo->hora_inicio
-        ? substr($prestamo->hora_inicio, 0, 5)
-        : ''
-                                        }}
-
-                                    </div>
-
-
-                                    {{-- HORA FINAL --}}
-                                    <div class="col-md-4 mb-3">
-
-                                        <strong>
-                                            Hora final:
-                                        </strong>
-
-                                        <br>
-
-                                        @if ($prestamo->hora_fin)
-
-                                            {{ substr($prestamo->hora_fin, 0, 5) }}
-
-                                        @else
-
-                                            <span class="text-muted">
-                                                —
-                                            </span>
-
-                                        @endif
-
-                                    </div>
-
-
-                                    {{-- ESTADO --}}
-                                    <div class="col-md-12">
-
-                                        <strong>
-                                            Estado:
-                                        </strong>
-
-                                        <br>
-
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="bloque-dato text-md-end">
+                                        <div class="etiqueta">ESTADO</div>
                                         @if ($prestamo->estado === 'ACTIVO')
-
-                                            <span class="badge bg-success">
-                                                ACTIVO
-                                            </span>
-
+                                            <span class="badge bg-success fs-6">ACTIVO</span>
                                         @else
-
-                                            <span class="badge bg-secondary">
-                                                TERMINADO
-                                            </span>
-
+                                            <span class="badge bg-secondary fs-6">TERMINADO</span>
                                         @endif
-
                                     </div>
-
                                 </div>
-
                             </div>
 
+                            <div class="d-flex flex-wrap gap-2 mb-4">
+                                <span class="chip">{{ $totalEquipos }} equipo{{ $totalEquipos === 1 ? '' : 's' }}</span>
+                                <span class="chip">{{ $totalAccesorios }} accesorio{{ $totalAccesorios === 1 ? '' : 's' }}</span>
+                                @if ($malogrados > 0)
+                                    <span class="chip chip-alerta">{{ $malogrados }} malogrado{{ $malogrados === 1 ? '' : 's' }}</span>
+                                @endif
+                            </div>
+
+                            <h5 class="mb-3">EQUIPOS DEL PRÉSTAMO</h5>
+
+                            @forelse ($equipos as $indice => $prestamoEquipo)
+                                @php
+        $equipo = $prestamoEquipo->equipo;
+        $estadoEq = strtoupper($prestamoEquipo->estado ?? '');
+                                @endphp
+                                <div class="card mb-3 tarjeta-equipo {{ $borde($estadoEq) }}">
+                                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                        <div>
+                                            <div class="etiqueta">EQUIPO {{ $indice + 1 }}</div>
+                                            <strong>
+                                                {{ $equipo->tipoEquipo->nombre ?? 'SIN TIPO' }}
+                                                · {{ $equipo->marca ?? '' }}
+                                                {{ $equipo->modelo ?? '' }}
+                                            </strong>
+                                            <span class="font-monospace ms-2">{{ $equipo->num_serie ?? 'S/N' }}</span>
+                                        </div>
+                                        <span class="badge {{ $estadoEq === 'MALOGRADO' ? 'bg-danger' : ($estadoEq === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
+                                            {{ $estadoEq ?: '—' }}
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="etiqueta">OBSERVACIÓN</div>
+                                            <div class="{{ $prestamoEquipo->observacion ? 'fst-italic' : 'text-muted' }}">
+                                                {{ $prestamoEquipo->observacion ?: 'Sin observaciones' }}
+                                            </div>
+                                        </div>
+
+                                        @if ($prestamoEquipo->prestamoAccesorios->count())
+                                            <div class="table-responsive">
+                                                <table class="table table-sm table-bordered mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tipo</th>
+                                                            <th>Marca</th>
+                                                            <th>N.º serie</th>
+                                                            <th>Estado</th>
+                                                            <th>Observación</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($prestamoEquipo->prestamoAccesorios as $prestamoAccesorio)
+                                                            @php
+                $acc = $prestamoAccesorio->accesorioEquipo;
+                $estadoAcc = strtoupper($prestamoAccesorio->estado ?? '');
+                                                            @endphp
+                                                            <tr>
+                                                                <td>{{ $acc->tipo ?? '—' }}</td>
+                                                                <td>{{ $acc->marca ?? '—' }}</td>
+                                                                <td class="font-monospace">{{ $acc->num_serie ?? '—' }}</td>
+                                                                <td>
+                                                                    <span class="badge {{ $estadoAcc === 'MALOGRADO' ? 'bg-danger' : ($estadoAcc === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
+                                                                        {{ $estadoAcc ?: '—' }}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="{{ $prestamoAccesorio->observacion ? '' : 'text-muted' }}">
+                                                                    {{ $prestamoAccesorio->observacion ?: 'Sin observaciones' }}
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        @else
+                                            <div class="text-muted">Este equipo no tiene accesorios registrados en el préstamo.</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="alert alert-warning">No hay equipos asociados a este préstamo.</div>
+                            @endforelse
                         </div>
-
-
-                        {{-- ========================================== --}}
-                        {{-- EQUIPOS --}}
-                        {{-- ========================================== --}}
-
-                        <h4 class="mb-3">
-                            Equipos del préstamo
-                        </h4>
-
-
-                        @forelse ($prestamo->prestamoEquipos as $indice => $prestamoEquipo)
-
-                            <div class="card mb-4">
-
-                                {{-- CABECERA DEL EQUIPO --}}
-                                <div class="card-header">
-
-                                    <strong>
-                                        EQUIPO {{ $indice + 1 }}
-                                    </strong>
-
-                                </div>
-
-
-                                <div class="card-body">
-
-                                    <div class="row">
-
-                                        {{-- TIPO --}}
-                                        <div class="col-md-6 mb-3">
-
-                                            <strong>
-                                                Tipo de equipo:
-                                            </strong>
-
-                                            <br>
-
-                                            {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? 'Sin tipo' }}
-
-                                        </div>
-
-
-                                        {{-- MARCA --}}
-                                        <div class="col-md-6 mb-3">
-
-                                            <strong>
-                                                Marca:
-                                            </strong>
-
-                                            <br>
-
-                                            {{ $prestamoEquipo->equipo->marca ?? '' }}
-
-                                        </div>
-
-
-                                        {{-- MODELO --}}
-                                        <div class="col-md-6 mb-3">
-
-                                            <strong>
-                                                Modelo:
-                                            </strong>
-
-                                            <br>
-
-                                            {{ $prestamoEquipo->equipo->modelo ?? '—' }}
-
-                                        </div>
-
-
-                                        {{-- NÚMERO DE SERIE --}}
-                                        <div class="col-md-6 mb-3">
-
-                                            <strong>
-                                                Número de serie:
-                                            </strong>
-
-                                            <br>
-
-                                            {{ $prestamoEquipo->equipo->num_serie ?? '—' }}
-
-                                        </div>
-
-
-                                        {{-- ESTADO DEL EQUIPO --}}
-                                        <div class="col-md-6 mb-3">
-
-                                            <strong>
-                                                Estado del equipo:
-                                            </strong>
-
-                                            <br>
-
-                                            @if ($prestamoEquipo->estado === 'BUENO')
-
-                                                <span class="badge bg-success">
-                                                    BUENO
-                                                </span>
-
-                                            @elseif ($prestamoEquipo->estado === 'REGULAR')
-
-                                                <span class="badge bg-warning text-dark">
-                                                    REGULAR
-                                                </span>
-
-                                            @else
-
-                                                <span class="badge bg-danger">
-                                                    MALOGRADO
-                                                </span>
-
-                                            @endif
-
-                                        </div>
-
-
-                                        {{-- OBSERVACIÓN DEL EQUIPO --}}
-                                        <div class="col-md-12 mb-3">
-
-                                            <strong>
-                                                Observación del equipo:
-                                            </strong>
-
-                                            <br>
-
-                                            @if ($prestamoEquipo->observacion)
-
-                                                {{ $prestamoEquipo->observacion }}
-
-                                            @else
-
-                                                <span class="text-muted">
-                                                    Sin observaciones
-                                                </span>
-
-                                            @endif
-
-                                        </div>
-
-                                    </div>
-
-
-                                    {{-- ================================= --}}
-                                    {{-- ACCESORIOS --}}
-                                    {{-- ================================= --}}
-
-                                    @if ($prestamoEquipo->prestamoAccesorios->count())
-
-                                        <hr>
-
-                                        <h5 class="mb-3">
-                                            Accesorios
-                                        </h5>
-
-
-                                        <div class="table-responsive">
-
-                                            <table class="table table-bordered">
-
-                                                <thead>
-
-                                                    <tr>
-
-                                                        <th>
-                                                            Tipo
-                                                        </th>
-
-                                                        <th>
-                                                            Marca
-                                                        </th>
-
-                                                        <th>
-                                                            Número de serie
-                                                        </th>
-
-                                                        <th>
-                                                            Estado
-                                                        </th>
-
-                                                        <th>
-                                                            Observación
-                                                        </th>
-
-                                                    </tr>
-
-                                                </thead>
-
-
-                                                <tbody>
-
-                                                    @foreach (
-                                                                                    $prestamoEquipo->prestamoAccesorios
-                                                                                    as $prestamoAccesorio
-                                                                                )
-
-                                                                                <tr>
-
-                                                                                    {{-- TIPO --}}
-                                                                                    <td>
-
-                                                                                        {{
-                                                        $prestamoAccesorio
-                                                            ->accesorioEquipo
-                                                            ->tipo
-                                                        ?? '—'
-                                                                                                    }}
-
-                                                                                    </td>
-
-
-                                                                                    {{-- MARCA --}}
-                                                                                    <td>
-
-                                                                                        {{
-                                                        $prestamoAccesorio
-                                                            ->accesorioEquipo
-                                                            ->marca
-                                                        ?? '—'
-                                                                                                    }}
-
-                                                                                    </td>
-
-
-                                                                                    {{-- SERIE --}}
-                                                                                    <td>
-
-                                                                                        {{
-                                                        $prestamoAccesorio
-                                                            ->accesorioEquipo
-                                                            ->num_serie
-                                                        ?? '—'
-                                                                                                    }}
-
-                                                                                    </td>
-
-
-                                                                                    {{-- ESTADO --}}
-                                                                                    <td>
-
-                                                                                        @if (
-                                                                                                $prestamoAccesorio->estado
-                                                                                                === 'BUENO'
-                                                                                            )
-
-                                                                                            <span class="badge bg-success">
-                                                                                                BUENO
-                                                                                            </span>
-
-                                                                                        @elseif (
-                                                                                                $prestamoAccesorio->estado
-                                                                                                === 'REGULAR'
-                                                                                            )
-
-                                                                                            <span class="badge bg-warning text-dark">
-                                                                                                REGULAR
-                                                                                            </span>
-
-                                                                                        @else
-
-                                                                                            <span class="badge bg-danger">
-                                                                                                MALOGRADO
-                                                                                            </span>
-
-                                                                                        @endif
-
-                                                                                    </td>
-
-
-                                                                                    {{-- OBSERVACIÓN --}}
-                                                                                    <td>
-
-                                                                                        {{
-                                                        $prestamoAccesorio
-                                                            ->observacion
-                                                        ?: 'Sin observaciones'
-                                                                                                    }}
-
-                                                                                    </td>
-
-                                                                                </tr>
-
-                                                    @endforeach
-
-                                                </tbody>
-
-                                            </table>
-
-                                        </div>
-
-                                    @else
-
-                                        <div class="text-muted">
-
-                                            Este equipo no tiene accesorios registrados en el préstamo.
-
-                                        </div>
-
-                                    @endif
-
-                                </div>
-
-                            </div>
-
-                        @empty
-
-                            <div class="alert alert-warning">
-
-                                No hay equipos asociados a este préstamo.
-
-                            </div>
-
-                        @endforelse
-
                     </div>
-
                 </div>
-
             </div>
+        </section>
 
-        </div>
-
-    </section>
-
-
-    {{-- ========================================== --}}
-    {{-- ESTILOS PARA IMPRESIÓN --}}
-    {{-- ========================================== --}}
-
-    <style>
-        @media print {
-
-            .btn,
-            .navbar,
-            .sidebar,
-            .main-footer,
-            footer {
-                display: none !important;
+        <style>
+            .etiqueta {
+                font-size: .75rem;
+                letter-spacing: .04em;
+                text-transform: uppercase;
+                color: #6c757d;
+                font-weight: 600;
             }
 
-            .card {
-                border: 1px solid #000 !important;
-                box-shadow: none !important;
+            .valor {
+                font-weight: 700;
+                font-size: 1.05rem;
             }
 
-            body {
-                background: white !important;
+            .subvalor {
+                color: #6c757d;
             }
 
-        }
-    </style>
+            .bloque-dato {
+                background: #f8f9fa;
+                border-radius: .5rem;
+                padding: .75rem 1rem;
+                height: 100%;
+            }
 
+            .chip {
+                background: #e9ecef;
+                border-radius: 999px;
+                padding: .25rem .75rem;
+                font-size: .85rem;
+            }
+
+            .chip-alerta {
+                background: #f8d7da;
+                color: #842029;
+            }
+
+            .tarjeta-equipo {
+                border-left-width: 6px;
+            }
+
+            .borde-bueno {
+                border-left-color: #198754;
+            }
+
+            .borde-regular {
+                border-left-color: #ffc107;
+            }
+
+            .borde-malogrado {
+                border-left-color: #dc3545;
+            }
+
+            .borde-neutro {
+                border-left-color: #adb5bd;
+            }
+
+            @media print {
+
+                #sidebar,
+                .dot-spinner-container,
+                .no-print,
+                .btn,
+                .dropdown,
+                footer {
+                    display: none !important;
+                }
+
+                #content-wrapper,
+                main {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    width: 100% !important;
+                }
+
+                body {
+                    background: white !important;
+                }
+
+                .card {
+                    border: 1px solid #000 !important;
+                    box-shadow: none !important;
+                }
+
+                * {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+        </style>
 @endsection
