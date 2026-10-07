@@ -91,36 +91,36 @@
                 <div class="row g-3">
                     <!-- Tarjeta Préstamos -->
                     <div class="col-12 col-sm-6">
-                        <div class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #2563eb;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
-                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="fw-bold small">Préstamos</div>
-                                <div class="text-secondary mt-1" style="font-size: 0.75rem;">Registrar salidas o devoluciones de equipos.</div>
-                            </div>
+                    <a href="{{ route('prestamos.index') }}" class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm text-decoration-none text-dark bg-white">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #2563eb;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
                         </div>
-                    </div>
+                        <div>
+                            <div class="fw-bold small">Préstamos</div>
+                            <div class="text-secondary mt-1" style="font-size: 0.75rem;">Registrar salidas o devoluciones de equipos.</div>
+                        </div>
+                    </a>
+                </div>
 
-                    <!-- Tarjeta Equipos -->
-                    <div class="col-12 col-sm-6">
-                        <div class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #059669;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
-                                    <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="fw-bold small">Equipos</div>
-                                <div class="text-secondary mt-1" style="font-size: 0.75rem;">Ver listado de máquinas y estados.</div>
-                            </div>
+                <!-- Tarjeta Equipos -->
+                <div class="col-12 col-sm-6">
+                    <a href="{{ route('equipos.index') }}" class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm text-decoration-none text-dark bg-white">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #059669;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
+                                <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
-                    </div>
+                        <div>
+                            <div class="fw-bold small">Equipos</div>
+                            <div class="text-secondary mt-1" style="font-size: 0.75rem;">Ver listado de máquinas y estados.</div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
+    </div>
 
         <!-- Bloque Derecho: Información -->
         <div class="col-12 col-lg-5">
