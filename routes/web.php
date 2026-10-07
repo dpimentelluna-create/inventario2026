@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
         ->name('equipos.export.pdf');
     Route::post('/equipos/export-excel', [EquipoController::class, 'exportExcel'])
         ->name('equipos.export.excel');
+    Route::get('/equipos/verificar-serie', [EquipoController::class, 'verificarSerie'])
+        ->name('equipos.verificarSerie');
 
     Route::resource('equipos', App\Http\Controllers\EquipoController::class);
 

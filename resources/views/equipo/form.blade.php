@@ -1333,38 +1333,53 @@
 
 
         validarCampoVivo('num_serie', 'El número de serie es obligatorio.');
-        validarCampoVivo('marca', 'La marca es obligatoria.');
-        validarCampoVivo('modelo', 'El modelo es obligatorio.');
-        validarCampoVivo('descripcion', 'La descripción es obligatoria.');
-        validarCampoVivo('procesador', 'El procesador es obligatorio.');
-        validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
-        validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
 
-        ['procesador', 'ram', 'disco_duro', 'descripcion'].forEach(function (id) {
-            const campo = document.getElementById(id);
-            if (!campo) return;
-            campo.addEventListener('input', actualizarBloqueoParte1);
-            campo.addEventListener('change', actualizarBloqueoParte1);
-        });
+const inputSerie = document.getElementById('num_serie');
+const equipoActualId = @json($equipo->id ?? null);
 
-        const inputSerie = document.getElementById('num_serie');
+function enfocarSerie() {
+    if (!inputSerie || esEdicion) return;
+    setTimeout(function () { inputSerie.focus(); }, 50);
+}
 
-        function enfocarSerie() {
-            if (!inputSerie || esEdicion) return;
-            setTimeout(function () { inputSerie.focus(); }, 50);
-        }
+if (inputSerie) {
+    inputSerie.addEventListener('input', function () {
+        actualizarBloqueoParte1();
+    });
 
-        if (inputSerie) {
-            inputSerie.addEventListener('input', function () {
+    inputSerie.addEventListener('blur', function () {
+        const serie = this.value.trim();
+        if (!serie) return;
+
+        const params = new URLSearchParams({ num_serie: serie });
+        if (equipoActualId) params.set('equipo_id', equipoActualId);
+
+        fetch('{{ route('equipos.verificarSerie') }}?' + params.toString(), {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.existe) {
+                marcarError(inputSerie, 'Este número de serie ya está registrado.');
                 actualizarBloqueoParte1();
-            });
-        }
-
-        ['marca', 'modelo'].forEach(function (id) {
-            const campo = document.getElementById(id);
-            if (!campo) return;
-            campo.addEventListener('input', actualizarBloqueoParte1);
+            }
         });
+    });
+}
+
+validarCampoVivo('marca', 'La marca es obligatoria.');
+validarCampoVivo('modelo', 'El modelo es obligatorio.');
+validarCampoVivo('descripcion', 'La descripción es obligatoria.');
+validarCampoVivo('procesador', 'El procesador es obligatorio.');
+validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
+validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
+
+['procesador', 'ram', 'disco_duro', 'descripcion', 'marca', 'modelo'].forEach(function (id) {
+    const campo = document.getElementById(id);
+    if (!campo) return;
+    campo.addEventListener('input', actualizarBloqueoParte1);
+    campo.addEventListener('change', actualizarBloqueoParte1);
+});
 
 
         function pintarListaTiposEquipo() {

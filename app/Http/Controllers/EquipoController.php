@@ -497,6 +497,7 @@ class EquipoController extends Controller
             ->with('equipo_resaltado', $equipo->id)
             ->with('equipo_accion', 'editar');
     }
+
     public function destroy(Equipo $equipo): RedirectResponse
     {
         $equipo->delete();
@@ -508,73 +509,85 @@ class EquipoController extends Controller
             ->with('equipo_accion', 'eliminar');
     }
 
+    public function verificarSerie(Request $request)
+    {
+        $serie = mb_strtoupper(trim((string) $request->query('num_serie', '')), 'UTF-8');
+        $ignorar = $request->query('equipo_id');
+
+        $existe = $serie !== '' && \App\Models\Equipo::query()
+            ->where('num_serie', $serie)
+            ->when($ignorar, fn($q) => $q->where('id', '!=', $ignorar))
+            ->exists();
+
+        return response()->json(['existe' => $existe]);
+    }
+
     public function exportPdf(Request $request)
-{
-    $ids = $request->input('ids', []);
+    {
+        $ids = $request->input('ids', []);
 
-    if (empty($ids)) {
-        return response()->json([
-            'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
-        ], 422);
+        if (empty($ids)) {
+            return response()->json([
+                'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
+            ], 422);
+        }
+
+        $equiposEncontrados = Equipo::with([
+            'tipoEquipo',
+            'ubicacione',
+            'especificacionesLaptops',
+            'especificacionesEquipo',
+            'accesoriosEquipos',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        // Mantener exactamente el orden enviado desde DataTables
+        $equipos = collect($ids)
+            ->map(fn($id) => $equiposEncontrados->get($id))
+            ->filter()
+            ->values();
+
+        $pdf = Pdf::loadView('equipo.export-pdf', compact('equipos'))
+            ->setPaper('a4', 'landscape');
+
+        $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+
+        return $pdf->download($nombreArchivo);
     }
 
-    $equiposEncontrados = Equipo::with([
-        'tipoEquipo',
-        'ubicacione',
-        'especificacionesLaptops',
-        'especificacionesEquipo',
-        'accesoriosEquipos',
-    ])
-        ->whereIn('id', $ids)
-        ->get()
-        ->keyBy('id');
+    public function exportExcel(Request $request)
+    {
+        $ids = $request->input('ids', []);
 
-    // Mantener exactamente el orden enviado desde DataTables
-    $equipos = collect($ids)
-        ->map(fn ($id) => $equiposEncontrados->get($id))
-        ->filter()
-        ->values();
+        if (empty($ids)) {
+            return response()->json([
+                'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
+            ], 422);
+        }
 
-    $pdf = Pdf::loadView('equipo.export-pdf', compact('equipos'))
-        ->setPaper('a4', 'landscape');
+        $equiposEncontrados = Equipo::with([
+            'tipoEquipo',
+            'ubicacione',
+            'especificacionesLaptops',
+            'especificacionesEquipo',
+            'accesoriosEquipos',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
 
-    $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+        $equipos = collect($ids)
+            ->map(fn($id) => $equiposEncontrados->get($id))
+            ->filter()
+            ->values();
 
-    return $pdf->download($nombreArchivo);
-}
+        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
 
-public function exportExcel(Request $request)
-{
-    $ids = $request->input('ids', []);
-
-    if (empty($ids)) {
-        return response()->json([
-            'message' => 'NO HAY EQUIPOS PARA EXPORTAR.'
-        ], 422);
+        return Excel::download(
+            new \App\Exports\EquiposExport($equipos),
+            $nombreArchivo
+        );
     }
-
-    $equiposEncontrados = Equipo::with([
-        'tipoEquipo',
-        'ubicacione',
-        'especificacionesLaptops',
-        'especificacionesEquipo',
-        'accesoriosEquipos',
-    ])
-        ->whereIn('id', $ids)
-        ->get()
-        ->keyBy('id');
-
-    $equipos = collect($ids)
-        ->map(fn ($id) => $equiposEncontrados->get($id))
-        ->filter()
-        ->values();
-
-    $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
-
-    return Excel::download(
-        new \App\Exports\EquiposExport($equipos),
-        $nombreArchivo
-    );
-}
-
 }
