@@ -406,9 +406,9 @@
                                             {{ $equipo->ubicacione->nombre ?? '-' }}
                                         </td>
 
-                                        <td class="text-center" data-fecha="{{ $fechaIso }}">
-                                            {{ $fechaVista }}
-                                        </td>
+                                        <td class="text-center" data-fecha="{{ $fechaIso }}" data-order="{{ $fechaIso ?: '0000-00-00' }}">
+    {{ $fechaVista }}
+</td>
 
                                         <td>
                                             {{
