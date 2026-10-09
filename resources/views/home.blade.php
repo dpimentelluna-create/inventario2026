@@ -1,155 +1,121 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid px-2">
-
-    <!-- Encabezado con Icono y Título -->
-    <div class="d-flex align-items-center mb-4">
-        <div class="me-3 text-primary" style="width: 32px; height: 32px; min-width: 32px; min-height: 32px;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px; height:32px; min-width:32px; min-height:32px;">
-                <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+<div class="container mx-auto px-4 py-6">
+    <!-- Encabezado del Panel -->
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+            <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
             </svg>
-        </div>
-        <div>
-            <h1 class="h3 fw-bold mb-0">Panel de Control (Inicio)</h1>
-            <p class="text-secondary small mb-0">Resumen general del estado de los equipos e inventario institucional.</p>
-        </div>
+            Panel de Control (Inicio)
+        </h1>
+        <p class="text-gray-400 text-sm mt-1">Resumen general del estado de los equipos e inventario institucional.</p>
     </div>
 
-    <!-- 4 Tarjetas Superiores (KPIs) -->
-    <div class="row g-4 mb-4">
-        
+    <!-- Tarjetas de Estadísticas Principales -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <!-- Total Equipos -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="p-4 rounded-3 h-100 shadow-sm border">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase small fw-bold text-secondary" style="letter-spacing: 0.5px;">TOTAL EQUIPOS</span>
-                    <span class="rounded-circle d-inline-block" style="width: 28px; height: 28px; background-color: #2563eb;"></span>
-                </div>
-                <div class="h1 fw-bold mb-2">2</div>
-                <div class="small text-secondary">
-                    <span class="text-primary fw-bold">&rarr;</span> Registrados en el sistema
-                </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Total Equipos</span>
+                <span class="w-3 h-3 rounded-full bg-blue-500"></span>
             </div>
+            <div class="text-3xl font-bold text-white mb-2">0</div>
+            <p class="text-xs text-blue-400 flex items-center gap-1">Registrados en el sistema</p>
         </div>
 
         <!-- Equipos Operativos -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="p-4 rounded-3 h-100 shadow-sm border">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase small fw-bold text-secondary" style="letter-spacing: 0.5px;">EQUIPOS OPERATIVOS</span>
-                    <span class="rounded-circle d-inline-block" style="width: 28px; height: 28px; background-color: #10b981;"></span>
-                </div>
-                <div class="h1 fw-bold text-success mb-2">1</div>
-                <div class="small text-secondary">
-                    <span class="text-success fw-bold">&check;</span> En buen estado y disponibles
-                </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Equipos Operativos</span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
             </div>
+            <div class="text-3xl font-bold text-white mb-2">0</div>
+            <p class="text-xs text-emerald-400 flex items-center gap-1">En buen estado y disponibles</p>
         </div>
 
         <!-- Malogrados / Averiados -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="p-4 rounded-3 h-100 shadow-sm border">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase small fw-bold text-secondary" style="letter-spacing: 0.5px;">MALOGRADOS / AVERIADOS</span>
-                    <span class="rounded-circle d-inline-block" style="width: 28px; height: 28px; background-color: #e11d48;"></span>
-                </div>
-                <div class="h1 fw-bold text-danger mb-2">1</div>
-                <div class="small text-secondary">
-                    <span class="text-danger fw-bold">&#128295;</span> Requieren atención técnica
-                </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Malogrados / Averiados</span>
+                <span class="w-3 h-3 rounded-full bg-rose-500"></span>
             </div>
+            <div class="text-3xl font-bold text-white mb-2">0</div>
+            <p class="text-xs text-rose-400 flex items-center gap-1">Requieren atención técnica</p>
         </div>
 
         <!-- Préstamos Activos -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="p-4 rounded-3 h-100 shadow-sm border">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="text-uppercase small fw-bold text-secondary" style="letter-spacing: 0.5px;">PRÉSTAMOS ACTIVOS</span>
-                    <span class="rounded-circle d-inline-block" style="width: 28px; height: 28px; background-color: #f59e0b;"></span>
-                </div>
-                <div class="h1 fw-bold text-warning mb-2">3</div>
-                <div class="small text-secondary">
-                    <span class="text-warning fw-bold">&#128336;</span> Equipos actualmente prestados
-                </div>
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-5 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-semibold tracking-wider text-gray-400 uppercase">Préstamos Activos</span>
+                <span class="w-3 h-3 rounded-full bg-amber-500"></span>
             </div>
+            <div class="text-3xl font-bold text-white mb-2">0</div>
+            <p class="text-xs text-amber-400 flex items-center gap-1">Equipos actualmente prestados</p>
         </div>
-
     </div>
 
-    <!-- Sección Inferior: Acceso Rápido e Información -->
-    <div class="row g-4">
-        
-        <!-- Bloque Izquierdo: Acceso Rápido -->
-        <div class="col-12 col-lg-7">
-            <div class="p-4 rounded-3 h-100 shadow-sm border">
-                <div class="d-flex align-items-center mb-4">
-                    <span class="me-2 text-warning">⚡</span>
-                    <h2 class="h5 fw-bold mb-0">Acceso Rápido</h2>
-                </div>
-
-                <div class="row g-3">
-                    <!-- Tarjeta Préstamos -->
-                    <div class="col-12 col-sm-6">
-                        <div class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #2563eb;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
-                                    <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="fw-bold small">Préstamos</div>
-                                <div class="text-secondary mt-1" style="font-size: 0.75rem;">Registrar salidas o devoluciones de equipos.</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tarjeta Equipos -->
-                    <div class="col-12 col-sm-6">
-                        <div class="d-flex align-items-center p-3 rounded-3 h-100 border shadow-sm">
-                            <div class="rounded-3 d-flex align-items-center justify-content-center me-3 flex-shrink-0 text-white" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; background-color: #059669;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:24px; height:24px; min-width:24px; min-height:24px;">
-                                    <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="fw-bold small">Equipos</div>
-                                <div class="text-secondary mt-1" style="font-size: 0.75rem;">Ver listado de máquinas y estados.</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bloque Derecho: Información -->
-        <div class="col-12 col-lg-5">
-            <div class="p-4 rounded-3 h-100 d-flex flex-column justify-content-between shadow-sm border">
-                <div>
-                    <div class="d-flex align-items-center mb-3">
-                        <span class="me-2 text-primary">ⓘ</span>
-                        <h2 class="h5 fw-bold mb-0">Información</h2>
-                    </div>
-                    <p class="text-secondary small leading-relaxed mb-4">
-                        Bienvenido al sistema de control de inventario y préstamos. Utilice la barra lateral izquierda para navegar rápidamente entre los diferentes módulos y mantener el registro actualizado.
-                    </p>
-                </div>
-
-                <!-- Cuadro de sesión -->
-                <div class="p-3 rounded-3 d-flex align-items-center shadow-sm border">
-                    <div class="me-3 flex-shrink-0 text-success" style="width: 20px; height: 20px; min-width: 20px; min-height: 20px;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; min-width:20px; min-height:20px;">
-                            <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+    <!-- Sección Inferior: Accesos Rápidos e Información -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Acceso Rápido -->
+        <div class="lg:col-span-2 bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg">
+            <h2 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                Acceso Rápido
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="{{ route('prestamos.index') }}" class="flex items-center p-4 bg-slate-900/60 border border-slate-700/60 rounded-lg hover:border-blue-500 transition group">
+                    <div class="p-3 bg-blue-600/20 text-blue-400 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                         </svg>
                     </div>
-                    <span class="text-secondary small">
-                        Sesión iniciada correctamente como <strong class="fw-bold">Usuario</strong>.
-                    </span>
-                </div>
+                    <div>
+                        <h3 class="text-white font-medium group-hover:text-blue-400 transition">Préstamos</h3>
+                        <p class="text-xs text-gray-400">Registrar salidas o devoluciones de equipos.</p>
+                    </div>
+                </a>
+
+                <a href="{{ route('equipos.index') }}" class="flex items-center p-4 bg-slate-900/60 border border-slate-700/60 rounded-lg hover:border-emerald-500 transition group">
+                    <div class="p-3 bg-emerald-600/20 text-emerald-400 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition mr-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-medium group-hover:text-emerald-400 transition">Equipos</h3>
+                        <p class="text-xs text-gray-400">Ver listado de máquinas y estados.</p>
+                    </div>
+                </a>
             </div>
         </div>
 
-    </div>
+        <!-- Información y Notificación de Sesión Corregida -->
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Información
+                </h2>
+                <p class="text-xs text-gray-300 leading-relaxed mb-4">
+                    Bienvenido al sistema de control de inventario y préstamos. Utilice la barra lateral izquierda para navegar rápidamente entre los diferentes módulos y mantener el registro actualizado.
+                </p>
+            </div>
 
-</div>
+           <!-- Caja de Estado de Sesión en Modo Oscuro Uniforme -->
+            <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3.5 flex items-center gap-3">
+                <div class="text-emerald-400 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs font-medium text-gray-200">Sesión iniciada correctamente como <span class="font-semibold text-emerald-400">Usuario</span>.</p>
+                </div>
+            </div>
 @endsection
