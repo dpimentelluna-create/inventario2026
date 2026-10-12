@@ -102,6 +102,18 @@ class EquipoRequest extends FormRequest
                         'Complete el accesorio o elimínelo antes de guardar.'
                     );
                 }
+
+                $serie = mb_strtoupper(trim((string) ($fila['num_serie'] ?? '')), 'UTF-8');
+                if ($serie !== '') {
+                    $id = $fila['id'] ?? null;
+                    $existe = \App\Models\AccesoriosEquipo::query()
+                        ->where('num_serie', $serie)
+                        ->when($id, fn($q) => $q->where('id', '!=', $id))
+                        ->exists();
+                    if ($existe) {
+                        $validator->errors()->add("accesorios.$i.num_serie", 'Este número de serie de accesorio ya está registrado.');
+                    }
+                }
             }
         });
     }

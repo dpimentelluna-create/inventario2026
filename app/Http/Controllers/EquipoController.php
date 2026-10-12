@@ -522,6 +522,19 @@ class EquipoController extends Controller
         return response()->json(['existe' => $existe]);
     }
 
+    public function verificarSerieAccesorio(Request $request)
+    {
+        $serie = mb_strtoupper(trim((string) $request->query('num_serie', '')), 'UTF-8');
+        $ignorar = $request->query('accesorio_id');
+
+        $existe = $serie !== '' && \App\Models\AccesoriosEquipo::query()
+            ->where('num_serie', $serie)
+            ->when($ignorar, fn($q) => $q->where('id', '!=', $ignorar))
+            ->exists();
+
+        return response()->json(['existe' => $existe]);
+    }
+
     public function exportPdf(Request $request)
     {
         $ids = $request->input('ids', []);

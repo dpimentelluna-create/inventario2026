@@ -1094,6 +1094,10 @@
                 });
             }
 
+            if (container && specsOk) {
+                container.querySelectorAll('.accesorio-item').forEach(bloquearFilaAccesorio);
+            }
+
             pintarUbicacionObligatoria();
         }
 
@@ -1483,6 +1487,25 @@
             inputPers.required = esOtro;
         }
 
+        function tipoAccListo(accesorio) {
+            const tipo = accesorio.querySelector('.tipo-accesorio');
+            const pers = accesorio.querySelector('.tipo-personalizado');
+            const txt = tipo ? tipo.value.trim().toUpperCase() : '';
+            if (!txt) return false;
+            if (txt === 'OTRO') return !!(pers && pers.value.trim());
+            return true;
+        }
+
+        function bloquearFilaAccesorio(accesorio) {
+            const listo = tipoAccListo(accesorio);
+            accesorio.querySelectorAll('input, select, textarea').forEach(function (el) {
+                if (el.classList.contains('tipo-accesorio') || el.classList.contains('tipo-personalizado')) return;
+                if (el.tagName === 'SELECT') el.disabled = !listo;
+                else el.readOnly = !listo;
+                el.classList.toggle('bg-light', !listo);
+            });
+        }
+
         function tipoEquipoActualNombre() {
             if (inputNuevoTipo && inputNuevoTipo.value.trim()) {
                 return inputNuevoTipo.value.trim().toUpperCase();
@@ -1568,6 +1591,36 @@
                     if (this.value.trim()) limpiar(this);
                 });
             });
+
+            const serieCampo = accesorio.querySelector('[name*="[num_serie]"]');
+const idCampo = accesorio.querySelector('[name*="[id]"]');
+if (serieCampo) {
+    serieCampo.addEventListener('blur', function () {
+        const serie = this.value.trim().toUpperCase();
+        if (!serie) return;
+
+        const repetida = Array.from(container.querySelectorAll('[name*="[num_serie]"]'))
+            .some(function (otro) {
+                return otro !== serieCampo && otro.value.trim().toUpperCase() === serie;
+            });
+        if (repetida) {
+            errorEn(serieCampo, 'Este número de serie ya está en otro accesorio.');
+            return;
+        }
+
+        const params = new URLSearchParams({ num_serie: serie });
+        if (idCampo && idCampo.value) params.set('accesorio_id', idCampo.value);
+
+        fetch('{{ route('equipos.verificarSerieAccesorio') }}?' + params.toString(), {
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.existe) errorEn(serieCampo, 'Este número de serie de accesorio ya está registrado.');
+            else limpiar(serieCampo);
+        });
+    });
+}
         }
 
         function configurarCombobox(accesorio) {
@@ -1593,9 +1646,14 @@
                 lista.style.display = 'none';
                 actualizarTipoPersonalizado(accesorio);
                 sugerirMarcaAccesorio(accesorio);
+                bloquearFilaAccesorio(accesorio);
+
                 if (String(texto).toUpperCase() === 'OTRO') {
                     const personalizado = accesorio.querySelector('.tipo-personalizado');
                     if (personalizado) setTimeout(function () { personalizado.focus(); }, 50);
+                } else {
+                    const serie = accesorio.querySelector('[name*="[num_serie]"]');
+                    if (serie) setTimeout(function () { serie.focus(); }, 50);
                 }
             }
 
@@ -1631,6 +1689,7 @@
             input.addEventListener('input', function () {
                 mostrarLista();
                 actualizarTipoPersonalizado(accesorio);
+                bloquearFilaAccesorio(accesorio);               
             });
             input.addEventListener('focus', mostrarLista);
             input.addEventListener('click', mostrarLista);
@@ -1653,6 +1712,17 @@
                     lista.style.display = 'none';
                 }
             });
+
+            const personalizado = accesorio.querySelector('.tipo-personalizado');
+            if (personalizado) {
+                personalizado.addEventListener('input', function () {
+                    bloquearFilaAccesorio(accesorio);
+                    if (tipoAccListo(accesorio)) {
+                        const serie = accesorio.querySelector('[name*="[num_serie]"]');
+                        if (serie) serie.focus();
+                    }
+                });
+            }
         }
 
         if (container) {
@@ -1660,6 +1730,10 @@
                 configurarCombobox(accesorio);
                 actualizarTipoPersonalizado(accesorio);
                 validarFilaAccesorio(accesorio);
+                bloquearFilaAccesorio(accesorio);
+
+                const tipoNuevo = accesorio.querySelector('.tipo-accesorio');
+                if (tipoNuevo) tipoNuevo.focus();
             });
             actualizarMensaje();
 

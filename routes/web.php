@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
         ->name('equipos.export.excel');
     Route::get('/equipos/verificar-serie', [EquipoController::class, 'verificarSerie'])
         ->name('equipos.verificarSerie');
+    Route::get('/equipos/verificar-serie-accesorio', [EquipoController::class, 'verificarSerieAccesorio'])
+        ->name('equipos.verificarSerieAccesorio');
 
     Route::resource('equipos', App\Http\Controllers\EquipoController::class);
 
