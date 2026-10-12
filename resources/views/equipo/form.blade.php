@@ -1493,15 +1493,16 @@
             const txt = tipo ? tipo.value.trim().toUpperCase() : '';
             if (!txt) return false;
             if (txt === 'OTRO') return !!(pers && pers.value.trim());
-            return true;
+            return (tiposAccesorios || []).some(function (item) {
+                return String(item).trim().toUpperCase() === txt;
+            });
         }
 
         function bloquearFilaAccesorio(accesorio) {
             const listo = tipoAccListo(accesorio);
             accesorio.querySelectorAll('input, select, textarea').forEach(function (el) {
                 if (el.classList.contains('tipo-accesorio') || el.classList.contains('tipo-personalizado')) return;
-                if (el.tagName === 'SELECT') el.disabled = !listo;
-                else el.readOnly = !listo;
+                el.disabled = !listo;
                 el.classList.toggle('bg-light', !listo);
             });
         }
@@ -1652,8 +1653,8 @@ if (serieCampo) {
                     const personalizado = accesorio.querySelector('.tipo-personalizado');
                     if (personalizado) setTimeout(function () { personalizado.focus(); }, 50);
                 } else {
-                    const serie = accesorio.querySelector('[name*="[num_serie]"]');
-                    if (serie) setTimeout(function () { serie.focus(); }, 50);
+                    const marca = accesorio.querySelector('[name*="[marca]"]');
+                if (marca) setTimeout(function () { marca.focus(); }, 50);
                 }
             }
 
@@ -1689,8 +1690,23 @@ if (serieCampo) {
             input.addEventListener('input', function () {
                 mostrarLista();
                 actualizarTipoPersonalizado(accesorio);
-                bloquearFilaAccesorio(accesorio);               
+
+                const marca = accesorio.querySelector('[name*="[marca]"]');
+                if (marca) marca.value = '';
+
+                 bloquearFilaAccesorio(accesorio);               
             });
+
+            input.addEventListener('blur', function () {
+                if (!this.value.trim()) return;
+                if (!tipoAccListo(accesorio)) {
+                    marcarError(this, 'Seleccione un tipo de la lista o use OTRO.');
+                    bloquearFilaAccesorio(accesorio);
+                } else {
+                    limpiarErrorCampo(this);
+                }
+            });
+
             input.addEventListener('focus', mostrarLista);
             input.addEventListener('click', mostrarLista);
             input.addEventListener('keydown', function (e) {
@@ -1717,13 +1733,17 @@ if (serieCampo) {
             if (personalizado) {
                 personalizado.addEventListener('input', function () {
                     bloquearFilaAccesorio(accesorio);
+                });
+                personalizado.addEventListener('blur', function () {
+                    bloquearFilaAccesorio(accesorio);
                     if (tipoAccListo(accesorio)) {
-                        const serie = accesorio.querySelector('[name*="[num_serie]"]');
-                        if (serie) serie.focus();
+                        const marca = accesorio.querySelector('[name*="[marca]"]');
+                        if (marca) marca.focus();
                     }
                 });
             }
         }
+
 
         if (container) {
             container.querySelectorAll('.accesorio-item').forEach(function (accesorio) {
@@ -1731,9 +1751,6 @@ if (serieCampo) {
                 actualizarTipoPersonalizado(accesorio);
                 validarFilaAccesorio(accesorio);
                 bloquearFilaAccesorio(accesorio);
-
-                const tipoNuevo = accesorio.querySelector('.tipo-accesorio');
-                if (tipoNuevo) tipoNuevo.focus();
             });
             actualizarMensaje();
 
@@ -1785,6 +1802,9 @@ if (serieCampo) {
                     });
                     configurarCombobox(accesorio);
                     validarFilaAccesorio(accesorio);
+                    bloquearFilaAccesorio(accesorio);
+                    const tipoNuevo = accesorio.querySelector('.tipo-accesorio');
+                    if (tipoNuevo) tipoNuevo.focus();
                     contador++;
                     actualizarMensaje();
                 });

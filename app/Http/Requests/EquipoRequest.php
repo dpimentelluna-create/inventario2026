@@ -114,6 +114,22 @@ class EquipoRequest extends FormRequest
                         $validator->errors()->add("accesorios.$i.num_serie", 'Este número de serie de accesorio ya está registrado.');
                     }
                 }
+
+                $tipoTxt = mb_strtoupper(trim((string) ($fila['tipo'] ?? '')), 'UTF-8');
+                if ($tipoTxt !== '' && $tipoTxt !== 'OTRO') {
+                    $permitido = \App\Models\AccesoriosEquipo::query()
+                        ->whereRaw('UPPER(tipo) = ?', [$tipoTxt])
+                        ->exists();
+                    if (!$permitido) {
+                        $validator->errors()->add(
+                            "accesorios.$i.tipo",
+                            'Seleccione un tipo de la lista o regístrelo con OTRO.'
+                        );
+                    }
+                }
+                if ($tipoTxt === 'OTRO' && trim((string) ($fila['tipo_personalizado'] ?? '')) === '') {
+                    $validator->errors()->add("accesorios.$i.tipo_personalizado", 'Especifique el tipo de accesorio.');
+                }
             }
         });
     }
