@@ -26,9 +26,9 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
     {
         $filas = collect();
 
-        for ($i = 1; $i <= 4; $i++) {
-        $filas->push(array_fill(0, 9, ''));
-    }
+        for ($i = 1; $i <= 5; $i++) {
+            $filas->push(array_fill(0, 9, ''));
+        }
 
         // Encabezados
         $filas->push([
@@ -74,8 +74,8 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
             );
 
             $fecha = $equipo->fecha_registro
-    ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y')
-    : '-';
+                ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y')
+                : '-';
 
             $observacion = strtoupper(
                 $equipo->especificacionesLaptops->observaciones
@@ -161,80 +161,53 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->setCellValue(
-                    'B2',
-                    'RESPONSABLE'
-                );
+                $ubicaciones = $this->equipos
+                    ->map(fn($equipo) => mb_strtoupper(trim($equipo->ubicacione->nombre ?? '')))
+                    ->filter()
+                    ->unique();
 
-                $sheet->mergeCells('C2:D2');
+                $ubicacionReporte = $ubicaciones->count() === 1
+                    ? $ubicaciones->first()
+                    : ($ubicaciones->count() ? 'VARIAS' : '-');
 
-                $sheet->setCellValue(
-                    'C2',
-                    'ING. MICHAEL CABOS OLIVARES'
-                );
+                $fechaReporte = now()->format('d-m-Y');
 
-                $sheet->setCellValue(
-                    'E2',
-                    'CARGO'
-                );
+                $sheet->setCellValue('B2', 'RESPONSABLE');
+                $sheet->mergeCells('C2:E2');
+                $sheet->setCellValue('C2', 'ING. MICHAEL CABOS OLIVARES');
+                $sheet->setCellValue('G2', 'UBICACIÓN');
+                $sheet->mergeCells('H2:I2');
+                $sheet->setCellValue('H2', $ubicacionReporte);
 
-                $sheet->mergeCells('F2:I2');
+                $sheet->setCellValue('B3', 'CARGO');
+                $sheet->mergeCells('C3:E3');
+                $sheet->setCellValue('C3', 'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO');
+                $sheet->setCellValue('G3', 'FECHA');
+                $sheet->mergeCells('H3:I3');
+                $sheet->setCellValue('H3', $fechaReporte);
 
-                $sheet->setCellValue(
-                    'F2',
-                    'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO'
-                );
-
-                $sheet->getStyle('B2:I2')->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
+                foreach (['B2:E2', 'G2:I2', 'B3:E3', 'G3:I3'] as $rango) {
+                    $sheet->getStyle($rango)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                         ],
-                    ],
-                    'alignment' => [
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
+                        'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+                    ]);
+                }
 
-                $sheet->getStyle('B2')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FFD6A84F',
+                foreach (['B2', 'G2', 'B3', 'G3'] as $celda) {
+                    $sheet->getStyle($celda)->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['argb' => 'FFD6A84F'],
                         ],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    ],
-                ]);
-
-                $sheet->getStyle('E2')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FFD6A84F',
-                        ],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    ],
-                ]);
-
-                $sheet->getStyle('C2:D2')
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                $sheet->getStyle('F2:I2')
-                    ->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+                }
 
                 $sheet->getRowDimension(2)->setRowHeight(18);
+                $sheet->getRowDimension(3)->setRowHeight(18);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -242,7 +215,7 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->getRowDimension(3)->setRowHeight(8);
+                $sheet->getRowDimension(4)->setRowHeight(8);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -250,14 +223,14 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                 |--------------------------------------------------------------------------
                 */
 
-                $sheet->mergeCells('A4:I4');
+                $sheet->mergeCells('A5:I5');
 
                 $sheet->setCellValue(
-                    'A4',
+                    'A5',
                     'INFORMACIÓN GENERAL DE LOS EQUIPOS TECNOLÓGICOS'
                 );
 
-                $sheet->getStyle('A4:I4')->applyFromArray([
+                $sheet->getStyle('A5:I5')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 11,
@@ -275,22 +248,22 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                 */
 
                 $headers = [
-                    'A5' => 'N°',
-                    'B5' => 'TIPO',
-                    'C5' => 'NÚM. SERIE',
-                    'D5' => 'MARCA',
-                    'E5' => 'MODELO',
-                    'F5' => 'ESTADO',
-                    'G5' => 'UBICACIÓN',
-                    'H5' => 'FECHA REGISTRO',
-                    'I5' => 'OBSERVACIONES',
+                    'A6' => 'N°',
+                    'B6' => 'TIPO',
+                    'C6' => 'NÚM. SERIE',
+                    'D6' => 'MARCA',
+                    'E6' => 'MODELO',
+                    'F6' => 'ESTADO',
+                    'G6' => 'UBICACIÓN',
+                    'H6' => 'FECHA REGISTRO',
+                    'I6' => 'OBSERVACIONES',
                 ];
 
                 foreach ($headers as $celda => $valor) {
                     $sheet->setCellValue($celda, $valor);
                 }
 
-                $sheet->getStyle('A5:I5')->applyFromArray([
+                $sheet->getStyle('A6:I6')->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'size' => 9,
@@ -313,7 +286,7 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                     ],
                 ]);
 
-                $sheet->getRowDimension(5)->setRowHeight(28);
+                $sheet->getRowDimension(6)->setRowHeight(28);
 
                 /*
                 |--------------------------------------------------------------------------
@@ -323,10 +296,10 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
 
                 $highestRow = $sheet->getHighestRow();
 
-                if ($highestRow >= 6) {
+                if ($highestRow >= 7) {
 
                     $sheet->getStyle(
-                        'A6:I' . $highestRow
+                        'A7:I' . $highestRow
                     )->applyFromArray([
                         'font' => [
                             'size' => 9,
@@ -343,12 +316,12 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                     ]);
 
                     $sheet->getStyle(
-                        'A6:A' . $highestRow
+                        'A7:A' . $highestRow
                     )->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
                     $sheet->getStyle(
-                        'F6:H' . $highestRow
+                        'F7:H' . $highestRow
                     )->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
@@ -359,7 +332,7 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                     */
 
                     $sheet->setAutoFilter(
-                        'A5:I' . $highestRow
+                        'A6:I' . $highestRow
                     );
                 }
             },

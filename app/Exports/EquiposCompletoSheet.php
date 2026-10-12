@@ -4,14 +4,14 @@ namespace App\Exports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
-use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, WithColumnWidths
 {
@@ -23,64 +23,20 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
     }
 
     public function collection()
-{
-    $filas = collect();
+    {
+        $filas = collect();
 
-    /*
-    |--------------------------------------------------------------------------
-    | FILAS RESERVADAS PARA EL ENCABEZADO
-    |--------------------------------------------------------------------------
-    |
-    | IMPORTANTE:
-    | No usar [] porque Laravel Excel puede omitir esas filas.
-    | Se colocan 16 celdas vacías para mantener físicamente
-    | las posiciones de las filas.
-    |
-    */
+        for ($i = 1; $i <= 7; $i++) {
+            $filas->push(array_fill(0, 16, ''));
+        }
 
-    for ($i = 1; $i <= 6; $i++) {
-        $filas->push(array_fill(0, 16, ''));
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | DATOS
-    |--------------------------------------------------------------------------
-    */
-
-    $indice = 1;
-
-    foreach ($this->equipos as $equipo) {
+        $indice = 1;
 
         foreach ($this->equipos as $equipo) {
-
-            /*
-            |--------------------------------------------------------------------------
-            | INFORMACIÓN GENERAL
-            |--------------------------------------------------------------------------
-            */
-
-            $tipo = strtoupper(
-                $equipo->tipoEquipo->nombre ?? '-'
-            );
-
-            $serie = strtoupper(
-                $equipo->num_serie ?? '-'
-            );
-
-            $marca = strtoupper(
-                $equipo->marca ?? '-'
-            );
-
-            $modelo = strtoupper(
-                $equipo->modelo ?? '-'
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | DETALLES
-            |--------------------------------------------------------------------------
-            */
+            $tipo = strtoupper($equipo->tipoEquipo->nombre ?? '-');
+            $serie = strtoupper($equipo->num_serie ?? '-');
+            $marca = strtoupper($equipo->marca ?? '-');
+            $modelo = strtoupper($equipo->modelo ?? '-');
 
             $procesador = '';
             $ram = '';
@@ -89,39 +45,14 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
             $descripcion = '';
 
             if ($equipo->especificacionesLaptops) {
-
-                $procesador = strtoupper(
-                    $equipo->especificacionesLaptops->procesador ?? ''
-                );
-
-                $ram = strtoupper(
-                    $equipo->especificacionesLaptops->ram ?? ''
-                );
-
-                $disco = strtoupper(
-                    $equipo->especificacionesLaptops->disco_duro ?? ''
-                );
-
-                $color = strtoupper(
-                    $equipo->especificacionesLaptops->color ?? ''
-                );
-
+                $procesador = strtoupper($equipo->especificacionesLaptops->procesador ?? '');
+                $ram = strtoupper($equipo->especificacionesLaptops->ram ?? '');
+                $disco = strtoupper($equipo->especificacionesLaptops->disco_duro ?? '');
+                $color = strtoupper($equipo->especificacionesLaptops->color ?? '');
             } elseif ($equipo->especificacionesEquipo) {
-
-                $color = strtoupper(
-                    $equipo->especificacionesEquipo->color ?? ''
-                );
-
-                $descripcion = strtoupper(
-                    $equipo->especificacionesEquipo->descripcion ?? ''
-                );
+                $color = strtoupper($equipo->especificacionesEquipo->color ?? '');
+                $descripcion = strtoupper($equipo->especificacionesEquipo->descripcion ?? '');
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | ESTADO
-            |--------------------------------------------------------------------------
-            */
 
             $estado = strtoupper(
                 $equipo->especificacionesLaptops->estado
@@ -129,21 +60,7 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
                     ?? '-'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | UBICACIÓN
-            |--------------------------------------------------------------------------
-            */
-
-            $ubicacion = strtoupper(
-                $equipo->ubicacione->nombre ?? '-'
-            );
-
-            /*
-            |--------------------------------------------------------------------------
-            | OBSERVACIÓN
-            |--------------------------------------------------------------------------
-            */
+            $ubicacion = strtoupper($equipo->ubicacione->nombre ?? '-');
 
             $observacion = strtoupper(
                 $equipo->especificacionesLaptops->observaciones
@@ -152,39 +69,22 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
                     ?? '-'
             );
 
-            /*
-            |--------------------------------------------------------------------------
-            | DETALLES
-            |--------------------------------------------------------------------------
-            */
-
             $detalles = [];
 
             if ($procesador !== '') {
                 $detalles[] = 'PROCESADOR: ' . $procesador;
             }
-
             if ($ram !== '') {
                 $detalles[] = 'RAM: ' . $ram;
             }
-
             if ($disco !== '') {
                 $detalles[] = 'DISCO DURO: ' . $disco;
             }
-
             if ($descripcion !== '') {
                 $detalles[] = 'DESCRIPCIÓN: ' . $descripcion;
             }
 
-            $detallesTexto = !empty($detalles)
-                ? implode("\n", $detalles)
-                : '-';
-
-            /*
-            |--------------------------------------------------------------------------
-            | ACCESORIOS
-            |--------------------------------------------------------------------------
-            */
+            $detallesTexto = !empty($detalles) ? implode("\n", $detalles) : '-';
 
             $tiposAccesorios = [];
             $marcasAccesorios = [];
@@ -193,33 +93,12 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
             $observacionesAccesorios = [];
 
             foreach ($equipo->accesoriosEquipos ?? [] as $accesorio) {
-
-                $tiposAccesorios[] = strtoupper(
-                    $accesorio->tipo ?? '-'
-                );
-
-                $marcasAccesorios[] = strtoupper(
-                    $accesorio->marca ?? '-'
-                );
-
-                $seriesAccesorios[] = strtoupper(
-                    $accesorio->num_serie ?? '-'
-                );
-
-                $estadosAccesorios[] = strtoupper(
-                    $accesorio->estado ?? '-'
-                );
-
-                $observacionesAccesorios[] = strtoupper(
-                    $accesorio->observaciones ?? '-'
-                );
+                $tiposAccesorios[] = strtoupper($accesorio->tipo ?? '-');
+                $marcasAccesorios[] = strtoupper($accesorio->marca ?? '-');
+                $seriesAccesorios[] = strtoupper($accesorio->num_serie ?? '-');
+                $estadosAccesorios[] = strtoupper($accesorio->estado ?? '-');
+                $observacionesAccesorios[] = strtoupper($accesorio->observaciones ?? '-');
             }
-
-            /*
-            |--------------------------------------------------------------------------
-            | FILA
-            |--------------------------------------------------------------------------
-            */
 
             $filas->push([
                 sprintf('%02d', $indice),
@@ -230,26 +109,16 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
                 $estado,
                 $ubicacion,
                 $equipo->fecha_registro
-    ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y')
-    : '-',
+                    ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y')
+                    : '-',
                 $observacion,
                 $detallesTexto,
                 $color ?: '-',
-                !empty($tiposAccesorios)
-                    ? implode("\n", $tiposAccesorios)
-                    : '-',
-                !empty($marcasAccesorios)
-                    ? implode("\n", $marcasAccesorios)
-                    : '-',
-                !empty($seriesAccesorios)
-                    ? implode("\n", $seriesAccesorios)
-                    : '-',
-                !empty($estadosAccesorios)
-                    ? implode("\n", $estadosAccesorios)
-                    : '-',
-                !empty($observacionesAccesorios)
-                    ? implode("\n", $observacionesAccesorios)
-                    : '-',
+                !empty($tiposAccesorios) ? implode("\n", $tiposAccesorios) : '-',
+                !empty($marcasAccesorios) ? implode("\n", $marcasAccesorios) : '-',
+                !empty($seriesAccesorios) ? implode("\n", $seriesAccesorios) : '-',
+                !empty($estadosAccesorios) ? implode("\n", $estadosAccesorios) : '-',
+                !empty($observacionesAccesorios) ? implode("\n", $observacionesAccesorios) : '-',
             ]);
 
             $indice++;
@@ -257,7 +126,6 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
 
         return $filas;
     }
-}
 
     public function columnWidths(): array
     {
@@ -290,224 +158,128 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-
                 $sheet = $event->sheet->getDelegate();
 
-                /*
-                |--------------------------------------------------------------------------
-                | TÍTULO
-                |--------------------------------------------------------------------------
-                */
-
                 $sheet->mergeCells('A1:P1');
-
-                $sheet->setCellValue(
-                    'A1',
-                    'FORMATO PARA REGISTRO DE EQUIPOS TECNOLOGICOS'
-                );
-
+                $sheet->setCellValue('A1', 'FORMATO PARA REGISTRO DE EQUIPOS TECNOLOGICOS');
                 $sheet->getStyle('A1:P1')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 14,
-                    ],
+                    'font' => ['bold' => true, 'size' => 14],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
                     ],
                 ]);
-
                 $sheet->getRowDimension(1)->setRowHeight(22);
 
-                /*
-                |--------------------------------------------------------------------------
-                | RESPONSABLE / CARGO
-                |--------------------------------------------------------------------------
-                */
+                $ubicaciones = $this->equipos
+                    ->map(fn ($equipo) => mb_strtoupper(trim($equipo->ubicacione->nombre ?? '')))
+                    ->filter()
+                    ->unique();
+
+                $ubicacionReporte = $ubicaciones->count() === 1
+                    ? $ubicaciones->first()
+                    : ($ubicaciones->count() ? 'VARIAS' : '-');
+
+                $fechaReporte = now()->format('d-m-Y');
 
                 $sheet->setCellValue('B2', 'RESPONSABLE');
-                $sheet->mergeCells('C2:D2');
-                $sheet->setCellValue(
-                    'C2',
-                    'ING. MICHAEL CABOS OLIVARES'
-                );
+                $sheet->mergeCells('C2:E2');
+                $sheet->setCellValue('C2', 'ING. MICHAEL CABOS OLIVARES');
+                $sheet->setCellValue('G2', 'UBICACIÓN');
+                $sheet->mergeCells('H2:I2');
+                $sheet->setCellValue('H2', $ubicacionReporte);
 
-                $sheet->setCellValue('E2', 'CARGO');
-                $sheet->mergeCells('F2:P2');
-                $sheet->setCellValue(
-                    'F2',
-                    'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO'
-                );
+                $sheet->setCellValue('B3', 'CARGO');
+                $sheet->mergeCells('C3:E3');
+                $sheet->setCellValue('C3', 'COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO');
+                $sheet->setCellValue('G3', 'FECHA');
+                $sheet->mergeCells('H3:I3');
+                $sheet->setCellValue('H3', $fechaReporte);
 
-                $sheet->getStyle('B2:P2')->applyFromArray([
-                    'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
+                foreach (['B2:E2', 'G2:I2', 'B3:E3', 'G3:I3'] as $rango) {
+                    $sheet->getStyle($rango)->applyFromArray([
+                        'borders' => [
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                         ],
-                    ],
-                    'alignment' => [
-                        'vertical' => Alignment::VERTICAL_CENTER,
-                    ],
-                ]);
+                        'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
+                    ]);
+                }
 
-                $sheet->getStyle('B2')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FFD6A84F',
+                foreach (['B2', 'G2', 'B3', 'G3'] as $celda) {
+                    $sheet->getStyle($celda)->applyFromArray([
+                        'font' => ['bold' => true],
+                        'fill' => [
+                            'fillType' => Fill::FILL_SOLID,
+                            'startColor' => ['argb' => 'FFD6A84F'],
                         ],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    ],
-                ]);
-
-                $sheet->getStyle('E2')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                    ],
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FFD6A84F',
-                        ],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                    ],
-                ]);
-
-                $sheet->getStyle('C2:D2')->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
-
-                $sheet->getStyle('F2:P2')->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+                }
 
                 $sheet->getRowDimension(2)->setRowHeight(18);
+                $sheet->getRowDimension(3)->setRowHeight(18);
+                $sheet->getRowDimension(4)->setRowHeight(8);
 
-                /*
-                |--------------------------------------------------------------------------
-                | ESPACIO
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->getRowDimension(3)->setRowHeight(8);
-
-                /*
-                |--------------------------------------------------------------------------
-                | SUBTÍTULO
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->mergeCells('A4:P4');
-
-                $sheet->setCellValue(
-                    'A4',
-                    'INFORMACIÓN COMPLETA DE LOS EQUIPOS TECNOLÓGICOS'
-                );
-
-                $sheet->getStyle('A4:P4')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 11,
-                    ],
+                $sheet->mergeCells('A5:P5');
+                $sheet->setCellValue('A5', 'INFORMACIÓN COMPLETA DE LOS EQUIPOS TECNOLÓGICOS');
+                $sheet->getStyle('A5:P5')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 11],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_LEFT,
                         'vertical' => Alignment::VERTICAL_CENTER,
                     ],
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | GRUPOS
-                |--------------------------------------------------------------------------
-                */
-
-                $sheet->mergeCells('B5:I5');
-                $sheet->mergeCells('J5:K5');
-                $sheet->mergeCells('L5:P5');
-
-                $sheet->setCellValue(
-                    'B5',
-                    'INFORMACIÓN GENERAL'
-                );
-
-                $sheet->setCellValue(
-                    'J5',
-                    'DETALLES'
-                );
-
-                $sheet->setCellValue(
-                    'L5',
-                    'ACCESORIOS'
-                );
-
-                $sheet->setCellValue('A5', 'N°');
-
-                $sheet->getStyle('A5:P5')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 10,
-                    ],
+                $sheet->mergeCells('B6:I6');
+                $sheet->mergeCells('J6:K6');
+                $sheet->mergeCells('L6:P6');
+                $sheet->setCellValue('B6', 'INFORMACIÓN GENERAL');
+                $sheet->setCellValue('J6', 'DETALLES');
+                $sheet->setCellValue('L6', 'ACCESORIOS');
+                $sheet->setCellValue('A6', 'N°');
+                $sheet->getStyle('A6:P6')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FFD6A84F',
-                        ],
+                        'startColor' => ['argb' => 'FFD6A84F'],
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
                         'vertical' => Alignment::VERTICAL_CENTER,
                     ],
                     'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                        ],
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                     ],
                 ]);
 
-                /*
-                |--------------------------------------------------------------------------
-                | ENCABEZADOS DE COLUMNAS
-                |--------------------------------------------------------------------------
-                */
-
                 $headers = [
-                    'A6' => 'N°',
-                    'B6' => 'TIPO',
-                    'C6' => 'NÚM. SERIE',
-                    'D6' => 'MARCA',
-                    'E6' => 'MODELO',
-                    'F6' => 'ESTADO',
-                    'G6' => 'UBICACIÓN',
-                    'H6' => 'FECHA REGISTRO',
-                    'I6' => 'OBSERVACIONES',
-                    'J6' => 'DETALLES',
-                    'K6' => 'COLOR',
-                    'L6' => 'TIPO',
-                    'M6' => 'MARCA',
-                    'N6' => 'SERIE',
-                    'O6' => 'ESTADO',
-                    'P6' => 'OBSERVACIONES',
+                    'A7' => 'N°',
+                    'B7' => 'TIPO',
+                    'C7' => 'NÚM. SERIE',
+                    'D7' => 'MARCA',
+                    'E7' => 'MODELO',
+                    'F7' => 'ESTADO',
+                    'G7' => 'UBICACIÓN',
+                    'H7' => 'FECHA REGISTRO',
+                    'I7' => 'OBSERVACIONES',
+                    'J7' => 'DETALLES',
+                    'K7' => 'COLOR',
+                    'L7' => 'TIPO',
+                    'M7' => 'MARCA',
+                    'N7' => 'SERIE',
+                    'O7' => 'ESTADO',
+                    'P7' => 'OBSERVACIONES',
                 ];
 
                 foreach ($headers as $celda => $valor) {
                     $sheet->setCellValue($celda, $valor);
                 }
 
-                $sheet->getStyle('A6:P6')->applyFromArray([
-                    'font' => [
-                        'bold' => true,
-                        'size' => 9,
-                    ],
+                $sheet->getStyle('A7:P7')->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 9],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => [
-                            'argb' => 'FF90EE90',
-                        ],
+                        'startColor' => ['argb' => 'FF90EE90'],
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -515,101 +287,53 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
                         'wrapText' => true,
                     ],
                     'borders' => [
-                        'allBorders' => [
-                            'borderStyle' => Border::BORDER_THIN,
-                        ],
+                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                     ],
                 ]);
-
-                $sheet->getRowDimension(6)->setRowHeight(28);
-
-                /*
-                |--------------------------------------------------------------------------
-                | DATOS
-                |--------------------------------------------------------------------------
-                */
+                $sheet->getRowDimension(7)->setRowHeight(28);
 
                 $highestRow = $sheet->getHighestRow();
 
-                if ($highestRow >= 7) {
-
-                    $sheet->getStyle(
-                        'A7:P' . $highestRow
-                    )->applyFromArray([
-                        'font' => [
-                            'size' => 9,
-                        ],
+                if ($highestRow >= 8) {
+                    $sheet->getStyle('A8:P' . $highestRow)->applyFromArray([
+                        'font' => ['size' => 9],
                         'alignment' => [
                             'vertical' => Alignment::VERTICAL_TOP,
                             'wrapText' => true,
                         ],
                         'borders' => [
-                            'allBorders' => [
-                                'borderStyle' => Border::BORDER_THIN,
-                            ],
+                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                         ],
                     ]);
 
-                    $sheet->getStyle(
-                        'A7:A' . $highestRow
-                    )->getAlignment()
+                    $sheet->getStyle('A8:A' . $highestRow)
+                        ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                    $sheet->getStyle(
-                        'F7:H' . $highestRow
-                    )->getAlignment()
+                    $sheet->getStyle('F8:H' . $highestRow)
+                        ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                    $sheet->getStyle(
-                        'K7:O' . $highestRow
-                    )->getAlignment()
+                    $sheet->getStyle('K8:O' . $highestRow)
+                        ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | ALTURA AUTOMÁTICA APROXIMADA
-                    |--------------------------------------------------------------------------
-                    */
-
-                    for ($fila = 7; $fila <= $highestRow; $fila++) {
-
+                    for ($fila = 8; $fila <= $highestRow; $fila++) {
                         $maxLineas = 1;
 
                         foreach (range('A', 'P') as $columna) {
-
-                            $valor = $sheet->getCell(
-                                $columna . $fila
-                            )->getValue();
+                            $valor = $sheet->getCell($columna . $fila)->getValue();
 
                             if ($valor !== null) {
-
-                                $lineas = substr_count(
-                                    (string) $valor,
-                                    "\n"
-                                ) + 1;
-
-                                $maxLineas = max(
-                                    $maxLineas,
-                                    $lineas
-                                );
+                                $lineas = substr_count((string) $valor, "\n") + 1;
+                                $maxLineas = max($maxLineas, $lineas);
                             }
                         }
 
-                        $sheet->getRowDimension($fila)
-                            ->setRowHeight(
-                                max(22, $maxLineas * 15)
-                            );
+                        $sheet->getRowDimension($fila)->setRowHeight(max(22, $maxLineas * 15));
                     }
 
-                    /*
-                    |--------------------------------------------------------------------------
-                    | FILTROS
-                    |--------------------------------------------------------------------------
-                    */
-
-                    $sheet->setAutoFilter(
-                        'A6:P' . $highestRow
-                    );
+                    $sheet->setAutoFilter('A7:P' . $highestRow);
                 }
             },
         ];
