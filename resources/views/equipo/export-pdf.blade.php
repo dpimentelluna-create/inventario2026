@@ -7,9 +7,9 @@
     <style>
         @page {
             size: A4 landscape;
-            margin: 138px 12px 18px 12px;
+            margin: 143px 16px 18px 16px;
         }
-
+    
         body {
             font-family: DejaVu Sans, sans-serif;
             font-size: 12px;
@@ -17,126 +17,141 @@
             margin: 0;
             padding: 0;
         }
-
+    
         /* ---------- Header fijo ---------- */
         .encabezado-general {
             position: fixed;
-            top: -128px;
+            top: -143px;
             left: 0;
             right: 0;
-            height: 125px;
+            height: 150px;
         }
-
+    
         .encabezado {
             width: 100%;
             border-collapse: collapse;
-            margin: 0 0 2px 0;
+            margin: 0;
         }
-
+    
         .encabezado td {
             border: none;
             vertical-align: middle;
             padding: 0;
         }
-
+    
         .logo-izquierdo {
             width: 9%;
             text-align: center;
         }
-
+    
+        .logo-izquierdo img {
+            margin-top: 7px;
+            margin-bottom: -7px;
+        }
+    
         .logo-derecho {
             width: 18%;
             text-align: center;
         }
-
+    
+        .logo-derecho img {
+            margin-top: 27px;
+            margin-bottom: -27px;
+        }
+    
         .logo {
             width: 48px;
             height: 48px;
         }
-
+    
         .logo-grande {
-            width: 72px;
-            height: 72px;
+            width: 82px;
+            height: 82px;
         }
-
+    
         .titulo-centro {
             width: 73%;
             text-align: center;
-            font-size: 14px;
+            font-size: 20px;
             font-weight: bold;
         }
-
+    
         /* ---------- Bloque RESPONSABLE / CARGO ---------- */
         .cabecera-datos {
-            width: 100%;
+            width: 72%;
             border-collapse: collapse;
-            margin: 0;
+            margin: -6px 0 0 9%;
             table-layout: fixed;
         }
-
+    
         .cabecera-datos td {
             border: 1px solid #000;
             padding: 2px 4px;
             vertical-align: middle;
             height: 15px;
         }
-
+    
         .cab-vacio-izq {
             width: 3%;
             border: none !important;
             padding: 0 !important;
         }
-
+    
         .cabecera-label {
-            width: 11%;
+            width: 16%;
             background-color: #D6A84F;
             font-weight: bold;
             text-align: center;
             font-size: 8.5px;
         }
-
+    
         .cabecera-valor {
-            width: 28.5%;
+            width: 30%;
             font-size: 9px;
         }
-
+    
         .cab-vacio-der {
             width: 18%;
             border: none !important;
             padding: 0 !important;
         }
-
+    
+        .cab-espacio {
+            width: 8%;
+            border: none !important;
+        }
+    
         /* ---------- Subtítulo ---------- */
         .subtitulo {
             width: 100%;
             text-align: left;
             font-size: 11px;
             font-weight: bold;
-            margin: 7px 0 1px 0;
+            margin: 5px 0 0 2%;
             padding: 0;
         }
-
+    
         .espacio-antes-tabla {
             height: 0;
         }
-
+    
         /* ---------- Tabla principal ---------- */
         .tabla-principal {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
         }
-
+    
         .tabla-principal thead {
             display: table-header-group;
         }
-
+    
         .tabla-principal th,
         .tabla-principal td {
             border: 1px solid #000;
             vertical-align: middle;
         }
-
+    
         .tabla-principal th {
             background-color: #90EE90;
             font-size: 9.5px;
@@ -144,66 +159,90 @@
             text-align: center;
             padding: 3px 2px;
         }
-
+    
         .tabla-principal td {
             font-size: 9.5px;
             padding: 3px 2px;
         }
-
+    
         .fila-equipo {
             page-break-inside: avoid;
         }
-
+    
         /* ---------- Columnas ---------- */
         .col-numero {
-            width: 4%;
+            width: 2%;
             text-align: center;
         }
-
+    
         .col-tipo {
-            width: 13%;
+            width: 11%;
         }
-
+    
         .col-serie {
-            width: 13%;
+            width: 14%;
         }
-
+    
         .col-marca {
             width: 11%;
         }
-
+    
         .col-modelo {
             width: 12%;
         }
-
+    
         .col-estado {
             width: 9%;
             text-align: center;
         }
-
+    
         .col-ubicacion {
-            width: 13%;
+            width: 11%;
         }
-
+    
         .col-fecha {
             width: 8%;
             text-align: center;
         }
-
+    
         .col-observacion {
-            width: 17%;
+            width: 21%;
         }
-
+    
         .texto-centro {
             text-align: center;
         }
-
+    
         .estado {
             font-weight: bold;
         }
+    
+        .cab-vacio-izq,
+        .cab-vacio-der {
+            display: none;
+        }
+    
+        .cabecera-datos td:nth-child(2) {
+            width: 13%;
+        }
+    
+        .cabecera-datos td:nth-child(3) {
+            width: 48%;
+        }
+    
+        .cabecera-datos td:nth-child(4) {
+            width: 5%;
+        }
+    
+        .cabecera-datos td:nth-child(5) {
+            width: 14%;
+        }
+    
+        .cabecera-datos td:nth-child(6) {
+            width: 20%;
+        }
     </style>
 </head>
-
 <body>
 
     {{-- Header fijo --}}
@@ -225,27 +264,35 @@
             </tr>
         </table>
 
+        @php
+            $ubicaciones = $equipos->map(function ($equipo) {
+                return mb_strtoupper(trim($equipo->ubicacione->nombre ?? ''));
+            })->filter()->unique();
+
+            $ubicacionReporte = $ubicaciones->count() === 1
+                ? $ubicaciones->first()
+                : ($ubicaciones->count() ? 'VARIAS' : '-');
+
+            $fechaReporte = now()->format('d-m-Y');
+        @endphp
         {{-- MISMA MINI TABLA DE PRESTAMOS --}}
         <table class="cabecera-datos">
             <tr>
                 <td class="cab-vacio-izq"></td>
-
-                <td class="cabecera-label">
-                    RESPONSABLE
-                </td>
-
-                <td class="cabecera-valor">
-                    ING. MICHAEL CABOS OLIVARES
-                </td>
-
-                <td class="cabecera-label">
-                    CARGO
-                </td>
-
-                <td class="cabecera-valor">
-                    COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO
-                </td>
-
+                <td class="cabecera-label">RESPONSABLE</td>
+                <td class="cabecera-valor">ING. MICHAEL CABOS OLIVARES</td>
+                <td class="cab-espacio"></td>
+                <td class="cabecera-label">UBICACIÓN</td>
+                <td class="cabecera-valor">{{ $ubicacionReporte }}</td>
+                <td class="cab-vacio-der"></td>
+            </tr>
+            <tr>
+                <td class="cab-vacio-izq"></td>
+                <td class="cabecera-label">CARGO</td>
+                <td class="cabecera-valor">COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO</td>
+                <td class="cab-espacio"></td>
+                <td class="cabecera-label">FECHA</td>
+                <td class="cabecera-valor">{{ $fechaReporte }}</td>
                 <td class="cab-vacio-der"></td>
             </tr>
         </table>
