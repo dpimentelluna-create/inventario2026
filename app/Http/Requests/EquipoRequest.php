@@ -14,6 +14,14 @@ class EquipoRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+
+        $accesorios = collect($this->input('accesorios', []))
+            ->map(function ($fila) {
+                $fila['estado'] = $this->normalizarEstado($fila['estado'] ?? null);
+                return $fila;
+            })
+            ->all();
+
         $this->merge([
             'marca' => $this->aMayusculas($this->marca),
             'modelo' => $this->aMayusculas($this->modelo),
@@ -28,6 +36,7 @@ class EquipoRequest extends FormRequest
             'observaciones_equipo' => $this->aMayusculas($this->observaciones_equipo),
             'estado_laptop' => $this->normalizarEstado($this->estado_laptop),
             'estado_equipo' => $this->normalizarEstado($this->estado_equipo),
+            'accesorios' => $accesorios,
         ]);
     }
 
@@ -48,8 +57,12 @@ class EquipoRequest extends FormRequest
             ],
             'marca' => ['required', 'string', 'max:80'],
             'modelo' => ['required', 'string', 'max:100'],
-            'num_serie' => ['required', 'string', 'max:100',
-            Rule::unique('equipos', 'num_serie')->ignore($this->route('equipo')),],
+            'num_serie' => [
+                'required',
+                'string',
+                'max:100',
+                Rule::unique('equipos', 'num_serie')->ignore($this->route('equipo')),
+            ],
 
             'ubicacion_id' => ['required', 'exists:ubicaciones,id'],
             'fecha_registro' => ['required', 'date'],
@@ -77,21 +90,21 @@ class EquipoRequest extends FormRequest
     }
 
     public function withValidator($validator): void
-{
-    $validator->after(function ($validator) {
-        foreach ($this->input('accesorios', []) as $i => $fila) {
-            $tipo = trim((string) ($fila['tipo'] ?? ''));
-            $marca = trim((string) ($fila['marca'] ?? ''));
-            $serie = trim((string) ($fila['num_serie'] ?? ''));
-            if ($tipo === '' && $marca === '' && $serie === '') {
-                $validator->errors()->add(
-                    "accesorios.$i.tipo",
-                    'Complete el accesorio o elimínelo antes de guardar.'
-                );
+    {
+        $validator->after(function ($validator) {
+            foreach ($this->input('accesorios', []) as $i => $fila) {
+                $tipo = trim((string) ($fila['tipo'] ?? ''));
+                $marca = trim((string) ($fila['marca'] ?? ''));
+                $serie = trim((string) ($fila['num_serie'] ?? ''));
+                if ($tipo === '' && $marca === '' && $serie === '') {
+                    $validator->errors()->add(
+                        "accesorios.$i.tipo",
+                        'Complete el accesorio o elimínelo antes de guardar.'
+                    );
+                }
             }
-        }
-    });
-}
+        });
+    }
 
     public function messages(): array
     {

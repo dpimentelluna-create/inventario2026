@@ -635,11 +635,7 @@
                         <div class="accesorio-item border rounded p-3 mb-3">
 
                             {{-- ID --}}
-                            <input
-                                type="hidden"
-                                name="accesorios[{{ $indice }}][id]"
-                                value="{{ $accesorio->id }}"
-                            >
+                            <input type="hidden" name="accesorios[{{ $indice }}][id]" value="{{ $accesorio->id }}">
 
                             <div class="row">
 
@@ -653,44 +649,29 @@
 
                                     <div class="position-relative">
 
-                                        <input
-                                            type="text"
-                                            name="accesorios[{{ $indice }}][tipo]"
-                                            class="form-control tipo-accesorio campo-mayusculas"
-                                            value="{{ $accesorio->tipo }}"
-                                            placeholder="ESCRIBA O SELECCIONE..."
-                                            autocomplete="off"
-                                        >
+                                        <input type="text" name="accesorios[{{ $indice }}][tipo]"
+                                            class="form-control tipo-accesorio campo-mayusculas" value="{{ $accesorio->tipo }}"
+                                            placeholder="ESCRIBA O SELECCIONE..." autocomplete="off">
 
-                                        <div
-                                            class="lista-tipos-accesorio position-absolute w-100 bg-white border rounded shadow-sm"
-                                            style="
-                                                display: none;
-                                                z-index: 1050;
-                                                max-height: 220px;
-                                                overflow-y: auto;
-                                            "
-                                        ></div>
+                                        <div class="lista-tipos-accesorio position-absolute w-100 bg-white border rounded shadow-sm" style="
+                                                                        display: none;
+                                                                        z-index: 1050;
+                                                                        max-height: 220px;
+                                                                        overflow-y: auto;
+                                                                    "></div>
 
                                     </div>
 
 
                                     {{-- TIPO PERSONALIZADO --}}
-                                    <div
-                                        class="tipo-personalizado-container mt-2"
-                                        style="display: none;"
-                                    >
+                                    <div class="tipo-personalizado-container mt-2" style="display: none;">
 
                                         <label class="form-label">
                                             ESPECIFIQUE EL TIPO
                                         </label>
 
-                                        <input
-                                            type="text"
-                                            name="accesorios[{{ $indice }}][tipo_personalizado]"
-                                            class="form-control tipo-personalizado campo-mayusculas"
-                                            placeholder="EJ. CABLE HDMI"
-                                        >
+                                        <input type="text" name="accesorios[{{ $indice }}][tipo_personalizado]"
+                                            class="form-control tipo-personalizado campo-mayusculas" placeholder="EJ. CABLE HDMI">
 
                                     </div>
 
@@ -705,13 +686,8 @@
                                         <span class="text-danger">*</span>
                                     </label>
 
-                                    <input
-                                        type="text"
-                                        name="accesorios[{{ $indice }}][marca]"
-                                        class="form-control campo-mayusculas"
-                                        value="{{ $accesorio->marca }}"
-                                        placeholder="MARCA"
-                                    >
+                                    <input type="text" name="accesorios[{{ $indice }}][marca]" class="form-control campo-mayusculas"
+                                        value="{{ $accesorio->marca }}" placeholder="MARCA">
 
                                 </div>
 
@@ -724,13 +700,8 @@
                                         <span class="text-danger">*</span>
                                     </label>
 
-                                    <input
-                                        type="text"
-                                        name="accesorios[{{ $indice }}][num_serie]"
-                                        class="form-control campo-mayusculas"
-                                        value="{{ $accesorio->num_serie }}"
-                                        placeholder="N.º SERIE"
-                                    >
+                                    <input type="text" name="accesorios[{{ $indice }}][num_serie]" class="form-control campo-mayusculas"
+                                        value="{{ $accesorio->num_serie }}" placeholder="N.º SERIE">
 
                                 </div>
 
@@ -743,32 +714,11 @@
                                         <span class="text-danger">*</span>
                                     </label>
 
-                                    <select
-                                        name="accesorios[{{ $indice }}][estado]"
-                                        class="form-select"
-                                    >
-
-                                        <option
-                                            value="Regular"
-                                            {{ $accesorio->estado == 'Regular' ? 'selected' : '' }}
-                                        >
-                                            REGULAR
-                                        </option>
-
-                                        <option
-                                            value="Bueno"
-                                            {{ $accesorio->estado == 'Bueno' ? 'selected' : '' }}
-                                        >
-                                            BUENO
-                                        </option>
-
-                                        <option
-                                            value="Malogrado"
-                                            {{ $accesorio->estado == 'Malogrado' ? 'selected' : '' }}
-                                        >
-                                            MALOGRADO
-                                        </option>
-
+                                    @php $estadoAcc = strtoupper($accesorio->estado ?? 'REGULAR'); @endphp
+                                    <select name="accesorios[{{ $indice }}][estado]" class="form-select">
+                                        <option value="REGULAR" {{ $estadoAcc === 'REGULAR' ? 'selected' : '' }}>REGULAR</option>
+                                        <option value="BUENO" {{ $estadoAcc === 'BUENO' ? 'selected' : '' }}>BUENO</option>
+                                        <option value="MALOGRADO" {{ $estadoAcc === 'MALOGRADO' ? 'selected' : '' }}>MALOGRADO</option>
                                     </select>
 
                                 </div>
@@ -781,12 +731,8 @@
                                         OBSERVACIONES
                                     </label>
 
-                                    <textarea
-                                        name="accesorios[{{ $indice }}][observaciones]"
-                                        class="form-control campo-mayusculas"
-                                        rows="1"
-                                        placeholder="OBSERVACIONES"
-                                    >{{ $accesorio->observaciones }}</textarea>
+                                    <textarea name="accesorios[{{ $indice }}][observaciones]" class="form-control campo-mayusculas" rows="1"
+                                        placeholder="OBSERVACIONES">{{ $accesorio->observaciones }}</textarea>
 
                                 </div>
 
@@ -794,11 +740,7 @@
                                 {{-- ELIMINAR --}}
                                 <div class="col-12 col-md-1 mb-3 d-flex align-items-end justify-content-center">
 
-                                    <button
-                                        type="button"
-                                        class="btn btn-danger btn-eliminar-accesorio"
-                                        title="ELIMINAR ACCESORIO"
-                                    >
+                                    <button type="button" class="btn btn-danger btn-eliminar-accesorio" title="ELIMINAR ACCESORIO">
                                         <i class="bi bi-trash"></i>
                                     </button>
 
@@ -1038,6 +980,7 @@
 
             const serie = document.getElementById('num_serie');
             if (!serie || serie.value.trim() === '') return false;
+            if (serie.classList.contains('is-invalid')) return false;
 
             const marca = document.getElementById('marca');
             if (!marca || marca.value.trim() === '') return false;
@@ -1055,33 +998,34 @@
         }
 
         function camposFaltantesParte1() {
-                const faltan = [];
-                if (!tipoEquipoListo()) faltan.push('TIPO DE EQUIPO');
+            const faltan = [];
+            if (!tipoEquipoListo()) faltan.push('TIPO DE EQUIPO');
 
-                const serie = document.getElementById('num_serie');
-                if (!serie || serie.value.trim() === '') faltan.push('NÚMERO DE SERIE');
+            const serie = document.getElementById('num_serie');
+            if (!serie || serie.value.trim() === '') faltan.push('NÚMERO DE SERIE');
+            else if (serie.classList.contains('is-invalid')) faltan.push('NÚMERO DE SERIE ÚNICO');
 
-                const marca = document.getElementById('marca');
-                if (!marca || marca.value.trim() === '') faltan.push('MARCA');
+            const marca = document.getElementById('marca');
+            if (!marca || marca.value.trim() === '') faltan.push('MARCA');
 
-                const modelo = document.getElementById('modelo');
-                if (!modelo || modelo.value.trim() === '') faltan.push('MODELO');
+            const modelo = document.getElementById('modelo');
+            if (!modelo || modelo.value.trim() === '') faltan.push('MODELO');
 
-                const ubicacion = document.getElementById('ubicacion_id');
-                if (!ubicacion || ubicacion.value.trim() === '') faltan.push('UBICACIÓN');
+            const ubicacion = document.getElementById('ubicacion_id');
+            if (!ubicacion || ubicacion.value.trim() === '') faltan.push('UBICACIÓN');
 
-                const fecha = document.getElementById('fecha_registro');
-                if (!fecha || fecha.value.trim() === '') faltan.push('FECHA DE REGISTRO');
+            const fecha = document.getElementById('fecha_registro');
+            if (!fecha || fecha.value.trim() === '') faltan.push('FECHA DE REGISTRO');
 
-                return faltan;
+            return faltan;
+        }
+
+        function mensajeBloqueoParte1(faltan) {
+            if (faltan.length === 1) {
+                return 'COMPLETE \'' + faltan[0] + '\' PARA CONTINUAR.';
             }
-
-            function mensajeBloqueoParte1(faltan) {
-                if (faltan.length === 1) {
-                    return 'COMPLETE \'' + faltan[0] + '\' PARA CONTINUAR.';
-                }
-                return 'COMPLETE TODOS LOS CAMPOS DE LA PARTE 1 PARA CONTINUAR.';
-            }
+            return 'COMPLETE TODOS LOS CAMPOS DE LA PARTE 1 PARA CONTINUAR.';
+        }
 
         function parte2Completa() {
             if (!parte1Completa()) return false;
@@ -1334,52 +1278,55 @@
 
         validarCampoVivo('num_serie', 'El número de serie es obligatorio.');
 
-const inputSerie = document.getElementById('num_serie');
-const equipoActualId = @json($equipo->id ?? null);
+        const inputSerie = document.getElementById('num_serie');
+        const equipoActualId = @json($equipo->id ?? null);
 
-function enfocarSerie() {
-    if (!inputSerie || esEdicion) return;
-    setTimeout(function () { inputSerie.focus(); }, 50);
-}
+        function enfocarSerie() {
+            if (!inputSerie || esEdicion) return;
+            setTimeout(function () { inputSerie.focus(); }, 50);
+        }
 
-if (inputSerie) {
-    inputSerie.addEventListener('input', function () {
-        actualizarBloqueoParte1();
-    });
-
-    inputSerie.addEventListener('blur', function () {
-        const serie = this.value.trim();
-        if (!serie) return;
-
-        const params = new URLSearchParams({ num_serie: serie });
-        if (equipoActualId) params.set('equipo_id', equipoActualId);
-
-        fetch('{{ route('equipos.verificarSerie') }}?' + params.toString(), {
-            headers: { 'Accept': 'application/json' }
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.existe) {
-                marcarError(inputSerie, 'Este número de serie ya está registrado.');
+        if (inputSerie) {
+            inputSerie.addEventListener('input', function () {
+                limpiarErrorCampo(inputSerie);
                 actualizarBloqueoParte1();
-            }
+            });
+
+            inputSerie.addEventListener('blur', function () {
+                const serie = this.value.trim();
+                if (!serie) return;
+
+                const params = new URLSearchParams({ num_serie: serie });
+                if (equipoActualId) params.set('equipo_id', equipoActualId);
+
+                fetch('{{ route('equipos.verificarSerie') }}?' + params.toString(), {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.existe) {
+                            marcarError(inputSerie, 'Este número de serie ya está registrado.');
+                        } else {
+                            limpiarErrorCampo(inputSerie);
+                        }
+                        actualizarBloqueoParte1();
+                    });
+            });
+        }
+
+        validarCampoVivo('marca', 'La marca es obligatoria.');
+        validarCampoVivo('modelo', 'El modelo es obligatorio.');
+        validarCampoVivo('descripcion', 'La descripción es obligatoria.');
+        validarCampoVivo('procesador', 'El procesador es obligatorio.');
+        validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
+        validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
+
+        ['procesador', 'ram', 'disco_duro', 'descripcion', 'marca', 'modelo'].forEach(function (id) {
+            const campo = document.getElementById(id);
+            if (!campo) return;
+            campo.addEventListener('input', actualizarBloqueoParte1);
+            campo.addEventListener('change', actualizarBloqueoParte1);
         });
-    });
-}
-
-validarCampoVivo('marca', 'La marca es obligatoria.');
-validarCampoVivo('modelo', 'El modelo es obligatorio.');
-validarCampoVivo('descripcion', 'La descripción es obligatoria.');
-validarCampoVivo('procesador', 'El procesador es obligatorio.');
-validarCampoVivo('ram', 'La memoria RAM es obligatoria.');
-validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
-
-['procesador', 'ram', 'disco_duro', 'descripcion', 'marca', 'modelo'].forEach(function (id) {
-    const campo = document.getElementById(id);
-    if (!campo) return;
-    campo.addEventListener('input', actualizarBloqueoParte1);
-    campo.addEventListener('change', actualizarBloqueoParte1);
-});
 
 
         function pintarListaTiposEquipo() {
@@ -1826,7 +1773,7 @@ validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
             'equipos_filtros_nuevo_equipo',
             '1'
         );*/
-        
+
 
         /*
          * =========================================================
@@ -1836,90 +1783,90 @@ validarCampoVivo('disco_duro', 'El disco duro es obligatorio.');
          */
 
         if (form) {
-                form.addEventListener('submit', function (event) {
-                    this.querySelectorAll('[disabled]').forEach(function (el) {
-                        el.disabled = false;
-                    });
+            form.addEventListener('submit', function (event) {
+                this.querySelectorAll('[disabled]').forEach(function (el) {
+                    el.disabled = false;
+                });
 
-                    limpiarErroresCampos();
+                limpiarErroresCampos();
 
-                    let primero = null;
+                let primero = null;
 
-                    function exigir(campo, mensaje) {
-                        if (!campo || String(campo.value || '').trim() === '') {
-                            marcarError(campo, mensaje);
-                            if (!primero) primero = campo;
-                            return;
-                        }
-                        limpiarErrorCampo(campo);
-                    }
-
-                    const tipoId = document.getElementById('tipo_equipo_id');
-                    const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
-                    const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
-                    if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
-                        exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
-                    }
-
-                    exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
-                    exigir(document.getElementById('marca'), 'La marca es obligatoria.');
-                    exigir(document.getElementById('modelo'), 'El modelo es obligatorio.');
-                    exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
-                    exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
-
-                    const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
-                    const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
-
-                    if (laptopVisible) {
-                        exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
-                        exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
-                        exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
-                    }
-                    if (equipoVisible) {
-                        exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
-                    }
-
-                    if (container) {
-                        container.querySelectorAll('.accesorio-item').forEach(function (fila) {
-                            const tipo = fila.querySelector('.tipo-accesorio');
-                            const personalizado = fila.querySelector('.tipo-personalizado');
-                            const marca = fila.querySelector('[name*="[marca]"]');
-                            const serie = fila.querySelector('[name*="[num_serie]"]');
-                            const estado = fila.querySelector('[name*="[estado]"]');
-                            const tipoTxt = tipo ? tipo.value.trim().toUpperCase() : '';
-                            const marcaTxt = marca ? marca.value.trim() : '';
-                            const serieTxt = serie ? serie.value.trim() : '';
-
-                            if (!tipoTxt && !marcaTxt && !serieTxt) {
-                                exigir(tipo, 'Complete el accesorio o elimínelo antes de guardar.');
-                                exigir(marca, 'La marca del accesorio es obligatoria.');
-                                exigir(serie, 'El número de serie del accesorio es obligatorio.');
-                                return;
-                            }
-
-                            exigir(tipo, 'El tipo del accesorio es obligatorio.');
-                            if (tipoTxt === 'OTRO') {
-                                exigir(personalizado, 'Especifique el tipo de accesorio.');
-                            }
-                            exigir(marca, 'La marca del accesorio es obligatoria.');
-                            exigir(serie, 'El número de serie del accesorio es obligatorio.');
-                            exigir(estado, 'El estado del accesorio es obligatorio.');
-                        });
-                    }
-
-                    if (primero) {
-                        event.preventDefault();
-                        actualizarBloqueoParte1();
-                        primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        setTimeout(function () { primero.focus(); }, 200);
+                function exigir(campo, mensaje) {
+                    if (!campo || String(campo.value || '').trim() === '') {
+                        marcarError(campo, mensaje);
+                        if (!primero) primero = campo;
                         return;
                     }
-                    @if(!($equipo->exists ?? false))
-                        localStorage.setItem('equipos_filtros_nuevo_equipo', '1');
-                        localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
-                    @endif
+                    limpiarErrorCampo(campo);
+                }
+
+                const tipoId = document.getElementById('tipo_equipo_id');
+                const tipoTxt = inputTipoEq ? inputTipoEq.value.trim().toUpperCase() : '';
+                const nuevo = inputNuevoTipo ? inputNuevoTipo.value.trim() : '';
+                if (!(tipoId && tipoId.value.trim()) && !(tipoTxt === 'OTRO' && nuevo)) {
+                    exigir(inputTipoEq, 'Seleccione o registre un tipo de equipo.');
+                }
+
+                exigir(document.getElementById('num_serie'), 'El número de serie es obligatorio.');
+                exigir(document.getElementById('marca'), 'La marca es obligatoria.');
+                exigir(document.getElementById('modelo'), 'El modelo es obligatorio.');
+                exigir(document.getElementById('ubicacion_id'), 'Seleccione una ubicación.');
+                exigir(document.getElementById('fecha_registro'), 'La fecha de registro es obligatoria.');
+
+                const laptopVisible = laptopBox && laptopBox.style.display !== 'none' && laptopBox.offsetParent !== null;
+                const equipoVisible = equipoBox && equipoBox.style.display !== 'none' && equipoBox.offsetParent !== null;
+
+                if (laptopVisible) {
+                    exigir(document.getElementById('procesador'), 'El procesador es obligatorio.');
+                    exigir(document.getElementById('ram'), 'La memoria RAM es obligatoria.');
+                    exigir(document.getElementById('disco_duro'), 'El disco duro es obligatorio.');
+                }
+                if (equipoVisible) {
+                    exigir(document.getElementById('descripcion'), 'La descripción es obligatoria.');
+                }
+
+                if (container) {
+                    container.querySelectorAll('.accesorio-item').forEach(function (fila) {
+                        const tipo = fila.querySelector('.tipo-accesorio');
+                        const personalizado = fila.querySelector('.tipo-personalizado');
+                        const marca = fila.querySelector('[name*="[marca]"]');
+                        const serie = fila.querySelector('[name*="[num_serie]"]');
+                        const estado = fila.querySelector('[name*="[estado]"]');
+                        const tipoTxt = tipo ? tipo.value.trim().toUpperCase() : '';
+                        const marcaTxt = marca ? marca.value.trim() : '';
+                        const serieTxt = serie ? serie.value.trim() : '';
+
+                        if (!tipoTxt && !marcaTxt && !serieTxt) {
+                            exigir(tipo, 'Complete el accesorio o elimínelo antes de guardar.');
+                            exigir(marca, 'La marca del accesorio es obligatoria.');
+                            exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                            return;
+                        }
+
+                        exigir(tipo, 'El tipo del accesorio es obligatorio.');
+                        if (tipoTxt === 'OTRO') {
+                            exigir(personalizado, 'Especifique el tipo de accesorio.');
+                        }
+                        exigir(marca, 'La marca del accesorio es obligatoria.');
+                        exigir(serie, 'El número de serie del accesorio es obligatorio.');
+                        exigir(estado, 'El estado del accesorio es obligatorio.');
+                    });
+                }
+
+                if (primero) {
+                    event.preventDefault();
+                    actualizarBloqueoParte1();
+                    primero.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function () { primero.focus(); }, 200);
+                    return;
+                }
+                @if(!($equipo->exists ?? false))
+                    localStorage.setItem('equipos_filtros_nuevo_equipo', '1');
+                    localStorage.setItem('equipos_filtros_estado_nuevo_equipo', '1');
+                @endif
             });
-            }
+        }
 
         mostrarEspecificaciones();
 
