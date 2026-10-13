@@ -55,7 +55,7 @@ class EquipoController extends Controller
         $equipo = new Equipo();
 
         $tiposequipo = TiposEquipo::pluck('nombre', 'id');
-        $ubicacione = Ubicacione::pluck('nombre', 'id');
+        $ubicacione = Ubicacione::orderBy('nombre')->pluck('nombre', 'id');
 
         // Obtener tipos de accesorios guardados
         $tiposAccesorios = AccesoriosEquipo::whereNotNull('tipo')
@@ -262,7 +262,7 @@ class EquipoController extends Controller
 
         $tiposequipo = TiposEquipo::pluck('nombre', 'id');
 
-        $ubicacione = Ubicacione::pluck('nombre', 'id');
+        $ubicacione = Ubicacione::orderBy('nombre')->pluck('nombre', 'id');
 
         // Obtener todos los tipos de accesorios registrados
         $tiposAccesorios = AccesoriosEquipo::whereNotNull('tipo')
@@ -596,7 +596,7 @@ class EquipoController extends Controller
             ->filter()
             ->values();
 
-        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
+        $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
 
         return Excel::download(
             new \App\Exports\EquiposExport($equipos),
