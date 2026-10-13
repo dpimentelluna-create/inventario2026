@@ -38,12 +38,11 @@
             font-size: 9px;
         }
         
-        .detalle-acc {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            margin-bottom: 12px;
-        }
+.detalle-acc {
+    width: 100%;
+    table-layout: fixed;
+    margin-bottom: 12px;
+}
 
         .detalle-acc th,
         .detalle-acc td {
@@ -154,50 +153,28 @@ $nombreSolicitante = mb_strtoupper(trim(($docente->nombres ?? '') . ' ' . ($doce
         @endforeach
     </table>
 
-    <table class="detalle-acc">
-    <colgroup>
-        <col width="10%">
-        <col width="10%">
-        <col width="80%">
-    </colgroup>
-
+    <table width="100%" style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
     <tr>
-        <td class="seccion" colspan="3">DETALLE ACCESORIOS</td>
+        <td colspan="3" class="seccion">DETALLE ACCESORIOS</td>
     </tr>
-
     <tr>
-        <th class="cabecera ancho-tipo">TIPO</th>
-        <th class="cabecera ancho-estado">ESTADO</th>
-        <th class="cabecera ancho-observaciones">OBSERVACIONES</th>
-    </tr>
-
-    @php $hayAccesorios = false; @endphp
-
+    <td width="100" class="cabecera" align="center" style="padding: 2px 4px;">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="100" height="1">TIPO
+    </td>
+    <td width="110" class="cabecera" align="center" style="padding: 2px 4px;">
+        <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" width="110" height="1">ESTADO
+    </td>
+    <td class="cabecera" align="center" style="padding: 2px 4px;">OBSERVACIONES</td>
+</tr>
     @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
         @foreach ($prestamoEquipo->prestamoAccesorios as $filaAcc)
-            @php $hayAccesorios = true; @endphp
-
             <tr>
-                <td class="medio ancho-tipo">
-                    {{ mb_strtoupper($filaAcc->accesorioEquipo->tipo ?? '-') }}
-                </td>
-
-                <td class="medio ancho-estado">
-                    {{ mb_strtoupper($filaAcc->estado ?? $filaAcc->accesorioEquipo->estado ?? '-') }}
-                </td>
-
-                <td class="ancho-observaciones">
-                    {{ mb_strtoupper($filaAcc->observacion ?? $filaAcc->accesorioEquipo->observaciones ?? '-') }}
-                </td>
+                <td width="100" class="medio" align="center">{{ mb_strtoupper($filaAcc->accesorioEquipo->tipo ?? '-') }}</td>
+                <td width="110" class="medio" align="center">{{ mb_strtoupper($filaAcc->estado ?? $filaAcc->accesorioEquipo->estado ?? '-') }}</td>
+                <td>{{ mb_strtoupper($filaAcc->observacion ?? $filaAcc->accesorioEquipo->observaciones ?? '-') }}</td>
             </tr>
         @endforeach
     @endforeach
-
-    @if (!$hayAccesorios)
-        <tr>
-            <td class="medio" colspan="3">SIN ACCESORIOS</td>
-        </tr>
-    @endif
 </table>
 
     <table>
