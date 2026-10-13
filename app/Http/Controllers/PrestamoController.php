@@ -288,6 +288,9 @@ class PrestamoController extends Controller
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('prestamo.acta-pdf', compact('prestamo'))
             ->setPaper('a4', 'portrait');
 
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('chroot', public_path());
+
         return $pdf->download('Acta_Prestamo_' . $prestamo->id . '.pdf');
     }
 
