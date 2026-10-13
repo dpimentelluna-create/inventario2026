@@ -24,7 +24,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::middleware('auth')->group(function () {
-    
+
     //HOME:
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
@@ -79,9 +79,13 @@ Route::middleware('auth')->group(function () {
         [PrestamoController::class, 'buscarEquipos']
     )->name('prestamos.buscarEquipos');
     Route::post('/prestamos/export/excel', [PrestamoController::class, 'exportExcel'])
-    ->name('prestamos.export.excel');
+        ->name('prestamos.export.excel');
     Route::post('/prestamos/export/pdf', [PrestamoController::class, 'exportPdf'])
-    ->name('prestamos.export.pdf');
+        ->name('prestamos.export.pdf');
+    Route::get('/prestamos/{prestamo}/acta/pdf', [PrestamoController::class, 'actaPdf'])
+        ->name('prestamos.acta.pdf');
+    Route::get('/prestamos/{prestamo}/acta/excel', [PrestamoController::class, 'actaExcel'])
+        ->name('prestamos.acta.excel');
 
     Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
 });

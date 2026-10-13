@@ -282,6 +282,36 @@ class PrestamoController extends Controller
         return view('prestamo.show', compact('prestamo'));
     }
 
+    public function actaPdf($id)
+    {
+        $prestamo = $this->prestamoParaActa($id);
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('prestamo.acta-pdf', compact('prestamo'))
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('Acta_Prestamo_' . $prestamo->id . '.pdf');
+    }
+
+    public function actaExcel($id)
+    {
+        $prestamo = $this->prestamoParaActa($id);
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ActaPrestamoExport($prestamo),
+            'Acta_Prestamo_' . $prestamo->id . '.xlsx'
+        );
+    }
+
+    private function prestamoParaActa($id)
+    {
+        return \App\Models\Prestamo::with([
+            'docente',
+            'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.equipo.especificacionesLaptops',
+            'prestamoEquipos.equipo.especificacionesEquipo',
+            'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+        ])->findOrFail($id);
+    }
+
     /**
      * Mostrar formulario de edición
      */
@@ -550,37 +580,37 @@ class PrestamoController extends Controller
     }
 
     public function exportExcel(Request $request)
-{
-    $ids = $request->input('ids', []);
+    {
+        $ids = $request->input('ids', []);
 
-    if (empty($ids)) {
-        return back()->with('error', 'No hay registros para exportar.');
+        if (empty($ids)) {
+            return back()->with('error', 'No hay registros para exportar.');
+        }
+
+        $ids = array_map('intval', $ids);
+
+        $prestamosEncontrados = Prestamo::with([
+            'docente',
+            'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        // Respetar el orden del DataTable
+        $prestamos = collect($ids)
+            ->map(fn($id) => $prestamosEncontrados->get($id))
+            ->filter()
+            ->values();
+
+        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g:ia') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\PrestamosExport($prestamos),
+            $nombreArchivo
+        );
     }
-
-    $ids = array_map('intval', $ids);
-
-    $prestamosEncontrados = Prestamo::with([
-        'docente',
-        'prestamoEquipos.equipo.tipoEquipo',
-        'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
-    ])
-        ->whereIn('id', $ids)
-        ->get()
-        ->keyBy('id');
-
-    // Respetar el orden del DataTable
-    $prestamos = collect($ids)
-        ->map(fn ($id) => $prestamosEncontrados->get($id))
-        ->filter()
-        ->values();
-
-    $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g:ia') . '.xlsx';
-
-    return \Maatwebsite\Excel\Facades\Excel::download(
-        new \App\Exports\PrestamosExport($prestamos),
-        $nombreArchivo
-    );
-}
 
     public function exportPdf(Request $request)
     {

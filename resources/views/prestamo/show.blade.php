@@ -53,6 +53,12 @@
                                 <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
                                     <i class="fa fa-print"></i> Imprimir
                                 </button>
+                                <a class="btn btn-danger btn-sm" href="{{ route('prestamos.acta.pdf', $prestamo->id) }}">
+                                    <i class="fa fa-file-pdf"></i> PDF
+                                </a>
+                                <a class="btn btn-success btn-sm" href="{{ route('prestamos.acta.excel', $prestamo->id) }}">
+                                    <i class="fa fa-file-excel"></i> Excel
+                                </a>
                             </div>
                         </div>
 
@@ -91,9 +97,11 @@
 
                             <div class="d-flex flex-wrap gap-2 mb-4">
                                 <span class="chip">{{ $totalEquipos }} equipo{{ $totalEquipos === 1 ? '' : 's' }}</span>
-                                <span class="chip">{{ $totalAccesorios }} accesorio{{ $totalAccesorios === 1 ? '' : 's' }}</span>
+                                <span class="chip">{{ $totalAccesorios }}
+                                    accesorio{{ $totalAccesorios === 1 ? '' : 's' }}</span>
                                 @if ($malogrados > 0)
-                                    <span class="chip chip-alerta">{{ $malogrados }} malogrado{{ $malogrados === 1 ? '' : 's' }}</span>
+                                    <span class="chip chip-alerta">{{ $malogrados }}
+                                        malogrado{{ $malogrados === 1 ? '' : 's' }}</span>
                                 @endif
                             </div>
 
@@ -115,7 +123,8 @@
                                             </strong>
                                             <span class="font-monospace ms-2">{{ $equipo->num_serie ?? 'S/N' }}</span>
                                         </div>
-                                        <span class="badge {{ $estadoEq === 'MALOGRADO' ? 'bg-danger' : ($estadoEq === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
+                                        <span
+                                            class="badge {{ $estadoEq === 'MALOGRADO' ? 'bg-danger' : ($estadoEq === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
                                             {{ $estadoEq ?: '—' }}
                                         </span>
                                     </div>
@@ -150,7 +159,8 @@
                                                                 <td>{{ $acc->marca ?? '—' }}</td>
                                                                 <td class="font-monospace">{{ $acc->num_serie ?? '—' }}</td>
                                                                 <td>
-                                                                    <span class="badge {{ $estadoAcc === 'MALOGRADO' ? 'bg-danger' : ($estadoAcc === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
+                                                                    <span
+                                                                        class="badge {{ $estadoAcc === 'MALOGRADO' ? 'bg-danger' : ($estadoAcc === 'REGULAR' ? 'bg-warning text-dark' : 'bg-success') }}">
                                                                         {{ $estadoAcc ?: '—' }}
                                                                     </span>
                                                                 </td>
@@ -175,95 +185,95 @@
                 </div>
             </div>
         </section>
+        
+    <style>
+        .etiqueta {
+            font-size: .75rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: 600;
+        }
 
-        <style>
-            .etiqueta {
-                font-size: .75rem;
-                letter-spacing: .04em;
-                text-transform: uppercase;
-                color: #6c757d;
-                font-weight: 600;
+        .valor {
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .subvalor {
+            color: #6c757d;
+        }
+
+        .bloque-dato {
+            background: #f8f9fa;
+            border-radius: .5rem;
+            padding: .75rem 1rem;
+            height: 100%;
+        }
+
+        .chip {
+            background: #e9ecef;
+            border-radius: 999px;
+            padding: .25rem .75rem;
+            font-size: .85rem;
+        }
+
+        .chip-alerta {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .tarjeta-equipo {
+            border-left-width: 6px;
+        }
+
+        .borde-bueno {
+            border-left-color: #198754;
+        }
+
+        .borde-regular {
+            border-left-color: #ffc107;
+        }
+
+        .borde-malogrado {
+            border-left-color: #dc3545;
+        }
+
+        .borde-neutro {
+            border-left-color: #adb5bd;
+        }
+
+        @media print {
+
+            #sidebar,
+            .dot-spinner-container,
+            .no-print,
+            .btn,
+            .dropdown,
+            footer {
+                display: none !important;
             }
 
-            .valor {
-                font-weight: 700;
-                font-size: 1.05rem;
+            #content-wrapper,
+            main {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
             }
 
-            .subvalor {
-                color: #6c757d;
+            body {
+                background: white !important;
             }
 
-            .bloque-dato {
-                background: #f8f9fa;
-                border-radius: .5rem;
-                padding: .75rem 1rem;
-                height: 100%;
+            .card {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
             }
 
-            .chip {
-                background: #e9ecef;
-                border-radius: 999px;
-                padding: .25rem .75rem;
-                font-size: .85rem;
+            * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
-
-            .chip-alerta {
-                background: #f8d7da;
-                color: #842029;
-            }
-
-            .tarjeta-equipo {
-                border-left-width: 6px;
-            }
-
-            .borde-bueno {
-                border-left-color: #198754;
-            }
-
-            .borde-regular {
-                border-left-color: #ffc107;
-            }
-
-            .borde-malogrado {
-                border-left-color: #dc3545;
-            }
-
-            .borde-neutro {
-                border-left-color: #adb5bd;
-            }
-
-            @media print {
-
-                #sidebar,
-                .dot-spinner-container,
-                .no-print,
-                .btn,
-                .dropdown,
-                footer {
-                    display: none !important;
-                }
-
-                #content-wrapper,
-                main {
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    width: 100% !important;
-                }
-
-                body {
-                    background: white !important;
-                }
-
-                .card {
-                    border: 1px solid #000 !important;
-                    box-shadow: none !important;
-                }
-
-                * {
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-            }
-        </style>
+        }
+    </style>
 @endsection
