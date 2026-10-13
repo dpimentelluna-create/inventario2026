@@ -543,6 +543,7 @@
         if (link.target === '_blank') return;
         if (link.hasAttribute('download')) return;
         if (href.indexOf('export') !== -1) return;
+        if (href.indexOf('acta') !== -1) return;
         if (link.hasAttribute('onclick')) return;
         if (link.hostname && link.hostname !== window.location.hostname) return;
         if (document.querySelector('.swal2-container')) return;
