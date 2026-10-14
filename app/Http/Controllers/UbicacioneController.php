@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\UbicacioneRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 
 class UbicacioneController extends Controller
 {
@@ -45,12 +46,103 @@ class UbicacioneController extends Controller
     /**
      * Display the specified resource.
      */
+
     public function show($id): View
     {
-        $ubicacione = Ubicacione::find($id);
+        // Buscar la ubicación o mostrar error 404 si no existe.
+        $ubicacione = Ubicacione::findOrFail($id);
 
-        return view('ubicacione.show', compact('ubicacione'));
+        // Obtener el estado desde las especificaciones del equipo.
+        // Si no tiene estado en la primera tabla, revisar la segunda.
+        $estadoSQL = "UPPER(TRIM(COALESCE(
+        NULLIF(TRIM(el.estado), ''),
+        NULLIF(TRIM(ee.estado), ''),
+        ''
+    )))";
+
+        // Calcular las cantidades de equipos por estado.
+        $resumen = DB::table('equipos as e')
+            ->leftJoin(
+                'especificaciones_laptop as el',
+                'el.equipo_id',
+                '=',
+                'e.id'
+            )
+            ->leftJoin(
+                'especificaciones_equipo as ee',
+                'ee.equipo_id',
+                '=',
+                'e.id'
+            )
+            ->where('e.ubicacion_id', $ubicacione->id)
+            ->selectRaw("
+            COUNT(DISTINCT e.id) AS total,
+            COUNT(DISTINCT CASE
+                WHEN {$estadoSQL} = 'BUENO' THEN e.id
+            END) AS buenos,
+            COUNT(DISTINCT CASE
+                WHEN {$estadoSQL} = 'REGULAR' THEN e.id
+            END) AS regulares,
+            COUNT(DISTINCT CASE
+                WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id
+            END) AS malogrados
+        ")
+            ->first();
+
+        $totalEquipos = (int) $resumen->total;
+        $buenos = (int) $resumen->buenos;
+        $regulares = (int) $resumen->regulares;
+        $malogrados = (int) $resumen->malogrados;
+
+        // Equipos sin estado reconocido o sin especificaciones.
+        $sinClasificar = max(
+            0,
+            $totalEquipos - $buenos - $regulares - $malogrados
+        );
+
+        // Calcular porcentajes sin dividir entre cero.
+        $porcentajeBueno = $totalEquipos > 0
+            ? round(($buenos / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeRegular = $totalEquipos > 0
+            ? round(($regulares / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeMalogrado = $totalEquipos > 0
+            ? round(($malogrados / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeSinClasificar = $totalEquipos > 0
+            ? round(($sinClasificar / $totalEquipos) * 100, 1)
+            : 0;
+
+        // Obtener los equipos de la ubicación con sus relaciones.
+        $equipos = \App\Models\Equipo::with([
+            'tipoEquipo',
+            'especificacionesLaptops',
+            'especificacionesEquipo'
+        ])
+            ->where('ubicacion_id', $ubicacione->id)
+            ->orderByDesc('fecha_registro')
+            ->orderByDesc('id')
+            ->get();
+
+        return view('ubicacione.show', compact(
+            'ubicacione',
+            'totalEquipos',
+            'buenos',
+            'regulares',
+            'malogrados',
+            'sinClasificar',
+            'porcentajeBueno',
+            'porcentajeRegular',
+            'porcentajeMalogrado',
+            'porcentajeSinClasificar',
+            'equipos'
+        ));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -70,7 +162,7 @@ class UbicacioneController extends Controller
         $ubicacione->update($request->validated());
 
         return Redirect::route('ubicaciones.index')
-        ->with('success', 'Ubicación actualizada.')->with('toast_tipo', 'aviso');
+            ->with('success', 'Ubicación actualizada.')->with('toast_tipo', 'aviso');
     }
 
     public function destroy($id): RedirectResponse
@@ -78,6 +170,6 @@ class UbicacioneController extends Controller
         Ubicacione::find($id)->delete();
 
         return Redirect::route('ubicaciones.index')
-        ->with('success', 'Ubicación eliminada.')->with('toast_tipo', 'error');
+            ->with('success', 'Ubicación eliminada.')->with('toast_tipo', 'error');
     }
 }

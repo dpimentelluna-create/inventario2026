@@ -502,13 +502,15 @@
                 @endif
             </div>
 
+            <p class="tipo-subtitulo text-right">
+                INVENTARIO 2026 - REPORTE DE TIPOS DE EQUIPOS
+            </p>
+
             <div class="tipo-acciones mt-3 mb-4">
                 <a href="{{ route('tipos-equipo.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> VOLVER
                 </a>
-                <p class="tipo-subtitulo text-right">
-                    INVENTARIO 2026 - REPORTE DE TIPOS DE EQUIPOS
-                </p>
+
             </div>
         </div>
     </section>
