@@ -1269,14 +1269,54 @@ $('#btn_exportar_excel').on('click', function (e) {
     const vieneDeCrear = localStorage.getItem(STORAGE_NUEVO_EQUIPO) === '1'
     || @json(session('equipo_accion')) === 'crear';
 
-const filtrosRecuperados = !vieneDeCrear && cargarEstadoFiltros();
+// Inicialización de filtros: priorizar los accesos desde el dashboard.
+const parametrosURL = new URLSearchParams(window.location.search);
+const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
 
-if (filtrosRecuperados) {
+if (desdeDashboard) {
+    // Eliminar filtros anteriores guardados.
+    localStorage.removeItem(STORAGE_KEY);
+
+    // Limpiar todos los campos para aplicar solo el filtro solicitado.
+    [
+        inputTipo,
+        inputMarca,
+        inputModelo,
+        inputUbicacion,
+        inputSerie,
+        inputFecha
+    ].forEach(function (campo) {
+        if (campo) campo.value = '';
+    });
+
+    if (inputEstado) {
+        inputEstado.value = parametrosURL.get('estado') || '';
+    }
+
+    // Mostrar el panel si se solicitó un estado concreto.
+    if (panel) {
+        panel.style.display = inputEstado && inputEstado.value ? 'block' : 'none';
+    }
+
     actualizarEncadenados();
     actualizarSeries();
-    actualizarBadge();
-    tabla.draw();
-    mostrarCoincidencias();
+    actualizarResultados();
+
+    // Quitar los parámetros de inicio para evitar reiniciar el filtro
+    // desde el dashboard cada vez que se actualice la página.
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+} else {
+    // Comportamiento habitual: recuperar los filtros guardados.
+    const filtrosRecuperados = cargarEstadoFiltros();
+
+    if (filtrosRecuperados) {
+        actualizarEncadenados();
+        actualizarSeries();
+        actualizarBadge();
+        tabla.draw();
+        mostrarCoincidencias();
+    }
 }
 
     /*

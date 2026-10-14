@@ -741,15 +741,50 @@ Préstamos
             campos[k].addEventListener('change', aplicarFiltros);
         });
 
-        const NUEVO_KEY = 'prestamos_filtros_estado_nuevo_prestamo';
-        const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1'
-            || @json(session('prestamo_accion')) === 'crear';
+        // Inicialización de filtros: priorizar los accesos desde el dashboard.
+const parametrosURL = new URLSearchParams(window.location.search);
+const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
 
-        if (!vieneDeCrear) {
-            restaurarFiltros();
-            actualizarBadge();
-            if (filtrosActivos()) aplicarFiltros();
-        }
+// Se conserva la excepción que ya existía para la creación de préstamos.
+const NUEVO_KEY = 'prestamos_filtros_estado_nuevo_prestamo';
+const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1'
+    || @json(session('prestamo_accion')) === 'crear';
+
+if (desdeDashboard) {
+    // Eliminar los filtros anteriores guardados.
+    localStorage.removeItem(STORAGE_KEY);
+
+    // Limpiar los filtros para aplicar únicamente el estado solicitado.
+    Object.keys(campos).forEach(function (k) {
+        if (campos[k]) campos[k].value = '';
+    });
+
+    if (campos.estado) {
+        campos.estado.value = parametrosURL.get('estado') || '';
+    }
+
+    // Mostrar el panel si se solicita un estado.
+    if (panel) {
+        panel.style.display = campos.estado && campos.estado.value
+            ? 'block'
+            : 'none';
+    }
+
+    // Aplicar y guardar el filtro seleccionado.
+    aplicarFiltros();
+
+    // Quitar los parámetros para que no se reapliquen al actualizar.
+    window.history.replaceState({}, document.title, window.location.pathname);
+
+} else if (!vieneDeCrear) {
+    // Mantener el comportamiento normal del módulo.
+    restaurarFiltros();
+    actualizarBadge();
+
+    if (filtrosActivos()) {
+        aplicarFiltros();
+    }
+}
 
         const PAG_KEY = 'prestamos_pagina';
 
