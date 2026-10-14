@@ -46,12 +46,41 @@ class DocenteController extends Controller
     /**
      * Display the specified resource.
      */
+
     public function show($id): View
     {
-        $docente = Docente::find($id);
+        $docente = Docente::with([
+            'prestamos' => function ($query) {
+                $query->with([
+                    'prestamoEquipos.equipo.tipoEquipo'
+                ])
+                    ->orderByDesc('fecha')
+                    ->orderByDesc('hora_inicio')
+                    ->orderByDesc('id');
+            }
+        ])->findOrFail($id);
 
-        return view('docente.show', compact('docente'));
+        $prestamos = $docente->prestamos;
+
+        $totalPrestamos = $prestamos->count();
+
+        $prestamosActivos = $prestamos->filter(function ($prestamo) {
+            return strtoupper($prestamo->estado ?? '') === 'ACTIVO';
+        })->count();
+
+        $prestamosTerminados = $prestamos->filter(function ($prestamo) {
+            return strtoupper($prestamo->estado ?? '') === 'TERMINADO';
+        })->count();
+
+        return view('docente.show', compact(
+            'docente',
+            'prestamos',
+            'totalPrestamos',
+            'prestamosActivos',
+            'prestamosTerminados'
+        ));
     }
+
 
     /**
      * Show the form for editing the specified resource.

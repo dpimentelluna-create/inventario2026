@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Docente extends Model
 {
-    
+
     protected $perPage = 20;
 
     /**
@@ -37,9 +37,9 @@ class Docente extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
+
     public function prestamos()
     {
-        return $this->hasMany(\App\Models\Prestamo::class, 'id', 'docente_id');
+        return $this->hasMany(\App\Models\Prestamo::class, 'docente_id', 'id');
     }
-    
 }
