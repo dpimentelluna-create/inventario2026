@@ -9,22 +9,27 @@ Préstamos
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
-                <div class="card">
+                <div class="card prestamo-index-card">
 
-                    <div class="card-header">
+                    <div class="card-header prestamo-index-header">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <span id="card_title" class="fw-bold">
-                                <i class="bi bi-journal-check me-2 fs-5"></i>
-                                PRÉSTAMOS</span>
+                                <i class="bi bi-journal-check me-2 fs-5 text-success"></i>
+                                PRÉSTAMOS
+                                <small class="d-block fw-normal text-muted mt-1 ms-1">
+                                    Consulta y administra los préstamos de equipos y accesorios.
+                                </small>
+                            </span>
 
                             <div class="d-flex align-items-center gap-2">
-                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo" class="btn btn-primary btn-sm">
+                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
+                                    class="btn btn-success btn-sm">
                                     <i class="fa-solid fa-plus"></i> Registrar Nuevo
                                 </a>
 
                                 <div class="btn-group">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown"
-                                        aria-expanded="false">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
                                         <i class="fa-solid fa-download"></i> Exportar
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end">
@@ -44,7 +49,7 @@ Préstamos
                         </div>
                     </div>
 
-                    <div class="card-body">
+                    <div class="card-body prestamo-index-body">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                             <div class="d-flex align-items-center gap-2">
                                 <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
@@ -57,16 +62,43 @@ Préstamos
                         </div>
 
 
-                        <div id="panel_filtros" class="border rounded p-3 mb-3 bg-light" style="display:none;">
-                            <div class="row g-2">
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">SOLICITANTE</label>
+                    <div id="panel_filtros" class="panel-filtros-prestamos mb-3" style="display:none;">
+
+                        {{-- ENCABEZADO --}}
+                        <div class="panel-filtros-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="icono-filtros">
+                                    <i class="fa-solid fa-sliders"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">FILTROS DE BÚSQUEDA</h6>
+                                    <small>Utiliza los campos para encontrar los préstamos registrados.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- CAMPOS --}}
+                        <div class="panel-filtros-body">
+                            <div class="row g-3">
+
+                                {{-- SOLICITANTE --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_solicitante" class="form-label">
+                                        <i class="fa-solid fa-user me-1"></i> SOLICITANTE
+                                    </label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" id="filtro_solicitante"
-                                            class="form-control form-control-sm campo-mayusculas"
-                                            list="lista_filtro_solicitante" placeholder="TODOS" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_solicitante"><i class="fa-solid fa-xmark"></i></button>
+                                            class="form-control campo-mayusculas"
+                                            list="lista_filtro_solicitante"
+                                            placeholder="TODOS"
+                                            autocomplete="off">
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_solicitante"
+                                            title="Limpiar solicitante"
+                                            aria-label="Limpiar solicitante">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     </div>
                                     <datalist id="lista_filtro_solicitante">
                                         @foreach ($filtroSolicitantes ?? [] as $nombre)
@@ -74,14 +106,25 @@ Préstamos
                                         @endforeach
                                     </datalist>
                                 </div>
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">CARGO</label>
+
+                                {{-- CARGO --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_cargo" class="form-label">
+                                        <i class="fa-solid fa-id-badge me-1"></i> CARGO
+                                    </label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" id="filtro_cargo"
-                                            class="form-control form-control-sm campo-mayusculas" list="lista_filtro_cargo"
-                                            placeholder="TODOS" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_cargo"><i class="fa-solid fa-xmark"></i></button>
+                                            class="form-control campo-mayusculas"
+                                            list="lista_filtro_cargo"
+                                            placeholder="TODOS"
+                                            autocomplete="off">
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_cargo"
+                                            title="Limpiar cargo"
+                                            aria-label="Limpiar cargo">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     </div>
                                     <datalist id="lista_filtro_cargo">
                                         @foreach ($filtroCargos ?? [] as $cargo)
@@ -89,74 +132,139 @@ Préstamos
                                         @endforeach
                                     </datalist>
                                 </div>
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">EQUIPO</label>
+
+                                {{-- EQUIPO --}}
+                                <div class="col-12 col-md-12 col-xl-6">
+                                    <label for="filtro_equipo" class="form-label">
+                                        <i class="fa-solid fa-laptop me-1"></i> EQUIPO
+                                    </label>
                                     <div class="input-group input-group-sm">
                                         <input type="text" id="filtro_equipo"
-                                            class="form-control form-control-sm campo-mayusculas" list="lista_filtro_equipo"
-                                            placeholder="NOMBRE O N.º SERIE (3 CAR.)" autocomplete="off">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_equipo"><i class="fa-solid fa-xmark"></i></button>
+                                            class="form-control campo-mayusculas"
+                                            list="lista_filtro_equipo"
+                                            placeholder="NOMBRE O N.º SERIE (3 CAR.)"
+                                            autocomplete="off">
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_equipo"
+                                            title="Limpiar equipo"
+                                            aria-label="Limpiar equipo">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     </div>
                                     <datalist id="lista_filtro_equipo"></datalist>
                                 </div>
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">ESTADO</label>
+
+                                {{-- ESTADO --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_estado" class="form-label">
+                                        <i class="fa-solid fa-circle-check me-1"></i> ESTADO
+                                    </label>
                                     <div class="input-group input-group-sm">
-                                        <select id="filtro_estado" class="form-select form-select-sm">
+                                        <select id="filtro_estado" class="form-select">
                                             <option value="">TODOS</option>
                                             <option value="ACTIVO">ACTIVO</option>
                                             <option value="TERMINADO">TERMINADO</option>
                                         </select>
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_estado"><i class="fa-solid fa-xmark"></i></button>
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_estado"
+                                            title="Limpiar estado"
+                                            aria-label="Limpiar estado">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">FECHA</label>
+
+                                {{-- FECHA --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_fecha" class="form-label">
+                                        <i class="fa-solid fa-calendar-days me-1"></i> FECHA
+                                    </label>
                                     <div class="input-group input-group-sm">
-                                        <input type="date" id="filtro_fecha" class="form-control form-control-sm">
+                                        <input type="date" id="filtro_fecha" class="form-control">
                                         <button type="button" id="btn_filtro_hoy"
-                                            class="btn btn-outline-success btn-sm">HOY</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_fecha"><i class="fa-solid fa-xmark"></i></button>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">HORARIO DESDE</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="time" id="filtro_hora_inicio" class="form-control form-control-sm"
-                                            min="06:00" max="16:00">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_hora_inicio">
+                                            class="btn btn-hoy-filtro"
+                                            title="Filtrar préstamos de hoy">
+                                            HOY
+                                        </button>
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_fecha"
+                                            title="Limpiar fecha"
+                                            aria-label="Limpiar fecha">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="col-12 col-md-4 col-lg-3">
-                                    <label class="form-label fw-bold text-success">HORARIO HASTA</label>
+                                {{-- HORARIO DESDE --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_hora_inicio" class="form-label">
+                                        <i class="fa-regular fa-clock me-1"></i> HORARIO DESDE
+                                    </label>
                                     <div class="input-group input-group-sm">
-                                        <input type="time" id="filtro_hora_fin" class="form-control form-control-sm"
-                                            min="06:00" max="16:00">
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_hora_fin">
+                                        <input type="time" id="filtro_hora_inicio"
+                                            class="form-control" min="06:00" max="16:00">
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_hora_inicio"
+                                            title="Limpiar hora de inicio"
+                                            aria-label="Limpiar hora de inicio">
                                             <i class="fa-solid fa-xmark"></i>
                                         </button>
                                     </div>
                                 </div>
 
-                                <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                                    <button type="button" id="btn_aplicar_filtros"
-                                        class="btn btn-success btn-sm">APLICAR</button>
+                                {{-- HORARIO HASTA --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_hora_fin" class="form-label">
+                                        <i class="fa-regular fa-clock me-1"></i> HORARIO HASTA
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <input type="time" id="filtro_hora_fin"
+                                            class="form-control" min="06:00" max="16:00">
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_hora_fin"
+                                            title="Limpiar hora final"
+                                            aria-label="Limpiar hora final">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {{-- ACCIONES --}}
+                            <div class="panel-filtros-acciones">
+                                <div class="texto-ayuda-filtros">
+                                    <i class="fa-solid fa-circle-info me-1"></i>
+                                    Puedes combinar varios filtros.
+                                </div>
+
+                                <div class="d-flex flex-wrap gap-2">
                                     <button type="button" id="btn_limpiar_filtros"
-                                        class="btn btn-outline-secondary btn-sm">LIMPIAR</button>
+                                        class="btn btn-limpiar-todos btn-sm">
+                                        <i class="fa-solid fa-rotate-left me-1"></i>
+                                        LIMPIAR FILTROS
+                                    </button>
+
+                                    <button type="button" id="btn_aplicar_filtros"
+                                        class="btn btn-aplicar-filtros btn-sm">
+                                        <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                        APLICAR FILTROS
+                                    </button>
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+
                         <div class="table-responsive">
-                            <table id="example" class="table table-bordered table-hover" style="width:100%">
+                            <table id="example"
+                                class="table table-bordered table-hover table-striped align-middle prestamo-datatable"
+                                style="width:100%">
                                 <thead>
                                     <tr>
                                         <th>No</th>
@@ -261,20 +369,262 @@ Préstamos
         </div>
     </div>
 @endsection
-
 <style>
+    /* =========================================
+       TARJETA PRINCIPAL
+    ========================================= */
+    .prestamo-index-card {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+        overflow: hidden;
+    }
+
+    .prestamo-index-header {
+        background: #e9f7e9;
+        color: #212529;
+        border-bottom: 1px solid #c8e6c9;
+        padding: 15px 18px;
+    }
+
+    .prestamo-index-header #card_title {
+        font-size: 1rem;
+        letter-spacing: .2px;
+    }
+
+    .prestamo-index-body {
+        padding: 18px;
+    }
+
+    /* =========================================
+       BOTONES DEL ENCABEZADO
+    ========================================= */
+    #btn_nuevo_prestamo {
+        font-weight: 600;
+    }
+
+    .prestamo-index-header .btn,
+    .prestamo-index-body .btn {
+        border-radius: 6px;
+    }
+
+    /* =========================================
+       PANEL DE FILTROS
+    ========================================= */
+    #panel_filtros {
+        background: #f8f9fa !important;
+        border-color: #dee2e6 !important;
+        border-radius: 8px;
+    }
+
+    #panel_filtros .form-label {
+        font-size: .76rem;
+        margin-bottom: 5px;
+        letter-spacing: .2px;
+    }
+
+    #panel_filtros .form-control,
+    #panel_filtros .form-select,
+    #panel_filtros .btn {
+        min-height: 32px;
+    }
+
+    #panel_filtros .form-control:focus,
+    #panel_filtros .form-select:focus {
+        border-color: #86b7a0;
+        box-shadow: 0 0 0 .15rem rgba(25, 135, 84, .12);
+    }
+
+    /* =========================================
+       CONTROLES DEL DATATABLE
+    ========================================= */
+    #example_wrapper {
+        width: 100%;
+        color: #343a40;
+        font-size: .88rem;
+    }
+
+    #example_wrapper .dataTables_length,
+    #example_wrapper .dataTables_filter {
+        margin-bottom: 12px;
+    }
+
+    #example_wrapper .dataTables_length label,
+    #example_wrapper .dataTables_filter label {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    #example_wrapper .dataTables_length select,
+    #example_wrapper .dataTables_filter input {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 5px 9px;
+        background: #fff;
+        color: #212529;
+    }
+
+    #example_wrapper .dataTables_filter input {
+        margin-left: 6px;
+        max-width: 220px;
+    }
+
+    #example_wrapper .dataTables_length select:focus,
+    #example_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: #86b7a0;
+        box-shadow: 0 0 0 .15rem rgba(25, 135, 84, .12);
+    }
+
+    /* =========================================
+       TABLA
+    ========================================= */
+    #example {
+        width: 100% !important;
+        margin-bottom: 0 !important;
+        border-color: #dee2e6;
+    }
+
     #example thead th {
-        background-color: #5fe65f !important;
-        color: #000 !important;
+        background-color: #e9f7e9 !important;
+        color: #212529 !important;
         text-align: center;
         vertical-align: middle;
-        font-weight: bold;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .2px;
+        white-space: nowrap;
+        padding: 12px 10px;
+        border-color: #d5e5d7;
     }
 
     #example tbody td {
         vertical-align: middle !important;
+        padding: 10px;
+        border-color: #e5e7eb;
+        color: #343a40;
     }
 
+    #example tbody tr:nth-child(even) td {
+        background-color: #f8faf9;
+    }
+
+    #example tbody tr:hover td {
+        background-color: #eef7f0;
+    }
+
+    #example tbody td:nth-child(1),
+    #example tbody td:nth-child(5),
+    #example tbody td:nth-child(6),
+    #example tbody td:nth-child(7),
+    #example tbody td:nth-child(8),
+    #example tbody td:last-child {
+        text-align: center;
+    }
+
+    /* Columna de equipos: permitir leer varios equipos sin
+       que la tabla se vuelva excesivamente ancha. */
+    #example tbody td:nth-child(4) {
+        min-width: 200px;
+        max-width: 340px;
+        line-height: 1.5;
+    }
+
+    #example tbody td:nth-child(4) .mb-1 {
+        padding: 3px 0;
+        border-bottom: 1px solid #edf0ed;
+    }
+
+    #example tbody td:nth-child(4) .mb-1:last-child {
+        border-bottom: 0;
+    }
+
+    /* =========================================
+       ESTADOS
+    ========================================= */
+    #example .badge {
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 6px 9px;
+        border-radius: 5px;
+        letter-spacing: .2px;
+    }
+
+    /* =========================================
+       BOTONES DE ACCIONES
+    ========================================= */
+    #example .columna-acciones {
+        min-width: 125px;
+        white-space: nowrap;
+    }
+
+    #example .btn-accion {
+        width: 31px;
+        height: 30px;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 5px;
+        font-size: .8rem;
+        transition: opacity .2s, transform .2s;
+    }
+
+    #example .btn-accion:hover {
+        opacity: .85;
+        transform: translateY(-1px);
+    }
+
+    #example .btn-info.btn-accion {
+        background-color: #e7f1ff;
+        color: #0d6efd;
+    }
+
+    #example .btn-warning.btn-accion {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    #example .btn-danger.btn-accion {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+
+    /* =========================================
+       PAGINACIÓN
+    ========================================= */
+    #example_wrapper .dataTables_info {
+        padding-top: 10px;
+        color: #6c757d;
+        font-size: .82rem;
+    }
+
+    #example_wrapper .dataTables_paginate {
+        padding-top: 8px;
+    }
+
+    #example_wrapper .page-link {
+        color: #198754;
+        border-color: #dee2e6;
+    }
+
+    #example_wrapper .page-item.active .page-link {
+        background-color: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    #example_wrapper .page-link:focus {
+        box-shadow: 0 0 0 .15rem rgba(25, 135, 84, .15);
+    }
+
+    /* =========================================
+       FILAS RESALTADAS DESPUÉS DE UNA ACCIÓN
+       Se conservan los colores de tu lógica actual.
+    ========================================= */
     .fila-crear td {
         background-color: #d4edda !important;
     }
@@ -286,7 +636,242 @@ Préstamos
     .fila-ver td {
         background-color: #cfe2ff !important;
     }
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+    @media (max-width: 768px) {
+        .prestamo-index-body {
+            padding: 12px;
+        }
+
+        .prestamo-index-header {
+            padding: 12px;
+        }
+
+        #example_wrapper .dataTables_length,
+        #example_wrapper .dataTables_filter {
+            float: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        #example_wrapper .dataTables_filter input {
+            width: 100%;
+            max-width: none;
+            margin: 5px 0 0;
+        }
+
+        #example_wrapper .dataTables_paginate {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
+
+/* =========================================
+   PANEL DE FILTROS - PRESTAMOS
+========================================= */
+
+.panel-filtros-prestamos {
+    background: #ffffff;
+    border: 1px solid #dce5dd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* Encabezado verde claro */
+.panel-filtros-header {
+    padding: 14px 18px;
+    background: #e9f7e9;
+    border-bottom: 1px solid #d4e8d5;
+}
+
+.panel-filtros-header h6 {
+    color: #245c38;
+    font-size: 0.88rem;
+    letter-spacing: 0.3px;
+}
+
+.panel-filtros-header small {
+    color: #6c757d;
+    font-size: 0.78rem;
+}
+
+.icono-filtros {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    background: #d3ebd5;
+    color: #198754;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+/* Contenido del panel */
+.panel-filtros-body {
+    padding: 18px;
+}
+
+.panel-filtros-prestamos .form-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #495057;
+    font-size: 0.73rem;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+}
+
+.panel-filtros-prestamos .form-label i {
+    color: #198754;
+    font-size: 0.76rem;
+}
+
+.panel-filtros-prestamos .form-control,
+.panel-filtros-prestamos .form-select {
+    min-height: 34px;
+    border-color: #d6dce1;
+    border-radius: 5px;
+    color: #343a40;
+    font-size: 0.82rem;
+    background-color: #fff;
+}
+
+.panel-filtros-prestamos .input-group > .form-control,
+.panel-filtros-prestamos .input-group > .form-select {
+    min-width: 0;
+}
+
+.panel-filtros-prestamos .form-control::placeholder {
+    color: #9aa1a8;
+    font-size: 0.77rem;
+}
+
+.panel-filtros-prestamos .form-control:focus,
+.panel-filtros-prestamos .form-select:focus {
+    border-color: #86b7a0;
+    box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.12);
+}
+
+/* Botones para limpiar cada campo */
+.panel-filtros-prestamos .btn-limpiar-filtro {
+    min-width: 34px;
+    border: 1px solid #d6dce1;
+    background: #f8f9fa;
+    color: #6c757d;
+    transition: all 0.2s ease;
+}
+
+.panel-filtros-prestamos .btn-limpiar-filtro:hover {
+    background: #f8d7da;
+    border-color: #f1b9bf;
+    color: #842029;
+}
+
+/* Botón HOY */
+.panel-filtros-prestamos .btn-hoy-filtro {
+    padding-right: 10px;
+    padding-left: 10px;
+    border: 1px solid #198754;
+    background: #e9f7e9;
+    color: #198754;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.panel-filtros-prestamos .btn-hoy-filtro:hover {
+    background: #198754;
+    color: #fff;
+}
+
+/* Separación de la zona de acciones */
+.panel-filtros-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.texto-ayuda-filtros {
+    color: #7a838b;
+    font-size: 0.78rem;
+}
+
+.texto-ayuda-filtros i {
+    color: #198754;
+}
+
+/* Botón para limpiar todos los filtros */
+.panel-filtros-prestamos .btn-limpiar-todos {
+    padding: 7px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background: #fff;
+    color: #495057;
+    font-weight: 600;
+    font-size: 0.76rem;
+}
+
+.panel-filtros-prestamos .btn-limpiar-todos:hover {
+    background: #f1f3f5;
+    border-color: #adb5bd;
+}
+
+/* Botón principal */
+.panel-filtros-prestamos .btn-aplicar-filtros {
+    padding: 7px 14px;
+    border: 1px solid #198754;
+    border-radius: 6px;
+    background: #198754;
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.76rem;
+    transition: background 0.2s ease;
+}
+
+.panel-filtros-prestamos .btn-aplicar-filtros:hover {
+    background: #146c43;
+    border-color: #146c43;
+    color: #fff;
+}
+
+/* Adaptación para pantallas pequeñas */
+@media (max-width: 768px) {
+    .panel-filtros-header {
+        padding: 12px;
+    }
+
+    .panel-filtros-body {
+        padding: 12px;
+    }
+
+    .panel-filtros-acciones {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .panel-filtros-acciones > .d-flex {
+        width: 100%;
+    }
+
+    .panel-filtros-acciones > .d-flex .btn {
+        flex: 1;
+    }
+
+    .texto-ayuda-filtros {
+        font-size: 0.75rem;
+    }
+}
+
 </style>
+
 {{-- INICIO SCRIPT --}}
 <script>
     window.addEventListener('load', function () {
