@@ -1,9 +1,7 @@
-<tittle> Ve
-
 @extends('layouts.app')
 
 @section('template_title')
-    Ver Préstamo
+    Prestamo {{ $prestamo->id }} - {{ $prestamo->created_at ? \Carbon\Carbon::parse($prestamo->created_at)->format('d-m-Y') : 'SIN-FECHA' }}
 @endsection
 
 @section('content')

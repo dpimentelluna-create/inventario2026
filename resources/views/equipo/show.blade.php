@@ -1,9 +1,8 @@
+@section('template_title')
+    Equipo {{ $equipo->id }} - {{ strtoupper($equipo->tipoEquipo->nombre ?? 'EQUIPO') }} - {{ $equipo->num_serie ?: ($equipo->codigo_inventario ?? 'SIN-SERIE') }}
+@endsection
 
 @extends('layouts.app')
-
-@section('template_title')
-    Equipo {{ $equipo->num_serie ?? $equipo->id }}
-@endsection
 
 @section('content')
 @php
