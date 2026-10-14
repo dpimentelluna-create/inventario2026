@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\TiposEquipoRequest;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use App\Models\Equipo;
+use Illuminate\Support\Facades\DB;
 
 class TiposEquipoController extends Controller
 {
@@ -46,12 +48,97 @@ class TiposEquipoController extends Controller
     /**
      * Display the specified resource.
      */
+
     public function show($id): View
     {
-        $tiposEquipo = TiposEquipo::find($id);
+        // Buscar el tipo de equipo.
+        $tiposEquipo = TiposEquipo::findOrFail($id);
 
-        return view('tipos-equipo.show', compact('tiposEquipo'));
+        // Consultar el estado desde cualquiera de las dos tablas
+        // de especificaciones.
+        $estadoSQL = "UPPER(TRIM(COALESCE(
+        NULLIF(TRIM(el.estado), ''),
+        NULLIF(TRIM(ee.estado), ''),
+        ''
+    )))";
+
+        // Obtener los totales sin cargar todos los equipos en memoria.
+        $resumen = DB::table('equipos as e')
+            ->leftJoin(
+                'especificaciones_laptop as el',
+                'el.equipo_id',
+                '=',
+                'e.id'
+            )
+            ->leftJoin(
+                'especificaciones_equipo as ee',
+                'ee.equipo_id',
+                '=',
+                'e.id'
+            )
+            ->where('e.tipo_equipo_id', $tiposEquipo->id)
+            ->selectRaw("
+            COUNT(DISTINCT e.id) AS total,
+            SUM(CASE WHEN {$estadoSQL} = 'BUENO' THEN 1 ELSE 0 END) AS buenos,
+            SUM(CASE WHEN {$estadoSQL} = 'REGULAR' THEN 1 ELSE 0 END) AS regulares,
+            SUM(CASE WHEN {$estadoSQL} = 'MALOGRADO' THEN 1 ELSE 0 END) AS malogrados
+        ")
+            ->first();
+
+        $totalEquipos = (int) $resumen->total;
+        $buenos = (int) $resumen->buenos;
+        $regulares = (int) $resumen->regulares;
+        $malogrados = (int) $resumen->malogrados;
+
+        // Equipos sin estado reconocido o sin especificaciones.
+        $sinClasificar = max(
+            0,
+            $totalEquipos - $buenos - $regulares - $malogrados
+        );
+
+        // Calcular porcentajes evitando divisiones entre cero.
+        $porcentajeBueno = $totalEquipos > 0
+            ? round(($buenos / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeRegular = $totalEquipos > 0
+            ? round(($regulares / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeMalogrado = $totalEquipos > 0
+            ? round(($malogrados / $totalEquipos) * 100, 1)
+            : 0;
+
+        $porcentajeSinClasificar = $totalEquipos > 0
+            ? round(($sinClasificar / $totalEquipos) * 100, 1)
+            : 0;
+
+        // Obtener solamente los cinco equipos más recientes.
+        $ultimosEquipos = Equipo::with([
+            'especificacionesLaptops',
+            'especificacionesEquipo'
+        ])
+            ->where('tipo_equipo_id', $tiposEquipo->id)
+            ->orderByDesc('fecha_registro')
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
+
+        return view('tipos-equipo.show', compact(
+            'tiposEquipo',
+            'totalEquipos',
+            'buenos',
+            'regulares',
+            'malogrados',
+            'sinClasificar',
+            'porcentajeBueno',
+            'porcentajeRegular',
+            'porcentajeMalogrado',
+            'porcentajeSinClasificar',
+            'ultimosEquipos'
+        ));
     }
+
 
     /**
      * Show the form for editing the specified resource.

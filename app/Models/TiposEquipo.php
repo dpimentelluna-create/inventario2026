@@ -36,5 +36,4 @@ class TiposEquipo extends Model
     {
         return $this->hasMany(\App\Models\Equipo::class, 'tipo_equipo_id','id');
     }
-    
 }
