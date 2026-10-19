@@ -1014,43 +1014,59 @@ window.addEventListener('load', function() {
 
     // Resaltado de fila
     function pintarFilaAccesorio() {
-        const idFila = @json(session('accesorio_resaltado')) || sessionStorage.getItem('accesorio_resaltado');
-        const accFila = @json(session('accesorio_accion')) || sessionStorage.getItem('accesorio_accion');
-        sessionStorage.removeItem('accesorio_resaltado');
-        sessionStorage.removeItem('accesorio_accion');
-        if (!idFila || !accFila) return;
+    const idFila = @json(session('accesorio_resaltado'));
+    const accFila = @json(session('accesorio_accion'));
 
-        let nodo = null;
-        tabla.rows({ page: 'all' }).every(function() {
-            const tr = this.node();
-            if (tr && String(tr.getAttribute('data-accesorio-id')) === String(idFila)) nodo = tr;
+    // Limpiar siempre sessionStorage (por si quedó algo de un "ver")
+    sessionStorage.removeItem('accesorio_resaltado');
+    sessionStorage.removeItem('accesorio_accion');
+
+    if (!idFila || !accFila) return;
+
+    let nodo = null;
+    tabla.rows({ page: 'all' }).every(function() {
+        const tr = this.node();
+        if (tr && String(tr.getAttribute('data-accesorio-id')) === String(idFila)) {
+            nodo = tr;
+        }
+    });
+    if (!nodo) return;
+
+    const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
+    const posicion = visibles.indexOf(tabla.row(nodo).index());
+    if (posicion === -1) return;
+
+    const pagina = Math.floor(posicion / tabla.page.len());
+    tabla.page(pagina).draw('page');
+
+    setTimeout(function() {
+        const visible = document.querySelector(`#example tbody tr[data-accesorio-id="${idFila}"]`);
+        if (!visible) return;
+
+        const color = accFila === 'crear' ? '#d4edda' :
+                      accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
+
+        visible.querySelectorAll('td').forEach(td => {
+            td.style.backgroundColor = color;
         });
-        if (!nodo) return;
 
-        const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
-        const posicion = visibles.indexOf(tabla.row(nodo).index());
-        if (posicion === -1) return;
+        visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-        const pagina = Math.floor(posicion / tabla.page.len());
-        tabla.page(pagina).draw('page');
-
-        setTimeout(function() {
-            const visible = document.querySelector(`#example tbody tr[data-accesorio-id="${idFila}"]`);
-            if (!visible) return;
-            const color = accFila === 'crear' ? '#d4edda' : accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
-            visible.querySelectorAll('td').forEach(td => td.style.backgroundColor = color);
-            visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => visible.querySelectorAll('td').forEach(td => td.style.backgroundColor = ''), 4000);
-        }, 50);
-    }
+        setTimeout(() => {
+            visible.querySelectorAll('td').forEach(td => {
+                td.style.backgroundColor = '';
+            });
+        }, 4000);
+    }, 50);
+}
 
     document.querySelectorAll('.btn-ver-accesorio').forEach(a => {
-        a.addEventListener('click', function() {
-            const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('accesorio_resaltado', partes.pop());
-            sessionStorage.setItem('accesorio_accion', 'ver');
-        });
+    a.addEventListener('click', function() {
+        const partes = a.getAttribute('href').split('/').filter(Boolean);
+        sessionStorage.setItem('accesorio_resaltado', partes.pop());
+        sessionStorage.setItem('accesorio_accion', 'ver');
     });
+});
 
     setTimeout(pintarFilaAccesorio, 300);
     window.pintarFilaAccesorio = pintarFilaAccesorio;

@@ -15,7 +15,7 @@ class UbicacioneController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index()
     {
         $ubicaciones = Ubicacione::orderBy('nombre')->get();
 
@@ -37,10 +37,13 @@ class UbicacioneController extends Controller
      */
     public function store(UbicacioneRequest $request): RedirectResponse
     {
-        Ubicacione::create($request->validated());
+        $ubicacion = Ubicacione::create($request->validated());
 
         return Redirect::route('ubicaciones.index')
-            ->with('success', 'Ubicacione created successfully.');
+            ->with('success', 'Ubicación registrada.')
+            ->with('toast_tipo', 'exito')
+            ->with('ubicacion_resaltado', $ubicacion->id)
+            ->with('ubicacion_accion', 'crear');
     }
 
     /**
@@ -162,7 +165,10 @@ class UbicacioneController extends Controller
         $ubicacione->update($request->validated());
 
         return Redirect::route('ubicaciones.index')
-            ->with('success', 'Ubicación actualizada.')->with('toast_tipo', 'aviso');
+            ->with('success', 'Ubicación actualizada.')
+            ->with('toast_tipo', 'exito')
+            ->with('ubicacion_resaltado', $ubicacione->id)
+            ->with('ubicacion_accion', 'editar');
     }
 
     public function destroy($id): RedirectResponse

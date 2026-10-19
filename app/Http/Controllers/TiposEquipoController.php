@@ -16,12 +16,11 @@ class TiposEquipoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index()
     {
-        $tiposEquipos = TiposEquipo::paginate();
+        $tiposEquipos = TiposEquipo::orderBy('nombre')->get();
 
-        return view('tipos-equipo.index', compact('tiposEquipos'))
-            ->with('i', ($request->input('page', 1) - 1) * $tiposEquipos->perPage());
+        return view('tipos-equipo.index', compact('tiposEquipos'));
     }
 
     /**
@@ -39,10 +38,13 @@ class TiposEquipoController extends Controller
      */
     public function store(TiposEquipoRequest $request): RedirectResponse
     {
-        TiposEquipo::create($request->validated());
+        $tipo = TiposEquipo::create($request->validated());
 
         return Redirect::route('tipos-equipo.index')
-            ->with('success', 'Tipo de Equipo registrado.')->with('toast_tipo', 'aviso');
+            ->with('success', 'Tipo de equipo registrado.')
+            ->with('toast_tipo', 'exito')
+            ->with('tipo_resaltado', $tipo->id)
+            ->with('tipo_accion', 'crear');
     }
 
     /**
@@ -158,7 +160,10 @@ class TiposEquipoController extends Controller
         $tiposEquipo->update($request->validated());
 
         return Redirect::route('tipos-equipo.index')
-            ->with('success', 'Tipo de Equipo actualizado.')->with('toast_tipo', 'aviso');
+            ->with('success', 'Tipo de equipo actualizado.')
+            ->with('toast_tipo', 'exito')
+            ->with('tipo_resaltado', $tiposEquipo->id)
+            ->with('tipo_accion', 'editar');
     }
 
     public function destroy($id): RedirectResponse

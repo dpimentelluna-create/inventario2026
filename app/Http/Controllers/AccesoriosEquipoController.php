@@ -41,10 +41,10 @@ class AccesoriosEquipoController extends Controller
         $accesorio = AccesoriosEquipo::create($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'Accesorio registrado.')
-            ->with('toast_tipo', 'exito')
-            ->with('accesorio_resaltado', $accesorio->id)
-            ->with('accesorio_accion', 'crear');
+    ->with('success', 'Accesorio registrado.')
+    ->with('toast_tipo', 'exito')
+    ->with('accesorio_resaltado', $accesorio->id)
+    ->with('accesorio_accion', 'crear');
     }
 
     /**
@@ -86,10 +86,10 @@ class AccesoriosEquipoController extends Controller
         $accesoriosEquipo->update($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'Accesorio actualizado.')
-            ->with('toast_tipo', 'exito')
-            ->with('accesorio_resaltado', $accesoriosEquipo->id)
-            ->with('accesorio_accion', 'editar');
+    ->with('success', 'Accesorio actualizado.')
+    ->with('toast_tipo', 'exito')
+    ->with('accesorio_resaltado', $accesoriosEquipo->id)
+    ->with('accesorio_accion', 'editar');
     }
 
     public function destroy($id): RedirectResponse
