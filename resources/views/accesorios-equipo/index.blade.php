@@ -23,7 +23,7 @@
 
                         <div class="d-flex align-items-center gap-2">
                             <a href="{{ route('accesorios-equipo.create') }}" id="btn_nuevo_accesorio" class="btn btn-success btn-sm">
-                                <i class="fa-solid fa-plus"></i> Registrar Nuevo
+                                <i class="fa-solid fa-plus"></i> Registrar Accesorio
                             </a>
                         </div>
                     </div>

@@ -35,13 +35,15 @@ class DocenteController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(DocenteRequest $request): RedirectResponse
-    {
-        Docente::create($request->validated());
+{
+    $docente = Docente::create($request->validated());
 
-        return redirect()->route('docentes.index')
-            ->with('success', 'Docente registrado.')
-            ->with('toast_tipo', 'exito');
-    }
+    return Redirect::route('docentes.index')
+        ->with('success', 'Solicitante registrado.')
+        ->with('toast_tipo', 'exito')
+        ->with('docente_resaltado', $docente->id)
+        ->with('docente_accion', 'crear');
+}
 
     /**
      * Display the specified resource.
@@ -96,20 +98,22 @@ class DocenteController extends Controller
      * Update the specified resource in storage.
      */
     public function update(DocenteRequest $request, Docente $docente): RedirectResponse
-    {
-        $docente->update($request->validated());
+{
+    $docente->update($request->validated());
 
-        return redirect()->route('docentes.index')
-            ->with('success', 'Docente actualizado.')
-            ->with('toast_tipo', 'aviso');
-    }
+    return Redirect::route('docentes.index')
+        ->with('success', 'Solicitante actualizado.')
+        ->with('toast_tipo', 'exito')
+        ->with('docente_resaltado', $docente->id)
+        ->with('docente_accion', 'editar');
+}
 
     public function destroy($id): RedirectResponse
     {
         Docente::find($id)->delete();
 
-        return redirect()->route('docentes.index')
-            ->with('success', 'Docente eliminado.')
+        return Redirect::route('docentes.index')
+            ->with('success', 'Solicitante eliminado.')
             ->with('toast_tipo', 'error');
     }
 }
