@@ -1,10 +1,9 @@
-<title>Préstamos</title>
-
 @extends('layouts.app')
 
-{{-- @section('template_title')
-Préstamos
-@endsection--}}
+@section('template_title')
+    Préstamos
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">

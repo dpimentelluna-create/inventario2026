@@ -1,544 +1,867 @@
-<title>Equipos</title>
 @extends('layouts.app')
 
 @section('template_title')
     Equipos
 @endsection
 
+{{-- HTML --}}
 @section('content')
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card equipo-index-card">
 
-                    <div class="card">
+                {{-- ENCABEZADO --}}
+                <div class="card-header equipo-index-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span id="card_title" class="fw-bold">
+                            <i class="bi bi-laptop me-2 fs-5 text-success"></i>
+                            EQUIPOS
+                            <small class="d-block fw-normal text-muted mt-1 ms-1">
+                                Consulta y administra los equipos tecnológicos registrados en el inventario.
+                            </small>
+                        </span>
 
-                        {{-- ===================================================== --}}
-                        {{-- ENCABEZADO --}}
-                        {{-- ===================================================== --}}
-                        <div class="card-header">
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ route('equipos.create') }}" id="btn_nuevo_equipo" class="btn btn-success btn-sm">
+                                <i class="fa-solid fa-plus"></i> Registrar Equipo
+                            </a>
 
-                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-                                {{-- TÍTULO --}}
-                                <span id="card_title" class="fw-bold">
-                                    <i class="fa-solid fa-laptop me-2"></i>
-                                    EQUIPOS
-                                </span>
-
-                                {{-- BOTONES --}}
-                                <div class="d-flex align-items-center gap-2">
-
-                                    {{-- REGISTRAR NUEVO --}}
-                                    <a href="{{ route('equipos.create') }}" id="btn_nuevo_equipo"
-                                        class="btn btn-primary btn-sm">
-
-                                        <i class="fa-solid fa-plus"></i>
-                                        Registrar Nuevo
-
-                                    </a>
-
-                                    {{-- EXPORTAR --}}
-                                    <div class="btn-group">
-
-                                        <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-
-                                            <i class="fa-solid fa-download"></i>
-                                            Exportar
-
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-download"></i> Exportar
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <button type="button" class="dropdown-item" id="btn_exportar_excel">
+                                            <i class="fa-solid fa-file-excel text-success"></i> Excel
                                         </button>
+                                    </li>
+                                    <li>
+                                        <button type="button" class="dropdown-item" id="btn_exportar_pdf">
+                                            <i class="fa-solid fa-file-pdf text-danger"></i> PDF
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                        <ul class="dropdown-menu dropdown-menu-end">
+                <div class="card-body equipo-index-body">
 
-                                            {{-- EXCEL --}}
-                                            <a class="dropdown-item" href="#" id="btn_exportar_excel">
-        <i class="fa-solid fa-file-excel text-success"></i>
-        Excel
-    </a>
+                    {{-- BARRA FILTROS --}}
+                    <div class="barra-filtros-equipos mb-3">
+                        <div class="d-flex align-items-center flex-wrap gap-3">
+                            <button type="button" id="btn_toggle_filtros" class="btn btn-filtros-equipos btn-sm"
+                                aria-controls="panel_filtros" aria-expanded="false">
+                                <i class="fa-solid fa-sliders me-2 icono-boton-filtros"></i>
+                                <span>FILTROS</span>
+                                <span id="badge_filtros" class="badge badge-filtros-contador d-none">0</span>
+                                <i class="fa-solid fa-chevron-down ms-3 flecha-filtros"></i>
+                            </button>
 
-                                            {{-- PDF --}}
-                                            <li>
-        <a class="dropdown-item" href="#" id="btn_exportar_pdf">
-            <i class="fa-solid fa-file-pdf text-danger"></i>
-            PDF
-        </a>
-    </li>
+                            <div id="mensaje_coincidencias" class="mensaje-coincidencias" style="display:none;" aria-live="polite"></div>
+                        </div>
+                    </div>
 
-                                        </ul>
-                                    </div>
-
+                    {{-- PANEL FILTROS --}}
+                    <div id="panel_filtros" class="panel-filtros-equipos mb-3" style="display:none;">
+                        <div class="panel-filtros-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="icono-filtros">
+                                    <i class="fa-solid fa-sliders"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">FILTROS DE BÚSQUEDA</h6>
+                                    <small>Utiliza los campos para encontrar los equipos registrados.</small>
                                 </div>
                             </div>
-
                         </div>
 
-
-                        {{-- ===================================================== --}}
-                        {{-- CUERPO --}}
-                        {{-- ===================================================== --}}
-                        <div class="card-body">
-
-                            {{-- BOTÓN FILTROS --}}
-                            <div class="d-flex align-items-center gap-2 mb-2">
-
-                                <button type="button" id="btn_toggle_filtros" class="btn btn-outline-success btn-sm">
-
-                                    <i class="fa-solid fa-filter"></i>
-                                    FILTROS
-
-                                    <span id="badge_filtros" class="badge bg-success ms-1 d-none">
-                                        0
-                                    </span>
-
-                                </button>
-
-                                {{-- MENSAJE DE COINCIDENCIAS --}}
-                                <span id="mensaje_coincidencias" class="text-success fw-bold" style="visibility:hidden;">
-
-                                    &nbsp;
-
-                                </span>
-
-                            </div>
-
-
-                        {{-- ===================================================== --}}
-                        {{-- PANEL DE FILTROS --}}
-                        {{-- ===================================================== --}}
-                        <div id="panel_filtros" class="border rounded p-3 mb-3 mt-2 bg-light" style="display:none;">
-
-                            <div class="row g-2">
+                        <div class="panel-filtros-body">
+                            <div class="row g-3">
 
                                 {{-- TIPO --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        TIPO
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_tipo" class="form-label">
+                                        <i class="fa-solid fa-tag me-1"></i> TIPO
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="text" id="filtro_tipo" class="form-control form-control-sm"
+                                        <input type="text" id="filtro_tipo" class="form-control campo-mayusculas"
                                             list="lista_filtro_tipo" placeholder="TODOS" autocomplete="off">
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_tipo" tabindex="-1" title="Limpiar">
-
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_tipo" title="Limpiar tipo">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                     <datalist id="lista_filtro_tipo">
-                                        @foreach ($filtroTipos as $nombre)
+                                        @foreach ($filtroTipos ?? [] as $nombre)
                                             <option value="{{ $nombre }}"></option>
                                         @endforeach
                                     </datalist>
-
                                 </div>
-
 
                                 {{-- MARCA --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        MARCA
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_marca" class="form-label">
+                                        <i class="fa-solid fa-industry me-1"></i> MARCA
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="text" id="filtro_marca" class="form-control form-control-sm"
+                                        <input type="text" id="filtro_marca" class="form-control campo-mayusculas"
                                             list="lista_filtro_marca" placeholder="ELIJA UN TIPO" autocomplete="off" disabled>
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_marca" tabindex="-1" title="Limpiar">
-
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_marca" title="Limpiar marca">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                     <datalist id="lista_filtro_marca"></datalist>
-
                                 </div>
-
 
                                 {{-- MODELO --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        MODELO
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_modelo" class="form-label">
+                                        <i class="fa-solid fa-cube me-1"></i> MODELO
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="text" id="filtro_modelo" class="form-control form-control-sm"
-                                            list="lista_filtro_modelo" placeholder="ELIJA UNA MARCA" autocomplete="off"
-                                            disabled>
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_modelo" tabindex="-1" title="Limpiar">
-
+                                        <input type="text" id="filtro_modelo" class="form-control campo-mayusculas"
+                                            list="lista_filtro_modelo" placeholder="ELIJA UNA MARCA" autocomplete="off" disabled>
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_modelo" title="Limpiar modelo">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                     <datalist id="lista_filtro_modelo"></datalist>
-
                                 </div>
 
-
                                 {{-- UBICACIÓN --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        UBICACIÓN
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_ubicacion" class="form-label">
+                                        <i class="fa-solid fa-location-dot me-1"></i> UBICACIÓN
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="text" id="filtro_ubicacion" class="form-control form-control-sm"
+                                        <input type="text" id="filtro_ubicacion" class="form-control campo-mayusculas"
                                             list="lista_filtro_ubicacion" placeholder="TODAS" autocomplete="off">
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_ubicacion" tabindex="-1" title="Limpiar">
-
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_ubicacion" title="Limpiar ubicación">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                     <datalist id="lista_filtro_ubicacion">
-                                        @foreach ($filtroUbicaciones as $nombre)
+                                        @foreach ($filtroUbicaciones ?? [] as $nombre)
                                             <option value="{{ $nombre }}"></option>
                                         @endforeach
                                     </datalist>
-
                                 </div>
 
-
                                 {{-- ESTADO --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        ESTADO
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_estado" class="form-label">
+                                        <i class="fa-solid fa-circle-check me-1"></i> ESTADO
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <select id="filtro_estado" class="form-select form-select-sm">
-
+                                        <select id="filtro_estado" class="form-select">
                                             <option value="">TODOS</option>
                                             <option value="BUENO">BUENO</option>
                                             <option value="REGULAR">REGULAR</option>
                                             <option value="MALOGRADO">MALOGRADO</option>
-
                                         </select>
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_estado" tabindex="-1" title="Limpiar">
-
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_estado" title="Limpiar estado">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                 </div>
-
 
                                 {{-- NÚMERO DE SERIE --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        N.º SERIE
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_serie" class="form-label">
+                                        <i class="fa-solid fa-barcode me-1"></i> N.º SERIE
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="text" id="filtro_serie"
-                                            class="form-control form-control-sm campo-mayusculas" list="lista_filtro_serie"
-                                            placeholder="ESCRIBA 3 CARACTERES" autocomplete="off">
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_serie" tabindex="-1" title="Limpiar">
-
+                                        <input type="text" id="filtro_serie" class="form-control campo-mayusculas"
+                                            list="lista_filtro_serie" placeholder="ESCRIBA 3 CARACTERES" autocomplete="off">
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_serie" title="Limpiar serie">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
                                     <datalist id="lista_filtro_serie"></datalist>
-
                                 </div>
-
 
                                 {{-- FECHA --}}
-                                <div class="col-12 col-md-4 col-lg-3">
-
-                                    <label class="form-label fw-bold text-success">
-                                        FECHA
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_fecha" class="form-label">
+                                        <i class="fa-solid fa-calendar-days me-1"></i> FECHA
                                     </label>
-
                                     <div class="input-group input-group-sm">
-
-                                        <input type="date" id="filtro_fecha" class="form-control form-control-sm">
-
-                                        <button type="button" id="btn_filtro_hoy" class="btn btn-outline-success btn-sm">
-
+                                        <input type="date" id="filtro_fecha" class="form-control">
+                                        <button type="button" id="btn_filtro_hoy" class="btn btn-hoy-filtro" title="Filtrar por hoy">
                                             HOY
-
                                         </button>
-
-                                        <button type="button" class="btn btn-outline-secondary btn-limpiar-campo"
-                                            data-target="filtro_fecha" tabindex="-1" title="Limpiar">
-
+                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_fecha" title="Limpiar fecha">
                                             <i class="fa-solid fa-xmark"></i>
-
                                         </button>
-
                                     </div>
-
-                                </div>
-
-
-                                {{-- BOTONES DEL FILTRO --}}
-                                <div class="col-12 d-flex justify-content-end align-items-end gap-2 mt-2">
-
-                                    <button type="button" id="btn_aplicar_filtros" class="btn btn-success btn-sm">
-
-                                        APLICAR
-
-                                    </button>
-
-                                    <button type="button" id="btn_limpiar_filtros" class="btn btn-outline-secondary btn-sm">
-
-                                        LIMPIAR
-
-                                    </button>
-
                                 </div>
 
                             </div>
 
+                            {{-- ACCIONES --}}
+                            <div class="panel-filtros-acciones">
+                                <div class="texto-ayuda-filtros">
+                                    <i class="fa-solid fa-circle-info me-1"></i>
+                                    Puedes combinar varios filtros.
+                                </div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <button type="button" id="btn_limpiar_filtros" class="btn btn-limpiar-todos btn-sm">
+                                        <i class="fa-solid fa-rotate-left me-1"></i> LIMPIAR FILTROS
+                                    </button>
+                                    <button type="button" id="btn_aplicar_filtros" class="btn btn-aplicar-filtros btn-sm">
+                                        <i class="fa-solid fa-magnifying-glass me-1"></i> APLICAR FILTROS
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                    </div>
 
-
-                        {{-- ===================================================== --}}
-                        {{-- TABLA --}}
-                        {{-- ===================================================== --}}
-                        <div class="table-responsive">
-
-                            <table id="example" class="table table-bordered table-hover" style="width:100%">
-
-                                <thead class="thead">
-
-                                    <tr>
-                                        <th>No</th>
-                                        <th class="text-center">Tipo</th>
-                                        <th class="text-center">N.º Serie</th>
-                                        <th class="text-center">Marca</th>
-                                        <th class="text-center">Modelo</th>
-                                        <th class="text-center">Estado</th>
-                                        <th class="text-center">Ubicación</th>
-                                        <th class="text-center">Fecha</th>
-                                        <th class="text-center">Observación</th>
-                                        <th class="text-center columna-acciones">
-                                            Acciones
-                                        </th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    @foreach ($equipos as $i => $equipo)
-
-                                                                        @php
+                    {{-- TABLA --}}
+                    <div class="table-responsive">
+                        <table id="example" class="table table-bordered table-hover table-striped align-middle equipo-datatable" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th class="text-center">Tipo</th>
+                                    <th class="text-center">N.º Serie</th>
+                                    <th class="text-center">Marca</th>
+                                    <th class="text-center">Modelo</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Ubicación</th>
+                                    <th class="text-center">Fecha</th>
+                                    <th class="text-center">Observación</th>
+                                    <th class="text-center columna-acciones">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($equipos as $equipo)
+                                    @php
                                         $estado = strtoupper(
                                             $equipo->especificacionesLaptops->estado
                                             ?? $equipo->especificacionesEquipo->estado
                                             ?? ''
                                         );
-
                                         $fechaIso = $equipo->fecha_registro
                                             ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('Y-m-d')
                                             : '';
-
                                         $fechaVista = $fechaIso
                                             ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y')
                                             : '-';
-                                                                        @endphp
-
-                                                                        <tr data-equipo-id="{{ $equipo->id }}">
-
-                                                                            <td>
-                                                                                {{ $equipo->id }}
-                                                                            </td>
-
-                                                                            <td>
-                                                                                {{ $equipo->tipoEquipo->nombre ?? '-' }}
-                                                                            </td>
-
-                                                                            <td class="text-center">
-                                                                                {{ $equipo->num_serie }}
-                                                                            </td>
-
-                                                                            <td>
-                                                                                {{ $equipo->marca }}
-                                                                            </td>
-
-                                                                            <td>
-                                                                                {{ $equipo->modelo }}
-                                                                            </td>
-
-                                                                            <td class="text-center">
-                                                                                {{ $estado ?: '-' }}
-                                                                            </td>
-
-                                                                            <td class="text-center">
-                                                                                {{ $equipo->ubicacione->nombre ?? '-' }}
-                                                                            </td>
-
-                                                                            <td class="text-center" data-fecha="{{ $fechaIso }}" data-order="{{ $fechaIso ?: '0000-00-00' }}">
-                                                                                {{ $fechaVista }}
-                                                                            </td>
-
-                                                                            <td>
-                                                                                {{
-                                            $equipo->especificacionesLaptops->observaciones
-                                            ?? $equipo->especificacionesEquipo->observaciones
-                                            ?? '-'
-                                                                                }}
-                                                                            </td>
-
-                                                                            <td class="text-center columna-acciones">
-
-                                                                                <div class="d-flex justify-content-center align-items-center gap-1">
-
-                                                                                    <form action="{{ route('equipos.destroy', $equipo->id) }}" method="POST">
-
-                                                                                        {{-- VER --}}
-                                                                                        <a class="btn btn-info btn-accion btn-ver-equipo"
-                                                                                            href="{{ route('equipos.show', $equipo->id) }}">
-
-                                                                                            <i class="fa-solid fa-eye"></i>
-
-                                                                                        </a>
-
-                                                                                        {{-- EDITAR --}}
-                                                                                        <a class="btn btn-warning btn-accion"
-                                                                                            href="{{ route('equipos.edit', $equipo->id) }}">
-
-                                                                                            <i class="fa-solid fa-pen-to-square"></i>
-
-                                                                                        </a>
-
-                                                                                        @csrf
-                                                                                        @method('DELETE')
-
-                                                                                        {{-- ELIMINAR --}}
-                                                                                        <button type="submit" class="btn btn-danger btn-accion"
-                                                                                            onclick="event.preventDefault(); confirmarEliminarFila(this.closest('form'));">
-                                                                                            <i class="fa-solid fa-trash"></i>
-                                                                                        </button>
-                                                                                    </form>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        </div>
+                                    @endphp
+                                    <tr data-equipo-id="{{ $equipo->id }}"
+                                        data-tipo="{{ strtoupper($equipo->tipoEquipo->nombre ?? '') }}"
+                                        data-serie="{{ strtoupper($equipo->num_serie ?? '') }}"
+                                        data-marca="{{ strtoupper($equipo->marca ?? '') }}"
+                                        data-modelo="{{ strtoupper($equipo->modelo ?? '') }}"
+                                        data-estado="{{ $estado }}"
+                                        data-ubicacion="{{ strtoupper($equipo->ubicacione->nombre ?? '') }}"
+                                        data-fecha="{{ $fechaIso }}">
+                                        <td>{{ $equipo->id }}</td>
+                                        <td>{{ $equipo->tipoEquipo->nombre ?? '-' }}</td>
+                                        <td class="text-center">{{ $equipo->num_serie }}</td>
+                                        <td>{{ $equipo->marca }}</td>
+                                        <td>{{ $equipo->modelo }}</td>
+                                        <td class="text-center">
+                                            @if($estado === 'BUENO')
+                                                <span class="badge bg-success">{{ $estado }}</span>
+                                            @elseif($estado === 'REGULAR')
+                                                <span class="badge bg-warning text-dark">{{ $estado }}</span>
+                                            @elseif($estado === 'MALOGRADO')
+                                                <span class="badge bg-danger">{{ $estado }}</span>
+                                            @else
+                                                {{ $estado ?: '-' }}
+                                            @endif
+                                        </td>
+                                        <td class="text-center">{{ $equipo->ubicacione->nombre ?? '-' }}</td>
+                                        <td class="text-center" data-order="{{ $fechaIso ?: '0000-00-00' }}">
+                                            {{ $fechaVista }}
+                                        </td>
+                                        <td>
+                                            {{ $equipo->especificacionesLaptops->observaciones
+                                                ?? $equipo->especificacionesEquipo->observaciones
+                                                ?? '-' }}
+                                        </td>
+                                        <td class="text-center columna-acciones">
+                                            <div class="d-flex justify-content-center align-items-center gap-1">
+                                                <form action="{{ route('equipos.destroy', $equipo->id) }}" method="POST">
+                                                    <a class="btn btn-info btn-accion btn-ver-equipo"
+                                                        href="{{ route('equipos.show', $equipo->id) }}">
+                                                        <i class="fa-solid fa-eye"></i>
+                                                    </a>
+                                                    <a class="btn btn-warning btn-accion"
+                                                        href="{{ route('equipos.edit', $equipo->id) }}">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </a>
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-accion"
+                                                        onclick="event.preventDefault(); confirmarEliminarEquipo(this.closest('form'));">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 @endsection
 
-
+{{-- CSS --}}
 <style>
+    /* =========================================
+       TARJETA PRINCIPAL
+    ========================================= */
+    .equipo-index-card {
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
+        overflow: hidden;
+    }
+
+    .equipo-index-header {
+        background: #e9f7e9;
+        color: #212529;
+        border-bottom: 1px solid #c8e6c9;
+        padding: 15px 18px;
+    }
+
+    .equipo-index-header #card_title {
+        font-size: 1rem;
+        letter-spacing: .2px;
+    }
+
+    .equipo-index-body {
+        padding: 18px;
+    }
+
+    /* =========================================
+       BOTONES DEL ENCABEZADO
+    ========================================= */
+    #btn_nuevo_equipo {
+        font-weight: 600;
+    }
+
+    .equipo-index-header .btn,
+    .equipo-index-body .btn {
+        border-radius: 6px;
+    }
+
+    /* =========================================
+       PANEL DE FILTROS
+    ========================================= */
+    .panel-filtros-equipos {
+        background: #ffffff;
+        border: 1px solid #dce5dd;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .panel-filtros-header {
+        padding: 14px 18px;
+        background: #e9f7e9;
+        border-bottom: 1px solid #d4e8d5;
+    }
+
+    .panel-filtros-header h6 {
+        color: #245c38;
+        font-size: 0.88rem;
+        letter-spacing: 0.3px;
+    }
+
+    .panel-filtros-header small {
+        color: #6c757d;
+        font-size: 0.78rem;
+    }
+
+    .icono-filtros {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        background: #d3ebd5;
+        color: #198754;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+
+    .panel-filtros-body {
+        padding: 18px;
+    }
+
+    .panel-filtros-equipos .form-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #495057;
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 0.35px;
+    }
+
+    .panel-filtros-equipos .form-label i {
+        color: #198754;
+        font-size: 0.76rem;
+    }
+
+    .panel-filtros-equipos .form-control,
+    .panel-filtros-equipos .form-select {
+        min-height: 34px;
+        border-color: #d6dce1;
+        border-radius: 5px;
+        color: #343a40;
+        font-size: 0.82rem;
+        background-color: #fff;
+    }
+
+    .panel-filtros-equipos .input-group > .form-control,
+    .panel-filtros-equipos .input-group > .form-select {
+        min-width: 0;
+    }
+
+    .panel-filtros-equipos .form-control::placeholder {
+        color: #9aa1a8;
+        font-size: 0.77rem;
+    }
+
+    .panel-filtros-equipos .form-control:focus,
+    .panel-filtros-equipos .form-select:focus {
+        border-color: #86b7a0;
+        box-shadow: 0 0 0 0.15rem rgba(25, 135, 84, 0.12);
+    }
+
+    .panel-filtros-equipos .btn-limpiar-filtro {
+        min-width: 34px;
+        border: 1px solid #d6dce1;
+        background: #f8f9fa;
+        color: #6c757d;
+        transition: all 0.2s ease;
+    }
+
+    .panel-filtros-equipos .btn-limpiar-filtro:hover {
+        background: #f8d7da;
+        border-color: #f1b9bf;
+        color: #842029;
+    }
+
+    .panel-filtros-equipos .btn-hoy-filtro {
+        padding-right: 10px;
+        padding-left: 10px;
+        border: 1px solid #198754;
+        background: #e9f7e9;
+        color: #198754;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .panel-filtros-equipos .btn-hoy-filtro:hover {
+        background: #198754;
+        color: #fff;
+    }
+
+    .panel-filtros-acciones {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .texto-ayuda-filtros {
+        color: #7a838b;
+        font-size: 0.78rem;
+    }
+
+    .texto-ayuda-filtros i {
+        color: #198754;
+    }
+
+    .panel-filtros-equipos .btn-limpiar-todos {
+        padding: 7px 12px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        background: #fff;
+        color: #495057;
+        font-weight: 600;
+        font-size: 0.76rem;
+    }
+
+    .panel-filtros-equipos .btn-limpiar-todos:hover {
+        background: #f1f3f5;
+        border-color: #adb5bd;
+    }
+
+    .panel-filtros-equipos .btn-aplicar-filtros {
+        padding: 7px 14px;
+        border: 1px solid #198754;
+        border-radius: 6px;
+        background: #198754;
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.76rem;
+        transition: background 0.2s ease;
+    }
+
+    .panel-filtros-equipos .btn-aplicar-filtros:hover {
+        background: #146c43;
+        border-color: #146c43;
+        color: #fff;
+    }
+
+    /* =========================================
+       BOTÓN FILTROS Y MENSAJE
+    ========================================= */
+    .barra-filtros-equipos {
+        width: 100%;
+    }
+
+    .btn-filtros-equipos {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 7px 13px;
+        border: 1px solid #198754;
+        border-radius: 7px;
+        background: #fff;
+        color: #198754;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.25px;
+        transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-filtros-equipos:hover,
+    .btn-filtros-equipos.filtros-abiertos {
+        background: #198754;
+        color: #fff;
+        box-shadow: 0 2px 5px rgba(25, 135, 84, 0.15);
+    }
+
+    .btn-filtros-equipos:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.18);
+    }
+
+    .icono-boton-filtros {
+        font-size: 0.85rem;
+    }
+
+    .flecha-filtros {
+        font-size: 0.68rem;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-filtros-equipos.filtros-abiertos .flecha-filtros {
+        transform: rotate(180deg);
+    }
+
+    .btn-filtros-equipos .badge-filtros-contador {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        margin-left: 9px !important;
+        padding: 0 6px;
+        border: 1px solid #c5e7d3;
+        border-radius: 6px;
+        background: #d1e7dd;
+        color: #146c43;
+        font-size: 0.72rem;
+        font-weight: 800;
+    }
+
+    .btn-filtros-equipos:hover .badge-filtros-contador,
+    .btn-filtros-equipos.filtros-abiertos .badge-filtros-contador {
+        border-color: rgba(255, 255, 255, 0.45);
+        background: #fff;
+        color: #198754;
+    }
+
+    .mensaje-coincidencias {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 36px;
+        padding: 5px 11px;
+        border: 1px solid #cde5d5;
+        border-radius: 7px;
+        background: #f0f8f2;
+        color: #245c38;
+        font-size: 0.78rem;
+        line-height: 1.3;
+        animation: aparecerMensajeFiltros 0.2s ease;
+    }
+
+    .mensaje-coincidencias .icono-mensaje {
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .mensaje-coincidencias .texto-mensaje {
+        font-weight: 600;
+    }
+
+    .mensaje-coincidencias .numero-coincidencias {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 27px;
+        min-height: 25px;
+        padding: 3px 7px;
+        border-radius: 5px;
+        background: #d1e7dd;
+        color: #146c43;
+        font-size: 0.85rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .mensaje-coincidencias.sin-resultados {
+        border-color: #e5d8bd;
+        background: #fffaf0;
+        color: #795b20;
+    }
+
+    .mensaje-coincidencias.sin-resultados .numero-coincidencias {
+        background: #f5e8c9;
+        color: #795b20;
+    }
+
+    @keyframes aparecerMensajeFiltros {
+        from { opacity: 0; transform: translateY(-3px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =========================================
+       DATATABLE
+    ========================================= */
+    #example_wrapper {
+        width: 100%;
+        color: #343a40;
+        font-size: .88rem;
+    }
+
+    #example_wrapper .dataTables_length,
+    #example_wrapper .dataTables_filter {
+        margin-bottom: 12px;
+    }
+
+    #example_wrapper .dataTables_length label,
+    #example_wrapper .dataTables_filter label {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    #example_wrapper .dataTables_length select,
+    #example_wrapper .dataTables_filter input {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 5px 9px;
+        background: #fff;
+        color: #212529;
+    }
+
+    #example_wrapper .dataTables_filter input {
+        margin-left: 6px;
+        max-width: 220px;
+    }
+
+    #example_wrapper .dataTables_length select:focus,
+    #example_wrapper .dataTables_filter input:focus {
+        outline: none;
+        border-color: #86b7a0;
+        box-shadow: 0 0 0 .15rem rgba(25, 135, 84, .12);
+    }
+
+    #example {
+        width: 100% !important;
+        margin-bottom: 0 !important;
+        border-color: #dee2e6;
+    }
+
     #example thead th {
-        background-color: #5fe65f !important;
-        color: #000 !important;
+        background-color: #e9f7e9 !important;
+        color: #212529 !important;
         text-align: center;
         vertical-align: middle;
-        font-weight: bold;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .2px;
+        white-space: nowrap;
+        padding: 12px 10px;
+        border-color: #d5e5d7;
     }
 
-    @keyframes filaCrear {
-        0%, 70% { background-color: #d4edda !important; }
-        100% { background-color: transparent; }
+    #example tbody td {
+        vertical-align: middle !important;
+        padding: 10px;
+        border-color: #e5e7eb;
+        color: #343a40;
     }
 
-    @keyframes filaEditar {
-        0%, 70% { background-color: #fff3cd !important; }
-        100% { background-color: transparent; }
+    #example tbody tr:nth-child(even) td {
+        background-color: #f8faf9;
     }
 
-    @keyframes filaVer {
-        0%, 70% { background-color: #cfe2ff !important; }
-        100% { background-color: transparent; }
+    #example tbody tr:hover td {
+        background-color: #eef7f0;
     }
 
-    #example tbody tr.fila-crear td {
-        animation: filaCrear 3s ease forwards;
+    #example tbody td:nth-child(1),
+    #example tbody td:nth-child(3),
+    #example tbody td:nth-child(6),
+    #example tbody td:nth-child(7),
+    #example tbody td:nth-child(8),
+    #example tbody td:last-child {
+        text-align: center;
     }
 
-    #example tbody tr.fila-editar td {
-        animation: filaEditar 3s ease forwards;
+    #example tbody td:nth-child(9) {
+        min-width: 180px;
+        max-width: 320px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 
-    #example tbody tr.fila-ver td {
-        animation: filaVer 3s ease forwards;
+    #example .badge {
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 6px 9px;
+        border-radius: 5px;
+        letter-spacing: .2px;
     }
 
-    #example tbody tr.fila-borrar td {
-        background-color: #f8d7da !important;
+    #example .columna-acciones {
+        min-width: 125px;
+        white-space: nowrap;
     }
 
-    #example tbody tr.fila-borrar {
-        transition: opacity .6s ease;
+    #example .btn-accion {
+        width: 31px;
+        height: 30px;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 5px;
+        font-size: .8rem;
+        transition: opacity .2s, transform .2s;
     }
 
-    #example tbody tr.fila-borrar.saliendo {
-        opacity: 0;
+    #example .btn-accion:hover {
+        opacity: .85;
+        transform: translateY(-1px);
     }
 
-    /* =====================================================
-       CONTROLES SUPERIORES DE DATATABLES
-       ===================================================== */
-
-    #example_wrapper > .d-flex:first-child {
-        margin-bottom: 10px !important;
-        padding: 0 4px;
+    #example .btn-info.btn-accion {
+        background-color: #e7f1ff;
+        color: #0d6efd;
     }
 
-    #example_wrapper .dt-length,
-    #example_wrapper .dt-search {
-        margin: 0 !important;
+    #example .btn-warning.btn-accion {
+        background-color: #fff3cd;
+        color: #856404;
     }
 
-    #example_wrapper .dt-length select {
-        margin-left: 5px;
-        margin-right: 5px;
+    #example .btn-danger.btn-accion {
+        background-color: #f8d7da;
+        color: #842029;
     }
 
-    #example_wrapper .dt-search input {
-        margin-left: 5px;
+    #example_wrapper .dataTables_info {
+        padding-top: 10px;
+        color: #6c757d;
+        font-size: .82rem;
+    }
+
+    #example_wrapper .dataTables_paginate {
+        padding-top: 8px;
+    }
+
+    #example_wrapper .page-link {
+        color: #198754;
+        border-color: #dee2e6;
+    }
+
+    #example_wrapper .page-item.active .page-link {
+        background-color: #198754;
+        border-color: #198754;
+        color: #fff;
+    }
+
+    #example_wrapper .page-link:focus {
+        box-shadow: 0 0 0 .15rem rgba(25, 135, 84, .15);
+    }
+
+    /* Filas resaltadas */
+    .fila-crear td  { background-color: #d4edda !important; }
+    .fila-editar td { background-color: #fff3cd !important; }
+    .fila-ver td    { background-color: #cfe2ff !important; }
+
+    /* =========================================
+       RESPONSIVE
+    ========================================= */
+    @media (max-width: 768px) {
+        .equipo-index-body { padding: 12px; }
+        .equipo-index-header { padding: 12px; }
+        .panel-filtros-header { padding: 12px; }
+        .panel-filtros-body { padding: 12px; }
+
+        .panel-filtros-acciones {
+            align-items: stretch;
+            flex-direction: column;
+        }
+        .panel-filtros-acciones > .d-flex { width: 100%; }
+        .panel-filtros-acciones > .d-flex .btn { flex: 1; }
+
+        #example_wrapper .dataTables_length,
+        #example_wrapper .dataTables_filter {
+            float: none;
+            width: 100%;
+            text-align: left;
+        }
+        #example_wrapper .dataTables_filter input {
+            width: 100%;
+            max-width: none;
+            margin: 5px 0 0;
+        }
+        #example_wrapper .dataTables_paginate {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
     }
 </style>
 
+{{-- SCRIPTS --}}
 <script>
-window.addEventListener('load', function () {
-
+window.addEventListener('load', function() {
     if (typeof $ === 'undefined' || !$.fn.DataTable) return;
 
     const tabla = $.fn.DataTable.isDataTable('#example')
@@ -547,7 +870,6 @@ window.addEventListener('load', function () {
             dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rt<"d-flex justify-content-between align-items-center mt-2"ip>',
             pageLength: 10,
             lengthMenu: [5, 10, 25, 100],
-            responsive: true,
             language: {
                 lengthMenu: "Mostrar _MENU_ registros por página",
                 info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
@@ -558,932 +880,411 @@ window.addEventListener('load', function () {
             }
         });
 
-        // =========================================================
-// EXPORTAR EQUIPOS A PDF
-// =========================================================
+    tabla.order([[7, 'desc']]).draw();
 
-$('#btn_exportar_pdf').on('click', function (e) {
+    // ===================== EXPORTAR =====================
+    function exportar(ruta) {
+        const ids = [];
+        tabla.rows({ search: 'applied', order: 'applied' }).every(function() {
+            const id = this.node()?.getAttribute('data-equipo-id');
+            if (id) ids.push(id);
+        });
 
-    e.preventDefault();
-
-    const ids = [];
-
-    // Obtener los equipos actualmente filtrados y ordenados
-    tabla.rows({
-        search: 'applied',
-        order: 'applied'
-    }).every(function () {
-
-        const tr = this.node();
-
-        if (!tr) {
+        if (ids.length === 0) {
+            (typeof toastr !== 'undefined' ? toastr.warning : alert)('NO HAY EQUIPOS PARA EXPORTAR.');
             return;
         }
 
-        const id = tr.getAttribute('data-equipo-id');
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = ruta;
+        form.target = '_blank';
 
-        if (id) {
-            ids.push(id);
-        }
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = '{{ csrf_token() }}';
+        form.appendChild(csrf);
 
-    });
+        ids.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
 
-
-    // Verificar si existen equipos
-    if (ids.length === 0) {
-
-        alert('NO HAY EQUIPOS PARA EXPORTAR.');
-
-        return;
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
     }
 
+    document.getElementById('btn_exportar_excel')?.addEventListener('click', () => exportar('{{ route("equipos.export.excel") }}'));
+    document.getElementById('btn_exportar_pdf')?.addEventListener('click', () => exportar('{{ route("equipos.export.pdf") }}'));
 
-    // Crear formulario temporal
-    const form = document.createElement('form');
-
-    form.method = 'POST';
-    form.action = '{{ route('equipos.export.pdf') }}';
-    form.target = '_blank';
-
-
-    // CSRF
-    const csrf = document.createElement('input');
-
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = '{{ csrf_token() }}';
-
-    form.appendChild(csrf);
-
-
-    // Agregar IDs
-    ids.forEach(function (id) {
-
-        const input = document.createElement('input');
-
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = id;
-
-        form.appendChild(input);
-
-    });
-
-
-    // Enviar formulario
-    document.body.appendChild(form);
-
-    form.submit();
-
-    form.remove();
-
-});
-
-$('#btn_exportar_excel').on('click', function (e) {
-    e.preventDefault();
-
-    const ids = [];
-
-    tabla.rows({
-        search: 'applied',
-        order: 'applied'
-    }).every(function () {
-
-        const tr = this.node();
-
-        if (!tr) return;
-
-        const id = tr.getAttribute('data-equipo-id');
-
-        if (id) {
-            ids.push(id);
-        }
-    });
-
-    if (ids.length === 0) {
-        alert('NO HAY EQUIPOS PARA EXPORTAR.');
-        return;
-    }
-
-    const form = document.createElement('form');
-
-    form.method = 'POST';
-    form.action = '{{ route('equipos.export.excel') }}';
-    form.target = '_blank';
-
-    const csrf = document.createElement('input');
-
-    csrf.type = 'hidden';
-    csrf.name = '_token';
-    csrf.value = '{{ csrf_token() }}';
-
-    form.appendChild(csrf);
-
-    ids.forEach(function (id) {
-
-        const input = document.createElement('input');
-
-        input.type = 'hidden';
-        input.name = 'ids[]';
-        input.value = id;
-
-        form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-
-    form.submit();
-
-    form.remove();
-});
-
-
-
-    // Ordenar por FECHA de forma descendente
-    tabla.order([[7, 'desc']]).draw();
-
+    // ===================== FILTROS =====================
     const STORAGE_KEY = 'equipos_filtros_estado';
-
-    /*
-     * =========================================================
-     * ELEMENTOS PRINCIPALES
-     * =========================================================
-     */
-
     const panel = document.getElementById('panel_filtros');
     const btnToggle = document.getElementById('btn_toggle_filtros');
     const badge = document.getElementById('badge_filtros');
-    const mensajeCoincidencias = document.getElementById('mensaje_coincidencias');
+    const msg = document.getElementById('mensaje_coincidencias');
 
-    const inputTipo = document.getElementById('filtro_tipo');
-    const inputMarca = document.getElementById('filtro_marca');
-    const inputModelo = document.getElementById('filtro_modelo');
-    const inputUbicacion = document.getElementById('filtro_ubicacion');
-    const inputSerie = document.getElementById('filtro_serie');
-    const inputFecha = document.getElementById('filtro_fecha');
-    const inputEstado = document.getElementById('filtro_estado');
+    const campos = {
+        tipo: document.getElementById('filtro_tipo'),
+        marca: document.getElementById('filtro_marca'),
+        modelo: document.getElementById('filtro_modelo'),
+        ubicacion: document.getElementById('filtro_ubicacion'),
+        estado: document.getElementById('filtro_estado'),
+        serie: document.getElementById('filtro_serie'),
+        fecha: document.getElementById('filtro_fecha')
+    };
 
-    const listaTipo = document.getElementById('lista_filtro_tipo');
-    const listaMarca = document.getElementById('lista_filtro_marca');
-    const listaModelo = document.getElementById('lista_filtro_modelo');
-    const listaUbicacion = document.getElementById('lista_filtro_ubicacion');
-    const listaSerie = document.getElementById('lista_filtro_serie');
+    const listas = {
+        marca: document.getElementById('lista_filtro_marca'),
+        modelo: document.getElementById('lista_filtro_modelo'),
+        serie: document.getElementById('lista_filtro_serie')
+    };
 
-    /*
-     * =========================================================
-     * DATOS DE LOS EQUIPOS
-     * =========================================================
-     */
-
-    const filas = [];
-
-    tabla.rows().every(function () {
-        const d = this.data();
-        filas.push({
-            tipo: String(d[1] || '').toUpperCase(),
-            serie: String(d[2] || '').toUpperCase(),
-            marca: String(d[3] || '').toUpperCase(),
-            modelo: String(d[4] || '').toUpperCase()
-        });
-    });
-
-    /*
-     * =========================================================
-     * FUNCIONES GENERALES
-     * =========================================================
-     */
-
-    function val(id) {
-        const el = document.getElementById(id);
-        return el ? el.value.trim().toUpperCase() : '';
+    function val(el) {
+        return el ? String(el.value || '').trim().toUpperCase() : '';
     }
 
-    function fechaFiltro() {
-        return inputFecha ? inputFecha.value : '';
-    }
-
-    function llenarLista(datalist, valores) {
-        if (!datalist) return;
-        datalist.innerHTML = '';
-        Array.from(valores)
-            .sort()
-            .forEach(function (v) {
-                if (!v || v === '-') return;
-                const op = document.createElement('option');
-                op.value = v;
-                datalist.appendChild(op);
-            });
-    }
-
-    function setBloqueo(el, bloqueado, placeholder) {
-        if (!el) return;
-        el.disabled = bloqueado;
-        el.classList.toggle('bg-light', bloqueado);
-        if (bloqueado) {
-            el.value = '';
-        }
-        if (placeholder) {
-            el.placeholder = placeholder;
-        }
-    }
-
-    /*
-     * =========================================================
-     * FILTROS ENCADENADOS
-     * =========================================================
-     */
-
-    function actualizarEncadenados() {
-        const tipo = val('filtro_tipo');
-        const marca = val('filtro_marca');
-
-        if (!tipo) {
-            setBloqueo(inputMarca, true, 'ELIJA UN TIPO');
-            setBloqueo(inputModelo, true, 'ELIJA UNA MARCA');
-            llenarLista(listaMarca, []);
-            llenarLista(listaModelo, []);
-            return;
-        }
-
-        const marcas = new Set();
-        filas.forEach(function (f) {
-            if (f.tipo.indexOf(tipo) !== -1 && f.marca) {
-                marcas.add(f.marca);
-            }
-        });
-
-        setBloqueo(inputMarca, false, 'TODAS');
-        llenarLista(listaMarca, marcas);
-
-        if (!marca) {
-            setBloqueo(inputModelo, true, 'ELIJA UNA MARCA');
-            llenarLista(listaModelo, []);
-            return;
-        }
-
-        const modelos = new Set();
-        filas.forEach(function (f) {
-            if (
-                f.tipo.indexOf(tipo) !== -1 &&
-                f.marca.indexOf(marca) !== -1 &&
-                f.modelo
-            ) {
-                modelos.add(f.modelo);
-            }
-        });
-
-        setBloqueo(inputModelo, false, 'TODOS');
-        llenarLista(listaModelo, modelos);
-    }
-
-    /*
-     * =========================================================
-     * FILTRO DE NÚMERO DE SERIE
-     * =========================================================
-     */
-
-    function actualizarSeries() {
-        if (!inputSerie || !listaSerie) return;
-
-        const q = inputSerie.value.trim().toUpperCase();
-        listaSerie.innerHTML = '';
-        if (q.length < 3) return;
-
-        const vistos = new Set();
-        filas.forEach(function (f) {
-            if (f.serie.indexOf(q) !== -1 && !vistos.has(f.serie)) {
-                vistos.add(f.serie);
-                const op = document.createElement('option');
-                op.value = f.serie;
-                listaSerie.appendChild(op);
-            }
-        });
-    }
-
-    /*
-     * =========================================================
-     * CONTADOR DE FILTROS
-     * =========================================================
-     */
-
-    function contarFiltros() {
-        let n = 0;
-        [
-            'filtro_tipo',
-            'filtro_marca',
-            'filtro_modelo',
-            'filtro_ubicacion',
-            'filtro_estado',
-            'filtro_serie'
-        ].forEach(function (id) {
-            if (val(id)) {
-                n++;
-            }
-        });
-        if (fechaFiltro()) {
-            n++;
-        }
-        return n;
+    function filtrosActivos() {
+        return Object.values(campos).filter(el => el && String(el.value || '').trim() !== '').length;
     }
 
     function actualizarBadge() {
         if (!badge) return;
-        const cantidad = contarFiltros();
-        badge.textContent = cantidad;
-        badge.classList.toggle('d-none', cantidad === 0);
+        const n = filtrosActivos();
+        badge.textContent = n;
+        badge.classList.toggle('d-none', n === 0);
     }
-
-    /*
-     * =========================================================
-     * LOCALSTORAGE
-     * =========================================================
-     */
-
-    function guardarEstadoFiltros() {
-        const estado = {
-            tipo: inputTipo ? inputTipo.value : '',
-            marca: inputMarca ? inputMarca.value : '',
-            modelo: inputModelo ? inputModelo.value : '',
-            ubicacion: inputUbicacion ? inputUbicacion.value : '',
-            estado: inputEstado ? inputEstado.value : '',
-            serie: inputSerie ? inputSerie.value : '',
-            fecha: inputFecha ? inputFecha.value : '',
-            panelAbierto: panel ? panel.style.display !== 'none' : false
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
-    }
-
-    /*
-     * =========================================================
-     * MANTENER LA PAGINACIÓN ACTIVA
-     * =========================================================
-     */
-
-    const STORAGE_PAGE_KEY = STORAGE_KEY + '_pagina';
-    const STORAGE_NUEVO_EQUIPO = STORAGE_KEY + '_nuevo_equipo';
-
-    function guardarPaginaActual() {
-        const paginaActual = tabla.page();
-        localStorage.setItem(STORAGE_PAGE_KEY, String(paginaActual));
-    }
-
-    function cargarPaginaActual() {
-    const nuevoEquipo = localStorage.getItem(STORAGE_NUEVO_EQUIPO);
-    if (nuevoEquipo === '1') {
-        localStorage.removeItem(STORAGE_NUEVO_EQUIPO);
-        return;
-    }
-
-    const paginaGuardada = localStorage.getItem(STORAGE_PAGE_KEY);
-    if (paginaGuardada === null) return;
-
-    const pagina = parseInt(paginaGuardada, 10);
-    if (isNaN(pagina) || pagina < 0) return;
-
-    const paginasDisponibles = tabla.page.info().pages;
-    if (paginasDisponibles === 0) return;
-
-    const paginaFinal = Math.min(pagina, paginasDisponibles - 1);
-    tabla.page(paginaFinal).draw('page');
-}
-
-    tabla.on('page.dt', function () {
-        guardarPaginaActual();
-    });
-
-    window.addEventListener('beforeunload', function () {
-        guardarPaginaActual();
-    });
-
-    window.addEventListener('pageshow', function () {
-        setTimeout(function () {
-            cargarPaginaActual();
-        }, 100);
-    });
-
-    function cargarEstadoFiltros() {
-        const datos = localStorage.getItem(STORAGE_KEY);
-        if (!datos) return false;
-
-        try {
-            const estado = JSON.parse(datos);
-
-            if (inputTipo) inputTipo.value = estado.tipo || '';
-            if (inputMarca) inputMarca.value = estado.marca || '';
-            if (inputModelo) inputModelo.value = estado.modelo || '';
-            if (inputUbicacion) inputUbicacion.value = estado.ubicacion || '';
-            if (inputEstado) inputEstado.value = estado.estado || '';
-            if (inputSerie) inputSerie.value = estado.serie || '';
-            if (inputFecha) inputFecha.value = estado.fecha || '';
-
-            if (panel && estado.panelAbierto) {
-                panel.style.display = 'block';
-            }
-
-            return true;
-        } catch (error) {
-            console.error('Error al recuperar los filtros:', error);
-            localStorage.removeItem(STORAGE_KEY);
-            return false;
-        }
-    }
-
-    /*
-     * =========================================================
-     * MENSAJE DE COINCIDENCIAS
-     * =========================================================
-     */
 
     function mostrarCoincidencias() {
-        if (!mensajeCoincidencias) return;
-
-        const cantidadFiltros = contarFiltros();
-
-        if (cantidadFiltros === 0) {
-            mensajeCoincidencias.style.visibility = 'hidden';
+        if (!msg) return;
+        if (filtrosActivos() === 0) {
+            msg.style.display = 'none';
+            msg.innerHTML = '';
+            msg.classList.remove('sin-resultados');
             return;
         }
 
-        const coincidencias = tabla.rows({ search: 'applied' }).count();
+        const n = tabla.page.info().recordsDisplay || 0;
+        const sin = n === 0;
+        msg.classList.toggle('sin-resultados', sin);
 
-        mensajeCoincidencias.textContent =
-            'SE ENCONTRARON: ' + coincidencias + ' COINCIDENCIAS';
-        mensajeCoincidencias.style.visibility = 'visible';
+        msg.innerHTML = sin
+            ? `<i class="fa-solid fa-magnifying-glass icono-mensaje"></i><span class="texto-mensaje">NO SE ENCONTRARON COINCIDENCIAS</span><span class="numero-coincidencias">0</span>`
+            : `<i class="fa-solid fa-circle-check icono-mensaje"></i><span class="texto-mensaje">SE ENCONTRARON ${n} ${n === 1 ? 'COINCIDENCIA' : 'COINCIDENCIAS'}</span><span class="numero-coincidencias">${n}</span>`;
+
+        msg.style.display = 'inline-flex';
     }
 
-    /*
-     * =========================================================
-     * FILTRO PERSONALIZADO DATATABLE
-     * =========================================================
-     */
+    function guardarFiltros() {
+        const estado = { panel: panel && panel.style.display !== 'none' };
+        Object.keys(campos).forEach(k => { estado[k] = campos[k] ? campos[k].value : ''; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
+    }
 
-    $.fn.dataTable.ext.search.push(
-        function (settings, data, dataIndex) {
-            if (settings.nTable.id !== 'example') {
-                return true;
-            }
+    function restaurarFiltros() {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        try {
+            const estado = JSON.parse(raw);
+            Object.keys(campos).forEach(k => {
+                if (campos[k] && estado[k] != null) campos[k].value = estado[k];
+            });
+            if (panel && estado.panel) panel.style.display = 'block';
+            if (btnToggle) btnToggle.classList.toggle('filtros-abiertos', !!estado.panel);
+        } catch (e) {}
+    }
 
-            const tipo = val('filtro_tipo');
-            const marca = val('filtro_marca');
-            const modelo = val('filtro_modelo');
-            const ubicacion = val('filtro_ubicacion');
-            const estado = val('filtro_estado');
-            const serie = val('filtro_serie');
-            const fecha = fechaFiltro();
+    // ===================== FILTROS ENCADENADOS =====================
+    function setBloqueo(el, bloqueado, placeholder) {
+        if (!el) return;
+        el.disabled = bloqueado;
+        el.classList.toggle('bg-light', bloqueado);
+        if (bloqueado) el.value = '';
+        if (placeholder) el.placeholder = placeholder;
+    }
 
-            if (tipo && String(data[1]).toUpperCase().indexOf(tipo) === -1) {
-                return false;
-            }
+    function actualizarEncadenados() {
+        const tipo = val(campos.tipo);
+        const marca = val(campos.marca);
 
-            if (serie && String(data[2]).toUpperCase().indexOf(serie) === -1) {
-                return false;
-            }
-
-            if (marca && String(data[3]).toUpperCase().indexOf(marca) === -1) {
-                return false;
-            }
-
-            if (modelo && String(data[4]).toUpperCase().indexOf(modelo) === -1) {
-                return false;
-            }
-
-            if (estado && String(data[5]).toUpperCase() !== estado) {
-                return false;
-            }
-
-            if (ubicacion && String(data[6]).toUpperCase().indexOf(ubicacion) === -1) {
-                return false;
-            }
-
-            if (fecha) {
-                const nodo = tabla.row(dataIndex).node();
-                const elementoFecha = nodo ? nodo.querySelector('[data-fecha]') : null;
-                const iso = elementoFecha ? elementoFecha.getAttribute('data-fecha') : '';
-                if (iso !== fecha) {
-                    return false;
-                }
-            }
-
-            return true;
+        if (!tipo) {
+            setBloqueo(campos.marca, true, 'ELIJA UN TIPO');
+            setBloqueo(campos.modelo, true, 'ELIJA UNA MARCA');
+            if (listas.marca) listas.marca.innerHTML = '';
+            if (listas.modelo) listas.modelo.innerHTML = '';
+            return;
         }
-    );
 
-    /*
-     * =========================================================
-     * ACTUALIZAR RESULTADOS
-     * =========================================================
-     */
+        const marcas = new Set();
+        tabla.rows().every(function() {
+            const tr = this.node();
+            if ((tr?.getAttribute('data-tipo') || '').includes(tipo)) {
+                const m = tr.getAttribute('data-marca');
+                if (m) marcas.add(m);
+            }
+        });
 
-    function actualizarResultados() {
+        setBloqueo(campos.marca, false, 'TODAS');
+        if (listas.marca) {
+            listas.marca.innerHTML = '';
+            [...marcas].sort().forEach(v => {
+                const op = document.createElement('option');
+                op.value = v;
+                listas.marca.appendChild(op);
+            });
+        }
+
+        if (!marca) {
+            setBloqueo(campos.modelo, true, 'ELIJA UNA MARCA');
+            if (listas.modelo) listas.modelo.innerHTML = '';
+            return;
+        }
+
+        const modelos = new Set();
+        tabla.rows().every(function() {
+            const tr = this.node();
+            const dt = tr?.getAttribute('data-tipo') || '';
+            const dm = tr?.getAttribute('data-marca') || '';
+            if (dt.includes(tipo) && dm.includes(marca)) {
+                const mod = tr.getAttribute('data-modelo');
+                if (mod) modelos.add(mod);
+            }
+        });
+
+        setBloqueo(campos.modelo, false, 'TODOS');
+        if (listas.modelo) {
+            listas.modelo.innerHTML = '';
+            [...modelos].sort().forEach(v => {
+                const op = document.createElement('option');
+                op.value = v;
+                listas.modelo.appendChild(op);
+            });
+        }
+    }
+
+    function actualizarSeries() {
+        if (!campos.serie || !listas.serie) return;
+        const q = val(campos.serie);
+        listas.serie.innerHTML = '';
+        if (q.length < 3) return;
+
+        const vistos = new Set();
+        tabla.rows().every(function() {
+            const serie = this.node()?.getAttribute('data-serie') || '';
+            if (serie.includes(q) && !vistos.has(serie)) {
+                vistos.add(serie);
+                const op = document.createElement('option');
+                op.value = serie;
+                listas.serie.appendChild(op);
+            }
+        });
+    }
+
+    // Filtro custom
+    $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+        if (!settings.nTable || settings.nTable.id !== 'example') return true;
+        const fila = tabla.row(dataIndex).node();
+        if (!fila) return true;
+
+        const tipo = val(campos.tipo);
+        const marca = val(campos.marca);
+        const modelo = val(campos.modelo);
+        const ubic = val(campos.ubicacion);
+        const est = val(campos.estado);
+        const serie = val(campos.serie);
+        const fec = campos.fecha ? campos.fecha.value : '';
+
+        if (tipo && !(fila.getAttribute('data-tipo') || '').includes(tipo)) return false;
+        if (marca && !(fila.getAttribute('data-marca') || '').includes(marca)) return false;
+        if (modelo && !(fila.getAttribute('data-modelo') || '').includes(modelo)) return false;
+        if (ubic && !(fila.getAttribute('data-ubicacion') || '').includes(ubic)) return false;
+        if (est && (fila.getAttribute('data-estado') || '') !== est) return false;
+        if (serie && !(fila.getAttribute('data-serie') || '').includes(serie)) return false;
+        if (fec && (fila.getAttribute('data-fecha') || '') !== fec) return false;
+
+        return true;
+    });
+
+    function aplicarFiltros() {
         actualizarEncadenados();
         actualizarSeries();
+        guardarFiltros();
         actualizarBadge();
-        guardarEstadoFiltros();
         tabla.draw();
         mostrarCoincidencias();
     }
 
-    /*
-     * =========================================================
-     * APLICAR FILTROS + SCROLL
-     * =========================================================
-     */
-
-    function aplicarFiltros() {
-        actualizarResultados();
-        setTimeout(function () {
-            const tablaElement = document.getElementById('example');
-            if (!tablaElement) return;
-            tablaElement.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }, 100);
+    function aplicarYScroll() {
+        aplicarFiltros();
+        document.getElementById('example')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    /*
-     * =========================================================
-     * MOSTRAR / OCULTAR FILTROS
-     * =========================================================
-     */
+    function limpiarFiltros() {
+        Object.values(campos).forEach(el => { if (el) el.value = ''; });
+        localStorage.removeItem(STORAGE_KEY);
+        actualizarEncadenados();
+        if (listas.serie) listas.serie.innerHTML = '';
+        actualizarBadge();
+        tabla.draw();
+        mostrarCoincidencias();
+    }
 
-    if (btnToggle && panel) {
-        btnToggle.addEventListener('click', function () {
-            const estaOculto = panel.style.display === 'none';
-            panel.style.display = estaOculto ? 'block' : 'none';
-            guardarEstadoFiltros();
+    // Eventos
+    if (btnToggle) {
+        btnToggle.addEventListener('click', function() {
+            const abierto = panel.style.display !== 'none';
+            panel.style.display = abierto ? 'none' : 'block';
+            btnToggle.classList.toggle('filtros-abiertos', !abierto);
+            btnToggle.setAttribute('aria-expanded', String(!abierto));
+            guardarFiltros();
         });
     }
 
-    /*
-     * =========================================================
-     * LIMPIAR UN SOLO CAMPO - BOTÓN X
-     * =========================================================
-     */
+    document.getElementById('btn_aplicar_filtros')?.addEventListener('click', aplicarYScroll);
+    document.getElementById('btn_limpiar_filtros')?.addEventListener('click', limpiarFiltros);
 
-    function limpiarCampo(id) {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        el.value = '';
-
-        if (id === 'filtro_tipo' || id === 'filtro_marca') {
-            actualizarEncadenados();
-        }
-
-        if (id === 'filtro_serie' && listaSerie) {
-            listaSerie.innerHTML = '';
-        }
-
-        actualizarResultados();
-    }
-
-    document.querySelectorAll('.btn-limpiar-campo').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-            limpiarCampo(btn.getAttribute('data-target'));
-        });
-    });
-
-    /*
-     * =========================================================
-     * EVENTOS DE LOS CAMPOS
-     * =========================================================
-     */
-
-    if (inputTipo) {
-        inputTipo.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            actualizarResultados();
-        });
-    }
-
-    if (inputMarca) {
-        inputMarca.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            actualizarResultados();
-        });
-    }
-
-    if (inputModelo) {
-        inputModelo.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            actualizarResultados();
-        });
-    }
-
-    if (inputUbicacion) {
-        inputUbicacion.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            actualizarResultados();
-        });
-    }
-
-    if (inputSerie) {
-        inputSerie.addEventListener('input', function () {
-            this.value = this.value.toUpperCase();
-            actualizarResultados();
-        });
-    }
-
-    if (inputEstado) {
-        inputEstado.addEventListener('change', function () {
-            actualizarResultados();
-        });
-    }
-
-    if (inputFecha) {
-        inputFecha.addEventListener('change', function () {
-            actualizarResultados();
-        });
-    }
-
-    /*
-     * =========================================================
-     * BOTÓN HOY
-     * =========================================================
-     */
-
-    document.getElementById('btn_filtro_hoy')?.addEventListener('click', function () {
-        if (!inputFecha) return;
+    document.getElementById('btn_filtro_hoy')?.addEventListener('click', function() {
         const d = new Date();
-        inputFecha.value =
-            d.getFullYear() +
-            '-' +
-            String(d.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(d.getDate()).padStart(2, '0');
-        actualizarResultados();
-    });
-
-    /*
-     * =========================================================
-     * BOTÓN APLICAR
-     * =========================================================
-     */
-
-    document.getElementById('btn_aplicar_filtros')?.addEventListener('click', function () {
+        campos.fecha.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
         aplicarFiltros();
     });
 
-    /*
-     * =========================================================
-     * BOTÓN LIMPIAR TODOS
-     * =========================================================
-     */
-
-    document.getElementById('btn_limpiar_filtros')?.addEventListener('click', function () {
-        [
-            'filtro_tipo',
-            'filtro_marca',
-            'filtro_modelo',
-            'filtro_ubicacion',
-            'filtro_serie',
-            'filtro_fecha'
-        ].forEach(function (id) {
-            const el = document.getElementById(id);
+    document.querySelectorAll('.btn-limpiar-campo').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const el = document.getElementById(btn.getAttribute('data-target'));
             if (el) el.value = '';
+            aplicarFiltros();
         });
+    });
 
-        if (inputEstado) inputEstado.value = '';
+    Object.values(campos).forEach(el => {
+        if (!el) return;
+        el.addEventListener('input', function() {
+            if (this.classList.contains('campo-mayusculas')) this.value = this.value.toUpperCase();
+            aplicarFiltros();
+        });
+        el.addEventListener('change', aplicarFiltros);
+    });
 
-        actualizarEncadenados();
+    // Inicialización
+    const parametrosURL = new URLSearchParams(window.location.search);
+    const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
+    const NUEVO_KEY = STORAGE_KEY + '_nuevo_equipo';
+    const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1' || @json(session('equipo_accion')) === 'crear';
 
-        if (listaSerie) listaSerie.innerHTML = '';
-
+    if (desdeDashboard) {
         localStorage.removeItem(STORAGE_KEY);
-
+        Object.values(campos).forEach(el => { if (el) el.value = ''; });
+        if (campos.estado) campos.estado.value = parametrosURL.get('estado') || '';
+        if (panel) panel.style.display = (campos.estado && campos.estado.value) ? 'block' : 'none';
+        aplicarFiltros();
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (!vieneDeCrear) {
+        restaurarFiltros();
         actualizarBadge();
-        tabla.draw();
-
-        if (mensajeCoincidencias) {
-            mensajeCoincidencias.style.visibility = 'hidden';
-        }
-    });
-
-    /*
-     * =========================================================
-     * RECUPERAR FILTROS GUARDADOS
-     * =========================================================
-     */
-
-    const vieneDeCrear = localStorage.getItem(STORAGE_NUEVO_EQUIPO) === '1'
-    || @json(session('equipo_accion')) === 'crear';
-
-// Inicialización de filtros: priorizar los accesos desde el dashboard.
-const parametrosURL = new URLSearchParams(window.location.search);
-const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
-
-if (desdeDashboard) {
-    // Eliminar filtros anteriores guardados.
-    localStorage.removeItem(STORAGE_KEY);
-
-    // Limpiar todos los campos para aplicar solo el filtro solicitado.
-    [
-        inputTipo,
-        inputMarca,
-        inputModelo,
-        inputUbicacion,
-        inputSerie,
-        inputFecha
-    ].forEach(function (campo) {
-        if (campo) campo.value = '';
-    });
-
-    if (inputEstado) {
-        inputEstado.value = parametrosURL.get('estado') || '';
+        if (filtrosActivos()) aplicarFiltros();
     }
 
-    // Mostrar el panel si se solicitó un estado concreto.
-    if (panel) {
-        panel.style.display = inputEstado && inputEstado.value ? 'block' : 'none';
-    }
-
-    actualizarEncadenados();
-    actualizarSeries();
-    actualizarResultados();
-
-    // Quitar los parámetros de inicio para evitar reiniciar el filtro
-    // desde el dashboard cada vez que se actualice la página.
-    window.history.replaceState({}, document.title, window.location.pathname);
-
-} else {
-    // Comportamiento habitual: recuperar los filtros guardados.
-    const filtrosRecuperados = cargarEstadoFiltros();
-
-    if (filtrosRecuperados) {
-        actualizarEncadenados();
-        actualizarSeries();
-        actualizarBadge();
-        tabla.draw();
-        mostrarCoincidencias();
-    }
-}
-
-    /*
-     * =========================================================
-     * RESALTAR FILA (crear / editar / ver)
-     * =========================================================
-     */
-
+    // Resaltado de fila
     function pintarFilaEquipo() {
-    const idFila = @json(session('equipo_resaltado')) || sessionStorage.getItem('equipo_resaltado');
-    const accFila = @json(session('equipo_accion')) || sessionStorage.getItem('equipo_accion');
+        const idFila = @json(session('equipo_resaltado')) || sessionStorage.getItem('equipo_resaltado');
+        const accFila = @json(session('equipo_accion')) || sessionStorage.getItem('equipo_accion');
+        sessionStorage.removeItem('equipo_resaltado');
+        sessionStorage.removeItem('equipo_accion');
+        if (!idFila || !accFila) return;
 
-    sessionStorage.removeItem('equipo_resaltado');
-    sessionStorage.removeItem('equipo_accion');
-
-    if (!idFila || !accFila) return;
-
-    const cls = accFila === 'crear' ? 'fila-crear'
-        : accFila === 'editar' ? 'fila-editar'
-        : 'fila-ver';
-
-    let nodo = null;
-    tabla.rows({ page: 'all' }).every(function () {
-        const tr = this.node();
-        if (tr && String(tr.getAttribute('data-equipo-id')) === String(idFila)) {
-            nodo = tr;
-        }
-    });
-    if (!nodo) return;
-
-    const indiceInterno = tabla.row(nodo).index();
-    const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
-    const posicion = visibles.indexOf(indiceInterno);
-    if (posicion === -1) return;
-
-    const pagina = Math.floor(posicion / tabla.page.len());
-    tabla.page(pagina).draw('page');
-    localStorage.setItem(STORAGE_PAGE_KEY, String(pagina));
-
-    setTimeout(function () {
-        const visible = document.querySelector('#example tbody tr[data-equipo-id="' + idFila + '"]');
-        if (!visible) return;
-
-        visible.classList.add(cls);
-
-        const color = accFila === 'crear' ? '#d4edda'
-            : accFila === 'editar' ? '#fff3cd'
-            : '#cfe2ff';
-
-        visible.querySelectorAll('td').forEach(function (td) {
-            td.style.backgroundColor = color;
+        let nodo = null;
+        tabla.rows({ page: 'all' }).every(function() {
+            const tr = this.node();
+            if (tr && String(tr.getAttribute('data-equipo-id')) === String(idFila)) nodo = tr;
         });
+        if (!nodo) return;
 
-        visible.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center',
-            inline: 'nearest'
-        });
+        const visibles = tabla.rows({ search: 'applied', order: 'applied' }).indexes().toArray();
+        const posicion = visibles.indexOf(tabla.row(nodo).index());
+        if (posicion === -1) return;
 
-        setTimeout(function () {
-            visible.querySelectorAll('td').forEach(function (td) {
-                td.style.backgroundColor = '';
-            });
-        }, 3000);
-    }, 50);
-}
+        const pagina = Math.floor(posicion / tabla.page.len());
+        tabla.page(pagina).draw('page');
 
-    // Exponer para pageshow (bfcache)
-    window.pintarFilaEquipo = pintarFilaEquipo;
+        setTimeout(function() {
+            const visible = document.querySelector(`#example tbody tr[data-equipo-id="${idFila}"]`);
+            if (!visible) return;
+            const color = accFila === 'crear' ? '#d4edda' : accFila === 'editar' ? '#fff3cd' : '#cfe2ff';
+            visible.querySelectorAll('td').forEach(td => td.style.backgroundColor = color);
+            visible.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => visible.querySelectorAll('td').forEach(td => td.style.backgroundColor = ''), 4000);
+        }, 50);
+    }
 
-    document.querySelectorAll('.btn-ver-equipo').forEach(function (a) {
-        a.addEventListener('click', function () {
+    document.querySelectorAll('.btn-ver-equipo').forEach(a => {
+        a.addEventListener('click', function() {
             const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('equipo_resaltado', partes[partes.length - 1]);
+            sessionStorage.setItem('equipo_resaltado', partes.pop());
             sessionStorage.setItem('equipo_accion', 'ver');
         });
     });
 
-    setTimeout(function () {
-        cargarPaginaActual();
-        setTimeout(pintarFilaEquipo, 400);
-    }, 200);
+    setTimeout(pintarFilaEquipo, 300);
+    window.pintarFilaEquipo = pintarFilaEquipo;
 
-    /*
-     * =========================================================
-     * ENTER GLOBAL DEL INDEX
-     * =========================================================
-     */
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== 'Enter') return;
-
-        // No interferir si el foco está en un botón de acción, etc.
-        const tag = event.target && event.target.tagName
-            ? event.target.tagName.toLowerCase()
-            : '';
-
-        // Solo aplicar filtros cuando el foco está en inputs del panel de filtros
-        // o cuando no hay un input activo que deba manejar Enter por sí solo.
-        if (tag === 'textarea') return;
-
-        event.preventDefault();
-        aplicarFiltros();
-    });
-
-    /*
-     * =========================================================
-     * ATAJO DE TECLADO - REGISTRAR NUEVO (+)
-     * =========================================================
-     */
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key !== '+') return;
-
-        const elemento = event.target;
-        const tipoElemento = elemento.tagName
-            ? elemento.tagName.toLowerCase()
-            : '';
-
-        if (
-            tipoElemento === 'input' ||
-            tipoElemento === 'textarea' ||
-            tipoElemento === 'select'
-        ) {
+    // Atajos
+    document.addEventListener('keydown', function(e) {
+        const tag = e.target?.tagName;
+        if (tag && ['INPUT','SELECT','TEXTAREA'].includes(tag)) {
+            if (e.key === 'Enter') { e.preventDefault(); aplicarYScroll(); }
             return;
         }
-
-        event.preventDefault();
-
-        const botonRegistrar = document.querySelector('a[href*="/equipos/create"]');
-        if (botonRegistrar) {
-            botonRegistrar.click();
+        if (e.key === '+' || e.key === '=') {
+            e.preventDefault();
+            document.getElementById('btn_nuevo_equipo')?.click();
+        }
+        if (e.key === 'f' || e.key === 'F') {
+            e.preventDefault();
+            btnToggle?.click();
+            campos.tipo?.focus();
         }
     });
+});
 
-}); /* FIN DEL LOAD */
-
-
-function confirmarEliminarFila(form) {
+function confirmarEliminarEquipo(form) {
+    if (!form) return;
     const fila = form.closest('tr');
-    Swal.fire({
-        icon: 'warning',
-        title: '¿Eliminar equipo?',
-        showCancelButton: true,
-        confirmButtonColor: '#dc3545',
-        cancelButtonText: 'Cancelar',
-        confirmButtonText: 'Sí, eliminar',
-        reverseButtons: true
-    }).then(function (r) {
-        if (!r.isConfirmed) return;
-        if (!fila) {
+
+    function enviar() {
+        if (fila) {
+            fila.querySelectorAll('td').forEach(td => td.style.backgroundColor = '#f8d7da');
+            fila.style.transition = 'opacity 0.4s';
+            setTimeout(() => fila.style.opacity = '0', 200);
+            setTimeout(() => form.submit(), 700);
+        } else {
             form.submit();
-            return;
         }
-        fila.classList.add('fila-borrar');
-        setTimeout(function () {
-            fila.classList.add('saliendo');
-            setTimeout(function () {
-                form.submit();
-            }, 500);
-        }, 700);
-    });
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Eliminar equipo?',
+            text: 'Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) enviar(); });
+    } else if (confirm('¿Eliminar equipo?')) {
+        enviar();
+    }
 }
 
-window.addEventListener('pageshow', function () {
-    if (typeof window.pintarFilaEquipo === 'function') {
-        setTimeout(window.pintarFilaEquipo, 200);
-    }
+window.addEventListener('pageshow', function() {
+    if (typeof pintarFilaEquipo === 'function') setTimeout(pintarFilaEquipo, 200);
 });
 </script>
