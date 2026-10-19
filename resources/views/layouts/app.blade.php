@@ -581,27 +581,27 @@
                     </div>
 
                     {{-- Tarjetas de rol y sesión (se ocultan al colapsar) --}}
-<div class="user-info-cards">
-    {{-- Rol --}}
-    <div class="px-1 mb-2">
-        <div class="card border-0 bg-light mb-0">
-            <div class="card-body p-2 text-center">
-                <small class="text-muted d-block" style="font-size: 0.7rem;">Rol</small>
-                <span class="badge bg-primary">{{ Auth::user()->etiquetaRol() }}</span>
-            </div>
-        </div>
-    </div>
+                    <div class="user-info-cards">
+                        {{-- Rol --}}
+                        <div class="px-1 mb-2">
+                            <div class="card border-0 bg-light mb-0">
+                                <div class="card-body p-2 text-center">
+                                    <small class="text-muted d-block" style="font-size: 0.7rem;">Rol</small>
+                                    <span class="badge bg-primary">{{ Auth::user()->etiquetaRol() }}</span>
+                                </div>
+                            </div>
+                        </div>
 
-    {{-- Sesión activa --}}
-    <div class="px-1">
-        <div class="card border-success bg-success bg-opacity-10 mb-0">
-            <div class="card-body p-2 d-flex align-items-center justify-content-center">
-                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                <small class="text-success fw-semibold">Sesión activa</small>
-            </div>
-        </div>
-    </div>
-</div>
+                        {{-- Sesión activa --}}
+                        <div class="px-1">
+                            <div class="card border-success bg-success bg-opacity-10 mb-0">
+                                <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <small class="text-success fw-semibold">Sesión activa</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     @else
                     <div class="auth-buttons-container d-flex flex-column gap-1 px-1">
