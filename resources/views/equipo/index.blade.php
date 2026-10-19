@@ -322,6 +322,51 @@
         </div>
     </div>
 </div>
+
+{{-- PANEL PERSONALIZADO DE DESCARGA DE EXPORTACIONES --}}
+<div id="exportacion_overlay" class="exportacion-overlay" style="display: none;">
+    <div class="exportacion-panel">
+
+        <div class="exportacion-icono">
+            <i id="exportacion_icono_archivo" class="fa-solid fa-file-export"></i>
+        </div>
+
+        <h5 id="exportacion_titulo">Preparando exportación</h5>
+
+        <p id="exportacion_estado">
+            Estamos preparando los equipos seleccionados.
+        </p>
+
+        <div class="progress exportacion-barra-contenedor">
+            <div
+                id="exportacion_progreso"
+                class="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar"
+                style="width: 0%;"
+                aria-valuenow="0"
+                aria-valuemin="0"
+                aria-valuemax="100">
+            </div>
+        </div>
+
+        <div class="exportacion-detalles">
+            <span id="exportacion_porcentaje">Preparando...</span>
+            <span id="exportacion_tamano">0 MB</span>
+        </div>
+
+        <div class="exportacion-acciones">
+            <button
+                type="button"
+                id="btn_cancelar_exportacion"
+                class="btn btn-outline-secondary">
+                <i class="fa-solid fa-xmark me-1"></i>
+                Cancelar
+            </button>
+        </div>
+
+    </div>
+</div>
+
 @endsection
 
 {{-- CSS --}}
@@ -857,6 +902,119 @@
             white-space: nowrap;
         }
     }
+    
+/* ==========================================
+   PANEL DE DESCARGA DE EXPORTACIONES
+========================================== */
+
+.exportacion-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.60);
+    backdrop-filter: blur(3px);
+}
+
+.exportacion-panel {
+    width: 100%;
+    max-width: 430px;
+    padding: 30px 28px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #fff;
+    color: #334155;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.exportacion-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 27px;
+}
+
+.exportacion-panel h5 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.exportacion-panel p {
+    margin-bottom: 22px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.exportacion-barra-contenedor {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e2e8f0;
+}
+
+.exportacion-barra-contenedor .progress-bar {
+    background-color: #2563eb;
+    transition: width 0.2s ease;
+}
+
+.exportacion-detalles {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.exportacion-acciones {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+#btn_cancelar_exportacion {
+    min-width: 125px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+[data-bs-theme="dark"] .exportacion-panel {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .exportacion-panel p,
+[data-bs-theme="dark"] .exportacion-detalles {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .exportacion-icono {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+[data-bs-theme="dark"] .exportacion-barra-contenedor {
+    background: #334155;
+}
+
+@media (max-width: 480px) {
+    .exportacion-panel {
+        padding: 25px 20px;
+    }
+}
+
 </style>
 
 {{-- SCRIPTS --}}
@@ -882,45 +1040,304 @@ window.addEventListener('load', function() {
 
     tabla.order([[7, 'desc']]).draw();
 
-    // ===================== EXPORTAR =====================
-    function exportar(ruta) {
+
+    
+    // ===================== EXPORTAR EQUIPOS =====================
+
+    let controladorExportacionEquipo = null;
+    let exportacionEquipoEnCurso = false;
+
+    const botonExcelEquipo = document.getElementById('btn_exportar_excel');
+    const botonPdfEquipo = document.getElementById('btn_exportar_pdf');
+    const botonCancelarEquipo = document.getElementById('btn_cancelar_exportacion');
+
+    function mostrarPanelExportacionEquipo(tipo) {
+        const esExcel = tipo === 'excel';
+
+        document.getElementById('exportacion_overlay').style.display = 'flex';
+
+        document.getElementById('exportacion_titulo').textContent =
+            esExcel ? 'Preparando archivo Excel' : 'Preparando archivo PDF';
+
+        document.getElementById('exportacion_estado').textContent =
+            'Estamos generando el archivo de los equipos seleccionados.';
+
+        document.getElementById('exportacion_icono_archivo').className =
+            esExcel ? 'fa-solid fa-file-excel' : 'fa-solid fa-file-pdf';
+
+        const barra = document.getElementById('exportacion_progreso');
+
+        barra.style.width = '0%';
+        barra.setAttribute('aria-valuenow', 0);
+        barra.classList.add('progress-bar-animated');
+
+        document.getElementById('exportacion_porcentaje').textContent = 'Preparando...';
+        document.getElementById('exportacion_tamano').textContent = '0 MB';
+    }
+
+    function ocultarPanelExportacionEquipo() {
+        document.getElementById('exportacion_overlay').style.display = 'none';
+    }
+
+    function formatearTamanoEquipo(bytes) {
+        if (bytes < 1024 * 1024) {
+            return (bytes / 1024).toFixed(1) + ' KB';
+        }
+
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function obtenerNombreArchivoEquipo(respuesta, tipo) {
+        const disposicion = respuesta.headers.get('Content-Disposition') || '';
+
+        const nombreUTF8 = disposicion.match(/filename\*=UTF-8''([^;]+)/i);
+        const nombreNormal = disposicion.match(/filename="?([^";]+)"?/i);
+
+        if (nombreUTF8) {
+            try {
+                return decodeURIComponent(nombreUTF8[1]);
+            } catch (error) {
+                // Se utilizará el nombre alternativo.
+            }
+        }
+
+        if (nombreNormal) {
+            return nombreNormal[1];
+        }
+
+        const ahora = new Date();
+
+        const fecha = [
+            String(ahora.getDate()).padStart(2, '0'),
+            String(ahora.getMonth() + 1).padStart(2, '0'),
+            ahora.getFullYear()
+        ].join('-');
+
+        const hora = ahora.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        }).toLowerCase().replace(/\s/g, '');
+
+        return `Equipos_${fecha}_${hora}.${tipo === 'excel' ? 'xlsx' : 'pdf'}`;
+    }
+
+    async function exportarEquipos(tipo) {
+        if (exportacionEquipoEnCurso) return;
+
+        // Recoger todos los equipos que coinciden con la búsqueda y los filtros.
+        // Se mantiene el orden aplicado en DataTables.
         const ids = [];
-        tabla.rows({ search: 'applied', order: 'applied' }).every(function() {
-            const id = this.node()?.getAttribute('data-equipo-id');
+
+        tabla.rows({
+            search: 'applied',
+            order: 'applied'
+        }).every(function () {
+            const fila = this.node();
+            const id = fila ? fila.getAttribute('data-equipo-id') : null;
+
             if (id) ids.push(id);
         });
 
         if (ids.length === 0) {
-            (typeof toastr !== 'undefined' ? toastr.warning : alert)('NO HAY EQUIPOS PARA EXPORTAR.');
+            if (typeof toastr !== 'undefined') {
+                toastr.warning('NO HAY EQUIPOS PARA EXPORTAR.');
+            } else {
+                alert('NO HAY EQUIPOS PARA EXPORTAR.');
+            }
+
             return;
         }
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = ruta;
-        form.target = '_blank';
+        const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
 
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        form.appendChild(csrf);
+        if (!csrf) {
+            toastr.error('No se encontró el token de seguridad. Recarga la página.');
+            return;
+        }
 
-        ids.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'ids[]';
-            input.value = id;
-            form.appendChild(input);
+        const ruta = tipo === 'excel'
+            ? @json(route('equipos.export.excel'))
+            : @json(route('equipos.export.pdf'));
+
+        const formulario = new FormData();
+
+        formulario.append('_token', csrf);
+
+        ids.forEach(function (id) {
+            formulario.append('ids[]', id);
         });
 
-        document.body.appendChild(form);
-        form.submit();
-        form.remove();
+        controladorExportacionEquipo = new AbortController();
+        exportacionEquipoEnCurso = true;
+
+        botonExcelEquipo.disabled = true;
+        botonPdfEquipo.disabled = true;
+        botonCancelarEquipo.disabled = false;
+
+        mostrarPanelExportacionEquipo(tipo);
+
+        const barra = document.getElementById('exportacion_progreso');
+        const porcentaje = document.getElementById('exportacion_porcentaje');
+        const tamano = document.getElementById('exportacion_tamano');
+        const estado = document.getElementById('exportacion_estado');
+
+        try {
+            const respuesta = await fetch(ruta, {
+                method: 'POST',
+                headers: {
+                    'Accept': tipo === 'excel'
+                        ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        : 'application/pdf'
+                },
+                body: formulario,
+                signal: controladorExportacionEquipo.signal
+            });
+
+            if (!respuesta.ok) {
+                throw new Error(
+                    'No se pudo generar el archivo. Verifica la sesión e inténtalo nuevamente.'
+                );
+            }
+
+            const contentType = (
+                respuesta.headers.get('Content-Type') || ''
+            ).toLowerCase();
+
+            const archivoValido = tipo === 'excel'
+                ? contentType.includes(
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                )
+                : contentType.includes('application/pdf');
+
+            if (!archivoValido) {
+                throw new Error(
+                    'El servidor no devolvió un archivo válido. Recarga la página e inténtalo nuevamente.'
+                );
+            }
+
+            const longitud = Number(
+                respuesta.headers.get('Content-Length')
+            ) || 0;
+
+            let bytesRecibidos = 0;
+            const fragmentos = [];
+
+            estado.textContent = 'Recibiendo archivo...';
+
+            if (respuesta.body && respuesta.body.getReader) {
+                const lector = respuesta.body.getReader();
+
+                while (true) {
+                    const resultado = await lector.read();
+
+                    if (resultado.done) break;
+
+                    fragmentos.push(resultado.value);
+                    bytesRecibidos += resultado.value.byteLength;
+
+                    tamano.textContent = formatearTamanoEquipo(bytesRecibidos);
+
+                    if (longitud > 0) {
+                        const avance = Math.min(
+                            100,
+                            Math.round((bytesRecibidos / longitud) * 100)
+                        );
+
+                        barra.style.width = avance + '%';
+                        barra.setAttribute('aria-valuenow', avance);
+                        porcentaje.textContent = avance + '%';
+                    } else {
+                        // Sin tamaño total conocido, no inventamos el porcentaje.
+                        barra.style.width = '100%';
+                        porcentaje.textContent = 'Descargando...';
+                    }
+                }
+            } else {
+                const archivoTemporal = await respuesta.blob();
+
+                fragmentos.push(archivoTemporal);
+                bytesRecibidos = archivoTemporal.size;
+
+                tamano.textContent = formatearTamanoEquipo(bytesRecibidos);
+            }
+
+            if (bytesRecibidos === 0) {
+                throw new Error('El archivo recibido está vacío.');
+            }
+
+            barra.style.width = '100%';
+            barra.setAttribute('aria-valuenow', 100);
+            barra.classList.remove('progress-bar-animated');
+
+            porcentaje.textContent = '100%';
+            estado.textContent = 'Archivo recibido. Iniciando descarga...';
+
+            const blob = new Blob(fragmentos, {
+                type: tipo === 'excel'
+                    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    : 'application/pdf'
+            });
+
+            const nombreArchivo = obtenerNombreArchivoEquipo(respuesta, tipo);
+            const urlTemporal = URL.createObjectURL(blob);
+            const enlace = document.createElement('a');
+
+            enlace.href = urlTemporal;
+            enlace.download = nombreArchivo;
+            enlace.style.display = 'none';
+
+            document.body.appendChild(enlace);
+            enlace.click();
+            enlace.remove();
+
+            setTimeout(function () {
+                URL.revokeObjectURL(urlTemporal);
+            }, 1000);
+
+            ocultarPanelExportacionEquipo();
+
+            toastr.success(
+                'El archivo se recibió correctamente y se inició su descarga.',
+                'Exportación completada'
+            );
+
+        } catch (error) {
+            ocultarPanelExportacionEquipo();
+
+            if (error.name === 'AbortError') {
+                toastr.info('La descarga fue cancelada.');
+            } else {
+                console.error('Error al exportar equipos:', error);
+
+                toastr.error(
+                    error.message || 'Ocurrió un error al exportar los equipos.'
+                );
+            }
+
+        } finally {
+            exportacionEquipoEnCurso = false;
+            controladorExportacionEquipo = null;
+
+            botonExcelEquipo.disabled = false;
+            botonPdfEquipo.disabled = false;
+            botonCancelarEquipo.disabled = false;
+        }
     }
 
-    document.getElementById('btn_exportar_excel')?.addEventListener('click', () => exportar('{{ route("equipos.export.excel") }}'));
-    document.getElementById('btn_exportar_pdf')?.addEventListener('click', () => exportar('{{ route("equipos.export.pdf") }}'));
+    botonExcelEquipo?.addEventListener('click', function () {
+        exportarEquipos('excel');
+    });
+
+    botonPdfEquipo?.addEventListener('click', function () {
+        exportarEquipos('pdf');
+    });
+
+    botonCancelarEquipo?.addEventListener('click', function () {
+        if (controladorExportacionEquipo) {
+            controladorExportacionEquipo.abort();
+        }
+    });
 
     // ===================== FILTROS =====================
     const STORAGE_KEY = 'equipos_filtros_estado';

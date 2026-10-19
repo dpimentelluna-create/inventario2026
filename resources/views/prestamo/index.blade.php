@@ -385,6 +385,53 @@
         </div>
     </div>
 </div>
+
+
+{{-- PANEL PERSONALIZADO DE DESCARGA DE EXPORTACIONES --}}
+<div id="exportacion_overlay" class="exportacion-overlay" style="display: none;">
+    <div class="exportacion-panel">
+
+        <div class="exportacion-icono">
+            <i id="exportacion_icono_archivo" class="fa-solid fa-file-export"></i>
+        </div>
+
+        <h5 id="exportacion_titulo">Preparando exportación</h5>
+
+        <p id="exportacion_estado">
+            Estamos preparando los registros seleccionados.
+        </p>
+
+        <div class="progress exportacion-barra-contenedor">
+            <div
+                id="exportacion_progreso"
+                class="progress-bar progress-bar-striped progress-bar-animated"
+                role="progressbar"
+                style="width: 0%;"
+                aria-valuenow="0"
+                aria-valuemin="0"
+                aria-valuemax="100">
+            </div>
+        </div>
+
+        <div class="exportacion-detalles">
+            <span id="exportacion_porcentaje">Preparando...</span>
+            <span id="exportacion_tamano">0 MB</span>
+        </div>
+
+        <div class="exportacion-acciones">
+            <button
+                type="button"
+                id="btn_cancelar_exportacion"
+                class="btn btn-outline-secondary">
+                <i class="fa-solid fa-xmark me-1"></i>
+                Cancelar
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
 @endsection
 <style>
     /* =========================================
@@ -1042,6 +1089,120 @@
             font-size: 0.75rem;
         }
     }
+
+    
+/* ==========================================
+   PANEL DE DESCARGA DE EXPORTACIONES
+========================================== */
+
+.exportacion-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.60);
+    backdrop-filter: blur(3px);
+}
+
+.exportacion-panel {
+    width: 100%;
+    max-width: 430px;
+    padding: 30px 28px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #334155;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.exportacion-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 27px;
+}
+
+.exportacion-panel h5 {
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.exportacion-panel p {
+    margin-bottom: 22px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.exportacion-barra-contenedor {
+    height: 9px;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #e2e8f0;
+}
+
+.exportacion-barra-contenedor .progress-bar {
+    background-color: #2563eb;
+    transition: width 0.2s ease;
+}
+
+.exportacion-detalles {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 10px;
+    color: #64748b;
+    font-size: 0.82rem;
+}
+
+.exportacion-acciones {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+#btn_cancelar_exportacion {
+    min-width: 125px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+[data-bs-theme="dark"] .exportacion-panel {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-color: #334155;
+}
+
+[data-bs-theme="dark"] .exportacion-panel p,
+[data-bs-theme="dark"] .exportacion-detalles {
+    color: #cbd5e1;
+}
+
+[data-bs-theme="dark"] .exportacion-icono {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+[data-bs-theme="dark"] .exportacion-barra-contenedor {
+    background: #334155;
+}
+
+@media (max-width: 480px) {
+    .exportacion-panel {
+        padding: 25px 20px;
+    }
+}
+
 </style>
 
 {{-- INICIO SCRIPT --}}
@@ -1191,112 +1352,306 @@
 
         });
 
-        //EXPORTAR PDF
-        document.getElementById('btn_exportar_pdf').addEventListener('click', function() {
+        
+/* ==========================================
+   EXPORTACIÓN DE PRÉSTAMOS: PDF Y EXCEL
+   Descarga en la misma página con progreso
+========================================== */
 
-            /*
-            |--------------------------------------------------------------------------
-            | OBTENER FILAS SEGÚN EL ESTADO ACTUAL DE DATATABLE
-            |--------------------------------------------------------------------------
-            */
+let controladorExportacion = null;
+let exportacionEnCurso = false;
 
-            const ids = [];
+function mostrarPanelExportacion(tipo) {
+    const esExcel = tipo === 'excel';
 
-            tabla.rows({
-                search: 'applied',
-                order: 'applied'
-            }).every(function() {
+    document.getElementById('exportacion_overlay').style.display = 'flex';
+    document.getElementById('exportacion_titulo').textContent =
+        esExcel ? 'Preparando archivo Excel' : 'Preparando archivo PDF';
 
-                const tr = this.node();
+    document.getElementById('exportacion_estado').textContent =
+        'Estamos generando el archivo de los préstamos seleccionados.';
 
-                if (!tr) return;
+    document.getElementById('exportacion_icono_archivo').className =
+        esExcel
+            ? 'fa-solid fa-file-excel'
+            : 'fa-solid fa-file-pdf';
 
-                const id = tr.getAttribute('data-prestamo-id');
+    document.getElementById('exportacion_progreso').style.width = '0%';
+    document.getElementById('exportacion_progreso').classList.add('progress-bar-animated');
+    document.getElementById('exportacion_porcentaje').textContent = 'Preparando...';
+    document.getElementById('exportacion_tamano').textContent = '0 MB';
+}
 
-                if (id) {
-                    ids.push(id);
-                }
-            });
+function ocultarPanelExportacion() {
+    document.getElementById('exportacion_overlay').style.display = 'none';
+}
 
+function formatearTamano(bytes) {
+    if (bytes < 1024 * 1024) {
+        return (bytes / 1024).toFixed(1) + ' KB';
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | VALIDAR
-            |--------------------------------------------------------------------------
-            */
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
 
-            if (ids.length === 0) {
+function obtenerNombreArchivo(response, tipo) {
+    const disposicion = response.headers.get('Content-Disposition') || '';
 
-                if (typeof toastr !== 'undefined') {
-                    toastr.warning('NO HAY PRÉSTAMOS PARA EXPORTAR.');
-                } else {
-                    alert('NO HAY PRÉSTAMOS PARA EXPORTAR.');
-                }
+    // Admite nombres normales y nombres codificados en UTF-8.
+    const nombreUTF8 = disposicion.match(/filename\*=UTF-8''([^;]+)/i);
+    const nombreNormal = disposicion.match(/filename="?([^";]+)"?/i);
 
-                return;
-            }
+    if (nombreUTF8) {
+        try {
+            return decodeURIComponent(nombreUTF8[1]);
+        } catch (error) {
+            // Si el nombre está mal codificado, usamos el nombre alternativo.
+        }
+    }
 
+    if (nombreNormal) {
+        return nombreNormal[1];
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | CREAR FORMULARIO TEMPORAL
-            |--------------------------------------------------------------------------
-            */
+    const fecha = new Date();
+    const fechaTexto = [
+        String(fecha.getDate()).padStart(2, '0'),
+        String(fecha.getMonth() + 1).padStart(2, '0'),
+        fecha.getFullYear()
+    ].join('-');
 
-            const form = document.createElement('form');
+    const hora = fecha.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    }).toLowerCase().replace(/\s/g, '');
 
-            form.method = 'POST';
-            form.action = '{{ route('prestamos.export.pdf') }}';
-            form.target = '_blank';
+    return `Prestamos_${fechaTexto}_${hora}.${tipo === 'excel' ? 'xlsx' : 'pdf'}`;
+}
 
+async function exportarPrestamos(tipo) {
+    if (exportacionEnCurso) {
+        return;
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | TOKEN CSRF
-            |--------------------------------------------------------------------------
-            */
+    const tabla = $('#example').DataTable();
 
-            const csrf = document.createElement('input');
+    // Recopilar los préstamos visibles según la búsqueda y los filtros.
+    // Se conserva el orden aplicado en DataTables.
+    const ids = [];
 
-            csrf.type = 'hidden';
-            csrf.name = '_token';
-            csrf.value = '{{ csrf_token() }}';
+    tabla.rows({
+        search: 'applied',
+        order: 'applied'
+    }).every(function () {
+        const fila = this.node();
+        const id = fila ? fila.getAttribute('data-prestamo-id') : null;
 
-            form.appendChild(csrf);
+        if (id) {
+            ids.push(id);
+        }
+    });
 
+    if (ids.length === 0) {
+        toastr.warning('NO HAY PRÉSTAMOS PARA EXPORTAR.');
+        return;
+    }
 
-            /*
-            |--------------------------------------------------------------------------
-            | ENVIAR IDS EN EL ORDEN DEL DATATABLE
-            |--------------------------------------------------------------------------
-            */
+    const botonExcel = document.getElementById('btn_exportar_excel');
+    const botonPdf = document.getElementById('btn_exportar_pdf');
+    const botonCancelar = document.getElementById('btn_cancelar_exportacion');
 
-            ids.forEach(function(id) {
+    const url = tipo === 'excel'
+        ? @json(route('prestamos.export.excel'))
+        : @json(route('prestamos.export.pdf'));
 
-                const input = document.createElement('input');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
 
-                input.type = 'hidden';
-                input.name = 'ids[]';
-                input.value = id;
+    if (!csrf) {
+        toastr.error('No se encontró el token de seguridad. Recarga la página.');
+        return;
+    }
 
-                form.appendChild(input);
+    const formulario = new FormData();
+    formulario.append('_token', csrf);
 
-            });
+    ids.forEach(function (id) {
+        formulario.append('ids[]', id);
+    });
 
+    controladorExportacion = new AbortController();
+    exportacionEnCurso = true;
 
-            /*
-            |--------------------------------------------------------------------------
-            | ENVIAR
-            |--------------------------------------------------------------------------
-            */
+    botonExcel.disabled = true;
+    botonPdf.disabled = true;
+    botonCancelar.disabled = false;
 
-            document.body.appendChild(form);
+    mostrarPanelExportacion(tipo);
 
-            form.submit();
+    const barra = document.getElementById('exportacion_progreso');
+    const porcentaje = document.getElementById('exportacion_porcentaje');
+    const tamano = document.getElementById('exportacion_tamano');
+    const estado = document.getElementById('exportacion_estado');
 
-            form.remove();
-
+    try {
+        const respuesta = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': tipo === 'excel'
+                    ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                    : 'application/pdf'
+            },
+            body: formulario,
+            signal: controladorExportacion.signal
         });
+
+        if (!respuesta.ok) {
+            throw new Error(
+                'No se pudo generar el archivo. Verifica la sesión e inténtalo nuevamente.'
+            );
+        }
+
+        const contentType = (
+            respuesta.headers.get('Content-Type') || ''
+        ).toLowerCase();
+
+        const esArchivoValido = tipo === 'excel'
+            ? contentType.includes(
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            : contentType.includes('application/pdf');
+
+        if (!esArchivoValido) {
+            throw new Error(
+                'El servidor no devolvió un archivo válido. Recarga la página e inténtalo nuevamente.'
+            );
+        }
+
+        const longitud = Number(respuesta.headers.get('Content-Length')) || 0;
+        let bytesRecibidos = 0;
+        const fragmentos = [];
+
+        estado.textContent = 'Recibiendo archivo...';
+
+        if (respuesta.body && respuesta.body.getReader) {
+            const lector = respuesta.body.getReader();
+
+            while (true) {
+                const resultado = await lector.read();
+
+                if (resultado.done) {
+                    break;
+                }
+
+                fragmentos.push(resultado.value);
+                bytesRecibidos += resultado.value.byteLength;
+
+                tamano.textContent = formatearTamano(bytesRecibidos);
+
+                if (longitud > 0) {
+                    const avance = Math.min(
+                        100,
+                        Math.round((bytesRecibidos / longitud) * 100)
+                    );
+
+                    barra.style.width = avance + '%';
+                    barra.setAttribute('aria-valuenow', avance);
+                    porcentaje.textContent = avance + '%';
+                } else {
+                    // Sin Content-Length no se puede calcular un porcentaje real.
+                    porcentaje.textContent = 'Descargando...';
+                    barra.style.width = '100%';
+                }
+            }
+        } else {
+            const blobTemporal = await respuesta.blob();
+            fragmentos.push(blobTemporal);
+            bytesRecibidos = blobTemporal.size;
+            tamano.textContent = formatearTamano(bytesRecibidos);
+        }
+
+        if (bytesRecibidos === 0) {
+            throw new Error('El archivo recibido está vacío.');
+        }
+
+        barra.style.width = '100%';
+        barra.setAttribute('aria-valuenow', 100);
+        barra.classList.remove('progress-bar-animated');
+        porcentaje.textContent = '100%';
+        estado.textContent = 'Archivo recibido. Iniciando descarga...';
+
+        const blob = new Blob(fragmentos, {
+            type: tipo === 'excel'
+                ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                : 'application/pdf'
+        });
+
+        const nombreArchivo = obtenerNombreArchivo(respuesta, tipo);
+        const urlTemporal = URL.createObjectURL(blob);
+        const enlace = document.createElement('a');
+
+        enlace.href = urlTemporal;
+        enlace.download = nombreArchivo;
+        enlace.style.display = 'none';
+
+        document.body.appendChild(enlace);
+        enlace.click();
+        enlace.remove();
+
+        // Liberar la URL después de iniciar la descarga.
+        setTimeout(function () {
+            URL.revokeObjectURL(urlTemporal);
+        }, 1000);
+
+        ocultarPanelExportacion();
+
+        toastr.success(
+            'El archivo se recibió correctamente y se inició su descarga.',
+            'Exportación completada'
+        );
+
+    } catch (error) {
+        ocultarPanelExportacion();
+
+        if (error.name === 'AbortError') {
+            toastr.info('La descarga fue cancelada.');
+        } else {
+            console.error('Error en la exportación:', error);
+            toastr.error(
+                error.message || 'Ocurrió un error al exportar los préstamos.'
+            );
+        }
+
+    } finally {
+        exportacionEnCurso = false;
+        controladorExportacion = null;
+
+        botonExcel.disabled = false;
+        botonPdf.disabled = false;
+        botonCancelar.disabled = false;
+    }
+}
+
+$('#btn_exportar_excel')
+    .off('click.exportacion')
+    .on('click.exportacion', function () {
+        exportarPrestamos('excel');
+    });
+
+$('#btn_exportar_pdf')
+    .off('click.exportacion')
+    .on('click.exportacion', function () {
+        exportarPrestamos('pdf');
+    });
+
+$('#btn_cancelar_exportacion')
+    .off('click.exportacion')
+    .on('click.exportacion', function () {
+        if (controladorExportacion) {
+            controladorExportacion.abort();
+        }
+    });
+
 
 
 
