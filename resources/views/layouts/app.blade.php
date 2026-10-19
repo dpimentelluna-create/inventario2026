@@ -423,6 +423,22 @@
         .sidebar-footer {
             margin-top: auto;
         }
+
+        /* Ocultar tarjetas de rol y sesión cuando la barra está colapsada */
+        #sidebar.collapsed .user-info-cards {
+            display: none !important;
+        }
+
+        /* Centrar el avatar cuando está colapsada */
+        #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
+            justify-content: center;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        #sidebar.collapsed .user-dropdown-container .dropdown-toggle .rounded-circle {
+            margin-right: 0 !important;
+        }
     </style>
 </head>
 
@@ -564,25 +580,29 @@
                         </form>
                     </div>
 
-                    {{-- Rol (siempre visible) --}}
-                    <div class="px-1 mb-2">
-                        <div class="card border-0 bg-light mb-0">
-                            <div class="card-body p-2 text-center">
-                                <small class="text-muted d-block" style="font-size: 0.7rem;">Rol</small>
-                                <span class="badge bg-primary">{{ Auth::user()->etiquetaRol() }}</span>
-                            </div>
-                        </div>
-                    </div>
+                    {{-- Tarjetas de rol y sesión (se ocultan al colapsar) --}}
+<div class="user-info-cards">
+    {{-- Rol --}}
+    <div class="px-1 mb-2">
+        <div class="card border-0 bg-light mb-0">
+            <div class="card-body p-2 text-center">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Rol</small>
+                <span class="badge bg-primary">{{ Auth::user()->etiquetaRol() }}</span>
+            </div>
+        </div>
+    </div>
 
-                    {{-- Sesión activa (siempre visible) --}}
-                    <div class="px-1">
-                        <div class="card border-success bg-success bg-opacity-10 mb-0">
-                            <div class="card-body p-2 d-flex align-items-center justify-content-center">
-                                <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                <small class="text-success fw-semibold">Sesión activa</small>
-                            </div>
-                        </div>
-                    </div>
+    {{-- Sesión activa --}}
+    <div class="px-1">
+        <div class="card border-success bg-success bg-opacity-10 mb-0">
+            <div class="card-body p-2 d-flex align-items-center justify-content-center">
+                <i class="bi bi-check-circle-fill text-success me-2"></i>
+                <small class="text-success fw-semibold">Sesión activa</small>
+            </div>
+        </div>
+    </div>
+</div>
+
                     @else
                     <div class="auth-buttons-container d-flex flex-column gap-1 px-1">
                         @if (Route::has('login'))
@@ -806,17 +826,17 @@
     @endif
 
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const sidebar = document.getElementById('sidebar');
-        const toggleBtn = document.getElementById('sidebar-toggle');
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('sidebar-toggle');
 
-        if (sidebar && toggleBtn) {
-            toggleBtn.addEventListener('click', function () {
-                sidebar.classList.toggle('collapsed');
-            });
-        }
-    });
-</script>
+            if (sidebar && toggleBtn) {
+                toggleBtn.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>
