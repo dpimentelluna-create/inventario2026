@@ -16,12 +16,11 @@ class AccesoriosEquipoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): View
+    public function index()
     {
-        $accesoriosEquipos = AccesoriosEquipo::paginate();
+        $accesoriosEquipos = AccesoriosEquipo::with('equipo')->latest()->get();
 
-        return view('accesorios-equipo.index', compact('accesoriosEquipos'))
-            ->with('i', ($request->input('page', 1) - 1) * $accesoriosEquipos->perPage());
+        return view('accesorios-equipo.index', compact('accesoriosEquipos'));
     }
 
     /**
@@ -39,10 +38,13 @@ class AccesoriosEquipoController extends Controller
      */
     public function store(AccesoriosEquipoRequest $request): RedirectResponse
     {
-        AccesoriosEquipo::create($request->validated());
+        $accesorio = AccesoriosEquipo::create($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'Accesorio registrado.')->with('toast_tipo', 'exito');
+            ->with('success', 'Accesorio registrado.')
+            ->with('toast_tipo', 'exito')
+            ->with('accesorio_resaltado', $accesorio->id)
+            ->with('accesorio_accion', 'crear');
     }
 
     /**
@@ -54,6 +56,11 @@ class AccesoriosEquipoController extends Controller
             'equipo.tipoEquipo',
             'equipo.ubicacione'
         ])->findOrFail($id);
+
+        session([
+            'accesorio_resaltado' => $accesoriosEquipo->id,
+            'accesorio_accion' => 'ver'
+        ]);
 
         return view('accesorios-equipo.show', compact('accesoriosEquipo'));
     }
@@ -79,7 +86,10 @@ class AccesoriosEquipoController extends Controller
         $accesoriosEquipo->update($request->validated());
 
         return Redirect::route('accesorios-equipo.index')
-            ->with('success', 'Accesorio actualizado.')->with('toast_tipo', 'exito');
+            ->with('success', 'Accesorio actualizado.')
+            ->with('toast_tipo', 'exito')
+            ->with('accesorio_resaltado', $accesoriosEquipo->id)
+            ->with('accesorio_accion', 'editar');
     }
 
     public function destroy($id): RedirectResponse
