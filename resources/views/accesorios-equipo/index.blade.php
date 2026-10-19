@@ -305,8 +305,8 @@
        PANEL DE FILTROS
     ========================================= */
     .panel-filtros-accesorios {
-        background: #ffffff;
-        border: 1px solid #dce5dd;
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
         border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
