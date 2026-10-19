@@ -127,6 +127,8 @@ class ActaPrestamoExport implements FromArray, WithEvents
             $fila = 17;
         }
 
+        $filaEquipos = $fila; // última fila de datos de equipos + 1
+
         $fila += 1;
         $sheet->mergeCells('B' . $fila . ':H' . $fila);
         $sheet->setCellValue('B' . $fila, 'ESPECIFICACIONES GENERALES');
@@ -134,19 +136,20 @@ class ActaPrestamoExport implements FromArray, WithEvents
         $fila++;
 
         foreach ($bloquesSpecs as $bloque) {
-            $sheet->mergeCells('B' . $fila . ':H' . $fila);
+            $sheet->mergeCells('B' . $fila . ':E' . $fila);
             $sheet->setCellValue('B' . $fila, $bloque['equipo'] . ': ' . $bloque['specs']);
+            $sheet->mergeCells('F' . $fila . ':H' . $fila);
+            $sheet->setCellValue('F' . $fila, 'COLOR: ' . $bloque['color']);
             $fila++;
-            $sheet->mergeCells('B' . $fila . ':H' . $fila);
-            $sheet->setCellValue('B' . $fila, 'COLOR: ' . $bloque['color']);
-            $fila++;
-            $sheet->mergeCells('B' . $fila . ':H' . $fila);
+
+            $sheet->mergeCells('B' . $fila . ':D' . $fila);
             $sheet->setCellValue('B' . $fila, 'ESTADO: ' . $bloque['estado']);
-            $fila++;
-            $sheet->mergeCells('B' . $fila . ':H' . $fila);
-            $sheet->setCellValue('B' . $fila, 'OBSERVACIONES: ' . $bloque['observacion']);
+            $sheet->mergeCells('E' . $fila . ':H' . $fila);
+            $sheet->setCellValue('E' . $fila, 'OBSERVACIONES: ' . $bloque['observacion']);
             $fila++;
         }
+
+        $filaAntesObs = $fila; // fila justo después de las especificaciones (antes del separador)
 
         $fila++;
         $sheet->mergeCells('B' . $fila . ':H' . $fila);
@@ -158,6 +161,8 @@ class ActaPrestamoExport implements FromArray, WithEvents
         $sheet->getStyle('B' . $fila)->getAlignment()->setWrapText(true);
         $sheet->getRowDimension($fila)->setRowHeight(48);
         $fila += 3;
+
+        $filaAntesEntrega = $fila; // fila justo después de las observaciones
 
         $sheet->mergeCells('B' . $fila . ':H' . $fila);
         $sheet->setCellValue('B' . $fila, 'ENTREGA DEL EQUIPO');
@@ -193,26 +198,55 @@ class ActaPrestamoExport implements FromArray, WithEvents
         $sheet->setCellValue('F' . $fila, 'FECHA:');
         $ultima = $fila;
 
+        // Estilos de títulos principales
         $sheet->getStyle('B2:H3')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ]);
-        foreach (['B5:H5', 'B13:H13', 'B' . $inicioSpecs . ':H' . $inicioSpecs, 'B' . $filaObs . ':H' . $filaObs, 'B' . $filaEntrega . ':H' . $filaEntrega] as $rango) {
+
+        // Cabeceras de sección (fondo azul)
+        foreach ([
+            'B5:H5',
+            'B13:H13',
+            'B' . $inicioSpecs . ':H' . $inicioSpecs,
+            'B' . $filaObs . ':H' . $filaObs,
+            'B' . $filaEntrega . ':H' . $filaEntrega,
+        ] as $rango) {
             $sheet->getStyle($rango)->applyFromArray([
                 'font' => ['bold' => true, 'color' => ['argb' => 'FFFFFFFF']],
                 'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF1F4E79']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
             ]);
         }
+
+        // Cabecera de la tabla de equipos (fondo dorado)
         $sheet->getStyle('B14:H15')->applyFromArray([
             'font' => ['bold' => true],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FFD6A84F']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
-        $sheet->getStyle('B2:H' . $ultima)->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
-            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
-        ]);
+
+        // Alineación general y wrap (sin bordes todavía)
+        $sheet->getStyle('B2:H' . $ultima)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        $sheet->getStyle('B2:H' . $ultima)->getAlignment()->setWrapText(true);
         $sheet->getStyle('B2:H3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Bordes solo en los bloques de contenido (sin tocar filas vacías de separación)
+        $rangosConBorde = [
+            'B2:H3',                    // Títulos
+            'B5:H10',                   // Datos personales
+            'B13:H' . ($filaEquipos - 1), // Tabla de equipos (cabecera + datos)
+            'B' . $inicioSpecs . ':H' . ($filaAntesObs - 1), // Especificaciones
+            'B' . $filaObs . ':H' . ($filaAntesEntrega - 1), // Observaciones
+            'B' . $filaEntrega . ':H' . $ultima,             // Entrega
+        ];
+
+        foreach ($rangosConBorde as $rango) {
+            $sheet->getStyle($rango)->applyFromArray([
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+            ]);
+        }
+
         $sheet->getPageSetup()->setFitToPage(true);
         $sheet->getPageSetup()->setFitToWidth(1);
         $sheet->getPageSetup()->setFitToHeight(1);
