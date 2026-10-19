@@ -5,439 +5,438 @@
 @endsection
 
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card prestamo-index-card">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card prestamo-index-card">
 
-                <div class="card-header prestamo-index-header">
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <span id="card_title" class="fw-bold">
-                            <i class="bi bi-journal-check me-2 fs-5 text-success"></i>
-                            PRÉSTAMOS
-                            <small class="d-block fw-normal text-muted mt-1 ms-1">
-                                Consulta y administra los préstamos de equipos y accesorios.
-                            </small>
-                        </span>
+                    <div class="card-header prestamo-index-header">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <span id="card_title" class="fw-bold">
+                                <i class="bi bi-journal-check me-2 fs-5 text-success"></i>
+                                PRÉSTAMOS
+                                <small class="d-block fw-normal text-muted mt-1 ms-1">
+                                    Consulta y administra los préstamos de equipos y accesorios.
+                                </small>
+                            </span>
 
-                        <div class="d-flex align-items-center gap-2">
-                            @can('registrar')
-                            <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
-                                class="btn btn-success btn-sm">
-                                <i class="fa-solid fa-plus"></i> Registrar Préstamo
-                            </a>
-                            @endcan
-
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-download"></i> Exportar
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end">
-                                    <li>
-                                        <button type="button" class="dropdown-item" id="btn_exportar_excel">
-                                            <i class="fa-solid fa-file-excel text-success"></i> Excel
-                                        </button>
-                                    </li>
-                                    <li>
-                                        <button type="button" class="dropdown-item" id="btn_exportar_pdf">
-                                            <i class="fa-solid fa-file-pdf text-danger"></i> PDF
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-body prestamo-index-body">
-
-                    <div class="barra-filtros-prestamos mb-3">
-                        <div class="d-flex align-items-center flex-wrap gap-3">
-
-                            <button type="button"
-                                id="btn_toggle_filtros"
-                                class="btn btn-filtros-prestamos btn-sm"
-                                aria-controls="panel_filtros"
-                                aria-expanded="false">
-
-                                <i class="fa-solid fa-sliders me-2 icono-boton-filtros"></i>
-                                <span>FILTROS</span>
-
-                                <span id="badge_filtros"
-                                    class="badge badge-filtros-contador d-none">0</span>
-
-                                <i class="fa-solid fa-chevron-down ms-3 flecha-filtros"></i>
-                            </button>
-
-                            <div id="mensaje_coincidencias"
-                                class="mensaje-coincidencias"
-                                style="display:none;"
-                                aria-live="polite">
-                            </div>
-
-                        </div>
-                    </div>
-
-
-
-                    <div id="panel_filtros" class="panel-filtros-prestamos mb-3" style="display:none;">
-
-                        {{-- ENCABEZADO --}}
-                        <div class="panel-filtros-header">
                             <div class="d-flex align-items-center gap-2">
-                                <div class="icono-filtros">
-                                    <i class="fa-solid fa-sliders"></i>
-                                </div>
-                                <div>
-                                    <h6 class="mb-0 fw-bold">FILTROS DE BÚSQUEDA</h6>
-                                    <small>Utiliza los campos para encontrar los préstamos registrados.</small>
-                                </div>
-                            </div>
-                        </div>
+                                @can('registrar')
+                                <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
+                                    class="btn btn-success btn-sm">
+                                    <i class="fa-solid fa-plus"></i> Registrar Préstamo
+                                </a>
+                                @endcan
 
-                        {{-- CAMPOS --}}
-                        <div class="panel-filtros-body">
-                            <div class="row g-3">
-
-                                {{-- SOLICITANTE --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_solicitante" class="form-label">
-                                        <i class="fa-solid fa-user me-1"></i> SOLICITANTE
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_solicitante"
-                                            class="form-control campo-mayusculas"
-                                            list="lista_filtro_solicitante"
-                                            placeholder="TODOS"
-                                            autocomplete="off">
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_solicitante"
-                                            title="Limpiar solicitante"
-                                            aria-label="Limpiar solicitante">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                    <datalist id="lista_filtro_solicitante">
-                                        @foreach ($filtroSolicitantes ?? [] as $nombre)
-                                        <option value="{{ $nombre }}"></option>
-                                        @endforeach
-                                    </datalist>
-                                </div>
-
-                                {{-- CARGO --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_cargo" class="form-label">
-                                        <i class="fa-solid fa-id-badge me-1"></i> CARGO
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_cargo"
-                                            class="form-control campo-mayusculas"
-                                            list="lista_filtro_cargo"
-                                            placeholder="TODOS"
-                                            autocomplete="off">
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_cargo"
-                                            title="Limpiar cargo"
-                                            aria-label="Limpiar cargo">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                    <datalist id="lista_filtro_cargo">
-                                        @foreach ($filtroCargos ?? [] as $cargo)
-                                        <option value="{{ $cargo }}"></option>
-                                        @endforeach
-                                    </datalist>
-                                </div>
-
-                                {{-- EQUIPO --}}
-                                <div class="col-12 col-md-12 col-xl-6">
-                                    <label for="filtro_equipo" class="form-label">
-                                        <i class="fa-solid fa-laptop me-1"></i> EQUIPO
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" id="filtro_equipo"
-                                            class="form-control campo-mayusculas"
-                                            list="lista_filtro_equipo"
-                                            placeholder="NOMBRE O N.º SERIE (3 CAR.)"
-                                            autocomplete="off">
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_equipo"
-                                            title="Limpiar equipo"
-                                            aria-label="Limpiar equipo">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                    <datalist id="lista_filtro_equipo"></datalist>
-                                </div>
-
-                                {{-- ESTADO --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_estado" class="form-label">
-                                        <i class="fa-solid fa-circle-check me-1"></i> ESTADO
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <select id="filtro_estado" class="form-select">
-                                            <option value="">TODOS</option>
-                                            <option value="ACTIVO">ACTIVO</option>
-                                            <option value="TERMINADO">TERMINADO</option>
-                                        </select>
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_estado"
-                                            title="Limpiar estado"
-                                            aria-label="Limpiar estado">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- FECHA --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_fecha" class="form-label">
-                                        <i class="fa-solid fa-calendar-days me-1"></i> FECHA
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="date" id="filtro_fecha" class="form-control">
-                                        <button type="button" id="btn_filtro_hoy"
-                                            class="btn btn-hoy-filtro"
-                                            title="Filtrar préstamos de hoy">
-                                            HOY
-                                        </button>
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_fecha"
-                                            title="Limpiar fecha"
-                                            aria-label="Limpiar fecha">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- HORARIO DESDE --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_hora_inicio" class="form-label">
-                                        <i class="fa-regular fa-clock me-1"></i> HORARIO DESDE
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="time" id="filtro_hora_inicio"
-                                            class="form-control" min="06:00" max="16:00">
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_hora_inicio"
-                                            title="Limpiar hora de inicio"
-                                            aria-label="Limpiar hora de inicio">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {{-- HORARIO HASTA --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_hora_fin" class="form-label">
-                                        <i class="fa-regular fa-clock me-1"></i> HORARIO HASTA
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="time" id="filtro_hora_fin"
-                                            class="form-control" min="06:00" max="16:00">
-                                        <button type="button"
-                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_hora_fin"
-                                            title="Limpiar hora final"
-                                            aria-label="Limpiar hora final">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            {{-- ACCIONES --}}
-                            <div class="panel-filtros-acciones">
-                                <div class="texto-ayuda-filtros">
-                                    <i class="fa-solid fa-circle-info me-1"></i>
-                                    Puedes combinar varios filtros.
-                                </div>
-
-                                <div class="d-flex flex-wrap gap-2">
-                                    <button type="button" id="btn_limpiar_filtros"
-                                        class="btn btn-limpiar-todos btn-sm">
-                                        <i class="fa-solid fa-rotate-left me-1"></i>
-                                        LIMPIAR FILTROS
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-download"></i> Exportar
                                     </button>
-
-                                    <button type="button" id="btn_aplicar_filtros"
-                                        class="btn btn-aplicar-filtros btn-sm">
-                                        <i class="fa-solid fa-magnifying-glass me-1"></i>
-                                        APLICAR FILTROS
-                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <button type="button" class="dropdown-item" id="btn_exportar_excel">
+                                                <i class="fa-solid fa-file-excel text-success"></i> Excel
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="dropdown-item" id="btn_exportar_pdf">
+                                                <i class="fa-solid fa-file-pdf text-danger"></i> PDF
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <div class="card-body prestamo-index-body">
 
-                    <div class="table-responsive">
-                        <table id="example"
-                            class="table table-bordered table-hover table-striped align-middle prestamo-datatable"
-                            style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th class="text-center">Solicitante</th>
-                                    <th class="text-center">Cargo</th>
-                                    <th class="text-center">Equipos</th>
-                                    <th class="text-center">Fecha</th>
-                                    <th class="text-center">Hora inicio</th>
-                                    <th class="text-center">Hora final</th>
-                                    <th class="text-center">Estado</th>
-                                    <th class="text-center columna-acciones">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($prestamos as $i => $prestamo)
-                                @php
-                                $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
-                                $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
+                        <div class="barra-filtros-prestamos mb-3">
+                            <div class="d-flex align-items-center flex-wrap gap-3">
 
-                                $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
-                                $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
+                                <button type="button"
+                                    id="btn_toggle_filtros"
+                                    class="btn btn-filtros-prestamos btn-sm"
+                                    aria-controls="panel_filtros"
+                                    aria-expanded="false">
 
-                                $hIniMostrar = $hIni
-                                ? \Carbon\Carbon::createFromFormat('H:i', $hIni)->format('h:i A')
-                                : '';
+                                    <i class="fa-solid fa-sliders me-2 icono-boton-filtros"></i>
+                                    <span>FILTROS</span>
 
-                                $hFinMostrar = $hFin
-                                ? \Carbon\Carbon::createFromFormat('H:i', $hFin)->format('h:i A')
-                                : '';
+                                    <span id="badge_filtros"
+                                        class="badge badge-filtros-contador d-none">0</span>
 
-                                $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
-                                $eq = $pe->equipo;
-                                return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
-                                })->implode(' | ');
-                                @endphp
-                                <tr data-prestamo-id="{{ $prestamo->id }}"
-                                    data-solicitante="{{ strtoupper($nombreSol) }}"
-                                    data-cargo="{{ strtoupper($prestamo->cargo ?? '') }}"
-                                    data-equipos="{{ strtoupper($textoEquipos) }}" data-fecha="{{ $fechaIso }}"
-                                    data-hora-inicio="{{ $hIni }}" data-hora-fin="{{ $hFin }}"
-                                    data-estado="{{ strtoupper($prestamo->estado ?? '') }}">
-                                    <td>{{ $prestamo->id }}</td>
-                                    <td>{{ strtoupper($nombreSol) ?: '-' }}</td>
-                                    <td>{{ strtoupper($prestamo->cargo ?? '-') }}</td>
-                                    <td>
-                                        @forelse ($prestamo->prestamoEquipos as $prestamoEquipo)
-                                        <div class="mb-1">
-                                            {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? '' }}
-                                            {{ $prestamoEquipo->equipo->marca ?? '' }}
-                                            <small class="text-muted">N/S:
-                                                {{ $prestamoEquipo->equipo->num_serie ?? '-' }}</small>
+                                    <i class="fa-solid fa-chevron-down ms-3 flecha-filtros"></i>
+                                </button>
+
+                                <div id="mensaje_coincidencias"
+                                    class="mensaje-coincidencias"
+                                    style="display:none;"
+                                    aria-live="polite">
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+                        <div id="panel_filtros" class="panel-filtros-prestamos mb-3" style="display:none;">
+
+                            {{-- ENCABEZADO --}}
+                            <div class="panel-filtros-header">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icono-filtros">
+                                        <i class="fa-solid fa-sliders"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">FILTROS DE BÚSQUEDA</h6>
+                                        <small>Utiliza los campos para encontrar los préstamos registrados.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- CAMPOS --}}
+                            <div class="panel-filtros-body">
+                                <div class="row g-3">
+
+                                    {{-- SOLICITANTE --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_solicitante" class="form-label">
+                                            <i class="fa-solid fa-user me-1"></i> SOLICITANTE
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" id="filtro_solicitante"
+                                                class="form-control campo-mayusculas"
+                                                list="lista_filtro_solicitante"
+                                                placeholder="TODOS"
+                                                autocomplete="off">
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_solicitante"
+                                                title="Limpiar solicitante"
+                                                aria-label="Limpiar solicitante">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
                                         </div>
-                                        @empty
-                                        —
-                                        @endforelse
-                                    </td>
-                                    <td class="text-center">
-                                        {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}
-                                    </td>
-                                    <td class="text-center" data-order="{{ $hIni }}">
-                                        {{ $hIniMostrar ?: '-' }}
-                                    </td>
+                                        <datalist id="lista_filtro_solicitante">
+                                            @foreach ($filtroSolicitantes ?? [] as $nombre)
+                                            <option value="{{ $nombre }}"></option>
+                                            @endforeach
+                                        </datalist>
+                                    </div>
 
-                                    <td class="text-center" data-order="{{ $hFin }}">
-                                        {{ $hFinMostrar ?: '—' }}
-                                    </td>
-                                    <td class="text-center">
-                                        @if (($prestamo->estado ?? '') === 'ACTIVO')
-                                        <span class="badge bg-success">ACTIVO</span>
-                                        @else
-                                        <span class="badge bg-secondary">TERMINADO</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-center columna-acciones">
-                                        <div class="d-flex justify-content-center align-items-center gap-1">
-                                            <form action="{{ route('prestamos.destroy', $prestamo->id) }}"
-                                                method="POST">
-                                                <a class="btn btn-info btn-accion btn-ver-prestamo"
-                                                    href="{{ route('prestamos.show', $prestamo->id) }}">
-                                                    <i class="fa-solid fa-eye"></i>
-                                                </a>
-
-                                                @can('registrar')
-                                                <a class="btn btn-warning btn-accion"
-                                                    href="{{ route('prestamos.edit', $prestamo->id) }}"><i
-                                                        class="fa-solid fa-pen-to-square"></i></a>
-                                                @endcan
-
-                                                @can('eliminar')
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-accion"
-                                                    onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
-                                                    <i class="fa-solid fa-trash"></i>
-                                                </button>
-                                                @endcan
-                                            </form>
+                                    {{-- CARGO --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_cargo" class="form-label">
+                                            <i class="fa-solid fa-id-badge me-1"></i> CARGO
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" id="filtro_cargo"
+                                                class="form-control campo-mayusculas"
+                                                list="lista_filtro_cargo"
+                                                placeholder="TODOS"
+                                                autocomplete="off">
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_cargo"
+                                                title="Limpiar cargo"
+                                                aria-label="Limpiar cargo">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
                                         </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                        <datalist id="lista_filtro_cargo">
+                                            @foreach ($filtroCargos ?? [] as $cargo)
+                                            <option value="{{ $cargo }}"></option>
+                                            @endforeach
+                                        </datalist>
+                                    </div>
+
+                                    {{-- EQUIPO --}}
+                                    <div class="col-12 col-md-12 col-xl-6">
+                                        <label for="filtro_equipo" class="form-label">
+                                            <i class="fa-solid fa-laptop me-1"></i> EQUIPO
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="text" id="filtro_equipo"
+                                                class="form-control campo-mayusculas"
+                                                list="lista_filtro_equipo"
+                                                placeholder="NOMBRE O N.º SERIE (3 CAR.)"
+                                                autocomplete="off">
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_equipo"
+                                                title="Limpiar equipo"
+                                                aria-label="Limpiar equipo">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                        <datalist id="lista_filtro_equipo"></datalist>
+                                    </div>
+
+                                    {{-- ESTADO --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_estado" class="form-label">
+                                            <i class="fa-solid fa-circle-check me-1"></i> ESTADO
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <select id="filtro_estado" class="form-select">
+                                                <option value="">TODOS</option>
+                                                <option value="ACTIVO">ACTIVO</option>
+                                                <option value="TERMINADO">TERMINADO</option>
+                                            </select>
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_estado"
+                                                title="Limpiar estado"
+                                                aria-label="Limpiar estado">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- FECHA --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_fecha" class="form-label">
+                                            <i class="fa-solid fa-calendar-days me-1"></i> FECHA
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="date" id="filtro_fecha" class="form-control">
+                                            <button type="button" id="btn_filtro_hoy"
+                                                class="btn btn-hoy-filtro"
+                                                title="Filtrar préstamos de hoy">
+                                                HOY
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_fecha"
+                                                title="Limpiar fecha"
+                                                aria-label="Limpiar fecha">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- HORARIO DESDE --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_hora_inicio" class="form-label">
+                                            <i class="fa-regular fa-clock me-1"></i> HORARIO DESDE
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" id="filtro_hora_inicio"
+                                                class="form-control" min="06:00" max="16:00">
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_hora_inicio"
+                                                title="Limpiar hora de inicio"
+                                                aria-label="Limpiar hora de inicio">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {{-- HORARIO HASTA --}}
+                                    <div class="col-12 col-md-6 col-xl-3">
+                                        <label for="filtro_hora_fin" class="form-label">
+                                            <i class="fa-regular fa-clock me-1"></i> HORARIO HASTA
+                                        </label>
+                                        <div class="input-group input-group-sm">
+                                            <input type="time" id="filtro_hora_fin"
+                                                class="form-control" min="06:00" max="16:00">
+                                            <button type="button"
+                                                class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                                data-target="filtro_hora_fin"
+                                                title="Limpiar hora final"
+                                                aria-label="Limpiar hora final">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                {{-- ACCIONES --}}
+                                <div class="panel-filtros-acciones">
+                                    <div class="texto-ayuda-filtros">
+                                        <i class="fa-solid fa-circle-info me-1"></i>
+                                        Puedes combinar varios filtros.
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button type="button" id="btn_limpiar_filtros"
+                                            class="btn btn-limpiar-todos btn-sm">
+                                            <i class="fa-solid fa-rotate-left me-1"></i>
+                                            LIMPIAR FILTROS
+                                        </button>
+
+                                        <button type="button" id="btn_aplicar_filtros"
+                                            class="btn btn-aplicar-filtros btn-sm">
+                                            <i class="fa-solid fa-magnifying-glass me-1"></i>
+                                            APLICAR FILTROS
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="table-responsive">
+                            <table id="example"
+                                class="table table-bordered table-hover table-striped align-middle prestamo-datatable"
+                                style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th class="text-center">Solicitante</th>
+                                        <th class="text-center">Cargo</th>
+                                        <th class="text-center">Equipos</th>
+                                        <th class="text-center">Fecha</th>
+                                        <th class="text-center">Hora inicio</th>
+                                        <th class="text-center">Hora final</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center columna-acciones">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($prestamos as $i => $prestamo)
+                                                                    @php
+                                        $nombreSol = trim(($prestamo->docente->apellidos ?? '') . ' ' . ($prestamo->docente->nombres ?? ''));
+                                        $fechaIso = $prestamo->fecha ? \Carbon\Carbon::parse($prestamo->fecha)->format('Y-m-d') : '';
+
+                                        $hIni = $prestamo->hora_inicio ? substr($prestamo->hora_inicio, 0, 5) : '';
+                                        $hFin = $prestamo->hora_fin ? substr($prestamo->hora_fin, 0, 5) : '';
+
+                                        $hIniMostrar = $hIni
+                                            ? \Carbon\Carbon::createFromFormat('H:i', $hIni)->format('h:i A')
+                                            : '';
+
+                                        $hFinMostrar = $hFin
+                                            ? \Carbon\Carbon::createFromFormat('H:i', $hFin)->format('h:i A')
+                                            : '';
+
+                                        $textoEquipos = collect($prestamo->prestamoEquipos)->map(function ($pe) {
+                                            $eq = $pe->equipo;
+                                            return trim(($eq->tipoEquipo->nombre ?? '') . ' ' . ($eq->marca ?? '') . ' ' . ($eq->num_serie ?? ''));
+                                        })->implode(' | ');
+                                                                    @endphp
+                                                                    <tr data-prestamo-id="{{ $prestamo->id }}"
+                                                                        data-solicitante="{{ strtoupper($nombreSol) }}"
+                                                                        data-cargo="{{ strtoupper($prestamo->cargo ?? '') }}"
+                                                                        data-equipos="{{ strtoupper($textoEquipos) }}" data-fecha="{{ $fechaIso }}"
+                                                                        data-hora-inicio="{{ $hIni }}" data-hora-fin="{{ $hFin }}"
+                                                                        data-estado="{{ strtoupper($prestamo->estado ?? '') }}">
+                                                                        <td>{{ $prestamo->id }}</td>
+                                                                        <td>{{ strtoupper($nombreSol) ?: '-' }}</td>
+                                                                        <td>{{ strtoupper($prestamo->cargo ?? '-') }}</td>
+                                                                        <td>
+                                                                            @forelse ($prestamo->prestamoEquipos as $prestamoEquipo)
+                                                                            <div class="mb-1">
+                                                                                {{ $prestamoEquipo->equipo->tipoEquipo->nombre ?? '' }}
+                                                                                {{ $prestamoEquipo->equipo->marca ?? '' }}
+                                                                                <small class="text-muted">N/S:
+                                                                                    {{ $prestamoEquipo->equipo->num_serie ?? '-' }}</small>
+                                                                            </div>
+                                                                            @empty
+                                                                            —
+                                                                            @endforelse
+                                                                        <td class="text-center" data-order="{{ $fechaIso ?: '0000-00-00' }}">
+                                                                            {{ $fechaIso ? \Carbon\Carbon::parse($fechaIso)->format('d-m-Y') : '-' }}
+                                                                        </td>
+                                                                        <td class="text-center" data-order="{{ $hIni }}">
+                                                                            {{ $hIniMostrar ?: '-' }}
+                                                                        </td>
+
+                                                                        <td class="text-center" data-order="{{ $hFin }}">
+                                                                            {{ $hFinMostrar ?: '—' }}
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            @if (($prestamo->estado ?? '') === 'ACTIVO')
+                                                                            <span class="badge bg-success">ACTIVO</span>
+                                                                            @else
+                                                                            <span class="badge bg-secondary">TERMINADO</span>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td class="text-center columna-acciones">
+                                                                            <div class="d-flex justify-content-center align-items-center gap-1">
+                                                                                <form action="{{ route('prestamos.destroy', $prestamo->id) }}"
+                                                                                    method="POST">
+                                                                                    <a class="btn btn-info btn-accion btn-ver-prestamo"
+                                                                                        href="{{ route('prestamos.show', $prestamo->id) }}">
+                                                                                        <i class="fa-solid fa-eye"></i>
+                                                                                    </a>
+
+                                                                                    @can('registrar')
+                                                                                    <a class="btn btn-warning btn-accion"
+                                                                                        href="{{ route('prestamos.edit', $prestamo->id) }}"><i
+                                                                                            class="fa-solid fa-pen-to-square"></i></a>
+                                                                                    @endcan
+
+                                                                                    @can('eliminar')
+                                                                                    @csrf
+                                                                                    @method('DELETE')
+                                                                                    <button type="submit" class="btn btn-danger btn-accion"
+                                                                                        onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
+                                                                                        <i class="fa-solid fa-trash"></i>
+                                                                                    </button>
+                                                                                    @endcan
+                                                                                </form>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 
-{{-- PANEL PERSONALIZADO DE DESCARGA DE EXPORTACIONES --}}
-<div id="exportacion_overlay" class="exportacion-overlay" style="display: none;">
-    <div class="exportacion-panel">
+    {{-- PANEL PERSONALIZADO DE DESCARGA DE EXPORTACIONES --}}
+    <div id="exportacion_overlay" class="exportacion-overlay" style="display: none;">
+        <div class="exportacion-panel">
 
-        <div class="exportacion-icono">
-            <i id="exportacion_icono_archivo" class="fa-solid fa-file-export"></i>
-        </div>
-
-        <h5 id="exportacion_titulo">Preparando exportación</h5>
-
-        <p id="exportacion_estado">
-            Estamos preparando los registros seleccionados.
-        </p>
-
-        <div class="progress exportacion-barra-contenedor">
-            <div
-                id="exportacion_progreso"
-                class="progress-bar progress-bar-striped progress-bar-animated"
-                role="progressbar"
-                style="width: 0%;"
-                aria-valuenow="0"
-                aria-valuemin="0"
-                aria-valuemax="100">
+            <div class="exportacion-icono">
+                <i id="exportacion_icono_archivo" class="fa-solid fa-file-export"></i>
             </div>
-        </div>
 
-        <div class="exportacion-detalles">
-            <span id="exportacion_porcentaje">Preparando...</span>
-            <span id="exportacion_tamano">0 MB</span>
-        </div>
+            <h5 id="exportacion_titulo">Preparando exportación</h5>
 
-        <div class="exportacion-acciones">
-            <button
-                type="button"
-                id="btn_cancelar_exportacion"
-                class="btn btn-outline-secondary">
-                <i class="fa-solid fa-xmark me-1"></i>
-                Cancelar
-            </button>
-        </div>
+            <p id="exportacion_estado">
+                Estamos preparando los registros seleccionados.
+            </p>
 
+            <div class="progress exportacion-barra-contenedor">
+                <div
+                    id="exportacion_progreso"
+                    class="progress-bar progress-bar-striped progress-bar-animated"
+                    role="progressbar"
+                    style="width: 0%;"
+                    aria-valuenow="0"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                </div>
+            </div>
+
+            <div class="exportacion-detalles">
+                <span id="exportacion_porcentaje">Preparando...</span>
+                <span id="exportacion_tamano">0 MB</span>
+            </div>
+
+            <div class="exportacion-acciones">
+                <button
+                    type="button"
+                    id="btn_cancelar_exportacion"
+                    class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-xmark me-1"></i>
+                    Cancelar
+                </button>
+            </div>
+
+        </div>
     </div>
-</div>
 
 
 @endsection

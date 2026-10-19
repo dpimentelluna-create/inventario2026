@@ -40,9 +40,10 @@ Route::middleware(['auth', 'acceso'])->group(function () {
             ->name('usuarios.estado');
         Route::put('/usuarios/{usuario}/password', [\App\Http\Controllers\UsuarioController::class, 'restablecerPassword'])
             ->name('usuarios.password');
+
         Route::resource('usuarios', \App\Http\Controllers\UsuarioController::class)
             ->parameters(['usuarios' => 'usuario'])
-            ->except(['show', 'destroy']);
+            ->except(['destroy']);   // quitamos 'show' del except
     });
 
     //HOME:
@@ -65,6 +66,9 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         ->name('equipos.verificarSerie');
     Route::get('/equipos/verificar-serie-accesorio', [EquipoController::class, 'verificarSerieAccesorio'])
         ->name('equipos.verificarSerieAccesorio');
+    Route::post('/equipos/{equipo}/auditar-impresion', [EquipoController::class, 'auditarImpresion'])
+        ->name('equipos.auditar-impresion');
+
 
     Route::resource('equipos', App\Http\Controllers\EquipoController::class);
 

@@ -455,7 +455,14 @@
                 width: 90%;
                 flex-direction: column;
             }
+
+            /*estilos para el logo del colegio en la sección de presentación*/
         }
+    .logo-colegio img {
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+}
     </style>
 </head>
 
@@ -481,7 +488,7 @@
         </div>
 
         <div class="area-label">
-            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+            COORDINACIÓN EN INNOVACIÓN Y SOPORTE TECNÓLOGICO
         </div>
 
     </header>
@@ -494,75 +501,73 @@
     <main>
 
         <section class="hero">
-
+        
             <div class="hero-content">
-
+        
                 <div class="tag">
                     💻 SISTEMA INSTITUCIONAL
                 </div>
-
+        
                 <h1>
                     Gestión de
                     <span>Equipos</span>
                     y Préstamos
                 </h1>
-
+        
                 <p class="hero-description">
                     Sistema web desarrollado para facilitar el registro,
                     control y seguimiento de los equipos tecnológicos
                     utilizados dentro de la institución educativa.
                 </p>
-
+        
                 <div class="buttons">
-
+        
                     <a href="{{ route('login') }}" class="btn btn-primary">
                         INGRESAR AL SISTEMA →
                     </a>
-
+        
                     <a href="#modulos" class="btn btn-secondary">
                         CONOCER EL SISTEMA
                     </a>
-
+        
                 </div>
-
+        
             </div>
-
-
+        
+        
             {{-- =================================================
-                 LOGO
+            LOGO
             ================================================== --}}
-
+        
             <div class="visual">
-
+        
                 <div class="circle circle-one"></div>
                 <div class="circle circle-two"></div>
-
+        
                 <div class="logo-card">
-
-                    {{-- 
-                        AQUÍ PUEDES COLOCAR EL LOGO REAL.
-                        
-                        Ejemplo:
-                        <img src="{{ asset('img/logo-colegio.png') }}">
-                    --}}
-
+        
+                    <div class="logo-colegio">
+                        <img src="{{ asset('logo/logo.jpg') }}" alt="Logo del colegio">
+                    </div>
+        
+                    {{--
                     <div class="logo-placeholder">
                         🏫
-                    </div>
-
+                    </div>--}}
+        
                     <h2>
                         IE. 88021 ALFONSO UGARTE
                     </h2>
-
+        
                     <p>
-                        COORDINACIÓN Y SERVICIO<br>
-                        DE TECNOLOGÍA
+                        COORDINACIÓN EN INNOVACIÓN Y <br>
+                        SOPORTE TECNÓLOGICO
                     </p>
-
+        
                 </div>
-
+        
             </div>
-
+        
         </section>
 
 
@@ -659,7 +664,8 @@
         </span>
 
         <span>
-            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+            COORDINACIÓN EN INNOVACIÓN Y 
+            SOPORTE TECNÓLOGICO
         </span>
 
         <span>

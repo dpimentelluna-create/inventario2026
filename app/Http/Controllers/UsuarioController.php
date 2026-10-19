@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
+use App\Models\Auditoria;
 
 class UsuarioController extends Controller
 {
@@ -39,6 +40,12 @@ class UsuarioController extends Controller
         $usuario->activo = true;
         $usuario->debe_cambiar_password = true;
         $usuario->save();
+        Auditoria::registrar(
+            'CREAR',
+            'USUARIOS',
+            'Registro la cuenta del usuario ' . $usuario->name . '.',
+            $usuario
+        );
 
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario registrado. Deberá cambiar su contraseña al ingresar.')
@@ -52,6 +59,11 @@ class UsuarioController extends Controller
 
     public function update(UsuarioRequest $request, User $usuario): RedirectResponse
     {
+        $valoresAnteriores = [
+            'name' => $usuario->name,
+            'email' => $usuario->email,
+            'rol' => $usuario->rol,
+        ];
         $cambiaRol = $request->rol !== $usuario->rol;
 
         if ($cambiaRol && $usuario->is($request->user())) {
@@ -67,9 +79,62 @@ class UsuarioController extends Controller
         $usuario->rol = $request->rol;
         $usuario->save();
 
+        $valoresNuevos = [
+            'name' => $usuario->name,
+            'email' => $usuario->email,
+            'rol' => $usuario->rol,
+        ];
+
+        $cambios = [];
+
+        foreach ($valoresAnteriores as $campo => $anterior) {
+            if ($anterior !== $valoresNuevos[$campo]) {
+                $cambios[$campo] = [
+                    'anterior' => $anterior,
+                    'nuevo' => $valoresNuevos[$campo],
+                ];
+            }
+        }
+
+        if (!empty($cambios)) {
+            Auditoria::registrar(
+                'ACTUALIZAR',
+                'USUARIOS',
+                'Actualizó los datos de la cuenta ' . $usuario->name . '.',
+                $usuario,
+                $cambios
+            );
+        }
+
         return redirect()->route('usuarios.index')
             ->with('success', 'Usuario actualizado.')
             ->with('toast_tipo', 'aviso');
+    }
+
+    public function show(User $usuario): View
+    {
+        $consultaAuditoria = Auditoria::where(
+            'usuario_id',
+            $usuario->id
+        );
+
+        $totalAuditorias = (clone $consultaAuditoria)->count();
+
+        $ultimaActividad = (clone $consultaAuditoria)
+            ->latest('created_at')
+            ->first();
+
+        $auditorias = (clone $consultaAuditoria)
+            ->latest('created_at')
+            ->latest('id')
+            ->paginate(10);
+
+        return view('usuarios.show', compact(
+            'usuario',
+            'auditorias',
+            'totalAuditorias',
+            'ultimaActividad'
+        ));
     }
 
     public function cambiarEstado(Request $request, User $usuario): RedirectResponse
@@ -86,9 +151,23 @@ class UsuarioController extends Controller
                 ->with('toast_tipo', 'error');
         }
 
-        $usuario->activo = ! $usuario->activo;
+        $usuario->activo = !$usuario->activo;
         $usuario->setRememberToken(Str::random(60));
         $usuario->save();
+
+        Auditoria::registrar(
+            $usuario->activo ? 'ACTIVAR' : 'DESACTIVAR',
+            'USUARIOS',
+            ($usuario->activo ? 'Activó' : 'Desactivó')
+            . ' la cuenta de ' . $usuario->name . '.',
+            $usuario,
+            [
+                'activo' => [
+                    'anterior' => !$usuario->activo,
+                    'nuevo' => $usuario->activo,
+                ],
+            ]
+        );
 
         return redirect()->route('usuarios.index')
             ->with('success', $usuario->activo ? 'Usuario activado.' : 'Usuario desactivado.')
@@ -106,6 +185,14 @@ class UsuarioController extends Controller
         $usuario->debe_cambiar_password = true;
         $usuario->setRememberToken(Str::random(60));
         $usuario->save();
+
+        Auditoria::registrar(
+            'RESTABLECER_PASSWORD',
+            'USUARIOS',
+            'Restableció la contraseña de la cuenta '
+            . $usuario->name . '.',
+            $usuario
+        );
 
         return redirect()->route('usuarios.index')
             ->with('success', 'Contraseña restablecida. Deberá cambiarla al ingresar.')

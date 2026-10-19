@@ -8,6 +8,7 @@ use App\Models\Ubicacione;
 use App\Models\EspecificacionesLaptop;
 use App\Models\EspecificacionesEquipo;
 use App\Models\AccesoriosEquipo;
+use App\Models\Auditoria;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -220,6 +221,26 @@ class EquipoController extends Controller
             }
         }
 
+        // 5. REGISTRAR AUDITORÍA
+        Auditoria::registrar(
+            'CREAR',
+            'EQUIPOS',
+            'Registró el equipo '
+            . ($equipo->num_serie ?: 'ID ' . $equipo->id)
+            . ' - ' . $equipo->marca
+            . ' ' . ($equipo->modelo ?? '')
+            . '.',
+            $equipo,
+            [
+                'tipo_equipo_id' => $equipo->tipo_equipo_id,
+                'marca' => $equipo->marca,
+                'modelo' => $equipo->modelo,
+                'num_serie' => $equipo->num_serie,
+                'ubicacion_id' => $equipo->ubicacion_id,
+                'fecha_registro' => $equipo->fecha_registro,
+            ]
+        );
+
         //5. FINALIZAR
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo registrado.')
@@ -343,6 +364,16 @@ class EquipoController extends Controller
      */
     public function update(EquipoRequest $request, Equipo $equipo): RedirectResponse
     {
+        // Guardar los datos anteriores para la auditoría
+        $datosAnteriores = [
+            'tipo_equipo_id' => $equipo->tipo_equipo_id,
+            'marca' => $equipo->marca,
+            'modelo' => $equipo->modelo,
+            'num_serie' => $equipo->num_serie,
+            'ubicacion_id' => $equipo->ubicacion_id,
+            'fecha_registro' => $equipo->fecha_registro,
+        ];
+
         $tipoEquipoId = $request->tipo_equipo_id;
 
         if ($request->filled('nuevo_tipo_equipo')) {
@@ -491,6 +522,50 @@ class EquipoController extends Controller
             $equipo->accesoriosEquipos()->delete();
         }
 
+        // Registrar auditoría de actualización
+
+        // Registrar auditoría de actualización
+        $equipo->refresh();
+
+        $datosNuevos = [
+            'tipo_equipo_id' => $equipo->tipo_equipo_id,
+            'marca' => $equipo->marca,
+            'modelo' => $equipo->modelo,
+            'num_serie' => $equipo->num_serie,
+            'ubicacion_id' => $equipo->ubicacion_id,
+            'fecha_registro' => $equipo->fecha_registro,
+        ];
+
+        // Comparar los valores anteriores con los nuevos
+        $cambios = [];
+
+        foreach ($datosAnteriores as $campo => $valorAnterior) {
+            $valorNuevo = $datosNuevos[$campo] ?? null;
+
+            if ((string) ($valorAnterior ?? '') !== (string) ($valorNuevo ?? '')) {
+                $cambios[$campo] = [
+                    'anterior' => $valorAnterior,
+                    'nuevo' => $valorNuevo,
+                ];
+            }
+        }
+
+        // Registrar solamente si hubo cambios en los datos principales
+        if (!empty($cambios)) {
+            Auditoria::registrar(
+                'ACTUALIZAR',
+                'EQUIPOS',
+                'Actualizó el equipo '
+                . ($equipo->num_serie ?: 'ID ' . $equipo->id)
+                . ' - ' . $equipo->marca
+                . ' ' . ($equipo->modelo ?? '')
+                . '.',
+                $equipo,
+                $cambios
+            );
+        }
+
+
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo actualizado.')
             ->with('toast_tipo', 'aviso')
@@ -498,16 +573,50 @@ class EquipoController extends Controller
             ->with('equipo_accion', 'editar');
     }
 
+
     public function destroy(Equipo $equipo): RedirectResponse
     {
+        // Guardar la información del equipo antes de eliminarlo
+        $idEquipo = $equipo->id;
+
+        $descripcion = 'Eliminó el equipo '
+            . ($equipo->num_serie ?: 'ID ' . $equipo->id)
+            . ' - ' . $equipo->marca
+            . ' ' . ($equipo->modelo ?? '')
+            . '.';
+
+        $datosEliminados = [
+            'id' => $equipo->id,
+            'tipo_equipo_id' => $equipo->tipo_equipo_id,
+            'marca' => $equipo->marca,
+            'modelo' => $equipo->modelo,
+            'num_serie' => $equipo->num_serie,
+            'ubicacion_id' => $equipo->ubicacion_id,
+            'fecha_registro' => $equipo->fecha_registro,
+        ];
+
+        // Registrar la auditoría antes de eliminar el equipo
+        // para conservar correctamente la referencia al registro.
+        Auditoria::registrar(
+            'ELIMINAR',
+            'EQUIPOS',
+            $descripcion,
+            $equipo,
+            [
+                'eliminado' => $datosEliminados,
+            ]
+        );
+
+        // Eliminar el equipo después de guardar la auditoría
         $equipo->delete();
 
         return redirect()->route('equipos.index')
             ->with('success', 'Equipo eliminado.')
             ->with('toast_tipo', 'error')
-            ->with('equipo_resaltado', $equipo->id)
+            ->with('equipo_resaltado', $idEquipo)
             ->with('equipo_accion', 'eliminar');
     }
+
 
     public function verificarSerie(Request $request)
     {
@@ -567,6 +676,21 @@ class EquipoController extends Controller
 
         $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.pdf';
 
+        // Registrar auditoría de exportación PDF
+        Auditoria::registrar(
+            'EXPORTAR_PDF',
+            'EQUIPOS',
+            'Exportó ' . $equipos->count()
+            . ' equipo(s) a PDF.',
+            null,
+            [
+                'formato' => 'PDF',
+                'cantidad' => $equipos->count(),
+                'ids_equipos' => $equipos->pluck('id')->values()->all(),
+                'archivo' => $nombreArchivo,
+            ]
+        );
+
         return $pdf->download($nombreArchivo);
     }
 
@@ -598,9 +722,50 @@ class EquipoController extends Controller
 
         $nombreArchivo = 'Equipos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
 
+        // Registrar auditoría de exportación Excel
+        Auditoria::registrar(
+            'EXPORTAR_EXCEL',
+            'EQUIPOS',
+            'Exportó ' . $equipos->count()
+            . ' equipo(s) a Excel.',
+            null,
+            [
+                'formato' => 'EXCEL',
+                'cantidad' => $equipos->count(),
+                'ids_equipos' => $equipos->pluck('id')->values()->all(),
+                'archivo' => $nombreArchivo,
+            ]
+        );
+
         return Excel::download(
             new \App\Exports\EquiposExport($equipos),
             $nombreArchivo
         );
     }
+
+    
+public function auditarImpresion(Equipo $equipo)
+{
+    Auditoria::registrar(
+        'IMPRIMIR_FICHA',
+        'EQUIPOS',
+        'Solicitó imprimir la ficha del equipo '
+            . ($equipo->num_serie ?: 'ID ' . $equipo->id)
+            . ' - ' . $equipo->marca
+            . ' ' . ($equipo->modelo ?? '')
+            . '.',
+        $equipo,
+        [
+            'equipo_id' => $equipo->id,
+            'marca' => $equipo->marca,
+            'modelo' => $equipo->modelo,
+            'num_serie' => $equipo->num_serie,
+        ]
+    );
+
+    return response()->json([
+        'message' => 'Solicitud de impresión registrada correctamente.',
+    ]);
+}
+
 }

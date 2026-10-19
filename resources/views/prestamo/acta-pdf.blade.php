@@ -6,8 +6,8 @@
         @page { size: A4 portrait; margin: 28px 36px 24px 36px; }
         body { font-family: DejaVu Sans, sans-serif; font-size: 11px; color: #000; }
         h1, h2 { text-align: center; margin: 0; }
-        h1 { font-size: 14px; }
-        h2 { font-size: 13px; margin: 4px 0 12px 0; }
+        h1 { font-size: 15px; }
+        h2 { font-size: 14px; margin: 4px 0 12px 0; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
         th, td { border: 1px solid #000; padding: 5px 6px; }
         .seccion {
@@ -52,8 +52,20 @@
         $nombreSolicitante = mb_strtoupper(trim(($docente->nombres ?? '') . ' ' . ($docente->apellidos ?? '')));
     @endphp
 
-    <h1>INSTITUCION EDUCATIVA 88021 "ALFONSO UGARTE"</h1>
-    <h2>ACTA DE ENTREGA DE EQUIPOS DE COMPUTO</h2>
+    <table style="width: 100%; margin-bottom: 8px; border-collapse: collapse;">
+        <tr>
+            <td style="width: 20%; border: none; text-align: left; vertical-align: middle;">
+                <img src="{{ public_path('logo/logo.jpg') }}" width="85" height="85">
+            </td>
+            <td style="width: 60%; border: none; text-align: center; vertical-align: middle;">
+                <h1>INSTITUCION EDUCATIVA 88021 "ALFONSO UGARTE"</h1>
+                <h2>ACTA DE ENTREGA DE EQUIPOS DE COMPUTO</h2>
+            </td>
+            <td style="width: 20%; border: none; text-align: right; vertical-align: middle;">
+                <img src="{{ public_path('logo/jorgada.jpg') }}" width="75" height="75">
+            </td>
+        </tr>
+    </table>
 
     <table>
         <tr><td class="seccion" colspan="2">DATOS PERSONALES BENEFICIARIO</td></tr>

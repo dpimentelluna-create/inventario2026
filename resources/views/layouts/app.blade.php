@@ -471,6 +471,11 @@
         <div id="app-container">
             <!-- BARRA LATERAL -->
             <nav id="sidebar" class="shadow-sm">
+    <script>
+        if (localStorage.getItem('sidebarCollapsed') === 'true') {
+            document.currentScript.parentElement.classList.add('collapsed');
+        }
+    </script>
                 <div>
                     <!-- Cabecera de la Barra Lateral -->
                     <div class="d-flex align-items-center mb-3 px-1">
@@ -688,58 +693,40 @@
     <!-- Script para alternar el tema y colapsar la barra lateral -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const btnSwitch = document.getElementById('btn-switch-theme');
-            const themeIcon = document.getElementById('theme-icon');
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebar-toggle');
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+    const btnSwitch = document.getElementById('btn-switch-theme');
+    const themeIcon = document.getElementById('theme-icon');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
 
-            if (currentTheme === 'dark') {
-                themeIcon.className = 'bi bi-sun-fill';
-            } else {
-                themeIcon.className = 'bi bi-moon-fill';
-            }
+    if (themeIcon) {
+        themeIcon.className = (currentTheme === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
 
-            if (btnSwitch) {
-                btnSwitch.addEventListener('click', function() {
-                    let theme = document.documentElement.getAttribute('data-bs-theme');
-                    let newTheme = (theme === 'dark') ? 'light' : 'dark';
+    if (btnSwitch) {
+        btnSwitch.addEventListener('click', function() {
+            let theme = document.documentElement.getAttribute('data-bs-theme');
+            let newTheme = (theme === 'dark') ? 'light' : 'dark';
 
-                    document.documentElement.setAttribute('data-bs-theme', newTheme);
-                    localStorage.setItem('theme', newTheme);
+            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
 
-                    if (newTheme === 'dark') {
-                        themeIcon.className = 'bi bi-sun-fill';
-                    } else {
-                        themeIcon.className = 'bi bi-moon-fill';
-                    }
-                });
-            }
-
-            if (sidebarToggle) {
-                sidebarToggle.addEventListener('click', function() {
-                    sidebar.classList.toggle('collapsed');
-                });
+            if (themeIcon) {
+                themeIcon.className = (newTheme === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
             }
         });
-    </script>
+    }
 
-    <script>
-        if (document.querySelector('#example') && !$.fn.DataTable.isDataTable('#example')) {
-            new DataTable('#example', {
-                pageLength: 10,
-                lengthMenu: [5, 10, 25, 100],
-                responsive: true,
-                language: {
-                    lengthMenu: "Mostrar _MENU_ registros por página",
-                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros.",
-                    search: "Buscar:",
-                    zeroRecords: "No se encontraron registros",
-                    infoEmpty: "No hay registros disponibles",
-                    infoFiltered: "(filtrado de _MAX_ registros en total)",
-                }
-            });
-        }
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem(
+                'sidebarCollapsed',
+                sidebar.classList.contains('collapsed') ? 'true' : 'false'
+            );
+        });
+    }
+});
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -825,18 +812,6 @@
     </script>
     @endif
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const sidebar = document.getElementById('sidebar');
-            const toggleBtn = document.getElementById('sidebar-toggle');
-
-            if (sidebar && toggleBtn) {
-                toggleBtn.addEventListener('click', function() {
-                    sidebar.classList.toggle('collapsed');
-                });
-            }
-        });
-    </script>
 </body>
 
 </html>
