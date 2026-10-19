@@ -683,12 +683,19 @@ class EquipoController extends Controller
             'Exportó ' . $equipos->count()
             . ' equipo(s) a PDF.',
             null,
+
             [
                 'formato' => 'PDF',
                 'cantidad' => $equipos->count(),
-                'ids_equipos' => $equipos->pluck('id')->values()->all(),
                 'archivo' => $nombreArchivo,
+                'equipos' => $equipos->map(fn($equipo) => [
+                    'id' => $equipo->id,
+                    'num_serie' => $equipo->num_serie,
+                    'marca' => $equipo->marca,
+                    'modelo' => $equipo->modelo,
+                ])->values()->all(),
             ]
+
         );
 
         return $pdf->download($nombreArchivo);

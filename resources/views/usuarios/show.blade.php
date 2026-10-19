@@ -366,22 +366,29 @@
                                                                                 {{ $mostrarValor($valores['nuevo']) }}
                                                                             </span>
 
-                                                                        @elseif ($campo === 'eliminado' && is_array($valores))
-                                                                            <div class="usuario-cambios-eliminados">
-                                                                                @foreach ($valores as $campoEliminado => $valorEliminado)
-                                                                                    <div class="usuario-cambio-fila">
-                                                                                        <div class="usuario-cambio-campo">
-                                                                                            {{ $nombresCampos[$campoEliminado] ?? ucfirst(str_replace('_', ' ', $campoEliminado)) }}
-                                                                                        </div>
+                                                                        
+@elseif ($campo === 'equipos' && is_array($valores))
+    <div class="usuario-cambios-equipos">
+        <div class="usuario-cambio-campo mb-2">
+            Equipos incluidos en la exportación
+        </div>
 
-                                                                                        <div class="usuario-cambio-valor">
-                                                                                            <span class="valor-anterior">
-                                                                                                {{ $mostrarValor($valorEliminado) }}
-                                                                                            </span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            </div>
+        @foreach ($valores as $equipoExportado)
+            <div class="usuario-cambio-fila">
+                <div class="usuario-cambio-campo">
+                    {{ $equipoExportado['num_serie'] ?: 'SIN SERIE' }}
+                </div>
+
+                <div class="usuario-cambio-valor">
+                    <span class="valor-nuevo">
+                        {{ $equipoExportado['marca'] ?? 'SIN MARCA' }}
+                        {{ $equipoExportado['modelo'] ?? '' }}
+                    </span>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
                                                                         @else
                                                                             <span class="valor-nuevo">
                                                                                 {{ $mostrarValor($valores) }}
