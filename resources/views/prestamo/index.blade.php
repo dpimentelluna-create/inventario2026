@@ -21,10 +21,12 @@
                         </span>
 
                         <div class="d-flex align-items-center gap-2">
+                            @can('registrar')
                             <a href="{{ route('prestamos.create') }}" id="btn_nuevo_prestamo"
                                 class="btn btn-success btn-sm">
                                 <i class="fa-solid fa-plus"></i> Registrar Préstamo
                             </a>
+                            @endcan
 
                             <div class="btn-group">
                                 <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle"
@@ -363,15 +365,21 @@
                                                     href="{{ route('prestamos.show', $prestamo->id) }}">
                                                     <i class="fa-solid fa-eye"></i>
                                                 </a>
+
+                                                @can('registrar')
                                                 <a class="btn btn-warning btn-accion"
                                                     href="{{ route('prestamos.edit', $prestamo->id) }}"><i
                                                         class="fa-solid fa-pen-to-square"></i></a>
+                                                @endcan
+
+                                                @can('eliminar')
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-accion"
                                                     onclick="event.preventDefault(); confirmarEliminarPrestamo(this.closest('form'));">
                                                     <i class="fa-solid fa-trash"></i>
                                                 </button>
+                                                @endcan
                                             </form>
                                         </div>
                                     </td>

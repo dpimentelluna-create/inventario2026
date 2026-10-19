@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Gate::define('gestionar-usuarios', fn(User $usuario) => $usuario->activo && $usuario->esAdministrador());
+        Gate::define('registrar', fn(User $usuario) => $usuario->activo && $usuario->puedeRegistrar());
+
+        //Administrador y registrador pueden eliminar
+        Gate::define('eliminar', fn (User $usuario) => $usuario->activo && $usuario->puedeEliminar());
+
+        //Solo administradores pueden eliminar
+        //Gate::define('eliminar', fn(User $usuario) => $usuario->activo && $usuario->puedeEliminar());
     }
 }

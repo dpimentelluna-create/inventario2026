@@ -21,9 +21,29 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+Auth::routes([
+    'register' => false,
+    'reset' => false,
+    'verify' => false,
+]);
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'acceso'])->group(function () {
+    // Cambiar contraseña propia
+    Route::get('/cuenta/password', [\App\Http\Controllers\CuentaController::class, 'editarPassword'])
+        ->name('cuenta.password.edit');
+    Route::put('/cuenta/password', [\App\Http\Controllers\CuentaController::class, 'actualizarPassword'])
+        ->name('cuenta.password.update');
+
+    // Módulo Usuarios (solo administrador)
+    Route::middleware('can:gestionar-usuarios')->group(function () {
+        Route::post('/usuarios/{usuario}/estado', [\App\Http\Controllers\UsuarioController::class, 'cambiarEstado'])
+            ->name('usuarios.estado');
+        Route::put('/usuarios/{usuario}/password', [\App\Http\Controllers\UsuarioController::class, 'restablecerPassword'])
+            ->name('usuarios.password');
+        Route::resource('usuarios', \App\Http\Controllers\UsuarioController::class)
+            ->parameters(['usuarios' => 'usuario'])
+            ->except(['show', 'destroy']);
+    });
 
     //HOME:
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
