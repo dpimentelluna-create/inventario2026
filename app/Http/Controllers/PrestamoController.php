@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\PrestamoRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Exports\PrestamosExport;
@@ -79,11 +80,80 @@ class PrestamoController extends Controller
     }
 
     /**
+     * Bloquear los equipos en un orden estable y rechazar los que ya tengan
+     * un préstamo ACTIVO. El bloqueo de las filas de equipos serializa las
+     * altas/ediciones concurrentes que utilizan esta misma regla.
+     */
+    private function bloquearYValidarDisponibilidad(array $equipoIds, ?int $prestamoId = null): void
+    {
+        $ids = collect($equipoIds)
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($ids->isEmpty()) {
+            throw ValidationException::withMessages([
+                'equipos' => 'Debe seleccionar al menos un equipo.',
+            ]);
+        }
+
+        // Todos los procesos de préstamo deben bloquear primero estas filas.
+        $equipos = Equipo::query()
+            ->whereIn('id', $ids)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get(['id', 'marca', 'modelo', 'num_serie']);
+
+        if ($equipos->count() !== $ids->count()) {
+            throw ValidationException::withMessages([
+                'equipos' => 'Uno o más equipos seleccionados ya no existen. Actualice el formulario e inténtelo nuevamente.',
+            ]);
+        }
+
+        $consultaOcupados = PrestamoEquipo::query()
+            ->whereIn('equipo_id', $ids)
+            ->whereHas('prestamo', function ($query) use ($prestamoId) {
+                $query->where('estado', 'ACTIVO');
+
+                if ($prestamoId !== null) {
+                    $query->where('id', '<>', $prestamoId);
+                }
+            });
+
+        $idsOcupados = $consultaOcupados
+            ->pluck('equipo_id')
+            ->unique();
+
+        if ($idsOcupados->isNotEmpty()) {
+            $nombres = $equipos
+                ->whereIn('id', $idsOcupados)
+                ->map(function ($equipo) {
+                    $identificador = $equipo->num_serie
+                        ?: trim(($equipo->marca ?? '') . ' ' . ($equipo->modelo ?? ''));
+
+                    return 'ID ' . $equipo->id . ($identificador !== '' ? ' (' . $identificador . ')' : '');
+                })
+                ->implode(', ');
+
+            throw ValidationException::withMessages([
+                'equipos' => 'No se puede guardar el préstamo. Estos equipos ya tienen un préstamo activo: ' . $nombres . '.',
+            ]);
+        }
+    }
+
+    /**
      * Guardar préstamo
      */
     public function store(PrestamoRequest $request): RedirectResponse
     {
         $prestamo = DB::transaction(function () use ($request) {
+
+            $this->bloquearYValidarDisponibilidad(
+                collect($request->input('equipos', []))
+                    ->pluck('equipo_id')
+                    ->all()
+            );
 
             $estadoPrestamo = $request->filled('hora_fin')
                 ? 'TERMINADO'
@@ -379,6 +449,25 @@ class PrestamoController extends Controller
     ): RedirectResponse {
 
         DB::transaction(function () use ($request, $prestamo) {
+
+            // Bloquear el préstamo para evitar que dos ediciones simultáneas
+            // reemplacen sus detalles al mismo tiempo.
+            $prestamo = Prestamo::query()
+                ->whereKey($prestamo->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Bloquear tanto los equipos actuales como los nuevos, incluso
+            // los que se retirarán de este préstamo durante la edición.
+            $equiposActuales = $prestamo->prestamoEquipos()->pluck('equipo_id')->all();
+            $equiposSolicitados = collect($request->input('equipos', []))
+                ->pluck('equipo_id')
+                ->all();
+
+            $this->bloquearYValidarDisponibilidad(
+                array_merge($equiposActuales, $equiposSolicitados),
+                $prestamo->id
+            );
 
             // 1. Guardar la información anterior antes de modificar.
             $prestamo->load([
