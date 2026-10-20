@@ -409,51 +409,49 @@
 <script src="{{ asset('js/form-validaciones.js') }}"></script>
 <script>
 
-    const prestamosExistentes = {!! json_encode(
+    
+const prestamosExistentes = {!! json_encode(
     $prestamo->exists
     ? $prestamo->prestamoEquipos->map(function ($prestamoEquipo) {
+        $equipo = $prestamoEquipo->equipo;
+
         return [
             'equipo_id' => $prestamoEquipo->equipo_id,
             'estado' => $prestamoEquipo->estado,
             'observacion' => $prestamoEquipo->observacion,
 
             'equipo' => [
-                'id' => $prestamoEquipo->equipo->id,
-                'tipo_equipo_id' => $prestamoEquipo->equipo->tipo_equipo_id,
-                'marca' => $prestamoEquipo->equipo->marca,
-                'modelo' => $prestamoEquipo->equipo->modelo,
-                'num_serie' => $prestamoEquipo->equipo->num_serie,
+                'id' => $equipo->id,
+                'tipo_equipo_id' => $equipo->tipo_equipo_id,
+                'marca' => $equipo->marca,
+                'modelo' => $equipo->modelo,
+                'num_serie' => $equipo->num_serie,
 
                 'tipo_equipo' => [
-                    'nombre' => $prestamoEquipo->equipo->tipoEquipo->nombre
+                    'nombre' => $equipo->tipoEquipo->nombre ?? 'SIN TIPO'
                 ],
 
-                'accesorios_equipos' =>
-                    $prestamoEquipo->equipo->accesoriosEquipos->map(function ($accesorio) use ($prestamoEquipo) {
+                // Accesorios históricos de este préstamo.
+                'accesorios_equipos' => $prestamoEquipo->prestamoAccesorios
+                    ->map(function ($detalleAccesorio) {
+                        $accesorio = $detalleAccesorio->accesorioEquipo;
 
-                        $prestamoAccesorio =
-                            $prestamoEquipo->prestamoAccesorios
-                                ->firstWhere(
-                                    'accesorio_equipo_id',
-                                    $accesorio->id
-                                );
+                        if (!$accesorio) {
+                            return null;
+                        }
 
                         return [
-                            'id' => $accesorio->id,
+                            'id' => $detalleAccesorio->accesorio_equipo_id,
                             'tipo' => $accesorio->tipo,
                             'marca' => $accesorio->marca,
                             'num_serie' => $accesorio->num_serie,
-
-                            'estado' => $prestamoAccesorio
-                                ? $prestamoAccesorio->estado
-                                : 'BUENO',
-
-                            'observacion' => $prestamoAccesorio
-                                ? $prestamoAccesorio->observacion
-                                : null,
+                            'estado' => $detalleAccesorio->estado,
+                            'observacion' => $detalleAccesorio->observacion,
                         ];
-
-                    })->values()->toArray()
+                    })
+                    ->filter()
+                    ->values()
+                    ->toArray()
             ]
         ];
     })->values()->toArray()
@@ -2392,6 +2390,15 @@ localStorage.setItem('prestamos_filtros_estado_nuevo_prestamo', '1');
         const parametros =
             new URLSearchParams();
 
+        const prestamoId = @json(
+            isset($prestamo) && $prestamo->exists
+                ? $prestamo->id
+                : null
+        );
+
+        if (prestamoId !== null) {
+            parametros.append('prestamo_id', prestamoId);
+        }
 
         if (buscar !== '') {
 
@@ -3309,45 +3316,48 @@ actualizarEstadoBuscadorEquipos();
     /* CARGAR EQUIPOS EXISTENTES EN EDICIÓN */
     /* ========================================================= */
 
-    if (
-        Array.isArray(prestamosExistentes)
-        &&
-        prestamosExistentes.length > 0
-    ) {
+if (
+    Array.isArray(prestamosExistentes)
+    &&
+    prestamosExistentes.length > 0
+) {
+    prestamosExistentes.forEach(prestamoEquipo => {
+        const equipo = prestamoEquipo.equipo;
 
-        prestamosExistentes.forEach(
-            prestamoEquipo => {
+        if (!equipo || !equipo.id) {
+            return;
+        }
 
-                const equipo =
-                    prestamoEquipo.equipo;
+        equiposSeleccionados.add(String(equipo.id));
 
+        // Recuperar los accesorios guardados en este préstamo.
+        const accesoriosHistoricos = (
+            prestamoEquipo.prestamo_accesorios ?? []
+        ).map(detalleAccesorio => {
+            const accesorio = detalleAccesorio.accesorio_equipo;
 
-                equiposSeleccionados.add(
-                    String(equipo.id)
-                );
-
-
-                mostrarEquipoSeleccionado(
-
-                    equipo,
-
-                    prestamoEquipo.estado
-                        ?? 'BUENO',
-
-                    prestamoEquipo.observacion
-                        ?? '',
-
-                    equipo.accesorios_equipos
-                        ?? []
-
-                );
-
+            if (!accesorio) {
+                return null;
             }
-        );
 
-        ocultarCamposBusqueda();
+            return {
+                ...accesorio,
+                estado: detalleAccesorio.estado,
+                observacion: detalleAccesorio.observacion ?? ''
+            };
+        }).filter(Boolean);
 
-    }
+        mostrarEquipoSeleccionado(
+    equipo,
+    prestamoEquipo.estado ?? 'BUENO',
+    prestamoEquipo.observacion ?? '',
+    equipo.accesorios_equipos ?? []
+);
+    });
+
+    ocultarCamposBusqueda();
+}
+
 
     const erroresServidor = @json($errors->toArray());
     const mapaCampos = {

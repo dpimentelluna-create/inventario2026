@@ -62,22 +62,29 @@ class PrestamoController extends Controller
      * Mostrar formulario para crear préstamo
      */
     public function create(): View
-    {
-        $prestamo = new Prestamo();
+{
+    $prestamo = new Prestamo();
 
-        $tiposEquipo = TiposEquipo::whereHas('equipos')
-            ->orderBy('nombre')->get();
+    $tiposEquipo = TiposEquipo::whereHas('equipos', function ($query) {
+        $query->whereDoesntHave('prestamoEquipos', function ($detalle) {
+            $detalle->whereHas('prestamo', function ($prestamoQuery) {
+                $prestamoQuery->where('estado', 'ACTIVO');
+            });
+        });
+    })
+    ->orderBy('nombre')
+    ->get();
 
-        $docentes = Docente::orderBy('apellidos')
-            ->orderBy('nombres')
-            ->get();
+    $docentes = Docente::orderBy('apellidos')
+        ->orderBy('nombres')
+        ->get();
 
-        return view('prestamo.create', compact(
-            'prestamo',
-            'tiposEquipo',
-            'docentes'
-        ));
-    }
+    return view('prestamo.create', compact(
+        'prestamo',
+        'tiposEquipo',
+        'docentes'
+    ));
+}
 
     /**
      * Bloquear los equipos en un orden estable y rechazar los que ya tengan
@@ -427,27 +434,35 @@ class PrestamoController extends Controller
      * Mostrar formulario de edición
      */
     public function edit($id): View
-    {
-        $prestamo = Prestamo::with([
-            'docente',
-            'prestamoEquipos.equipo.tipoEquipo',
-            'prestamoEquipos.equipo.accesoriosEquipos',
-            'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
-        ])->findOrFail($id);
+{
+    $prestamo = Prestamo::with([
+        'docente',
+        'prestamoEquipos.equipo.tipoEquipo',
+        'prestamoEquipos.equipo.accesoriosEquipos',
+        'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
+    ])->findOrFail($id);
 
-        $tiposEquipo = TiposEquipo::whereHas('equipos')
-            ->orderBy('nombre')->get();
+    $tiposEquipo = TiposEquipo::whereHas('equipos', function ($query) use ($prestamo) {
+        $query->whereDoesntHave('prestamoEquipos', function ($detalle) use ($prestamo) {
+            $detalle->whereHas('prestamo', function ($prestamoQuery) use ($prestamo) {
+                $prestamoQuery->where('estado', 'ACTIVO')
+                    ->where('id', '!=', $prestamo->id);
+            });
+        });
+    })
+    ->orderBy('nombre')
+    ->get();
 
-        $docentes = Docente::orderBy('apellidos')
-            ->orderBy('nombres')
-            ->get();
+    $docentes = Docente::orderBy('apellidos')
+        ->orderBy('nombres')
+        ->get();
 
-        return view('prestamo.edit', compact(
-            'prestamo',
-            'tiposEquipo',
-            'docentes'
-        ));
-    }
+    return view('prestamo.edit', compact(
+        'prestamo',
+        'tiposEquipo',
+        'docentes'
+    ));
+}
 
     /**
      * Actualizar préstamo
@@ -492,7 +507,22 @@ class PrestamoController extends Controller
                 ? 'TERMINADO'
                 : 'ACTIVO';
 
-            // 2. Actualizar los datos principales.
+            
+            // 2. Guardar los detalles existentes para actualizarlos
+            // sin eliminar innecesariamente sus identificadores.
+            $estadoAnteriorPrestamo = $prestamo->estado;
+
+            $detallesActuales = $prestamo->prestamoEquipos()
+                ->with('prestamoAccesorios')
+                ->get()
+                ->keyBy('equipo_id');
+
+            $idsEquiposSolicitados = collect($request->input('equipos', []))
+                ->pluck('equipo_id')
+                ->map(fn ($id) => (int) $id)
+                ->all();
+
+            // 3. Actualizar los datos principales del préstamo.
             $prestamo->update([
                 'docente_id' => $request->docente_id,
                 'cargo' => $request->cargo,
@@ -502,24 +532,45 @@ class PrestamoController extends Controller
                 'estado' => $estadoPrestamo,
             ]);
 
-            // 3. Reemplazar las relaciones como ya lo hace tu sistema.
-            $prestamo->prestamoEquipos()->delete();
+            // 4. Eliminar solamente los equipos que se retiraron
+            // de este préstamo. Sus accesorios se eliminan en cascada.
+            $prestamo->prestamoEquipos()
+                ->whereNotIn('equipo_id', $idsEquiposSolicitados)
+                ->delete();
 
-            foreach ($request->equipos as $equipoData) {
+            foreach ($request->input('equipos', []) as $equipoData) {
 
-                $prestamoEquipo = PrestamoEquipo::create([
-                    'prestamo_id' => $prestamo->id,
-                    'equipo_id' => $equipoData['equipo_id'],
-                    'estado' => $equipoData['estado'],
-                    'observacion' => $equipoData['observacion'] ?? null,
-                ]);
+                $equipoId = (int) $equipoData['equipo_id'];
 
-                if ($estadoPrestamo === 'TERMINADO') {
+                // Si ya existía, actualizar su detalle. Si es nuevo,
+                // crear el registro correspondiente.
+                $prestamoEquipo = $detallesActuales->get($equipoId);
 
+                if ($prestamoEquipo) {
+                    $prestamoEquipo->update([
+                        'estado' => $equipoData['estado'],
+                        'observacion' => $equipoData['observacion'] ?? null,
+                    ]);
+                } else {
+                    $prestamoEquipo = PrestamoEquipo::create([
+                        'prestamo_id' => $prestamo->id,
+                        'equipo_id' => $equipoId,
+                        'estado' => $equipoData['estado'],
+                        'observacion' => $equipoData['observacion'] ?? null,
+                    ]);
+                }
+
+                // Actualizar el inventario únicamente cuando el préstamo
+                // pasa de ACTIVO a TERMINADO. Editar uno que ya estaba
+                // TERMINADO no debe sobrescribir el estado actual.
+                if (
+                    $estadoAnteriorPrestamo === 'ACTIVO'
+                    && $estadoPrestamo === 'TERMINADO'
+                ) {
                     $equipo = Equipo::with([
                         'especificacionesLaptops',
                         'especificacionesEquipo',
-                    ])->findOrFail($equipoData['equipo_id']);
+                    ])->findOrFail($equipoId);
 
                     if ($equipo->especificacionesLaptops) {
                         $equipo->especificacionesLaptops->update([
@@ -532,28 +583,68 @@ class PrestamoController extends Controller
                     }
                 }
 
-                if (!empty($equipoData['accesorios'])) {
+                // Sincronizar los accesorios del detalle sin recrear
+                // los que ya existen.
+                $accesoriosActuales = $prestamoEquipo
+                    ->prestamoAccesorios()
+                    ->get()
+                    ->keyBy('accesorio_equipo_id');
 
-                    foreach ($equipoData['accesorios'] as $accesorioData) {
+                $accesoriosSolicitados = collect(
+                    $equipoData['accesorios'] ?? []
+                );
 
-                        $prestamoAccesorio = PrestamoAccesorio::create([
-                            'prestamo_equipo_id' => $prestamoEquipo->id,
-                            'accesorio_equipo_id' =>
-                            $accesorioData['accesorio_equipo_id'],
+                $idsAccesoriosSolicitados = $accesoriosSolicitados
+                    ->pluck('accesorio_equipo_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->all();
+
+                // Retirar únicamente los accesorios que se quitaron
+                // de este equipo dentro del préstamo.
+                $prestamoEquipo->prestamoAccesorios()
+                    ->whereNotIn(
+                        'accesorio_equipo_id',
+                        $idsAccesoriosSolicitados
+                    )
+                    ->delete();
+
+                foreach ($accesoriosSolicitados as $accesorioData) {
+
+                    $accesorioId = (int) $accesorioData['accesorio_equipo_id'];
+
+                    $prestamoAccesorio = $accesoriosActuales->get(
+                        $accesorioId
+                    );
+
+                    if ($prestamoAccesorio) {
+                        $prestamoAccesorio->update([
                             'estado' => $accesorioData['estado'],
                             'observacion' =>
-                            $accesorioData['observacion'] ?? null,
+                                $accesorioData['observacion'] ?? null,
                         ]);
+                    } else {
+                        $prestamoAccesorio = PrestamoAccesorio::create([
+                            'prestamo_equipo_id' => $prestamoEquipo->id,
+                            'accesorio_equipo_id' => $accesorioId,
+                            'estado' => $accesorioData['estado'],
+                            'observacion' =>
+                                $accesorioData['observacion'] ?? null,
+                        ]);
+                    }
 
-                        if ($estadoPrestamo === 'TERMINADO') {
+                    // Igual que con los equipos: actualizar el estado
+                    // real del accesorio solo al terminar un préstamo
+                    // que anteriormente estaba activo.
+                    if (
+                        $estadoAnteriorPrestamo === 'ACTIVO'
+                        && $estadoPrestamo === 'TERMINADO'
+                    ) {
+                        $accesorio = $prestamoAccesorio->accesorioEquipo;
 
-                            $accesorio = $prestamoAccesorio->accesorioEquipo;
-
-                            if ($accesorio) {
-                                $accesorio->update([
-                                    'estado' => $accesorioData['estado'],
-                                ]);
-                            }
+                        if ($accesorio) {
+                            $accesorio->update([
+                                'estado' => $accesorioData['estado'],
+                            ]);
                         }
                     }
                 }
@@ -629,7 +720,7 @@ class PrestamoController extends Controller
     /**
      * Obtener equipos según tipo
      */
-    public function equiposPorTipo($tipoId)
+    public function equiposPorTipo(Request $request, $tipoId)
     {
         $equipos = Equipo::with([
             'tipoEquipo',
@@ -638,6 +729,19 @@ class PrestamoController extends Controller
             'accesoriosEquipos'
         ])
             ->where('tipo_equipo_id', $tipoId)
+->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
+    $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
+        $prestamoQuery->where('estado', 'ACTIVO');
+
+        if ($request->filled('prestamo_id')) {
+            $prestamoQuery->where(
+                'id',
+                '!=',
+                (int) $request->input('prestamo_id')
+            );
+        }
+    });
+})
             ->select(
                 'id',
                 'tipo_equipo_id',
@@ -667,11 +771,23 @@ class PrestamoController extends Controller
     public function buscarEquipos(Request $request)
     {
         $query = Equipo::with([
-            'tipoEquipo',
-            'especificacionesLaptops',
-            'especificacionesEquipo',
-            'accesoriosEquipos'
-        ]);
+    'tipoEquipo',
+    'especificacionesLaptops',
+    'especificacionesEquipo',
+    'accesoriosEquipos'
+])->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
+    $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
+        $prestamoQuery->where('estado', 'ACTIVO');
+
+        if ($request->filled('prestamo_id')) {
+            $prestamoQuery->where(
+                'id',
+                '!=',
+                (int) $request->input('prestamo_id')
+            );
+        }
+    });
+});
 
         if ($request->filled('tipo_equipo_id')) {
             $query->where(

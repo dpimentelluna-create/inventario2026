@@ -105,6 +105,19 @@ public function especificacionesEquipo()
     );
 }
     
+/**
+ * Detalles de préstamos asociados a este equipo.
+ */
+public function prestamoEquipos()
+{
+    return $this->hasMany(
+        \App\Models\PrestamoEquipo::class,
+        'equipo_id',
+        'id'
+    );
+}
+
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */

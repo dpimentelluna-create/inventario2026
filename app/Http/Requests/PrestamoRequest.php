@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class PrestamoRequest extends FormRequest
 {
@@ -93,4 +94,70 @@ class PrestamoRequest extends FormRequest
             'equipos.*.accesorios.*.estado.required' => 'El estado del accesorio es obligatorio.',
         ];
     }
+
+    
+    public function after(): array
+    {
+        return [
+            function (Validator $validator) {
+                $equipos = $this->input('equipos', []);
+
+                if (!is_array($equipos)) {
+                    return;
+                }
+
+                foreach ($equipos as $indiceEquipo => $equipo) {
+                    if (
+                        !is_array($equipo)
+                        || empty($equipo['equipo_id'])
+                        || !is_array($equipo['accesorios'] ?? [])
+                    ) {
+                        continue;
+                    }
+
+                    $equipoId = (int) $equipo['equipo_id'];
+                    $idsAccesorios = [];
+
+                    foreach (
+    ($equipo['accesorios'] ?? []) as $indiceAccesorio => $accesorio
+) {
+                        if (
+                            !is_array($accesorio)
+                            || empty($accesorio['accesorio_equipo_id'])
+                        ) {
+                            continue;
+                        }
+
+                        $accesorioId = (int) $accesorio['accesorio_equipo_id'];
+
+                        // Evitar accesorios repetidos dentro del mismo equipo.
+                        if (in_array($accesorioId, $idsAccesorios, true)) {
+                            $validator->errors()->add(
+                                "equipos.{$indiceEquipo}.accesorios.{$indiceAccesorio}.accesorio_equipo_id",
+                                'No puede repetir el mismo accesorio para un equipo.'
+                            );
+
+                            continue;
+                        }
+
+                        $idsAccesorios[] = $accesorioId;
+
+                        // Verificar que el accesorio pertenezca al equipo indicado.
+                        $pertenece = \App\Models\AccesoriosEquipo::query()
+                            ->whereKey($accesorioId)
+                            ->where('equipo_id', $equipoId)
+                            ->exists();
+
+                        if (!$pertenece) {
+                            $validator->errors()->add(
+                                "equipos.{$indiceEquipo}.accesorios.{$indiceAccesorio}.accesorio_equipo_id",
+                                'El accesorio seleccionado no pertenece al equipo indicado.'
+                            );
+                        }
+                    }
+                }
+            },
+        ];
+    }
+
 }
