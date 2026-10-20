@@ -1,472 +1,563 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Usuario {{ $usuario->name }}
+Usuario {{ $usuario->name }}
 @endsection
 
 @section('content')
-    <div class="container-fluid usuario-show-container">
-        <div class="row">
-            <div class="col-12">
+<div class="container-fluid usuario-show-container">
+    <div class="row">
+        <div class="col-12">
 
-                <div class="card usuario-show-card">
+            <div class="card usuario-show-card">
 
-                    {{-- ENCABEZADO --}}
-                    <div class="card-header usuario-show-header">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                {{-- ENCABEZADO --}}
+                <div class="card-header usuario-show-header">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                            <div class="usuario-show-titulo">
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="bi bi-person-badge-fill usuario-show-icono"></i>
-                                    <span>FICHA DEL USUARIO</span>
-                                </div>
-
-                                <small>
-                                    Información de la cuenta y trazabilidad de sus operaciones.
-                                </small>
+                        <div class="usuario-show-titulo">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-person-badge-fill usuario-show-icono"></i>
+                                <span>FICHA DEL USUARIO</span>
                             </div>
 
-                            <div class="usuario-show-estado">
-                                <span
-                                    class="usuario-estado-badge {{ $usuario->activo ? 'estado-activo' : 'estado-inactivo' }}">
-                                    <span class="usuario-estado-punto"></span>
-                                    {{ $usuario->activo ? 'ACTIVO' : 'INACTIVO' }}
-                                </span>
-                            </div>
-
+                            <small>
+                                Información de la cuenta y trazabilidad de sus operaciones.
+                            </small>
                         </div>
+
+                        <div class="usuario-show-estado">
+                            <span
+                                class="usuario-estado-badge {{ $usuario->activo ? 'estado-activo' : 'estado-inactivo' }}">
+                                <span class="usuario-estado-punto"></span>
+                                {{ $usuario->activo ? 'ACTIVO' : 'INACTIVO' }}
+                            </span>
+                        </div>
+
                     </div>
+                </div>
 
-                    <div class="card-body usuario-show-body">
+                <div class="card-body usuario-show-body">
 
-                        {{-- RESUMEN DE ACTIVIDAD --}}
-                        <div class="row g-3 mb-4">
+                    {{-- RESUMEN DE ACTIVIDAD --}}
+                    <div class="row g-3 mb-4">
 
-                            <div class="col-12 col-sm-6 col-xl-4">
-                                <div class="usuario-metrica">
-                                    <div class="usuario-metrica-icono metrica-verde">
-                                        <i class="bi bi-journal-check"></i>
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="usuario-metrica">
+                                <div class="usuario-metrica-icono metrica-verde">
+                                    <i class="bi bi-journal-check"></i>
+                                </div>
+                                <div>
+                                    <div class="usuario-metrica-etiqueta">
+                                        OPERACIONES REGISTRADAS
                                     </div>
-                                    <div>
-                                        <div class="usuario-metrica-etiqueta">
-                                            OPERACIONES REGISTRADAS
-                                        </div>
-                                        <div class="usuario-metrica-valor">
-                                            {{ number_format($totalAuditorias) }}
-                                        </div>
-                                        <div class="usuario-metrica-detalle">
-                                            Eventos asociados a esta cuenta
-                                        </div>
+                                    <div class="usuario-metrica-valor">
+                                        {{ number_format($totalAuditorias) }}
+                                    </div>
+                                    <div class="usuario-metrica-detalle">
+                                        Eventos asociados a esta cuenta
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="col-12 col-sm-6 col-xl-4">
-                                <div class="usuario-metrica">
-                                    <div class="usuario-metrica-icono metrica-azul">
-                                        <i class="bi bi-clock-history"></i>
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="usuario-metrica">
+                                <div class="usuario-metrica-icono metrica-azul">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div>
+                                    <div class="usuario-metrica-etiqueta">
+                                        ÚLTIMA ACTIVIDAD REGISTRADA
                                     </div>
-                                    <div>
-                                        <div class="usuario-metrica-etiqueta">
-                                            ÚLTIMA ACTIVIDAD REGISTRADA
-                                        </div>
-                                        <div class="usuario-metrica-valor usuario-metrica-fecha">
-                                            {{ $ultimaActividad
+                                    <div class="usuario-metrica-valor usuario-metrica-fecha">
+                                        {{ $ultimaActividad
         ? $ultimaActividad->created_at->format('d/m/Y')
         : 'Sin actividad' }}
-                                        </div>
-                                        <div class="usuario-metrica-detalle">
-                                            {{ $ultimaActividad
+                                    </div>
+                                    <div class="usuario-metrica-detalle">
+                                        {{ $ultimaActividad
         ? $ultimaActividad->created_at->format('h:i:s A')
         : 'Todavía no existen eventos' }}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="col-12 col-sm-6 col-xl-4">
-                                <div class="usuario-metrica">
-                                    <div class="usuario-metrica-icono metrica-morado">
-                                        <i class="bi bi-calendar-check"></i>
-                                    </div>
-                                    <div>
-                                        <div class="usuario-metrica-etiqueta">
-                                            FECHA DE REGISTRO
-                                        </div>
-                                        <div class="usuario-metrica-valor usuario-metrica-fecha">
-                                            {{ $usuario->created_at
-        ? $usuario->created_at->format('d/m/Y')
-        : '—' }}
-                                        </div>
-                                        <div class="usuario-metrica-detalle">
-                                            {{ $usuario->created_at
-        ? $usuario->created_at->format('h:i:s A')
-        : 'Fecha no disponible' }}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
 
-                        {{-- INFORMACIÓN DE LA CUENTA --}}
-                        <section class="usuario-seccion mb-4">
-
-                            <div class="usuario-seccion-header">
-                                <div class="usuario-seccion-icono">
-                                    <i class="bi bi-person-vcard"></i>
+                        <div class="col-12 col-sm-6 col-xl-4">
+                            <div class="usuario-metrica">
+                                <div class="usuario-metrica-icono metrica-morado">
+                                    <i class="bi bi-calendar-check"></i>
                                 </div>
-
                                 <div>
-                                    <h5>INFORMACIÓN DE LA CUENTA</h5>
-                                    <p>Datos de identificación y configuración del usuario.</p>
+                                    <div class="usuario-metrica-etiqueta">
+                                        FECHA DE REGISTRO
+                                    </div>
+                                    <div class="usuario-metrica-valor usuario-metrica-fecha">
+                                        {{ $usuario->created_at
+        ? $usuario->created_at->format('d/m/Y')
+        : '—' }}
+                                    </div>
+                                    <div class="usuario-metrica-detalle">
+                                        {{ $usuario->created_at
+        ? $usuario->created_at->format('h:i:s A')
+        : 'Fecha no disponible' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {{-- INFORMACIÓN DE LA CUENTA --}}
+                    <section class="usuario-seccion mb-4">
+
+                        <div class="usuario-seccion-header">
+                            <div class="usuario-seccion-icono">
+                                <i class="bi bi-person-vcard"></i>
+                            </div>
+
+                            <div>
+                                <h5>INFORMACIÓN DE LA CUENTA</h5>
+                                <p>Datos de identificación y configuración del usuario.</p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-person me-1"></i>
+                                        NOMBRE COMPLETO
+                                    </div>
+                                    <div class="usuario-dato-valor">
+                                        {{ $usuario->name }}
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="row g-3">
-
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-person me-1"></i>
-                                            NOMBRE COMPLETO
-                                        </div>
-                                        <div class="usuario-dato-valor">
-                                            {{ $usuario->name }}
-                                        </div>
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-envelope me-1"></i>
+                                        CORREO ELECTRÓNICO
+                                    </div>
+                                    <div class="usuario-dato-valor usuario-texto-largo">
+                                        {{ $usuario->email }}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-envelope me-1"></i>
-                                            CORREO ELECTRÓNICO
-                                        </div>
-                                        <div class="usuario-dato-valor usuario-texto-largo">
-                                            {{ $usuario->email }}
-                                        </div>
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-shield-lock me-1"></i>
+                                        ROL ASIGNADO
                                     </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-shield-lock me-1"></i>
-                                            ROL ASIGNADO
-                                        </div>
-                                        <div class="usuario-dato-valor">
-                                            <span class="usuario-rol-badge {{ match ($usuario->rol) {
+                                    <div class="usuario-dato-valor">
+                                        <span class="usuario-rol-badge {{ match ($usuario->rol) {
         \App\Models\User::ROL_ADMINISTRADOR => 'rol-admin',
         \App\Models\User::ROL_REGISTRADOR => 'rol-registrador',
         default => 'rol-consulta',
     } }}">
-                                                {{ $usuario->etiquetaRol() }}
-                                            </span>
-                                        </div>
+                                            {{ $usuario->etiquetaRol() }}
+                                        </span>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-person-check me-1"></i>
-                                            ESTADO DE LA CUENTA
-                                        </div>
-                                        <div class="usuario-dato-valor">
-                                            {{ $usuario->activo ? 'Cuenta habilitada' : 'Cuenta deshabilitada' }}
-                                        </div>
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-person-check me-1"></i>
+                                        ESTADO DE LA CUENTA
+                                    </div>
+                                    <div class="usuario-dato-valor">
+                                        {{ $usuario->activo ? 'Cuenta habilitada' : 'Cuenta deshabilitada' }}
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-key me-1"></i>
-                                            CAMBIO DE CONTRASEÑA
-                                        </div>
-                                        <div class="usuario-dato-valor">
-                                            {{ $usuario->debe_cambiar_password
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-key me-1"></i>
+                                        CAMBIO DE CONTRASEÑA
+                                    </div>
+                                    <div class="usuario-dato-valor">
+                                        {{ $usuario->debe_cambiar_password
         ? 'Pendiente al ingresar'
         : 'No requerido' }}
-                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="usuario-dato">
-                                        <div class="usuario-dato-etiqueta">
-                                            <i class="bi bi-arrow-repeat me-1"></i>
-                                            ÚLTIMA ACTUALIZACIÓN DE LA CUENTA
-                                        </div>
-                                        <div class="usuario-dato-valor">
-                                            {{ $usuario->updated_at
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="usuario-dato">
+                                    <div class="usuario-dato-etiqueta">
+                                        <i class="bi bi-arrow-repeat me-1"></i>
+                                        ÚLTIMA ACTUALIZACIÓN DE LA CUENTA
+                                    </div>
+                                    <div class="usuario-dato-valor">
+                                        {{ $usuario->updated_at
         ? $usuario->updated_at->format('d/m/Y h:i:s A')
         : '—' }}
-                                        </div>
                                     </div>
                                 </div>
-
-                            </div>
-                        </section>
-
-                        {{-- HISTORIAL DE AUDITORÍA --}}
-                        <section class="usuario-seccion usuario-auditoria-seccion">
-
-                            <div class="usuario-seccion-header usuario-auditoria-header">
-                                <div class="usuario-seccion-icono">
-                                    <i class="bi bi-shield-check"></i>
-                                </div>
-
-                                <div>
-                                    <h5>HISTORIAL DE AUDITORÍA</h5>
-                                    <p>
-                                        Operaciones registradas que fueron realizadas por esta cuenta.
-                                    </p>
-                                </div>
-
-                                <span class="usuario-auditoria-contador">
-                                    {{ number_format($totalAuditorias) }} eventos
-                                </span>
-                            </div>
-
-                            @if ($auditorias->count() > 0)
-
-                                <div class="usuario-timeline">
-
-                                    @foreach ($auditorias as $auditoria)
-                                        @php
-                                            $estilosAccion = match ($auditoria->accion) {
-                                                'CREAR' => ['bi-plus-circle', 'accion-crear'],
-                                                'ACTUALIZAR' => ['bi-pencil-square', 'accion-actualizar'],
-                                                'ELIMINAR' => ['bi-trash3', 'accion-eliminar'],
-                                                'ACTIVAR' => ['bi-person-check', 'accion-activar'],
-                                                'DESACTIVAR' => ['bi-person-x', 'accion-desactivar'],
-                                                'RESTABLECER_PASSWORD' => ['bi-key', 'accion-seguridad'],
-                                                default => ['bi-activity', 'accion-general'],
-                                            };
-                                        @endphp
-
-                                        <article class="usuario-evento">
-
-                                            <div class="usuario-evento-marcador {{ $estilosAccion[1] }}">
-                                                <i class="bi {{ $estilosAccion[0] }}"></i>
-                                            </div>
-
-                                            <div class="usuario-evento-contenido">
-
-                                                <div class="usuario-evento-cabecera">
-                                                    <div class="usuario-evento-titulo">
-                                                        <span class="usuario-accion-badge {{ $estilosAccion[1] }}">
-                                                            {{ str_replace('_', ' ', $auditoria->accion) }}
-                                                        </span>
-
-                                                        <span class="usuario-modulo-badge">
-                                                            {{ $auditoria->modulo }}
-                                                        </span>
-                                                    </div>
-
-                                                    <div class="usuario-evento-fecha">
-                                                        <i class="bi bi-clock me-1"></i>
-                                                        {{ $auditoria->created_at->format('d/m/Y h:i:s A') }}
-                                                    </div>
-                                                </div>
-
-                                                <p class="usuario-evento-descripcion">
-                                                    {{ $auditoria->descripcion }}
-                                                </p>
-
-                                                <div class="usuario-evento-metadatos">
-
-                                                    <span>
-                                                        <i class="bi bi-person me-1"></i>
-                                                        Actor: {{ $auditoria->usuario_nombre }}
-                                                    </span>
-
-                                                    @if ($auditoria->registro_tipo)
-                                                        <span>
-                                                            <i class="bi bi-database me-1"></i>
-                                                            Registro: {{ $auditoria->registro_tipo }}
-                                                            @if ($auditoria->registro_id)
-                                                                #{{ $auditoria->registro_id }}
-                                                            @endif
-                                                        </span>
-                                                    @endif
-
-                                                    @if ($auditoria->ip)
-                                                        <span>
-                                                            <i class="bi bi-pc-display me-1"></i>
-                                                            IP: {{ $auditoria->ip }}
-                                                        </span>
-                                                    @endif
-
-                                                </div>
-
-
-                                                @if (is_array($auditoria->cambios) && count($auditoria->cambios))
-                                                    <details class="usuario-evento-detalles">
-                                                        <summary>
-                                                            <i class="bi bi-list-ul me-1"></i>
-                                                            Ver detalle de los cambios
-                                                        </summary>
-
-                                                        <div class="usuario-cambios-tabla">
-                                                            @foreach ($auditoria->cambios as $campo => $valores)
-                                                                @php
-                                                                    $nombresCampos = [
-                                                                        'tipo_equipo_id' => 'Tipo de equipo',
-                                                                        'marca' => 'Marca',
-                                                                        'modelo' => 'Modelo',
-                                                                        'num_serie' => 'Número de serie',
-                                                                        'codigo_inventario' => 'Código de inventario',
-                                                                        'estado' => 'Estado',
-                                                                        'ubicacion_id' => 'Ubicación',
-                                                                        'fecha_registro' => 'Fecha de registro',
-                                                                        'observacion' => 'Observación',
-                                                                        'equipo_id' => 'Equipo',
-                                                                        'docente_id' => 'Docente',
-                                                                    ];
-
-                                                                    $nombreCampo = $nombresCampos[$campo]
-                                                                        ?? ucfirst(str_replace('_', ' ', $campo));
-
-                                                                    $esModificacion = is_array($valores)
-                                                                        && array_key_exists('anterior', $valores)
-                                                                        && array_key_exists('nuevo', $valores);
-
-                                                                    $mostrarValor = function ($valor) {
-                                                                        if ($valor === null || $valor === '') {
-                                                                            return 'Vacío';
-                                                                        }
-
-                                                                        if (is_bool($valor)) {
-                                                                            return $valor ? 'Sí' : 'No';
-                                                                        }
-
-                                                                        return is_scalar($valor)
-                                                                            ? (string) $valor
-                                                                            : 'No disponible';
-                                                                    };
-                                                                @endphp
-
-                                                                <div class="usuario-cambio-fila">
-                                                                    <div class="usuario-cambio-campo">
-                                                                        {{ $nombreCampo }}
-                                                                    </div>
-
-                                                                    <div class="usuario-cambio-valor">
-                                                                        @if ($esModificacion)
-                                                                            <span class="valor-anterior">
-                                                                                {{ $mostrarValor($valores['anterior']) }}
-                                                                            </span>
-
-                                                                            <i class="bi bi-arrow-right"></i>
-
-                                                                            <span class="valor-nuevo">
-                                                                                {{ $mostrarValor($valores['nuevo']) }}
-                                                                            </span>
-
-                                                                        
-@elseif ($campo === 'equipos' && is_array($valores))
-    <div class="usuario-cambios-equipos">
-        <div class="usuario-cambio-campo mb-2">
-            Equipos incluidos en la exportación
-        </div>
-
-        @foreach ($valores as $equipoExportado)
-            <div class="usuario-cambio-fila">
-                <div class="usuario-cambio-campo">
-                    {{ $equipoExportado['num_serie'] ?: 'SIN SERIE' }}
-                </div>
-
-                <div class="usuario-cambio-valor">
-                    <span class="valor-nuevo">
-                        {{ $equipoExportado['marca'] ?? 'SIN MARCA' }}
-                        {{ $equipoExportado['modelo'] ?? '' }}
-                    </span>
-                </div>
-            </div>
-        @endforeach
-    </div>
-
-                                                                        @else
-                                                                            <span class="valor-nuevo">
-                                                                                {{ $mostrarValor($valores) }}
-                                                                            </span>
-                                                                        @endif
-                                                                    </div>
-                                                                </div>
-                                                            @endforeach
-                                                        </div>
-                                                    </details>
-                                                @endif
-
-
-                                            </div>
-                                        </article>
-                                    @endforeach
-
-                                </div>
-
-                                <div class="usuario-paginacion">
-                                    <div class="usuario-paginacion-info">
-                                        Mostrando {{ $auditorias->firstItem() }}
-                                        a {{ $auditorias->lastItem() }}
-                                        de {{ $auditorias->total() }} eventos
-                                    </div>
-
-                                    {{ $auditorias->links() }}
-                                </div>
-
-                            @else
-
-                                <div class="usuario-auditoria-vacia">
-                                    <div class="usuario-vacio-icono">
-                                        <i class="bi bi-clipboard2-data"></i>
-                                    </div>
-
-                                    <h6>No hay actividad registrada</h6>
-
-                                    <p>
-                                        Todavía no existen operaciones de auditoría asociadas a esta cuenta.
-                                        Los eventos aparecerán aquí a medida que el sistema los registre.
-                                    </p>
-                                </div>
-
-                            @endif
-
-                        </section>
-
-                        {{-- ACCIONES INFERIORES --}}
-                        <div class="usuario-show-footer">
-
-                            <div class="usuario-footer-texto">
-                                <strong>Administración de la cuenta</strong>
-                                <span>Consulta los datos o vuelve al listado de usuarios.</span>
-                            </div>
-
-                            <div class="usuario-footer-botones">
-                                <a href="{{ route('usuarios.index') }}"
-                                    class="btn btn-outline-secondary usuario-btn-footer">
-                                    <i class="fa-solid fa-arrow-left me-1"></i>
-                                    VOLVER
-                                </a>
-
-                                <a href="{{ route('usuarios.edit', $usuario->id) }}"
-                                    class="btn btn-success usuario-btn-footer">
-                                    <i class="fa-solid fa-pen-to-square me-1"></i>
-                                    EDITAR USUARIO
-                                </a>
                             </div>
 
                         </div>
+                    </section>
+
+                    {{-- HISTORIAL DE AUDITORÍA --}}
+                    <section class="usuario-seccion usuario-auditoria-seccion">
+
+                        <div class="usuario-seccion-header usuario-auditoria-header">
+                            <div class="usuario-seccion-icono">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+
+                            <div>
+                                <h5>HISTORIAL DE AUDITORÍA</h5>
+                                <p>
+                                    Operaciones registradas que fueron realizadas por esta cuenta.
+                                </p>
+                            </div>
+
+                            <span class="usuario-auditoria-contador">
+                                {{ number_format($totalAuditorias) }} eventos
+                            </span>
+                        </div>
+
+                        @if ($auditorias->count() > 0)
+
+                        <div class="usuario-timeline">
+
+                            @foreach ($auditorias as $auditoria)
+                            @php
+                            $estilosAccion = match ($auditoria->accion) {
+                            'CREAR' => ['bi-plus-circle', 'accion-crear'],
+                            'ACTUALIZAR' => ['bi-pencil-square', 'accion-actualizar'],
+                            'ELIMINAR' => ['bi-trash3', 'accion-eliminar'],
+                            'ACTIVAR' => ['bi-person-check', 'accion-activar'],
+                            'DESACTIVAR' => ['bi-person-x', 'accion-desactivar'],
+                            'RESTABLECER_PASSWORD' => ['bi-key', 'accion-seguridad'],
+                            default => ['bi-activity', 'accion-general'],
+                            };
+                            @endphp
+
+                            <article class="usuario-evento">
+
+                                <div class="usuario-evento-marcador {{ $estilosAccion[1] }}">
+                                    <i class="bi {{ $estilosAccion[0] }}"></i>
+                                </div>
+
+                                <div class="usuario-evento-contenido">
+
+                                    <div class="usuario-evento-cabecera">
+                                        <div class="usuario-evento-titulo">
+                                            <span class="usuario-accion-badge {{ $estilosAccion[1] }}">
+                                                {{ str_replace('_', ' ', $auditoria->accion) }}
+                                            </span>
+
+                                            <span class="usuario-modulo-badge">
+                                                {{ $auditoria->modulo }}
+                                            </span>
+                                        </div>
+
+                                        <div class="usuario-evento-fecha">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {{ $auditoria->created_at->format('d/m/Y h:i:s A') }}
+                                        </div>
+                                    </div>
+
+                                    <p class="usuario-evento-descripcion">
+                                        {{ $auditoria->descripcion }}
+                                    </p>
+
+                                    <div class="usuario-evento-metadatos">
+
+                                        <span>
+                                            <i class="bi bi-person me-1"></i>
+                                            Actor: {{ $auditoria->usuario_nombre }}
+                                        </span>
+
+                                        @if ($auditoria->registro_tipo)
+                                        <span>
+                                            <i class="bi bi-database me-1"></i>
+                                            Registro: {{ $auditoria->registro_tipo }}
+                                            @if ($auditoria->registro_id)
+                                            #{{ $auditoria->registro_id }}
+                                            @endif
+                                        </span>
+                                        @endif
+
+                                        @if ($auditoria->ip)
+                                        <span>
+                                            <i class="bi bi-pc-display me-1"></i>
+                                            IP: {{ $auditoria->ip }}
+                                        </span>
+                                        @endif
+
+                                    </div>
+
+
+                                    @if (is_array($auditoria->cambios) && count($auditoria->cambios))
+                                    <details class="usuario-evento-detalles">
+                                        <summary>
+                                            <i class="bi bi-list-ul me-1"></i>
+                                            Ver detalle de los cambios
+                                        </summary>
+
+
+                                        <div class="usuario-cambios-tabla">
+                                            @foreach ($auditoria->cambios as $campo => $valores)
+                                            @php
+                                            $nombresCampos = [
+                                            'tipo_equipo_id' => 'Tipo de equipo',
+                                            'marca' => 'Marca',
+                                            'modelo' => 'Modelo',
+                                            'num_serie' => 'Número de serie',
+                                            'codigo_inventario' => 'Código de inventario',
+                                            'estado' => 'Estado',
+                                            'ubicacion_id' => 'Ubicación',
+                                            'fecha_registro' => 'Fecha de registro',
+                                            'observacion' => 'Observación',
+                                            'equipo_id' => 'Equipo',
+                                            'docente_id' => 'Docente',
+                                            ];
+
+                                            $mostrarValor = function ($valor) {
+                                            if ($valor === null || $valor === '') {
+                                            return 'Vacío';
+                                            }
+
+                                            if (is_bool($valor)) {
+                                            return $valor ? 'Sí' : 'No';
+                                            }
+
+                                            return is_scalar($valor)
+                                            ? (string) $valor
+                                            : 'No disponible';
+                                            };
+
+                                            $esModificacion = is_array($valores)
+                                            && array_key_exists('anterior', $valores)
+                                            && array_key_exists('nuevo', $valores);
+                                            @endphp
+
+                                            @if ($campo === 'equipos' && is_array($valores))
+                                            @php
+                                            $idListaEquipos = 'auditoria-equipos-' . $auditoria->id;
+                                            $totalEquiposLista = count($valores);
+                                            @endphp
+
+                                            <div class="usuario-cambios-equipos">
+                                                <div class="usuario-cambio-campo mb-2">
+                                                    EQUIPOS INCLUIDOS ({{ $totalEquiposLista }})
+                                                </div>
+
+                                                @foreach ($valores as $indiceEquipo => $equipoExportado)
+                                                <div
+                                                    class="usuario-cambio-fila {{ $indiceEquipo >= 10 ? 'auditoria-equipo-oculto' : '' }}"
+                                                    data-lista-equipos="{{ $idListaEquipos }}"
+                                                    @if ($indiceEquipo>= 10) hidden @endif>
+
+                                                    <div class="usuario-cambio-campo">
+                                                        {{ $equipoExportado['num_serie'] ?: 'SIN SERIE' }}
+                                                    </div>
+
+                                                    <div class="usuario-cambio-valor">
+                                                        <span class="valor-nuevo">
+                                                            {{ $equipoExportado['marca'] ?? 'SIN MARCA' }}
+                                                            {{ $equipoExportado['modelo'] ?? '' }}
+                                                        </span>
+
+                                                        <span class="text-muted">
+                                                            · Tipo:
+                                                            {{ $equipoExportado['tipo_equipo'] ?? 'SIN TIPO' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+
+                                                @if ($totalEquiposLista > 10)
+                                                <button
+                                                    type="button"
+                                                    class="btn btn-sm btn-outline-secondary mt-2 btn-auditoria-ver-mas"
+                                                    data-target-lista="{{ $idListaEquipos }}"
+                                                    aria-expanded="false">
+                                                    VER MÁS ({{ $totalEquiposLista - 10 }})
+                                                </button>
+                                                @endif
+                                            </div>
+
+                                            @elseif ($esModificacion)
+                                            <div class="usuario-cambio-fila">
+                                                <div class="usuario-cambio-campo">
+                                                    {{ $nombresCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
+                                                </div>
+
+                                                <div class="usuario-cambio-valor">
+                                                    <span class="valor-anterior">
+                                                        {{ $mostrarValor($valores['anterior']) }}
+                                                    </span>
+
+                                                    <i class="bi bi-arrow-right"></i>
+
+                                                    <span class="valor-nuevo">
+                                                        {{ $mostrarValor($valores['nuevo']) }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            @elseif ($campo === 'eliminado' && is_array($valores))
+                                            <div class="usuario-cambios-eliminados">
+                                                @foreach ($valores as $campoEliminado => $valorEliminado)
+                                                <div class="usuario-cambio-fila">
+                                                    <div class="usuario-cambio-campo">
+                                                        {{ $nombresCampos[$campoEliminado] ?? ucfirst(str_replace('_', ' ', $campoEliminado)) }}
+                                                    </div>
+
+                                                    <div class="usuario-cambio-valor">
+                                                        <span class="valor-anterior">
+                                                            {{ $mostrarValor($valorEliminado) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+                                            </div>
+
+                                            @else
+                                            <div class="usuario-cambio-fila">
+                                                <div class="usuario-cambio-campo">
+                                                    {{ $nombresCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
+                                                </div>
+
+                                                <div class="usuario-cambio-valor">
+                                                    <span class="valor-nuevo">
+                                                        @if (is_array($valores))
+                                                        {{ json_encode($valores, JSON_UNESCAPED_UNICODE) }}
+                                                        @else
+                                                        {{ $mostrarValor($valores) }}
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            @endif
+                                            @endforeach
+                                        </div>
+
+
+                                    </details>
+                                    @endif
+
+
+                                </div>
+                            </article>
+                            @endforeach
+
+                        </div>
+
+                        <div class="usuario-paginacion">
+                            <div class="usuario-paginacion-info">
+                                Mostrando {{ $auditorias->firstItem() }}
+                                a {{ $auditorias->lastItem() }}
+                                de {{ $auditorias->total() }} eventos
+                            </div>
+
+                            {{ $auditorias->links() }}
+                        </div>
+
+                        @else
+
+                        <div class="usuario-auditoria-vacia">
+                            <div class="usuario-vacio-icono">
+                                <i class="bi bi-clipboard2-data"></i>
+                            </div>
+
+                            <h6>No hay actividad registrada</h6>
+
+                            <p>
+                                Todavía no existen operaciones de auditoría asociadas a esta cuenta.
+                                Los eventos aparecerán aquí a medida que el sistema los registre.
+                            </p>
+                        </div>
+
+                        @endif
+
+                    </section>
+
+                    {{-- ACCIONES INFERIORES --}}
+                    <div class="usuario-show-footer">
+
+                        <div class="usuario-footer-texto">
+                            <strong>Administración de la cuenta</strong>
+                            <span>Consulta los datos o vuelve al listado de usuarios.</span>
+                        </div>
+
+                        <div class="usuario-footer-botones">
+                            <a href="{{ route('usuarios.index') }}"
+                                class="btn btn-outline-secondary usuario-btn-footer">
+                                <i class="fa-solid fa-arrow-left me-1"></i>
+                                VOLVER
+                            </a>
+
+                            <a href="{{ route('usuarios.edit', $usuario->id) }}"
+                                class="btn btn-success usuario-btn-footer">
+                                <i class="fa-solid fa-pen-to-square me-1"></i>
+                                EDITAR USUARIO
+                            </a>
+                        </div>
 
                     </div>
-                </div>
 
+                </div>
             </div>
+
         </div>
     </div>
+</div>
+
+
+<script>
+document.addEventListener('click', function (event) {
+    const boton = event.target.closest('.btn-auditoria-ver-mas');
+
+    if (!boton) {
+        return;
+    }
+
+    const idLista = boton.dataset.targetLista;
+
+    const elementos = document.querySelectorAll(
+        '[data-lista-equipos="' + idLista + '"]'
+    );
+
+    const mostrarTodos = boton.getAttribute('aria-expanded') !== 'true';
+
+    elementos.forEach(function (elemento) {
+        if (elemento.classList.contains('auditoria-equipo-oculto')) {
+            elemento.hidden = !mostrarTodos;
+        }
+    });
+
+    boton.setAttribute('aria-expanded', String(mostrarTodos));
+
+    if (mostrarTodos) {
+        boton.textContent = 'VER MENOS';
+    } else {
+        const totalOcultos = Array.from(elementos).filter(function (elemento) {
+            return elemento.classList.contains('auditoria-equipo-oculto');
+        }).length;
+
+        boton.textContent = 'VER MÁS (' + totalOcultos + ')';
+    }
+});
+</script>
+
+
 @endsection
 
 <style>

@@ -681,8 +681,9 @@ class EquipoController extends Controller
             'EXPORTAR_PDF',
             'EQUIPOS',
             'Exportó ' . $equipos->count()
-            . ' equipo(s) a PDF.',
+                . ' equipo(s) a PDF.',
             null,
+
 
             [
                 'formato' => 'PDF',
@@ -690,11 +691,13 @@ class EquipoController extends Controller
                 'archivo' => $nombreArchivo,
                 'equipos' => $equipos->map(fn($equipo) => [
                     'id' => $equipo->id,
+                    'tipo_equipo' => $equipo->tipoEquipo?->nombre ?? 'SIN TIPO',
                     'num_serie' => $equipo->num_serie,
                     'marca' => $equipo->marca,
                     'modelo' => $equipo->modelo,
                 ])->values()->all(),
             ]
+
 
         );
 
@@ -734,14 +737,22 @@ class EquipoController extends Controller
             'EXPORTAR_EXCEL',
             'EQUIPOS',
             'Exportó ' . $equipos->count()
-            . ' equipo(s) a Excel.',
+                . ' equipo(s) a Excel.',
             null,
+
             [
                 'formato' => 'EXCEL',
                 'cantidad' => $equipos->count(),
-                'ids_equipos' => $equipos->pluck('id')->values()->all(),
                 'archivo' => $nombreArchivo,
+                'equipos' => $equipos->map(fn($equipo) => [
+                    'id' => $equipo->id,
+                    'tipo_equipo' => $equipo->tipoEquipo?->nombre ?? 'SIN TIPO',
+                    'num_serie' => $equipo->num_serie,
+                    'marca' => $equipo->marca,
+                    'modelo' => $equipo->modelo,
+                ])->values()->all(),
             ]
+
         );
 
         return Excel::download(
