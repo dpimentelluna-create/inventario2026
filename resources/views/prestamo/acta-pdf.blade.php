@@ -27,7 +27,7 @@
             text-align: center;
             vertical-align: middle;
         }
-        .legal { font-size: 10px; text-align: justify; }
+        .legal { font-size: 12px; text-align: justify; }
         .firmas { table-layout: fixed; width: 100%; }
         .firmas th, .firmas td { width: 33.33%; text-align: center; vertical-align: top; }
         .espacio-firma { height: 58px; }
