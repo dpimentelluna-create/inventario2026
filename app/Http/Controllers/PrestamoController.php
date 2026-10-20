@@ -84,15 +84,24 @@ class PrestamoController extends Controller
      * un préstamo ACTIVO. El bloqueo de las filas de equipos serializa las
      * altas/ediciones concurrentes que utilizan esta misma regla.
      */
-    private function bloquearYValidarDisponibilidad(array $equipoIds, ?int $prestamoId = null): void
-    {
+    private function bloquearYValidarDisponibilidad(
+        array $equipoIds,
+        ?int $prestamoId = null,
+        ?array $idsParaValidar = null
+    ): void {
         $ids = collect($equipoIds)
             ->map(fn ($id) => (int) $id)
             ->unique()
             ->sort()
             ->values();
 
-        if ($ids->isEmpty()) {
+        $idsValidar = collect($idsParaValidar ?? $equipoIds)
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values();
+
+        if ($ids->isEmpty() || $idsValidar->isEmpty()) {
             throw ValidationException::withMessages([
                 'equipos' => 'Debe seleccionar al menos un equipo.',
             ]);
@@ -112,7 +121,7 @@ class PrestamoController extends Controller
         }
 
         $consultaOcupados = PrestamoEquipo::query()
-            ->whereIn('equipo_id', $ids)
+            ->whereIn('equipo_id', $idsValidar)
             ->whereHas('prestamo', function ($query) use ($prestamoId) {
                 $query->where('estado', 'ACTIVO');
 
@@ -466,7 +475,8 @@ class PrestamoController extends Controller
 
             $this->bloquearYValidarDisponibilidad(
                 array_merge($equiposActuales, $equiposSolicitados),
-                $prestamo->id
+                $prestamo->id,
+                $equiposSolicitados
             );
 
             // 1. Guardar la información anterior antes de modificar.
