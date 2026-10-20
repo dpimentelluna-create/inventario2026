@@ -1,52 +1,52 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Prestamo {{ $prestamo->id }} - {{ $prestamo->created_at ? \Carbon\Carbon::parse($prestamo->created_at)->format('d-m-Y') : 'SIN-FECHA' }}
+Prestamo {{ $prestamo->id }} - {{ $prestamo->created_at ? \Carbon\Carbon::parse($prestamo->created_at)->format('d-m-Y') : 'SIN-FECHA' }}
 @endsection
 
 @section('content')
 @php
-    $nombreSol = trim(
-        ($prestamo->docente->apellidos ?? '') . ' ' .
-        ($prestamo->docente->nombres ?? '')
-    );
+$nombreSol = trim(
+($prestamo->docente->apellidos ?? '') . ' ' .
+($prestamo->docente->nombres ?? '')
+);
 
-    $fechaVista = $prestamo->fecha
-        ? \Carbon\Carbon::parse($prestamo->fecha)->format('d-m-Y')
-        : '—';
+$fechaVista = $prestamo->fecha
+? \Carbon\Carbon::parse($prestamo->fecha)->format('d-m-Y')
+: '—';
 
-    $hIni = $prestamo->hora_inicio
-        ? \Carbon\Carbon::parse($prestamo->hora_inicio)->format('h:i A')
-        : '—';
+$hIni = $prestamo->hora_inicio
+? \Carbon\Carbon::parse($prestamo->hora_inicio)->format('h:i A')
+: '—';
 
-    $hFin = $prestamo->hora_fin
-        ? \Carbon\Carbon::parse($prestamo->hora_fin)->format('h:i A')
-        : 'ACTIVO';
+$hFin = $prestamo->hora_fin
+? \Carbon\Carbon::parse($prestamo->hora_fin)->format('h:i A')
+: 'ACTIVO';
 
-    $equipos = $prestamo->prestamoEquipos;
-    $totalEquipos = $equipos->count();
+$equipos = $prestamo->prestamoEquipos;
+$totalEquipos = $equipos->count();
 
-    $totalAccesorios = $equipos->sum(
-        fn($pe) => $pe->prestamoAccesorios->count()
-    );
+$totalAccesorios = $equipos->sum(
+fn($pe) => $pe->prestamoAccesorios->count()
+);
 
-    $malogrados = $equipos->filter(
-        fn($pe) => strtoupper($pe->estado ?? '') === 'MALOGRADO'
-    )->count() + $equipos->sum(
-        fn($pe) => $pe->prestamoAccesorios->filter(
-            fn($a) => strtoupper($a->estado ?? '') === 'MALOGRADO'
-        )->count()
-    );
+$malogrados = $equipos->filter(
+fn($pe) => strtoupper($pe->estado ?? '') === 'MALOGRADO'
+)->count() + $equipos->sum(
+fn($pe) => $pe->prestamoAccesorios->filter(
+fn($a) => strtoupper($a->estado ?? '') === 'MALOGRADO'
+)->count()
+);
 
-    $borde = function ($estado) {
-        $estado = strtoupper($estado ?? '');
+$borde = function ($estado) {
+$estado = strtoupper($estado ?? '');
 
-        if ($estado === 'MALOGRADO') return 'borde-malogrado';
-        if ($estado === 'REGULAR') return 'borde-regular';
-        if ($estado === 'BUENO') return 'borde-bueno';
+if ($estado === 'MALOGRADO') return 'borde-malogrado';
+if ($estado === 'REGULAR') return 'borde-regular';
+if ($estado === 'BUENO') return 'borde-bueno';
 
-        return 'borde-neutro';
-    };
+return 'borde-neutro';
+};
 @endphp
 
 <section class="content container-fluid prestamo-show">
@@ -71,41 +71,52 @@
                         </div>
                     </div>
 
-                    {{-- EXPORTAR --}}
-                    <div class="dropdown no-print">
+                    <div class="d-flex flex-wrap align-items-center gap-2 no-print">
+                        {{-- IMPRIMIR --}}
                         <button
-                            class="btn btn-primary dropdown-toggle boton-exportar"
                             type="button"
-                            id="btn_menu_exportar"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                            <i class="fa fa-download me-1"></i>
-                            EXPORTAR
+                            class="btn btn-outline-secondary boton-exportar no-print"
+                            id="btn_imprimir_prestamo">
+                            <i class="fa fa-print me-1"></i>
+                            IMPRIMIR FICHA
                         </button>
 
-                        <ul class="dropdown-menu dropdown-menu-end menu-exportar"
-                            aria-labelledby="btn_menu_exportar">
+                        {{-- EXPORTAR --}}
+                        <div class="dropdown no-print">
+                            <button
+                                class="btn btn-primary dropdown-toggle boton-exportar"
+                                type="button"
+                                id="btn_menu_exportar"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false">
+                                <i class="fa fa-download me-1"></i>
+                                EXPORTAR
+                            </button>
 
-                            <li>
-                                <button
-                                    type="button"
-                                    class="dropdown-item opcion-exportar"
-                                    id="btn_acta_pdf">
-                                    <i class="fa fa-file-pdf text-danger me-2"></i>
-                                    Descargar PDF
-                                </button>
-                            </li>
+                            <ul class="dropdown-menu dropdown-menu-end menu-exportar"
+                                aria-labelledby="btn_menu_exportar">
 
-                            <li>
-                                <button
-                                    type="button"
-                                    class="dropdown-item opcion-exportar"
-                                    id="btn_acta_excel">
-                                    <i class="fa fa-file-excel text-success me-2"></i>
-                                    Descargar Excel
-                                </button>
-                            </li>
-                        </ul>
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item opcion-exportar"
+                                        id="btn_acta_pdf">
+                                        <i class="fa fa-file-pdf text-danger me-2"></i>
+                                        Descargar PDF
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="dropdown-item opcion-exportar"
+                                        id="btn_acta_excel">
+                                        <i class="fa fa-file-excel text-success me-2"></i>
+                                        Descargar Excel
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -166,13 +177,13 @@
 
                                 <div class="valor">
                                     @if ($prestamo->estado === 'ACTIVO')
-                                        <span class="badge bg-success fs-6">
-                                            ACTIVO
-                                        </span>
+                                    <span class="badge bg-success fs-6">
+                                        ACTIVO
+                                    </span>
                                     @else
-                                        <span class="badge bg-secondary fs-6">
-                                            TERMINADO
-                                        </span>
+                                    <span class="badge bg-secondary fs-6">
+                                        TERMINADO
+                                    </span>
                                     @endif
                                 </div>
                             </div>
@@ -203,11 +214,11 @@
                             </span>
 
                             @if ($malogrados > 0)
-                                <span class="chip chip-alerta">
-                                    <i class="bi bi-exclamation-triangle me-1"></i>
-                                    {{ $malogrados }}
-                                    malogrado{{ $malogrados === 1 ? '' : 's' }}
-                                </span>
+                            <span class="chip chip-alerta">
+                                <i class="bi bi-exclamation-triangle me-1"></i>
+                                {{ $malogrados }}
+                                malogrado{{ $malogrados === 1 ? '' : 's' }}
+                            </span>
                             @endif
                         </div>
                     </div>
@@ -229,47 +240,47 @@
 
                         @forelse ($equipos as $indice => $prestamoEquipo)
 
-                            @php
-                                $equipo = $prestamoEquipo->equipo;
-                                $estadoEq = strtoupper($prestamoEquipo->estado ?? '');
-                            @endphp
+                        @php
+                        $equipo = $prestamoEquipo->equipo;
+                        $estadoEq = strtoupper($prestamoEquipo->estado ?? '');
+                        @endphp
 
-                            <div class="card tarjeta-equipo {{ $borde($estadoEq) }}">
+                        <div class="card tarjeta-equipo {{ $borde($estadoEq) }}">
 
-                                {{-- CABECERA DE CADA EQUIPO --}}
-                                <div class="card-header cabecera-equipo">
-                                    <div class="identificacion-equipo">
+                            {{-- CABECERA DE CADA EQUIPO --}}
+                            <div class="card-header cabecera-equipo">
+                                <div class="identificacion-equipo">
 
-                                        <span class="numero-equipo">
-                                            {{ str_pad($indice + 1, 2, '0', STR_PAD_LEFT) }}
-                                        </span>
+                                    <span class="numero-equipo">
+                                        {{ str_pad($indice + 1, 2, '0', STR_PAD_LEFT) }}
+                                    </span>
 
-                                        <div class="datos-equipo">
-                                            <div class="etiqueta">
-                                                EQUIPO {{ $indice + 1 }}
-                                            </div>
+                                    <div class="datos-equipo">
+                                        <div class="etiqueta">
+                                            EQUIPO {{ $indice + 1 }}
+                                        </div>
 
-                                            <h6 class="nombre-equipo">
-                                                {{ $equipo->tipoEquipo->nombre ?? 'SIN TIPO' }}
-                                                @if ($equipo && $equipo->marca)
-                                                    · {{ $equipo->marca }}
-                                                @endif
-                                                @if ($equipo && $equipo->modelo)
-                                                    {{ $equipo->modelo }}
-                                                @endif
-                                            </h6>
+                                        <h6 class="nombre-equipo">
+                                            {{ $equipo->tipoEquipo->nombre ?? 'SIN TIPO' }}
+                                            @if ($equipo && $equipo->marca)
+                                            · {{ $equipo->marca }}
+                                            @endif
+                                            @if ($equipo && $equipo->modelo)
+                                            {{ $equipo->modelo }}
+                                            @endif
+                                        </h6>
 
-                                            <div class="serie-equipo">
-                                                <i class="bi bi-upc-scan me-1"></i>
-                                                N.º SERIE:
-                                                <span class="font-monospace">
-                                                    {{ $equipo->num_serie ?? 'S/N' }}
-                                                </span>
-                                            </div>
+                                        <div class="serie-equipo">
+                                            <i class="bi bi-upc-scan me-1"></i>
+                                            N.º SERIE:
+                                            <span class="font-monospace">
+                                                {{ $equipo->num_serie ?? 'S/N' }}
+                                            </span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <span class="badge estado-equipo
+                                <span class="badge estado-equipo
                                         {{ $estadoEq === 'MALOGRADO'
                                             ? 'bg-danger'
                                             : ($estadoEq === 'REGULAR'
@@ -277,76 +288,76 @@
                                                 : ($estadoEq === 'BUENO'
                                                     ? 'bg-success'
                                                     : 'bg-secondary')) }}">
-                                        {{ $estadoEq ?: '—' }}
+                                    {{ $estadoEq ?: '—' }}
+                                </span>
+                            </div>
+
+                            <div class="card-body cuerpo-equipo">
+
+                                {{-- OBSERVACIÓN DEL EQUIPO --}}
+                                <div class="bloque-observacion mb-3">
+                                    <div class="etiqueta mb-1">
+                                        <i class="bi bi-chat-left-text me-1"></i>
+                                        OBSERVACIÓN DEL EQUIPO
+                                    </div>
+
+                                    <div class="{{ $prestamoEquipo->observacion
+                                            ? 'texto-observacion'
+                                            : 'text-muted' }}">
+                                        {{ $prestamoEquipo->observacion ?: 'Sin observaciones registradas.' }}
+                                    </div>
+                                </div>
+
+                                {{-- ACCESORIOS --}}
+                                <div class="cabecera-accesorios">
+                                    <h6>
+                                        <i class="bi bi-usb-plug me-1"></i>
+                                        ACCESORIOS ASOCIADOS
+                                    </h6>
+
+                                    <span class="contador-accesorios">
+                                        {{ $prestamoEquipo->prestamoAccesorios->count() }}
                                     </span>
                                 </div>
 
-                                <div class="card-body cuerpo-equipo">
+                                @if ($prestamoEquipo->prestamoAccesorios->count())
 
-                                    {{-- OBSERVACIÓN DEL EQUIPO --}}
-                                    <div class="bloque-observacion mb-3">
-                                        <div class="etiqueta mb-1">
-                                            <i class="bi bi-chat-left-text me-1"></i>
-                                            OBSERVACIÓN DEL EQUIPO
-                                        </div>
+                                <div class="table-responsive tabla-accesorios">
+                                    <table class="table table-hover table-sm align-middle mb-0">
 
-                                        <div class="{{ $prestamoEquipo->observacion
-                                            ? 'texto-observacion'
-                                            : 'text-muted' }}">
-                                            {{ $prestamoEquipo->observacion ?: 'Sin observaciones registradas.' }}
-                                        </div>
-                                    </div>
+                                        <thead>
+                                            <tr>
+                                                <th>TIPO</th>
+                                                <th>MARCA</th>
+                                                <th>N.º SERIE</th>
+                                                <th>ESTADO</th>
+                                                <th>OBSERVACIÓN</th>
+                                            </tr>
+                                        </thead>
 
-                                    {{-- ACCESORIOS --}}
-                                    <div class="cabecera-accesorios">
-                                        <h6>
-                                            <i class="bi bi-usb-plug me-1"></i>
-                                            ACCESORIOS ASOCIADOS
-                                        </h6>
+                                        <tbody>
+                                            @foreach ($prestamoEquipo->prestamoAccesorios as $prestamoAccesorio)
 
-                                        <span class="contador-accesorios">
-                                            {{ $prestamoEquipo->prestamoAccesorios->count() }}
-                                        </span>
-                                    </div>
+                                            @php
+                                            $acc = $prestamoAccesorio->accesorioEquipo;
+                                            $estadoAcc = strtoupper($prestamoAccesorio->estado ?? '');
+                                            @endphp
 
-                                    @if ($prestamoEquipo->prestamoAccesorios->count())
+                                            <tr>
+                                                <td>
+                                                    {{ $acc->tipo ?? '—' }}
+                                                </td>
 
-                                        <div class="table-responsive tabla-accesorios">
-                                            <table class="table table-hover table-sm align-middle mb-0">
+                                                <td>
+                                                    {{ $acc->marca ?? '—' }}
+                                                </td>
 
-                                                <thead>
-                                                    <tr>
-                                                        <th>TIPO</th>
-                                                        <th>MARCA</th>
-                                                        <th>N.º SERIE</th>
-                                                        <th>ESTADO</th>
-                                                        <th>OBSERVACIÓN</th>
-                                                    </tr>
-                                                </thead>
+                                                <td class="font-monospace">
+                                                    {{ $acc->num_serie ?? '—' }}
+                                                </td>
 
-                                                <tbody>
-                                                    @foreach ($prestamoEquipo->prestamoAccesorios as $prestamoAccesorio)
-
-                                                        @php
-                                                            $acc = $prestamoAccesorio->accesorioEquipo;
-                                                            $estadoAcc = strtoupper($prestamoAccesorio->estado ?? '');
-                                                        @endphp
-
-                                                        <tr>
-                                                            <td>
-                                                                {{ $acc->tipo ?? '—' }}
-                                                            </td>
-
-                                                            <td>
-                                                                {{ $acc->marca ?? '—' }}
-                                                            </td>
-
-                                                            <td class="font-monospace">
-                                                                {{ $acc->num_serie ?? '—' }}
-                                                            </td>
-
-                                                            <td>
-                                                                <span class="badge
+                                                <td>
+                                                    <span class="badge
                                                                     {{ $estadoAcc === 'MALOGRADO'
                                                                         ? 'bg-danger'
                                                                         : ($estadoAcc === 'REGULAR'
@@ -354,42 +365,42 @@
                                                                             : ($estadoAcc === 'BUENO'
                                                                                 ? 'bg-success'
                                                                                 : 'bg-secondary')) }}">
-                                                                    {{ $estadoAcc ?: '—' }}
-                                                                </span>
-                                                            </td>
+                                                        {{ $estadoAcc ?: '—' }}
+                                                    </span>
+                                                </td>
 
-                                                            <td class="{{ $prestamoAccesorio->observacion
+                                                <td class="{{ $prestamoAccesorio->observacion
                                                                 ? ''
                                                                 : 'text-muted' }}">
-                                                                {{ $prestamoAccesorio->observacion ?: 'Sin observaciones' }}
-                                                            </td>
-                                                        </tr>
+                                                    {{ $prestamoAccesorio->observacion ?: 'Sin observaciones' }}
+                                                </td>
+                                            </tr>
 
-                                                    @endforeach
-                                                </tbody>
+                                            @endforeach
+                                        </tbody>
 
-                                            </table>
-                                        </div>
-
-                                    @else
-
-                                        <div class="sin-accesorios">
-                                            <i class="bi bi-info-circle me-1"></i>
-                                            Este equipo no tiene accesorios registrados en el préstamo.
-                                        </div>
-
-                                    @endif
-
+                                    </table>
                                 </div>
+
+                                @else
+
+                                <div class="sin-accesorios">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Este equipo no tiene accesorios registrados en el préstamo.
+                                </div>
+
+                                @endif
+
                             </div>
+                        </div>
 
                         @empty
 
-                            <div class="estado-vacio">
-                                <i class="bi bi-inbox"></i>
-                                <h6>No hay equipos asociados</h6>
-                                <p>Este préstamo no tiene equipos registrados.</p>
-                            </div>
+                        <div class="estado-vacio">
+                            <i class="bi bi-inbox"></i>
+                            <h6>No hay equipos asociados</h6>
+                            <p>Este préstamo no tiene equipos registrados.</p>
+                        </div>
 
                         @endforelse
 
@@ -808,7 +819,7 @@
         border-radius: 9px;
     }
 
-    .estado-vacio > i {
+    .estado-vacio>i {
         display: block;
         font-size: 2rem;
         color: #adb5bd;
@@ -896,6 +907,7 @@
 
     /* IMPRESIÓN */
     @media print {
+
         #sidebar,
         .dot-spinner-container,
         .no-print,
@@ -958,7 +970,7 @@
             width: 100%;
         }
 
-        .encabezado-show > .dropdown {
+        .encabezado-show>.dropdown {
             width: 100%;
         }
 
@@ -988,6 +1000,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const btnPdf = document.getElementById('btn_acta_pdf');
         const btnExcel = document.getElementById('btn_acta_excel');
+        const btnImprimir = document.getElementById('btn_imprimir_prestamo');
 
         const overlay = document.getElementById('acta_descarga_overlay');
         const titulo = document.getElementById('acta_descarga_titulo');
@@ -1001,6 +1014,50 @@
             !titulo || !estado || !barra || !porcentaje || !tamano) {
             console.error('Faltan elementos HTML necesarios para descargar las actas.');
             return;
+        }
+        if (btnImprimir) {
+            btnImprimir.addEventListener('click', async function() {
+                if (btnImprimir.disabled) return;
+
+                btnImprimir.disabled = true;
+
+                try {
+                    const respuesta = await fetch(
+                        @json(route('prestamos.auditar-impresion', $prestamo -> id)), {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector(
+                                    'meta[name="csrf-token"]'
+                                )?.getAttribute('content') || ''
+                            }
+                        }
+                    );
+
+                    if (!respuesta.ok) {
+                        throw new Error(
+                            'No se pudo registrar la impresión. Código HTTP: ' +
+                            respuesta.status
+                        );
+                    }
+
+                    window.print();
+
+                } catch (error) {
+                    console.error('Error al registrar la impresión:', error);
+
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(
+                            'No se pudo registrar la impresión. No se abrirá el diálogo de impresión.'
+                        );
+                    } else {
+                        alert('No se pudo registrar la impresión.');
+                    }
+                } finally {
+                    btnImprimir.disabled = false;
+                }
+            });
         }
 
         let descargando = false;

@@ -8,6 +8,7 @@ use App\Models\PrestamoAccesorio;
 use App\Models\Equipo;
 use App\Models\TiposEquipo;
 use App\Models\Docente;
+use App\Models\Auditoria;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\PrestamoRequest;
@@ -16,7 +17,6 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use App\Exports\PrestamosExport;
 use Maatwebsite\Excel\Facades\Excel;
-
 use Barryvdh\DomPDF\Facade\Pdf;
 
 
@@ -81,11 +81,8 @@ class PrestamoController extends Controller
     /**
      * Guardar préstamo
      */
-    public function store(
-        PrestamoRequest $request
-    ): RedirectResponse {
-
-        // CORRECCIÓN: Asignamos el resultado de la transacción a $prestamo para retornarlo
+    public function store(PrestamoRequest $request): RedirectResponse
+    {
         $prestamo = DB::transaction(function () use ($request) {
 
             $estadoPrestamo = $request->filled('hora_fin')
@@ -101,155 +98,68 @@ class PrestamoController extends Controller
                 'estado' => $estadoPrestamo,
             ]);
 
-
-            /*
-         * =====================================================
-         * 3. REGISTRAR EQUIPOS
-         * =====================================================
-         */
             foreach ($request->equipos as $equipoData) {
 
-                /*
-             * Buscar equipo real con sus especificaciones.
-             */
                 $equipo = Equipo::with([
                     'especificacionesLaptops',
                     'especificacionesEquipo',
                     'accesoriosEquipos',
-                ])->findOrFail(
-                    $equipoData['equipo_id']
-                );
+                ])->findOrFail($equipoData['equipo_id']);
 
-
-                /*
-             * =================================================
-             * OBTENER ESTADO REAL ACTUAL DEL EQUIPO
-             * =================================================
-             */
                 $estadoActual = 'BUENO';
 
                 if ($equipo->especificacionesLaptops) {
-
                     $estadoActual =
-                        $equipo
-                        ->especificacionesLaptops
-                        ->estado;
+                        $equipo->especificacionesLaptops->estado;
                 } elseif ($equipo->especificacionesEquipo) {
-
                     $estadoActual =
-                        $equipo
-                        ->especificacionesEquipo
-                        ->estado;
+                        $equipo->especificacionesEquipo->estado;
                 }
 
-
-                /*
-             * =================================================
-             * 4. CREAR SNAPSHOT DEL EQUIPO
-             * =================================================
-             */
                 $prestamoEquipo = PrestamoEquipo::create([
                     'prestamo_id' => $prestamo->id,
-
-                    'equipo_id' =>
-                    $equipo->id,
-
-                    'estado' =>
-                    $estadoActual,
-
-                    'observacion' =>
-                    $equipoData['observacion'] ?? null,
+                    'equipo_id' => $equipo->id,
+                    'estado' => $estadoActual,
+                    'observacion' => $equipoData['observacion'] ?? null,
                 ]);
 
-
-                /*
-             * =================================================
-             * 5. SI EL PRÉSTAMO SE CREA TERMINADO
-             *    ACTUALIZAR ESTADO REAL DEL EQUIPO
-             * =================================================
-             */
                 if ($estadoPrestamo === 'TERMINADO') {
 
                     if ($equipo->especificacionesLaptops) {
-
-                        $equipo
-                            ->especificacionesLaptops
-                            ->update([
-                                'estado' =>
-                                $equipoData['estado'],
-                            ]);
+                        $equipo->especificacionesLaptops->update([
+                            'estado' => $equipoData['estado'],
+                        ]);
                     } elseif ($equipo->especificacionesEquipo) {
-
-                        $equipo
-                            ->especificacionesEquipo
-                            ->update([
-                                'estado' =>
-                                $equipoData['estado'],
-                            ]);
+                        $equipo->especificacionesEquipo->update([
+                            'estado' => $equipoData['estado'],
+                        ]);
                     }
 
-
-                    /*
-                  * Como el préstamo terminó inmediatamente,
-                  * el snapshot debe representar el estado
-                  * final registrado.
-                  */
                     $prestamoEquipo->update([
-                        'estado' =>
-                        $equipoData['estado'],
+                        'estado' => $equipoData['estado'],
                     ]);
                 }
 
-
-                /*
-             * =================================================
-             * 6. REGISTRAR ACCESORIOS
-             * =================================================
-             */
                 if (!empty($equipoData['accesorios'])) {
 
-                    foreach (
-                        $equipoData['accesorios']
-                        as $accesorioData
-                    ) {
+                    foreach ($equipoData['accesorios'] as $accesorioData) {
 
-                        /*
-                     * Crear snapshot del accesorio.
-                     */
-                        $prestamoAccesorio =
-                            PrestamoAccesorio::create([
-                                'prestamo_equipo_id' =>
-                                $prestamoEquipo->id,
+                        $prestamoAccesorio = PrestamoAccesorio::create([
+                            'prestamo_equipo_id' => $prestamoEquipo->id,
+                            'accesorio_equipo_id' =>
+                            $accesorioData['accesorio_equipo_id'],
+                            'estado' => $accesorioData['estado'],
+                            'observacion' =>
+                            $accesorioData['observacion'] ?? null,
+                        ]);
 
-                                'accesorio_equipo_id' =>
-                                $accesorioData['accesorio_equipo_id'],
-
-                                'estado' =>
-                                $accesorioData['estado'],
-
-                                'observacion' =>
-                                $accesorioData['observacion'] ?? null,
-                            ]);
-
-
-                        /*
-                     * =================================================
-                     * 7. SI EL PRÉSTAMO SE CREA TERMINADO
-                     *    ACTUALIZAR ESTADO REAL DEL ACCESORIO
-                     * =================================================
-                     */
                         if ($estadoPrestamo === 'TERMINADO') {
 
-                            $accesorio =
-                                $prestamoAccesorio
-                                ->accesorioEquipo;
-
+                            $accesorio = $prestamoAccesorio->accesorioEquipo;
 
                             if ($accesorio) {
-
                                 $accesorio->update([
-                                    'estado' =>
-                                    $accesorioData['estado'],
+                                    'estado' => $accesorioData['estado'],
                                 ]);
                             }
                         }
@@ -257,7 +167,23 @@ class PrestamoController extends Controller
                 }
             }
 
-            // CORRECCIÓN: Retornamos el objeto préstamo para que salga de la transacción
+            // Cargar los datos definitivos para la auditoría.
+            $prestamo->load([
+                'docente',
+                'prestamoEquipos.equipo.tipoEquipo',
+                'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+            ]);
+
+            Auditoria::registrar(
+                'CREAR',
+                'PRESTAMOS',
+                "Se registró el préstamo #{$prestamo->id}.",
+                $prestamo,
+                [
+                    'nuevo' => $this->datosAuditoriaPrestamo($prestamo),
+                ]
+            );
+
             return $prestamo;
         });
 
@@ -282,26 +208,129 @@ class PrestamoController extends Controller
         return view('prestamo.show', compact('prestamo'));
     }
 
+
+    /**
+     * Obtener una copia de los datos del préstamo para auditoría.
+     */
+    private function datosAuditoriaPrestamo(Prestamo $prestamo): array
+    {
+        $prestamo->loadMissing([
+            'docente',
+            'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+        ]);
+
+        return [
+            'id' => $prestamo->id,
+
+            'solicitante' => trim(
+                ($prestamo->docente?->apellidos ?? '') . ' ' .
+                    ($prestamo->docente?->nombres ?? '')
+            ),
+
+            'cargo' => $prestamo->cargo,
+            'fecha' => $prestamo->fecha,
+            'hora_inicio' => $prestamo->hora_inicio,
+            'hora_fin' => $prestamo->hora_fin,
+            'estado' => $prestamo->estado,
+
+            'equipos' => $prestamo->prestamoEquipos->map(
+                function ($prestamoEquipo) {
+
+                    $equipo = $prestamoEquipo->equipo;
+
+                    return [
+                        'id' => $equipo?->id,
+                        'tipo' => $equipo?->tipoEquipo?->nombre,
+                        'codigo_inventario' => $equipo?->codigo_inventario,
+                        'marca' => $equipo?->marca,
+                        'modelo' => $equipo?->modelo,
+                        'num_serie' => $equipo?->num_serie,
+
+                        // Estado registrado en el préstamo.
+                        'estado' => $prestamoEquipo->estado,
+                        'observacion' => $prestamoEquipo->observacion,
+
+                        'accesorios' => $prestamoEquipo
+                            ->prestamoAccesorios
+                            ->map(function ($prestamoAccesorio) {
+
+                                $accesorio =
+                                    $prestamoAccesorio->accesorioEquipo;
+
+                                return [
+                                    'id' => $accesorio?->id,
+                                    'tipo' => $accesorio?->tipo,
+                                    'marca' => $accesorio?->marca,
+                                    'num_serie' => $accesorio?->num_serie,
+                                    'estado' => $prestamoAccesorio->estado,
+                                    'observacion' =>
+                                    $prestamoAccesorio->observacion,
+                                ];
+                            })
+                            ->values()
+                            ->all(),
+                    ];
+                }
+            )->values()->all(),
+        ];
+    }
+
     public function actaPdf($id)
     {
         $prestamo = $this->prestamoParaActa($id);
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('prestamo.acta-pdf', compact('prestamo'))
-            ->setPaper('a4', 'portrait');
+
+        $nombreArchivo = 'Acta_Prestamo_' . $prestamo->id . '.pdf';
+
+        $pdf = Pdf::loadView(
+            'prestamo.acta-pdf',
+            compact('prestamo')
+        )->setPaper('a4', 'portrait');
 
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setOption('chroot', public_path());
 
-        return $pdf->download('Acta_Prestamo_' . $prestamo->id . '.pdf');
+        Auditoria::registrar(
+            'EXPORTAR_PDF',
+            'PRESTAMOS',
+            'Solicitó exportar el acta PDF del préstamo #' . $prestamo->id . '.',
+            $prestamo,
+            [
+                'formato' => 'PDF',
+                'archivo' => $nombreArchivo,
+                'prestamo' => $this->datosAuditoriaPrestamo($prestamo),
+            ]
+        );
+
+        return $pdf->download($nombreArchivo);
     }
+
+
 
     public function actaExcel($id)
     {
         $prestamo = $this->prestamoParaActa($id);
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
+        $nombreArchivo = 'Acta_Prestamo_' . $prestamo->id . '.xlsx';
+
+        $respuesta = Excel::download(
             new \App\Exports\ActaPrestamoExport($prestamo),
-            'Acta_Prestamo_' . $prestamo->id . '.xlsx'
+            $nombreArchivo
         );
+
+        Auditoria::registrar(
+            'EXPORTAR_EXCEL',
+            'PRESTAMOS',
+            'Solicitó exportar el acta Excel del préstamo #' . $prestamo->id . '.',
+            $prestamo,
+            [
+                'formato' => 'EXCEL',
+                'archivo' => $nombreArchivo,
+                'prestamo' => $this->datosAuditoriaPrestamo($prestamo),
+            ]
+        );
+
+        return $respuesta;
     }
 
     private function prestamoParaActa($id)
@@ -351,10 +380,20 @@ class PrestamoController extends Controller
 
         DB::transaction(function () use ($request, $prestamo) {
 
+            // 1. Guardar la información anterior antes de modificar.
+            $prestamo->load([
+                'docente',
+                'prestamoEquipos.equipo.tipoEquipo',
+                'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+            ]);
+
+            $datosAnteriores = $this->datosAuditoriaPrestamo($prestamo);
+
             $estadoPrestamo = $request->filled('hora_fin')
                 ? 'TERMINADO'
                 : 'ACTIVO';
 
+            // 2. Actualizar los datos principales.
             $prestamo->update([
                 'docente_id' => $request->docente_id,
                 'cargo' => $request->cargo,
@@ -364,6 +403,7 @@ class PrestamoController extends Controller
                 'estado' => $estadoPrestamo,
             ]);
 
+            // 3. Reemplazar las relaciones como ya lo hace tu sistema.
             $prestamo->prestamoEquipos()->delete();
 
             foreach ($request->equipos as $equipoData) {
@@ -380,9 +420,7 @@ class PrestamoController extends Controller
                     $equipo = Equipo::with([
                         'especificacionesLaptops',
                         'especificacionesEquipo',
-                    ])->findOrFail(
-                        $equipoData['equipo_id']
-                    );
+                    ])->findOrFail($equipoData['equipo_id']);
 
                     if ($equipo->especificacionesLaptops) {
                         $equipo->especificacionesLaptops->update([
@@ -401,12 +439,15 @@ class PrestamoController extends Controller
 
                         $prestamoAccesorio = PrestamoAccesorio::create([
                             'prestamo_equipo_id' => $prestamoEquipo->id,
-                            'accesorio_equipo_id' => $accesorioData['accesorio_equipo_id'],
+                            'accesorio_equipo_id' =>
+                            $accesorioData['accesorio_equipo_id'],
                             'estado' => $accesorioData['estado'],
-                            'observacion' => $accesorioData['observacion'] ?? null,
+                            'observacion' =>
+                            $accesorioData['observacion'] ?? null,
                         ]);
 
                         if ($estadoPrestamo === 'TERMINADO') {
+
                             $accesorio = $prestamoAccesorio->accesorioEquipo;
 
                             if ($accesorio) {
@@ -418,6 +459,29 @@ class PrestamoController extends Controller
                     }
                 }
             }
+
+            // 4. Cargar la información nueva después de guardar todo.
+            $prestamo->refresh();
+
+            $prestamo->load([
+                'docente',
+                'prestamoEquipos.equipo.tipoEquipo',
+                'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+            ]);
+
+            $datosNuevos = $this->datosAuditoriaPrestamo($prestamo);
+
+            // 5. Registrar ambas versiones.
+            Auditoria::registrar(
+                'ACTUALIZAR',
+                'PRESTAMOS',
+                "Se modificó el préstamo #{$prestamo->id}.",
+                $prestamo,
+                [
+                    'anterior' => $datosAnteriores,
+                    'nuevo' => $datosNuevos,
+                ]
+            );
         });
 
         return redirect()->route('prestamos.index')
@@ -432,14 +496,34 @@ class PrestamoController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
-        $prestamo = Prestamo::findOrFail($id);
+        DB::transaction(function () use ($id) {
 
-        $prestamo->delete();
+            $prestamo = Prestamo::with([
+                'docente',
+                'prestamoEquipos.equipo.tipoEquipo',
+                'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
+            ])->findOrFail($id);
+
+            // Capturar todos los datos antes de eliminar.
+            $datosEliminados = $this->datosAuditoriaPrestamo($prestamo);
+
+            Auditoria::registrar(
+                'ELIMINAR',
+                'PRESTAMOS',
+                "Se eliminó el préstamo #{$prestamo->id}.",
+                $prestamo,
+                [
+                    'eliminado' => $datosEliminados,
+                ]
+            );
+
+            $prestamo->delete();
+        });
 
         return Redirect::route('prestamos.index')
             ->with('success', 'Préstamo eliminado.')
             ->with('toast_tipo', 'error')
-            ->with('prestamo_resaltado', $prestamo->id)
+            ->with('prestamo_resaltado', $id)
             ->with('prestamo_accion', 'eliminar');
     }
 
@@ -582,6 +666,7 @@ class PrestamoController extends Controller
         ]);
     }
 
+
     public function exportExcel(Request $request)
     {
         $ids = $request->input('ids', []);
@@ -607,12 +692,69 @@ class PrestamoController extends Controller
             ->filter()
             ->values();
 
-        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g:ia') . '.xlsx';
+        if ($prestamos->isEmpty()) {
+            return back()->with('error', 'No se encontraron préstamos válidos para exportar.');
+        }
 
-        return \Maatwebsite\Excel\Facades\Excel::download(
+        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.xlsx';
+
+        // Preparar la descarga
+        $respuesta = \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\PrestamosExport($prestamos),
             $nombreArchivo
         );
+
+        // Registrar los préstamos incluidos en la exportación
+        Auditoria::registrar(
+            'EXPORTAR_EXCEL',
+            'PRESTAMOS',
+            'Exportó ' . $prestamos->count() . ' préstamo(s) a Excel.',
+            null,
+            [
+                'formato' => 'EXCEL',
+                'cantidad' => $prestamos->count(),
+                'archivo' => $nombreArchivo,
+                'prestamos' => $prestamos->map(function ($prestamo) {
+                    return [
+                        'id' => $prestamo->id,
+                        'solicitante' => trim(
+                            ($prestamo->docente->apellidos ?? '') . ' ' .
+                                ($prestamo->docente->nombres ?? '')
+                        ),
+                        'cargo' => $prestamo->cargo,
+                        'fecha' => $prestamo->fecha,
+                        'hora_inicio' => $prestamo->hora_inicio,
+                        'hora_fin' => $prestamo->hora_fin,
+                        'estado' => $prestamo->estado,
+                        'equipos' => $prestamo->prestamoEquipos->map(function ($prestamoEquipo) {
+                            $equipo = $prestamoEquipo->equipo;
+
+                            return [
+                                'id' => $equipo?->id,
+                                'tipo_equipo' => $equipo?->tipoEquipo?->nombre ?? 'SIN TIPO',
+                                'marca' => $equipo?->marca ?? 'SIN MARCA',
+                                'modelo' => $equipo?->modelo,
+                                'num_serie' => $equipo?->num_serie ?? 'SIN SERIE',
+                                'estado' => $prestamoEquipo->estado,
+                                'accesorios' => $prestamoEquipo->prestamoAccesorios->map(function ($prestamoAccesorio) {
+                                    $accesorio = $prestamoAccesorio->accesorioEquipo;
+
+                                    return [
+                                        'id' => $accesorio?->id,
+                                        'tipo' => $accesorio?->tipo ?? 'SIN TIPO',
+                                        'marca' => $accesorio?->marca ?? 'SIN MARCA',
+                                        'num_serie' => $accesorio?->num_serie ?? 'SIN SERIE',
+                                        'estado' => $prestamoAccesorio->estado,
+                                    ];
+                                })->values()->all(),
+                            ];
+                        })->values()->all(),
+                    ];
+                })->values()->all(),
+            ]
+        );
+
+        return $respuesta;
     }
 
     public function exportPdf(Request $request)
@@ -634,12 +776,7 @@ class PrestamoController extends Controller
             ->get()
             ->keyBy('id');
 
-        /*
-    |--------------------------------------------------------------------------
-    | RESPETAR EXACTAMENTE EL ORDEN ENVIADO POR DATATABLE
-    |--------------------------------------------------------------------------
-    */
-
+        // Respetar exactamente el orden enviado por DataTable
         $prestamos = collect($ids)
             ->map(function ($id) use ($prestamosEncontrados) {
                 return $prestamosEncontrados->get($id);
@@ -647,13 +784,88 @@ class PrestamoController extends Controller
             ->filter()
             ->values();
 
+        if ($prestamos->isEmpty()) {
+            return back()->with('error', 'No se encontraron préstamos válidos para exportar.');
+        }
+
+        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+
         $pdf = Pdf::loadView(
             'prestamo.export-pdf',
             compact('prestamos')
         )->setPaper('a4', 'landscape');
 
-        $nombreArchivo = 'Prestamos_' . now()->format('d-m-Y_g-ia') . '.pdf';
+        // Preparar la descarga
+        $respuesta = $pdf->download($nombreArchivo);
 
-        return $pdf->download($nombreArchivo);
+        // Registrar los préstamos incluidos en la exportación
+        Auditoria::registrar(
+            'EXPORTAR_PDF',
+            'PRESTAMOS',
+            'Exportó ' . $prestamos->count() . ' préstamo(s) a PDF.',
+            null,
+            [
+                'formato' => 'PDF',
+                'cantidad' => $prestamos->count(),
+                'archivo' => $nombreArchivo,
+                'prestamos' => $prestamos->map(function ($prestamo) {
+                    return [
+                        'id' => $prestamo->id,
+                        'solicitante' => trim(
+                            ($prestamo->docente->apellidos ?? '') . ' ' .
+                                ($prestamo->docente->nombres ?? '')
+                        ),
+                        'cargo' => $prestamo->cargo,
+                        'fecha' => $prestamo->fecha,
+                        'hora_inicio' => $prestamo->hora_inicio,
+                        'hora_fin' => $prestamo->hora_fin,
+                        'estado' => $prestamo->estado,
+                        'equipos' => $prestamo->prestamoEquipos->map(function ($prestamoEquipo) {
+                            $equipo = $prestamoEquipo->equipo;
+
+                            return [
+                                'id' => $equipo?->id,
+                                'tipo_equipo' => $equipo?->tipoEquipo?->nombre ?? 'SIN TIPO',
+                                'marca' => $equipo?->marca ?? 'SIN MARCA',
+                                'modelo' => $equipo?->modelo,
+                                'num_serie' => $equipo?->num_serie ?? 'SIN SERIE',
+                                'estado' => $prestamoEquipo->estado,
+                                'accesorios' => $prestamoEquipo->prestamoAccesorios->map(function ($prestamoAccesorio) {
+                                    $accesorio = $prestamoAccesorio->accesorioEquipo;
+
+                                    return [
+                                        'id' => $accesorio?->id,
+                                        'tipo' => $accesorio?->tipo ?? 'SIN TIPO',
+                                        'marca' => $accesorio?->marca ?? 'SIN MARCA',
+                                        'num_serie' => $accesorio?->num_serie ?? 'SIN SERIE',
+                                        'estado' => $prestamoAccesorio->estado,
+                                    ];
+                                })->values()->all(),
+                            ];
+                        })->values()->all(),
+                    ];
+                })->values()->all(),
+            ]
+        );
+
+        return $respuesta;
+    }
+
+
+    public function auditarImpresion(Prestamo $prestamo)
+    {
+        Auditoria::registrar(
+            'IMPRIMIR_FICHA',
+            'PRESTAMOS',
+            'Solicitó imprimir la ficha del préstamo #' . $prestamo->id . '.',
+            $prestamo,
+            [
+                'prestamo' => $this->datosAuditoriaPrestamo($prestamo),
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Solicitud de impresión registrada correctamente.',
+        ]);
     }
 }

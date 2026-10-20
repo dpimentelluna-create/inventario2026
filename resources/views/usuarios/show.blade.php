@@ -304,157 +304,397 @@ Usuario {{ $usuario->name }}
 
 
                                     @if (is_array($auditoria->cambios) && count($auditoria->cambios))
-                                    <details class="usuario-evento-detalles">
-                                        <summary>
-                                            <i class="bi bi-list-ul me-1"></i>
-                                            Ver detalle de los cambios
-                                        </summary>
+
+                                    @php
+                                    $nombresCampos = [
+                                    'nuevo' => 'DATOS NUEVOS',
+                                    'anterior' => 'DATOS ANTERIORES',
+                                    'eliminado' => 'DATOS DEL REGISTRO ELIMINADO',
+                                    'prestamo' => 'DATOS DEL PRÉSTAMO',
+                                    'prestamos' => 'PRÉSTAMOS INCLUIDOS',
+                                    'equipos' => 'EQUIPOS INCLUIDOS',
+                                    'accesorios' => 'ACCESORIOS',
+                                    'solicitante' => 'Solicitante',
+                                    'cargo' => 'Cargo',
+                                    'fecha' => 'Fecha',
+                                    'hora_inicio' => 'Hora de inicio',
+                                    'hora_fin' => 'Hora de finalización',
+                                    'estado' => 'Estado',
+                                    'id' => 'ID',
+                                    'tipo' => 'Tipo',
+                                    'tipo_equipo' => 'Tipo de equipo',
+                                    'tipo_equipo_id' => 'Tipo de equipo',
+                                    'codigo_inventario' => 'Código de inventario',
+                                    'marca' => 'Marca',
+                                    'modelo' => 'Modelo',
+                                    'num_serie' => 'Número de serie',
+                                    'observacion' => 'Observación',
+                                    'docente_id' => 'Docente',
+                                    'equipo_id' => 'Equipo',
+                                    'accesorio_id' => 'Accesorio',
+                                    'estado_anterior' => 'Estado anterior',
+                                    'estado_nuevo' => 'Estado nuevo',
+                                    'formato' => 'Formato de exportación',
+                                    'cantidad' => 'Cantidad de registros',
+                                    'archivo' => 'Archivo generado',
+                                    'accion' => 'Acción',
+                                    ];
+
+                                    $mostrarValorAuditoria = function ($valor) {
+                                    if ($valor === null || $valor === '') {
+                                    return 'No especificado';
+                                    }
+
+                                    if (is_bool($valor)) {
+                                    return $valor ? 'Sí' : 'No';
+                                    }
+
+                                    if (is_scalar($valor)) {
+                                    return (string) $valor;
+                                    }
+
+                                    return 'Detalle disponible';
+                                    };
+
+                                    /*
+                                    * Genera una presentación recursiva de los datos.
+                                    * Permite mostrar préstamos, equipos y accesorios
+                                    * sin convertir las estructuras completas en JSON.
+                                    */
+                                    $renderAuditoria = function ($datos, $nivel = 0) use (
+                                    &$renderAuditoria,
+                                    $nombresCampos,
+                                    $mostrarValorAuditoria
+                                    ) {
+                                    if (!is_array($datos)) {
+                                    return '<span class="valor-nuevo">'
+                                        . e($mostrarValorAuditoria($datos))
+                                        . '</span>';
+                                    }
+
+                                    if (empty($datos)) {
+                                    return '<span class="text-muted">Sin datos disponibles.</span>';
+                                    }
+
+                                    $esLista = array_is_list($datos);
 
 
-                                        <div class="usuario-cambios-tabla">
-                                            @foreach ($auditoria->cambios as $campo => $valores)
-                                            @php
-                                            $nombresCampos = [
-                                            'tipo_equipo_id' => 'Tipo de equipo',
-                                            'marca' => 'Marca',
-                                            'modelo' => 'Modelo',
-                                            'num_serie' => 'Número de serie',
-                                            'codigo_inventario' => 'Código de inventario',
-                                            'estado' => 'Estado',
-                                            'ubicacion_id' => 'Ubicación',
-                                            'fecha_registro' => 'Fecha de registro',
-                                            'observacion' => 'Observación',
-                                            'equipo_id' => 'Equipo',
-                                            'docente_id' => 'Docente',
-                                            ];
 
-                                            $mostrarValor = function ($valor) {
-                                            if ($valor === null || $valor === '') {
-                                            return 'Vacío';
+                                    if ($esLista) {
+                                    $totalRegistros = count($datos);
+                                    $idLista = 'auditoria-lista-' . uniqid();
+
+                                    $html = '<div class="auditoria-lista-anidada"'
+        . ' data-auditoria-lista="' . e($idLista) . '">';
+
+                                        foreach ($datos as $indice => $elemento) {
+                                        $oculto = $indice >= 5;
+
+                                        $html .= '<div class="auditoria-registro-anidado'
+            . ($oculto ? ' auditoria-registro-oculto' : '') . '"'
+            . ' data-lista-registro="' . e($idLista) . '"'
+            . ($oculto ? ' hidden' : '' ) . '>' ;
+
+                                            if (is_array($elemento)) {
+                                            $identificador=$elemento['id']
+                                            ?? $elemento['codigo_inventario']
+                                            ?? null;
+
+                                            $html .='<div class="auditoria-registro-titulo">'
+                                            . e($identificador !==null
+                                            ? 'REGISTRO #' . $identificador
+                                            : 'ELEMENTO ' . ($indice + 1))
+                                            . '</div>' ;
+
+                                            $html .=$renderAuditoria($elemento, $nivel + 1);
+                                            } else {
+                                            $html .='<span class="valor-nuevo">'
+                                            . e($mostrarValorAuditoria($elemento))
+                                            . '</span>' ;
                                             }
 
-                                            if (is_bool($valor)) {
-                                            return $valor ? 'Sí' : 'No';
+                                            $html .='</div>' ;
                                             }
 
-                                            return is_scalar($valor)
-                                            ? (string) $valor
-                                            : 'No disponible';
+                                            if ($totalRegistros> 5) {
+                                            $html .= '<button type="button"'
+            . ' class="btn btn-sm btn-outline-secondary mt-2 btn-auditoria-lista"'
+            . ' data-target-lista="' . e($idLista) . '"'
+            . ' data-total-ocultos="' . ($totalRegistros - 5) . '"'
+            . ' aria-expanded="false">'
+                                                . 'VER MÁS (' . ($totalRegistros - 5) . ')'
+                                                . '</button>';
+                                            }
+
+                                            $html .= '</div>';
+
+                                        return $html;
+                                        }
+
+
+
+                                        $html = '<div class="auditoria-datos-anidados">';
+
+                                            foreach ($datos as $campo => $valor) {
+                                            $nombreCampo = $nombresCampos[$campo]
+                                            ?? ucfirst(str_replace('_', ' ', $campo));
+
+                                            /*
+                                            * Los bloques anterior, nuevo y eliminado
+                                            * se presentan como secciones diferenciadas.
+                                            */
+                                            if (is_array($valor)) {
+                                            $claseSeccion = match ($campo) {
+                                            'anterior', 'eliminado' => 'auditoria-seccion-anterior',
+                                            'nuevo' => 'auditoria-seccion-nuevo',
+                                            default => 'auditoria-seccion-anidada',
                                             };
 
-                                            $esModificacion = is_array($valores)
-                                            && array_key_exists('anterior', $valores)
-                                            && array_key_exists('nuevo', $valores);
-                                            @endphp
+                                            $html .= '<div class="auditoria-bloque-anidado '
+                        . $claseSeccion . '">';
 
-                                            @if ($campo === 'equipos' && is_array($valores))
-                                            @php
-                                            $idListaEquipos = 'auditoria-equipos-' . $auditoria->id;
-                                            $totalEquiposLista = count($valores);
-                                            @endphp
+                                                $html .= '<div class="auditoria-bloque-titulo">'
+                                                    . e($nombreCampo)
+                                                    . '</div>';
 
-                                            <div class="usuario-cambios-equipos">
-                                                <div class="usuario-cambio-campo mb-2">
-                                                    EQUIPOS INCLUIDOS ({{ $totalEquiposLista }})
-                                                </div>
+                                                $html .= $renderAuditoria($valor, $nivel + 1);
+                                                $html .= '</div>';
 
-                                                @foreach ($valores as $indiceEquipo => $equipoExportado)
-                                                <div
-                                                    class="usuario-cambio-fila {{ $indiceEquipo >= 10 ? 'auditoria-equipo-oculto' : '' }}"
-                                                    data-lista-equipos="{{ $idListaEquipos }}"
-                                                    @if ($indiceEquipo>= 10) hidden @endif>
+                                            continue;
+                                            }
 
-                                                    <div class="usuario-cambio-campo">
-                                                        {{ $equipoExportado['num_serie'] ?: 'SIN SERIE' }}
-                                                    </div>
+                                            $html .= '<div class="usuario-cambio-fila">';
 
-                                                    <div class="usuario-cambio-valor">
-                                                        <span class="valor-nuevo">
-                                                            {{ $equipoExportado['marca'] ?? 'SIN MARCA' }}
-                                                            {{ $equipoExportado['modelo'] ?? '' }}
-                                                        </span>
+                                                $html .= '<div class="usuario-cambio-campo">'
+                                                    . e($nombreCampo)
+                                                    . '</div>';
 
-                                                        <span class="text-muted">
-                                                            · Tipo:
-                                                            {{ $equipoExportado['tipo_equipo'] ?? 'SIN TIPO' }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                @endforeach
+                                                $html .= '<div class="usuario-cambio-valor">'
+                                                    . '<span class="valor-nuevo">'
+                                                        . e($mostrarValorAuditoria($valor))
+                                                        . '</span>'
+                                                    . '</div>';
 
-                                                @if ($totalEquiposLista > 10)
-                                                <button
-                                                    type="button"
-                                                    class="btn btn-sm btn-outline-secondary mt-2 btn-auditoria-ver-mas"
-                                                    data-target-lista="{{ $idListaEquipos }}"
-                                                    aria-expanded="false">
-                                                    VER MÁS ({{ $totalEquiposLista - 10 }})
-                                                </button>
+                                                $html .= '</div>';
+                                            }
+
+                                            $html .= '</div>';
+
+                                        return $html;
+                                        };
+                                        @endphp
+
+                                        <details class="usuario-evento-detalles">
+                                            <summary>
+                                                <i class="bi bi-list-ul me-1"></i>
+
+                                                @if ($auditoria->modulo === 'PRESTAMOS')
+                                                Ver detalle del préstamo y sus operaciones
+                                                @else
+                                                Ver detalle de los cambios
                                                 @endif
-                                            </div>
+                                            </summary>
 
-                                            @elseif ($esModificacion)
-                                            <div class="usuario-cambio-fila">
-                                                <div class="usuario-cambio-campo">
-                                                    {{ $nombresCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
+                                            <div class="usuario-cambios-tabla">
+
+                                                @if ($auditoria->modulo === 'PRESTAMOS')
+
+                                                @if (in_array($auditoria->accion, ['EXPORTAR_PDF', 'EXPORTAR_EXCEL']))
+                                                @php
+                                                $esMasiva = isset($auditoria->cambios['prestamos'])
+                                                && is_array($auditoria->cambios['prestamos']);
+
+                                                $esIndividual = isset($auditoria->cambios['prestamo'])
+                                                && is_array($auditoria->cambios['prestamo']);
+                                                @endphp
+
+                                                <div class="auditoria-tipo-operacion">
+                                                    <i class="bi bi-file-earmark-arrow-down"></i>
+
+                                                    <div>
+                                                        <strong>
+                                                            {{ $esMasiva
+                                    ? 'EXPORTACIÓN DE VARIOS PRÉSTAMOS'
+                                    : ($esIndividual
+                                        ? 'EXPORTACIÓN DE ACTA INDIVIDUAL'
+                                        : 'EXPORTACIÓN DE ARCHIVO') }}
+                                                        </strong>
+
+                                                        <div>
+                                                            Formato:
+                                                            {{ strtoupper(
+                                    $auditoria->cambios['formato']
+                                    ?? str_replace('EXPORTAR_', '', $auditoria->accion)
+                                ) }}
+                                                        </div>
+
+                                                        @if (isset($auditoria->cambios['cantidad']))
+                                                        <div>
+                                                            Cantidad de registros:
+                                                            {{ $auditoria->cambios['cantidad'] }}
+                                                        </div>
+                                                        @endif
+
+                                                        @if (isset($auditoria->cambios['archivo']))
+                                                        <div class="text-break">
+                                                            Archivo:
+                                                            {{ $auditoria->cambios['archivo'] }}
+                                                        </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @elseif ($auditoria->accion === 'IMPRIMIR_FICHA')
+                                                <div class="auditoria-tipo-operacion">
+                                                    <i class="bi bi-printer"></i>
+
+                                                    <div>
+                                                        <strong>IMPRESIÓN DE FICHA DE PRÉSTAMO</strong>
+                                                        <div>
+                                                            Se registró la solicitud de impresión de la ficha.
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                @endif
+
+                                                {!! $renderAuditoria($auditoria->cambios) !!}
+
+                                                @else
+
+                                                {{-- Se conserva el tratamiento existente para Equipos y otros módulos. --}}
+                                                @foreach ($auditoria->cambios as $campo => $valores)
+
+                                                @php
+                                                $nombresCamposEquipos = [
+                                                'tipo_equipo_id' => 'Tipo de equipo',
+                                                'marca' => 'Marca',
+                                                'modelo' => 'Modelo',
+                                                'num_serie' => 'Número de serie',
+                                                'codigo_inventario' => 'Código de inventario',
+                                                'estado' => 'Estado',
+                                                'ubicacion_id' => 'Ubicación',
+                                                'fecha_registro' => 'Fecha de registro',
+                                                'observacion' => 'Observación',
+                                                'equipo_id' => 'Equipo',
+                                                'docente_id' => 'Docente',
+                                                ];
+
+                                                $esModificacion = is_array($valores)
+                                                && array_key_exists('anterior', $valores)
+                                                && array_key_exists('nuevo', $valores);
+                                                @endphp
+
+                                                @if ($campo === 'equipos' && is_array($valores))
+
+                                                @php
+                                                $idListaEquipos = 'auditoria-equipos-' . $auditoria->id;
+                                                $totalEquiposLista = count($valores);
+                                                @endphp
+
+                                                <div class="usuario-cambios-equipos">
+                                                    <div class="usuario-cambio-campo mb-2">
+                                                        EQUIPOS INCLUIDOS ({{ $totalEquiposLista }})
+                                                    </div>
+
+                                                    @foreach ($valores as $indiceEquipo => $equipoExportado)
+                                                    <div
+                                                        class="usuario-cambio-fila {{ $indiceEquipo >= 10 ? 'auditoria-equipo-oculto' : '' }}"
+                                                        data-lista-equipos="{{ $idListaEquipos }}"
+                                                        @if ($indiceEquipo>= 10) hidden @endif>
+
+                                                        <div class="usuario-cambio-campo">
+                                                            {{ $equipoExportado['num_serie'] ?? 'SIN SERIE' }}
+                                                        </div>
+
+                                                        <div class="usuario-cambio-valor">
+                                                            <span class="valor-nuevo">
+                                                                {{ $equipoExportado['marca'] ?? 'SIN MARCA' }}
+                                                                {{ $equipoExportado['modelo'] ?? '' }}
+                                                            </span>
+
+                                                            <span class="text-muted">
+                                                                · Tipo:
+                                                                {{ $equipoExportado['tipo_equipo'] ?? 'SIN TIPO' }}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    @endforeach
+
+                                                    @if ($totalEquiposLista > 10)
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-sm btn-outline-secondary mt-2 btn-auditoria-ver-mas"
+                                                        data-target-lista="{{ $idListaEquipos }}"
+                                                        aria-expanded="false">
+                                                        VER MÁS ({{ $totalEquiposLista - 10 }})
+                                                    </button>
+                                                    @endif
                                                 </div>
 
-                                                <div class="usuario-cambio-valor">
-                                                    <span class="valor-anterior">
-                                                        {{ $mostrarValor($valores['anterior']) }}
-                                                    </span>
+                                                @elseif ($esModificacion)
 
-                                                    <i class="bi bi-arrow-right"></i>
-
-                                                    <span class="valor-nuevo">
-                                                        {{ $mostrarValor($valores['nuevo']) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            @elseif ($campo === 'eliminado' && is_array($valores))
-                                            <div class="usuario-cambios-eliminados">
-                                                @foreach ($valores as $campoEliminado => $valorEliminado)
                                                 <div class="usuario-cambio-fila">
                                                     <div class="usuario-cambio-campo">
-                                                        {{ $nombresCampos[$campoEliminado] ?? ucfirst(str_replace('_', ' ', $campoEliminado)) }}
+                                                        {{ $nombresCamposEquipos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
                                                     </div>
 
                                                     <div class="usuario-cambio-valor">
                                                         <span class="valor-anterior">
-                                                            {{ $mostrarValor($valorEliminado) }}
+                                                            {{ $mostrarValorAuditoria($valores['anterior']) }}
+                                                        </span>
+
+                                                        <i class="bi bi-arrow-right"></i>
+
+                                                        <span class="valor-nuevo">
+                                                            {{ $mostrarValorAuditoria($valores['nuevo']) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                @elseif ($campo === 'eliminado' && is_array($valores))
+
+                                                @foreach ($valores as $campoEliminado => $valorEliminado)
+                                                <div class="usuario-cambio-fila">
+                                                    <div class="usuario-cambio-campo">
+                                                        {{ $nombresCamposEquipos[$campoEliminado] ?? ucfirst(str_replace('_', ' ', $campoEliminado)) }}
+                                                    </div>
+
+                                                    <div class="usuario-cambio-valor">
+                                                        <span class="valor-anterior">
+                                                            {{ $mostrarValorAuditoria($valorEliminado) }}
                                                         </span>
                                                     </div>
                                                 </div>
                                                 @endforeach
-                                            </div>
 
-                                            @else
-                                            <div class="usuario-cambio-fila">
-                                                <div class="usuario-cambio-campo">
-                                                    {{ $nombresCampos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
+                                                @else
+
+                                                <div class="usuario-cambio-fila">
+                                                    <div class="usuario-cambio-campo">
+                                                        {{ $nombresCamposEquipos[$campo] ?? ucfirst(str_replace('_', ' ', $campo)) }}
+                                                    </div>
+
+                                                    <div class="usuario-cambio-valor">
+                                                        <span class="valor-nuevo">
+                                                            @if (is_array($valores))
+                                                            {{ json_encode($valores, JSON_UNESCAPED_UNICODE) }}
+                                                            @else
+                                                            {{ $mostrarValorAuditoria($valores) }}
+                                                            @endif
+                                                        </span>
+                                                    </div>
                                                 </div>
 
-                                                <div class="usuario-cambio-valor">
-                                                    <span class="valor-nuevo">
-                                                        @if (is_array($valores))
-                                                        {{ json_encode($valores, JSON_UNESCAPED_UNICODE) }}
-                                                        @else
-                                                        {{ $mostrarValor($valores) }}
-                                                        @endif
-                                                    </span>
-                                                </div>
+                                                @endif
+                                                @endforeach
+
+                                                @endif
                                             </div>
-                                            @endif
-                                            @endforeach
-                                        </div>
+                                        </details>
+
+                                        @endif
 
 
-                                    </details>
-                                    @endif
-
-
-                                </div>
+                                    </div>
                             </article>
                             @endforeach
 
@@ -522,39 +762,71 @@ Usuario {{ $usuario->name }}
 
 
 <script>
-document.addEventListener('click', function (event) {
-    const boton = event.target.closest('.btn-auditoria-ver-mas');
+    document.addEventListener('click', function(event) {
+        const boton = event.target.closest('.btn-auditoria-ver-mas');
 
-    if (!boton) {
-        return;
-    }
+        if (!boton) {
+            return;
+        }
 
-    const idLista = boton.dataset.targetLista;
+        const idLista = boton.dataset.targetLista;
 
-    const elementos = document.querySelectorAll(
-        '[data-lista-equipos="' + idLista + '"]'
-    );
+        const elementos = document.querySelectorAll(
+            '[data-lista-equipos="' + idLista + '"]'
+        );
 
-    const mostrarTodos = boton.getAttribute('aria-expanded') !== 'true';
+        const mostrarTodos = boton.getAttribute('aria-expanded') !== 'true';
 
-    elementos.forEach(function (elemento) {
-        if (elemento.classList.contains('auditoria-equipo-oculto')) {
-            elemento.hidden = !mostrarTodos;
+        elementos.forEach(function(elemento) {
+            if (elemento.classList.contains('auditoria-equipo-oculto')) {
+                elemento.hidden = !mostrarTodos;
+            }
+        });
+
+        boton.setAttribute('aria-expanded', String(mostrarTodos));
+
+        if (mostrarTodos) {
+            boton.textContent = 'VER MENOS';
+        } else {
+            const totalOcultos = Array.from(elementos).filter(function(elemento) {
+                return elemento.classList.contains('auditoria-equipo-oculto');
+            }).length;
+
+            boton.textContent = 'VER MÁS (' + totalOcultos + ')';
         }
     });
 
-    boton.setAttribute('aria-expanded', String(mostrarTodos));
 
-    if (mostrarTodos) {
-        boton.textContent = 'VER MENOS';
-    } else {
-        const totalOcultos = Array.from(elementos).filter(function (elemento) {
-            return elemento.classList.contains('auditoria-equipo-oculto');
-        }).length;
+    document.addEventListener('click', function(event) {
+        const boton = event.target.closest('.btn-auditoria-lista');
 
-        boton.textContent = 'VER MÁS (' + totalOcultos + ')';
-    }
-});
+        if (!boton) {
+            return;
+        }
+
+        const idLista = boton.dataset.targetLista;
+
+        const elementos = document.querySelectorAll(
+            '[data-lista-registro="' + idLista + '"]'
+        );
+
+        const mostrarTodos = boton.getAttribute('aria-expanded') !== 'true';
+
+        elementos.forEach(function(elemento, indice) {
+            if (elemento.classList.contains('auditoria-registro-oculto')) {
+                elemento.hidden = !mostrarTodos;
+            }
+        });
+
+        boton.setAttribute('aria-expanded', String(mostrarTodos));
+
+        if (mostrarTodos) {
+            boton.textContent = 'VER MENOS';
+        } else {
+            boton.textContent =
+                'VER MÁS (' + boton.dataset.totalOcultos + ')';
+        }
+    });
 </script>
 
 
@@ -1235,5 +1507,141 @@ document.addEventListener('click', function (event) {
     [data-bs-theme="dark"] .usuario-auditoria-vacia p,
     [data-bs-theme="dark"] .usuario-footer-texto span {
         color: #b0becb;
+    }
+
+    /* =========================================
+   AUDITORÍA DETALLADA DE PRÉSTAMOS
+========================================= */
+
+    .auditoria-tipo-operacion {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 13px;
+        background: #e9f7e9;
+        border: 1px solid #c8e6c9;
+        border-radius: 8px;
+        color: #245c38;
+        font-size: .82rem;
+        overflow-wrap: anywhere;
+    }
+
+    .auditoria-tipo-operacion>i {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+    }
+
+    .auditoria-tipo-operacion strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: .79rem;
+    }
+
+    .auditoria-tipo-operacion div div {
+        margin-top: 3px;
+    }
+
+    .auditoria-lista-anidada {
+        display: grid;
+        gap: 10px;
+        margin-top: 8px;
+    }
+
+    .auditoria-registro-anidado {
+        min-width: 0;
+        padding: 12px;
+        background: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+    }
+
+    .auditoria-registro-titulo {
+        margin-bottom: 8px;
+        color: #245c38;
+        font-size: .76rem;
+        font-weight: 800;
+        letter-spacing: .25px;
+    }
+
+    .auditoria-datos-anidados {
+        display: grid;
+        gap: 3px;
+    }
+
+    .auditoria-bloque-anidado {
+        margin: 8px 0;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 7px;
+    }
+
+    .auditoria-bloque-titulo {
+        margin-bottom: 7px;
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 800;
+        letter-spacing: .2px;
+    }
+
+    .auditoria-seccion-anterior {
+        background: #fff5f5;
+        border-color: #f1c6ca;
+    }
+
+    .auditoria-seccion-nuevo {
+        background: #f0faf4;
+        border-color: #c8e6c9;
+    }
+
+    .auditoria-seccion-anidada {
+        background: #f8fafc;
+    }
+
+    [data-bs-theme="dark"] .auditoria-tipo-operacion {
+        background: #1b382d;
+        border-color: #315442;
+        color: #d8f3df;
+    }
+
+    [data-bs-theme="dark"] .auditoria-registro-anidado,
+    [data-bs-theme="dark"] .auditoria-seccion-anidada {
+        background: #1e293b;
+        border-color: #475569;
+    }
+
+    [data-bs-theme="dark"] .auditoria-registro-titulo,
+    [data-bs-theme="dark"] .auditoria-bloque-titulo {
+        color: #d8e5f2;
+    }
+
+    [data-bs-theme="dark"] .auditoria-seccion-anterior {
+        background: #3b252c;
+        border-color: #75404a;
+    }
+
+    [data-bs-theme="dark"] .auditoria-seccion-nuevo {
+        background: #1b382d;
+        border-color: #315442;
+    }
+
+    @media (max-width: 768px) {
+        .auditoria-registro-anidado {
+            padding: 9px;
+        }
+
+        .auditoria-bloque-anidado {
+            padding: 8px;
+        }
+    }
+
+    .auditoria-registro-oculto[hidden] {
+        display: none !important;
+    }
+
+    .btn-auditoria-lista {
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .2px;
     }
 </style>

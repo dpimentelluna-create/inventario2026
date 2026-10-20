@@ -110,6 +110,10 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         ->name('prestamos.acta.pdf');
     Route::get('/prestamos/{prestamo}/acta/excel', [PrestamoController::class, 'actaExcel'])
         ->name('prestamos.acta.excel');
+    Route::post(
+        '/prestamos/{prestamo}/auditar-impresion',
+        [PrestamoController::class, 'auditarImpresion']
+    )->name('prestamos.auditar-impresion');
 
     Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
 });
