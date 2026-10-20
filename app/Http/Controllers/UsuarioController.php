@@ -111,31 +111,110 @@ class UsuarioController extends Controller
             ->with('toast_tipo', 'aviso');
     }
 
-    public function show(User $usuario): View
-    {
-        $consultaAuditoria = Auditoria::where(
-            'usuario_id',
-            $usuario->id
-        );
+    
+public function show(Request $request, User $usuario): View
+{
+    $consultaAuditoria = Auditoria::where(
+        'usuario_id',
+        $usuario->id
+    );
 
-        $totalAuditorias = (clone $consultaAuditoria)->count();
+    // Filtro por fecha exacta o rango de fechas.
+    $fecha = $request->input('fecha');
+    $desde = $request->input('desde');
+    $hasta = $request->input('hasta');
 
-        $ultimaActividad = (clone $consultaAuditoria)
-            ->latest('created_at')
-            ->first();
+    if ($fecha) {
+        $consultaAuditoria->whereDate('created_at', $fecha);
+    } else {
+        if ($desde) {
+            $consultaAuditoria->whereDate('created_at', '>=', $desde);
+        }
 
-        $auditorias = (clone $consultaAuditoria)
-            ->latest('created_at')
-            ->latest('id')
-            ->paginate(10);
-
-        return view('usuarios.show', compact(
-            'usuario',
-            'auditorias',
-            'totalAuditorias',
-            'ultimaActividad'
-        ));
+        if ($hasta) {
+            $consultaAuditoria->whereDate('created_at', '<=', $hasta);
+        }
     }
+
+    // Filtro por módulo.
+    $modulo = $request->input('modulo');
+
+    if ($modulo) {
+        $consultaAuditoria->where('modulo', $modulo);
+    }
+
+    // Filtro por una o varias operaciones.
+    $operaciones = $request->input('operaciones', []);
+
+    if (!is_array($operaciones)) {
+        $operaciones = [];
+    }
+
+    $operacionesPermitidas = [
+        'CREAR',
+        'ACTUALIZAR',
+        'ELIMINAR',
+        'ACTIVAR',
+        'DESACTIVAR',
+        'RESTABLECER_PASSWORD',
+        'EXPORTAR',
+        'IMPRIMIR',
+        'IMPRIMIR_FICHA',
+    ];
+
+    $operaciones = array_values(array_intersect(
+        $operaciones,
+        $operacionesPermitidas
+    ));
+
+    if (!empty($operaciones)) {
+        $consultaAuditoria->whereIn('accion', $operaciones);
+    }
+
+    // Total y última actividad del usuario, sin filtros.
+    $consultaGeneral = Auditoria::where(
+        'usuario_id',
+        $usuario->id
+    );
+
+    $totalAuditorias = (clone $consultaGeneral)->count();
+
+    $ultimaActividad = (clone $consultaGeneral)
+        ->latest('created_at')
+        ->latest('id')
+        ->first();
+
+    // Resultados filtrados y paginados.
+    $auditorias = (clone $consultaAuditoria)
+        ->latest('created_at')
+        ->latest('id')
+        ->paginate(10)
+        ->withQueryString();
+
+    // Opciones de módulos existentes en el historial.
+    $modulosAuditoria = Auditoria::where(
+        'usuario_id',
+        $usuario->id
+    )
+        ->whereNotNull('modulo')
+        ->distinct()
+        ->orderBy('modulo')
+        ->pluck('modulo');
+
+    return view('usuarios.show', compact(
+        'usuario',
+        'auditorias',
+        'totalAuditorias',
+        'ultimaActividad',
+        'fecha',
+        'desde',
+        'hasta',
+        'modulo',
+        'operaciones',
+        'modulosAuditoria'
+    ));
+}
+
 
     public function cambiarEstado(Request $request, User $usuario): RedirectResponse
     {

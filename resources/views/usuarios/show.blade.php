@@ -230,7 +230,108 @@ Usuario {{ $usuario->name }}
                             </span>
                         </div>
 
-                        @if ($auditorias->count() > 0)
+                        
+{{-- FILTROS DE AUDITORÍA --}}
+{{-- FILTROS DE AUDITORÍA --}}
+<div class="usuario-auditoria-filtros mb-4">
+    <button
+        type="button"
+        class="btn usuario-auditoria-filtros-toggle"
+        id="btnToggleFiltrosAuditoria"
+        aria-expanded="{{ request()->hasAny(['fecha', 'desde', 'hasta', 'modulo', 'operaciones']) ? 'true' : 'false' }}"
+        aria-controls="panelFiltrosAuditoria">
+        <i class="bi bi-funnel-fill me-2"></i>
+        FILTROS DE BÚSQUEDA
+        <i class="bi bi-chevron-down ms-2"></i>
+    </button>
+
+    <div
+        id="panelFiltrosAuditoria"
+        class="mt-3"
+        @if (!request()->hasAny(['fecha', 'desde', 'hasta', 'modulo', 'operaciones']))
+            style="display: none;"
+        @endif>
+
+        <form
+            action="{{ route('usuarios.show', $usuario) }}"
+            method="GET"
+            class="usuario-auditoria-formulario">
+
+            <div class="row g-3">
+                <div class="col-12 col-md-4">
+                    <label for="filtro_fecha" class="form-label">FECHA ESPECÍFICA</label>
+                    <input type="date" id="filtro_fecha" name="fecha" class="form-control"
+                           value="{{ $fecha ?? '' }}">
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label for="filtro_desde" class="form-label">FECHA DESDE</label>
+                    <input type="date" id="filtro_desde" name="desde" class="form-control"
+                           value="{{ $desde ?? '' }}">
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <label for="filtro_hasta" class="form-label">FECHA HASTA</label>
+                    <input type="date" id="filtro_hasta" name="hasta" class="form-control"
+                           value="{{ $hasta ?? '' }}">
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label for="filtro_modulo" class="form-label">MÓDULO</label>
+                    <select id="filtro_modulo" name="modulo" class="form-select">
+                        <option value="">TODOS LOS MÓDULOS</option>
+                        @foreach ($modulosAuditoria as $nombreModulo)
+                            <option value="{{ $nombreModulo }}"
+                                {{ ($modulo ?? '') === $nombreModulo ? 'selected' : '' }}>
+                                {{ $nombreModulo }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">OPERACIÓN</label>
+                    <div class="usuario-auditoria-operaciones">
+                        @php
+                            $opcionesAuditoria = [
+                                'CREAR' => 'CREAR',
+                                'ACTUALIZAR' => 'ACTUALIZAR',
+                                'ELIMINAR' => 'ELIMINAR',
+                                'ACTIVAR' => 'ACTIVAR',
+                                'DESACTIVAR' => 'DESACTIVAR',
+                                'RESTABLECER_PASSWORD' => 'RESTABLECER CONTRASEÑA',
+                                'EXPORTAR' => 'EXPORTAR',
+                                'IMPRIMIR' => 'IMPRIMIR',
+                                'IMPRIMIR_FICHA' => 'IMPRIMIR FICHA',
+                            ];
+                        @endphp
+
+                        @foreach ($opcionesAuditoria as $valorOperacion => $etiquetaOperacion)
+                            <label class="usuario-auditoria-operacion">
+                                <input type="checkbox" name="operaciones[]" value="{{ $valorOperacion }}"
+                                    {{ in_array($valorOperacion, $operaciones ?? [], true) ? 'checked' : '' }}>
+                                <span>{{ $etiquetaOperacion }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex flex-wrap gap-2 justify-content-end">
+                    <a href="{{ route('usuarios.show', $usuario) }}"
+                       class="btn btn-outline-secondary usuario-auditoria-btn-limpiar">
+                        <i class="bi bi-eraser me-1"></i> LIMPIAR
+                    </a>
+                    <button type="submit" class="btn usuario-auditoria-btn-aplicar">
+                        <i class="bi bi-funnel me-1"></i> APLICAR FILTROS
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if ($auditorias->count() > 0)
+
 
                         <div class="usuario-timeline">
 
@@ -762,6 +863,20 @@ Usuario {{ $usuario->name }}
 
 
 <script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const boton = document.getElementById('btnToggleFiltrosAuditoria');
+    const panel = document.getElementById('panelFiltrosAuditoria');
+
+    if (!boton || !panel) return;
+
+    boton.addEventListener('click', function () {
+        const abierto = boton.getAttribute('aria-expanded') === 'true';
+        panel.style.display = abierto ? 'none' : 'block';
+        boton.setAttribute('aria-expanded', String(!abierto));
+    });
+});
+
     document.addEventListener('click', function(event) {
         const boton = event.target.closest('.btn-auditoria-ver-mas');
 
@@ -827,10 +942,8 @@ Usuario {{ $usuario->name }}
                 'VER MÁS (' + boton.dataset.totalOcultos + ')';
         }
     });
+
 </script>
-
-
-@endsection
 
 <style>
     /* =========================================
@@ -1644,4 +1757,102 @@ Usuario {{ $usuario->name }}
         font-weight: 700;
         letter-spacing: .2px;
     }
+
+    
+/* FILTROS DE AUDITORÍA */
+.usuario-auditoria-filtros {
+    padding: 18px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+}
+
+.usuario-auditoria-filtros-toggle {
+    background: #e8f5e9;
+    color: #216e39;
+    border: 1px solid #b7dfc0;
+    border-radius: 7px;
+    padding: 10px 15px;
+    font-weight: 700;
+    font-size: .88rem;
+    letter-spacing: .2px;
+}
+
+.usuario-auditoria-filtros-toggle:hover {
+    background: #d9efde;
+    color: #18572d;
+}
+
+.usuario-auditoria-formulario .form-label {
+    display: block;
+    margin-bottom: 7px;
+    color: #495057;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.usuario-auditoria-formulario .form-control,
+.usuario-auditoria-formulario .form-select {
+    min-height: 42px;
+    border-radius: 7px;
+    font-size: .9rem;
+}
+
+.usuario-auditoria-operaciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.usuario-auditoria-operacion {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 11px;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 7px;
+    color: #495057;
+    font-size: .78rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.usuario-auditoria-operacion input {
+    accent-color: #198754;
+}
+
+.usuario-auditoria-btn-limpiar,
+.usuario-auditoria-btn-aplicar {
+    min-height: 40px;
+    padding: 9px 15px;
+    border-radius: 7px;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.usuario-auditoria-btn-aplicar {
+    background: #198754;
+    color: #fff;
+    border: 1px solid #198754;
+}
+
+.usuario-auditoria-btn-aplicar:hover {
+    background: #157347;
+    color: #fff;
+}
+
+@media (max-width: 576px) {
+    .usuario-auditoria-filtros {
+        padding: 12px;
+    }
+
+    .usuario-auditoria-operacion {
+        flex: 1 1 100%;
+    }
+}
+
 </style>
+
+@endsection
