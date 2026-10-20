@@ -198,9 +198,9 @@
             <th class="cabecera">DEVOLUCION</th>
         </tr>
         <tr>
-            <td>NOMBRES:<br>{{ $nombreSolicitante }}</td>
-            <td>NOMBRES:<br>MICHAEL RAUL CABOS OLIVARES</td>
-            <td>NOMBRES:</td>
+            <td>{{ $nombreSolicitante }}</td>
+            <td>MICHAEL RAUL CABOS OLIVARES</td>
+            <td></td>
         </tr>
         <tr>
             <td class="espacio-firma">
