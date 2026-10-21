@@ -2,6 +2,27 @@
 
 @section('template_title')
     Detalle de baja administrativa
+
+<script>
+function confirmarAnularBaja(form) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Anular esta baja?',
+            text: 'El equipo volverá a EN_INVENTARIO. Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
+    } else if (confirm('¿Anular esta baja? El equipo volverá a EN_INVENTARIO.')) {
+        form.submit();
+    }
+}
+</script>
+
 @endsection
 
 @section('content')
@@ -36,7 +57,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-12 col-md-6">
                             <small class="text-muted d-block">Identificador</small>
-                            <strong>ID {{ $baja->equipo_id }}</strong>
+                            <strong>ID: {{ $baja->equipo_id }}</strong>
                         </div>
 
                         <div class="col-12 col-md-6">
@@ -107,16 +128,54 @@
 
                     <hr>
 
-                    <div class="d-flex justify-content-end">
+                    <div class="d-flex justify-content-end gap-2 flex-wrap">
                         <a href="{{ route('bajas-equipos.index') }}"
                            class="btn btn-outline-secondary">
                             <i class="bi bi-arrow-left me-1"></i>
-                            VOLVER AL HISTORIAL
+                            VOLVER
                         </a>
+                        <a href="{{ route('bajas-equipos.edit', $baja->id) }}"
+                           class="btn btn-warning">
+                            <i class="bi bi-pencil me-1"></i>
+                            EDITAR
+                        </a>
+                        <form action="{{ route('bajas-equipos.destroy', $baja->id) }}"
+                              method="POST"
+                              class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="button"
+                                    class="btn btn-danger"
+                                    onclick="confirmarAnularBaja(this.closest('form'))">
+                                <i class="bi bi-trash me-1"></i>
+                                ANULAR BAJA
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+function confirmarAnularBaja(form) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Anular esta baja?',
+            text: 'El equipo volverá a EN_INVENTARIO. Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
+    } else if (confirm('¿Anular esta baja? El equipo volverá a EN_INVENTARIO.')) {
+        form.submit();
+    }
+}
+</script>
+
 @endsection

@@ -2,6 +2,27 @@
 
 @section('template_title')
     Bajas administrativas
+
+<script>
+function confirmarAnularBaja(form) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Anular esta baja?',
+            text: 'El equipo volverá a EN_INVENTARIO. Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
+    } else if (confirm('¿Anular esta baja? El equipo volverá a EN_INVENTARIO.')) {
+        form.submit();
+    }
+}
+</script>
+
 @endsection
 
 @section('content')
@@ -90,12 +111,31 @@
                                             <td>{{ $baja->quien_entrego }}</td>
                                             <td>{{ $baja->quien_recibio }}</td>
                                             <td class="text-center">
-                                                <a href="{{ route('bajas-equipos.show', $baja->id) }}"
-                                                   class="btn btn-sm btn-outline-primary"
-                                                   title="Ver detalle">
-                                                    <i class="bi bi-eye"></i>
-                                                    VER
-                                                </a>
+                                                <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                                    <a href="{{ route('bajas-equipos.show', $baja->id) }}"
+                                                       class="btn btn-sm btn-outline-primary"
+                                                       title="Ver detalle">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('bajas-equipos.edit', $baja->id) }}"
+                                                       class="btn btn-sm btn-outline-warning"
+                                                       title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form action="{{ route('bajas-equipos.destroy', $baja->id) }}"
+                                                          method="POST"
+                                                          class="d-inline"
+                                                          onsubmit="return false;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="button"
+                                                                class="btn btn-sm btn-outline-danger"
+                                                                title="Anular baja"
+                                                                onclick="confirmarAnularBaja(this.closest('form'))">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -112,4 +152,25 @@
         </div>
     </div>
 </div>
+
+<script>
+function confirmarAnularBaja(form) {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'warning',
+            title: '¿Anular esta baja?',
+            text: 'El equipo volverá a EN_INVENTARIO. Esta acción no se puede deshacer.',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, anular',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
+    } else if (confirm('¿Anular esta baja? El equipo volverá a EN_INVENTARIO.')) {
+        form.submit();
+    }
+}
+</script>
+
 @endsection

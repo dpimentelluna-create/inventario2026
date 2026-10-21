@@ -61,6 +61,18 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         Route::get('/bajas-equipos/{bajas_equipo}', [BajaEquipoController::class, 'show'])
             ->whereNumber('bajas_equipo')
             ->name('bajas-equipos.show');
+
+        Route::get('/bajas-equipos/{bajas_equipo}/edit', [BajaEquipoController::class, 'edit'])
+            ->whereNumber('bajas_equipo')
+            ->name('bajas-equipos.edit');
+
+        Route::put('/bajas-equipos/{bajas_equipo}', [BajaEquipoController::class, 'update'])
+            ->whereNumber('bajas_equipo')
+            ->name('bajas-equipos.update');
+
+        Route::delete('/bajas-equipos/{bajas_equipo}', [BajaEquipoController::class, 'destroy'])
+            ->whereNumber('bajas_equipo')
+            ->name('bajas-equipos.destroy');
     });
 
     //HOME:

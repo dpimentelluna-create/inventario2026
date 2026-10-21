@@ -55,40 +55,51 @@
                             @csrf
 
                             <div class="row g-3">
-                                <div class="col-12">
-                                    <label for="equipo_id" class="form-label fw-semibold">
+                                {{-- FILTRO POR TIPO --}}
+                                <div class="col-12 col-md-4">
+                                    <label for="filtro_tipo" class="form-label fw-semibold">
+                                        Tipo de equipo
+                                    </label>
+                                    <select id="filtro_tipo" class="form-select">
+                                        <option value="">TODOS</option>
+                                        @foreach ($tiposEquipo as $tipo)
+                                            <option value="{{ $tipo->id }}">{{ $tipo->nombre }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="form-text">Filtra la lista de equipos.</div>
+                                </div>
+
+                                {{-- COMBOBOX HÍBRIDO DE EQUIPO --}}
+                                <div class="col-12 col-md-8">
+                                    <label for="buscar_equipo" class="form-label fw-semibold">
                                         Equipo <span class="text-danger">*</span>
                                     </label>
 
-                                    <select name="equipo_id"
-                                            id="equipo_id"
-                                            class="form-select @error('equipo_id') is-invalid @enderror"
-                                            required>
-                                        <option value="">Seleccione un equipo</option>
+                                    <div class="position-relative">
+                                        <input type="text"
+                                               id="buscar_equipo"
+                                               class="form-control campo-mayusculas @error('equipo_id') is-invalid @enderror"
+                                               placeholder="Buscar por ID, tipo, serie, marca, modelo o ubicación..."
+                                               autocomplete="off">
 
-                                        @foreach ($equipos as $equipo)
-                                            <option value="{{ $equipo->id }}"
-                                                @selected(old('equipo_id') == $equipo->id)>
-                                                ID {{ $equipo->id }} —
-                                                {{ $equipo->tipoEquipo->nombre ?? 'SIN TIPO' }} —
-                                                {{ $equipo->marca }}
-                                                {{ $equipo->modelo }}
-                                                @if ($equipo->num_serie)
-                                                    — Serie: {{ $equipo->num_serie }}
-                                                @endif
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                        <input type="hidden" name="equipo_id" id="equipo_id" value="{{ old('equipo_id') }}">
+
+                                        <div id="lista_equipos"
+                                             class="lista-equipos position-absolute w-100 bg-white border rounded shadow-sm"
+                                             style="display:none; z-index:9999; max-height:240px; overflow-y:auto;">
+                                        </div>
+                                    </div>
 
                                     @error('equipo_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
 
                                     <div class="form-text">
                                         Solo se muestran equipos que actualmente figuran
-                                        EN_INVENTARIO. La disponibilidad se volverá a validar
-                                        al guardar.
+                                        EN_INVENTARIO. La disponibilidad se volverá a validar al guardar.
                                     </div>
+
+                                    <div id="equipo_seleccionado" class="mt-2 small text-success fw-semibold" style="display:none;"></div>
                                 </div>
 
                                 <div class="col-12 col-md-6">
@@ -116,10 +127,10 @@
                                     <input type="text"
                                            name="destino"
                                            id="destino"
-                                           class="form-control @error('destino') is-invalid @enderror"
+                                           class="form-control campo-mayusculas @error('destino') is-invalid @enderror"
                                            maxlength="150"
                                            value="{{ old('destino') }}"
-                                           placeholder="Ej.: UGEL, otra institución"
+                                           placeholder="Institución, UGEL, almacén, etc."
                                            required>
 
                                     @error('destino')
@@ -135,7 +146,7 @@
                                     <input type="text"
                                            name="quien_entrego"
                                            id="quien_entrego"
-                                           class="form-control @error('quien_entrego') is-invalid @enderror"
+                                           class="form-control campo-mayusculas @error('quien_entrego') is-invalid @enderror"
                                            maxlength="150"
                                            value="{{ old('quien_entrego') }}"
                                            placeholder="Nombre de quien entrega"
@@ -154,7 +165,7 @@
                                     <input type="text"
                                            name="quien_recibio"
                                            id="quien_recibio"
-                                           class="form-control @error('quien_recibio') is-invalid @enderror"
+                                           class="form-control campo-mayusculas @error('quien_recibio') is-invalid @enderror"
                                            maxlength="150"
                                            value="{{ old('quien_recibio') }}"
                                            placeholder="Nombre de quien recibe"
@@ -172,7 +183,7 @@
 
                                     <textarea name="observaciones"
                                               id="observaciones"
-                                              class="form-control @error('observaciones') is-invalid @enderror"
+                                              class="form-control campo-mayusculas @error('observaciones') is-invalid @enderror"
                                               rows="4"
                                               placeholder="Motivo de la salida, reparación, transferencia u otros detalles">{{ old('observaciones') }}</textarea>
 
@@ -182,17 +193,15 @@
                                 </div>
                             </div>
 
-                            <hr class="my-4">
-
-                            <div class="d-flex justify-content-end flex-wrap gap-2">
+                            <div class="d-flex justify-content-end gap-2 mt-4">
                                 <a href="{{ route('bajas-equipos.index') }}"
                                    class="btn btn-outline-secondary">
-                                    <i class="bi bi-x-circle me-1"></i>
+                                    <i class="bi bi-arrow-left me-1"></i>
                                     CANCELAR
                                 </a>
 
                                 <button type="submit" class="btn btn-success">
-                                    <i class="bi bi-check-circle me-1"></i>
+                                    <i class="bi bi-check2-circle me-1"></i>
                                     REGISTRAR BAJA
                                 </button>
                             </div>
@@ -203,4 +212,155 @@
         </div>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const equipos = @json($equiposForJs);
+
+    const inputBuscar = document.getElementById('buscar_equipo');
+    const inputId = document.getElementById('equipo_id');
+    const lista = document.getElementById('lista_equipos');
+    const filtroTipo = document.getElementById('filtro_tipo');
+    const seleccion = document.getElementById('equipo_seleccionado');
+
+    let indiceActivo = -1;
+
+    function etiquetaEquipo(eq) {
+        let txt = `ID ${eq.id} — ${eq.tipo} — ${eq.marca} ${eq.modelo}`;
+        if (eq.serie) txt += ` — Serie: ${eq.serie}`;
+        if (eq.ubicacion) txt += ` — ${eq.ubicacion}`;
+        return txt.trim();
+    }
+
+    function filtrar() {
+        const texto = (inputBuscar.value || '').trim().toUpperCase();
+        const tipoId = filtroTipo.value;
+
+        return equipos.filter(function (eq) {
+            if (tipoId && String(eq.tipo_id) !== String(tipoId)) return false;
+            if (!texto) return true;
+
+            const campos = [
+                String(eq.id),
+                eq.tipo,
+                eq.marca,
+                eq.modelo,
+                eq.serie,
+                eq.ubicacion
+            ].map(c => String(c || '').toUpperCase());
+
+            return campos.some(c => c.includes(texto));
+        });
+    }
+
+    function mostrarLista() {
+        const resultados = filtrar();
+        lista.innerHTML = '';
+        indiceActivo = -1;
+
+        if (resultados.length === 0) {
+            lista.innerHTML = '<div class="px-3 py-2 text-muted">No se encontraron equipos</div>';
+            lista.style.display = 'block';
+            return;
+        }
+
+        resultados.slice(0, 50).forEach(function (eq) {
+            const op = document.createElement('div');
+            op.className = 'px-3 py-2 opcion-equipo';
+            op.style.cursor = 'pointer';
+            op.textContent = etiquetaEquipo(eq);
+            op.dataset.id = eq.id;
+            op.addEventListener('mousedown', function (e) {
+                e.preventDefault();
+                elegir(eq);
+            });
+            lista.appendChild(op);
+        });
+
+        lista.style.display = 'block';
+    }
+
+    function elegir(eq) {
+        inputId.value = eq.id;
+        inputBuscar.value = etiquetaEquipo(eq);
+        seleccion.textContent = 'Seleccionado: ' + etiquetaEquipo(eq);
+        seleccion.style.display = 'block';
+        lista.style.display = 'none';
+        inputBuscar.classList.remove('is-invalid');
+    }
+
+    function itemsLista() {
+        return Array.from(lista.querySelectorAll('.opcion-equipo'));
+    }
+
+    function pintarActivo() {
+        const items = itemsLista();
+        items.forEach(function (el, i) {
+            el.style.backgroundColor = i === indiceActivo ? '#d1e7dd' : '';
+        });
+        const act = items[indiceActivo];
+        if (act) act.scrollIntoView({ block: 'nearest' });
+    }
+
+    inputBuscar.addEventListener('focus', mostrarLista);
+    inputBuscar.addEventListener('input', function () {
+        // Si el usuario escribe, limpia la selección previa
+        if (inputId.value) {
+            const actual = equipos.find(e => String(e.id) === String(inputId.value));
+            if (actual && inputBuscar.value !== etiquetaEquipo(actual)) {
+                inputId.value = '';
+                seleccion.style.display = 'none';
+            }
+        }
+        mostrarLista();
+    });
+    inputBuscar.addEventListener('click', mostrarLista);
+
+    inputBuscar.addEventListener('keydown', function (e) {
+        const items = itemsLista();
+        const visible = lista.style.display !== 'none' && items.length;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (!visible) mostrarLista();
+            indiceActivo = Math.min(indiceActivo + 1, itemsLista().length - 1);
+            pintarActivo();
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            indiceActivo = Math.max(indiceActivo - 1, 0);
+            pintarActivo();
+        } else if (e.key === 'Enter' && visible && indiceActivo >= 0) {
+            e.preventDefault();
+            const id = itemsLista()[indiceActivo].dataset.id;
+            const eq = equipos.find(x => String(x.id) === String(id));
+            if (eq) elegir(eq);
+        } else if (e.key === 'Escape') {
+            lista.style.display = 'none';
+        }
+    });
+
+    filtroTipo.addEventListener('change', function () {
+        inputId.value = '';
+        inputBuscar.value = '';
+        seleccion.style.display = 'none';
+        mostrarLista();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!inputBuscar.contains(e.target) && !lista.contains(e.target)) {
+            lista.style.display = 'none';
+        }
+    });
+
+    // Restaurar selección si hay old()
+    if (inputId.value) {
+        const eq = equipos.find(e => String(e.id) === String(inputId.value));
+        if (eq) {
+            inputBuscar.value = etiquetaEquipo(eq);
+            seleccion.textContent = 'Seleccionado: ' + etiquetaEquipo(eq);
+            seleccion.style.display = 'block';
+        }
+    }
+});
+</script>
+
 @endsection
