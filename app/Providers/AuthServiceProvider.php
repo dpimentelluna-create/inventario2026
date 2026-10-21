@@ -24,7 +24,8 @@ class AuthServiceProvider extends ServiceProvider
     {
         Gate::define('gestionar-usuarios', fn(User $usuario) => $usuario->activo && $usuario->esAdministrador());
         Gate::define('registrar', fn(User $usuario) => $usuario->activo && $usuario->puedeRegistrar());
-
+        Gate::define('gestionar-bajas', fn(User $usuario) => $usuario->activo && $usuario->esAdministrador());
+        
         //Administrador y registrador pueden eliminar
         Gate::define('eliminar', fn (User $usuario) => $usuario->activo && $usuario->puedeEliminar());
 

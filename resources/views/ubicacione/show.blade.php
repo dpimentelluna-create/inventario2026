@@ -86,6 +86,10 @@
         border-left-color: #dc2626;
     }
 
+    .ubicacion-card.dados-baja {
+        border-left-color: #7c3aed;
+    }
+
     .ubicacion-card-etiqueta {
         color: #718096;
         font-size: 12px;
@@ -312,17 +316,18 @@
             </div>
         </div>
 
+        
         {{-- TARJETAS DE RESUMEN --}}
         <div class="row mb-4">
-            <div class="col-6 col-lg-3 mb-3">
+            <div class="col-6 col-lg-4 mb-3">
                 <div class="ubicacion-card total">
-                    <div class="ubicacion-card-etiqueta">TOTAL DE EQUIPOS</div>
+                    <div class="ubicacion-card-etiqueta">EQUIPOS EN INVENTARIO</div>
                     <div class="ubicacion-card-numero">{{ $totalEquipos }}</div>
-                    <div class="ubicacion-subtitulo">Asignados a esta ubicación</div>
+                    <div class="ubicacion-subtitulo">Asignados y vigentes en esta ubicación</div>
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3 mb-3">
+            <div class="col-6 col-lg-4 mb-3">
                 <div class="ubicacion-card bueno">
                     <div class="ubicacion-card-etiqueta">BUENOS</div>
                     <div class="ubicacion-card-numero">{{ $buenos }}</div>
@@ -330,7 +335,7 @@
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3 mb-3">
+            <div class="col-6 col-lg-4 mb-3">
                 <div class="ubicacion-card regular">
                     <div class="ubicacion-card-etiqueta">REGULARES</div>
                     <div class="ubicacion-card-numero">{{ $regulares }}</div>
@@ -338,14 +343,26 @@
                 </div>
             </div>
 
-            <div class="col-6 col-lg-3 mb-3">
+            <div class="col-6 col-lg-4 mb-3">
                 <div class="ubicacion-card malogrado">
                     <div class="ubicacion-card-etiqueta">MALOGRADOS</div>
                     <div class="ubicacion-card-numero">{{ $malogrados }}</div>
                     <div class="ubicacion-subtitulo">Requieren revisión</div>
                 </div>
             </div>
+
+            <div class="col-6 col-lg-4 mb-3">
+                <div class="ubicacion-card dados-baja">
+                    <div class="ubicacion-card-etiqueta">
+                        <i class="fas fa-box-archive me-1"></i>
+                        EQUIPOS DADOS DE BAJA
+                    </div>
+                    <div class="ubicacion-card-numero">{{ $equiposDadosBaja }}</div>
+                    <div class="ubicacion-subtitulo">Fuera del inventario vigente</div>
+                </div>
+            </div>
         </div>
+
 
         {{-- DISTRIBUCIÓN POR ESTADO --}}
         <div class="ubicacion-panel">

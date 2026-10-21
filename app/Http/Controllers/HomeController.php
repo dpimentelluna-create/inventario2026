@@ -17,16 +17,17 @@ class HomeController extends Controller
         $this->middleware('auth');
     }
 
+
     public function index()
     {
-        // Expresión para obtener el estado desde la tabla correspondiente.
+        // Obtener el estado físico desde la tabla de especificaciones.
         $estadoSQL = "UPPER(TRIM(COALESCE(
-            NULLIF(TRIM(el.estado), ''),
-            NULLIF(TRIM(ee.estado), ''),
-            ''
-        )))";
+        NULLIF(TRIM(el.estado), ''),
+        NULLIF(TRIM(ee.estado), ''),
+        ''
+    )))";
 
-        // Resumen general de todos los equipos.
+        // Resumen general: separar inventario activo y equipos dados de baja.
         $resumenGeneral = DB::table('equipos as e')
             ->leftJoin(
                 'especificaciones_laptop as el',
@@ -41,20 +42,34 @@ class HomeController extends Controller
                 'e.id'
             )
             ->selectRaw("
-                COUNT(DISTINCT e.id) AS total,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'BUENO' THEN e.id
-                END) AS buenos,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'REGULAR' THEN e.id
-                END) AS regulares,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id
-                END) AS malogrados
-            ")
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                THEN e.id
+            END) AS total,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'DE_BAJA'
+                THEN e.id
+            END) AS dados_baja,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'BUENO'
+                THEN e.id
+            END) AS buenos,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'REGULAR'
+                THEN e.id
+            END) AS regulares,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'MALOGRADO'
+                THEN e.id
+            END) AS malogrados
+        ")
             ->first();
 
         $totalEquipos = (int) $resumenGeneral->total;
+        $totalEquiposDadosBaja = (int) $resumenGeneral->dados_baja;
         $equiposBuenos = (int) $resumenGeneral->buenos;
         $equiposRegulares = (int) $resumenGeneral->regulares;
         $equiposMalogrados = (int) $resumenGeneral->malogrados;
@@ -62,24 +77,22 @@ class HomeController extends Controller
         $equiposSinClasificar = max(
             0,
             $totalEquipos
-                - $equiposBuenos
-                - $equiposRegulares
-                - $equiposMalogrados
+            - $equiposBuenos
+            - $equiposRegulares
+            - $equiposMalogrados
         );
 
         // Total de préstamos activos.
         $prestamosActivos = Prestamo::where('estado', 'ACTIVO')->count();
 
-        // Resumen de todos los módulos.
+        // Totales de los demás módulos.
         $totalPrestamos = Prestamo::count();
         $totalAccesorios = AccesoriosEquipo::count();
         $totalTiposEquipo = TiposEquipo::count();
-
-        // Total de docentes y ubicaciones.
         $totalDocentes = Docente::count();
         $totalUbicaciones = Ubicacione::count();
 
-        // Resumen de equipos agrupados por tipo.
+        // Equipos por tipo: contar solamente los que siguen en inventario.
         $tiposEquipoResumen = DB::table('tipos_equipo as t')
             ->leftJoin('equipos as e', 'e.tipo_equipo_id', '=', 't.id')
             ->leftJoin(
@@ -94,27 +107,33 @@ class HomeController extends Controller
                 '=',
                 'e.id'
             )
-            ->select(
-                't.id',
-                't.nombre'
-            )
+            ->select('t.id', 't.nombre')
             ->selectRaw("
-                COUNT(DISTINCT e.id) AS total,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'BUENO' THEN e.id
-                END) AS buenos,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'REGULAR' THEN e.id
-                END) AS regulares,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id
-                END) AS malogrados
-            ")
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                THEN e.id
+            END) AS total,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'BUENO'
+                THEN e.id
+            END) AS buenos,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'REGULAR'
+                THEN e.id
+            END) AS regulares,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'MALOGRADO'
+                THEN e.id
+            END) AS malogrados
+        ")
             ->groupBy('t.id', 't.nombre')
             ->orderBy('t.nombre')
             ->get();
 
-        // Resumen de equipos agrupados por ubicación.
+        // Equipos por ubicación: excluir las bajas de los totales activos.
         $ubicacionesResumen = DB::table('ubicaciones as u')
             ->leftJoin('equipos as e', 'e.ubicacion_id', '=', 'u.id')
             ->leftJoin(
@@ -129,29 +148,35 @@ class HomeController extends Controller
                 '=',
                 'e.id'
             )
-            ->select(
-                'u.id',
-                'u.nombre',
-                'u.tipo'
-            )
+            ->select('u.id', 'u.nombre', 'u.tipo')
             ->selectRaw("
-                COUNT(DISTINCT e.id) AS total,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'BUENO' THEN e.id
-                END) AS buenos,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'REGULAR' THEN e.id
-                END) AS regulares,
-                COUNT(DISTINCT CASE
-                    WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id
-                END) AS malogrados
-            ")
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                THEN e.id
+            END) AS total,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'BUENO'
+                THEN e.id
+            END) AS buenos,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'REGULAR'
+                THEN e.id
+            END) AS regulares,
+            COUNT(DISTINCT CASE
+                WHEN e.situacion_administrativa = 'EN_INVENTARIO'
+                    AND {$estadoSQL} = 'MALOGRADO'
+                THEN e.id
+            END) AS malogrados
+        ")
             ->groupBy('u.id', 'u.nombre', 'u.tipo')
             ->orderBy('u.nombre')
             ->get();
 
         return view('home', compact(
             'totalEquipos',
+            'totalEquiposDadosBaja',
             'equiposBuenos',
             'equiposRegulares',
             'equiposMalogrados',
@@ -163,7 +188,7 @@ class HomeController extends Controller
             'ubicacionesResumen',
             'totalPrestamos',
             'totalAccesorios',
-            'totalTiposEquipo',
+            'totalTiposEquipo'
         ));
     }
 }

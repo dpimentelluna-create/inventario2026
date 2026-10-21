@@ -85,6 +85,10 @@
             border-left-color: #dc2626;
         }
 
+        .tipo-card.dados-baja {
+            border-left-color: #7c3aed;
+        }
+
         .tipo-card-etiqueta {
             color: #718096;
             font-size: 12px;
@@ -318,15 +322,15 @@
 
             {{-- TARJETAS DE RESUMEN --}}
             <div class="row mb-4">
-                <div class="col-6 col-lg-3 mb-3">
+                <div class="col-6 col-lg-4 mb-3">
                     <div class="tipo-card total">
-                        <div class="tipo-card-etiqueta">Total de equipos</div>
+                        <div class="tipo-card-etiqueta">Equipos en inventario</div>
                         <div class="tipo-card-numero">{{ $totalEquipos }}</div>
-                        <div class="tipo-subtitulo">Registrados en este tipo</div>
+                        <div class="tipo-subtitulo">Registrados y vigentes en este tipo</div>
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-3 mb-3">
+                <div class="col-6 col-lg-4 mb-3">
                     <div class="tipo-card bueno">
                         <div class="tipo-card-etiqueta">BUENOS</div>
                         <div class="tipo-card-numero">{{ $buenos }}</div>
@@ -334,7 +338,7 @@
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-3 mb-3">
+                <div class="col-6 col-lg-4 mb-3">
                     <div class="tipo-card regular">
                         <div class="tipo-card-etiqueta">REGULARES</div>
                         <div class="tipo-card-numero">{{ $regulares }}</div>
@@ -342,11 +346,22 @@
                     </div>
                 </div>
 
-                <div class="col-6 col-lg-3 mb-3">
+                <div class="col-6 col-lg-4 mb-3">
                     <div class="tipo-card malogrado">
                         <div class="tipo-card-etiqueta">MALOGRADOS</div>
                         <div class="tipo-card-numero">{{ $malogrados }}</div>
                         <div class="tipo-subtitulo">Requieren revisión</div>
+                    </div>
+                </div>
+
+                <div class="col-6 col-lg-4 mb-3">
+                    <div class="tipo-card dados-baja">
+                        <div class="tipo-card-etiqueta">
+                            <i class="fas fa-box-archive me-1"></i>
+                            EQUIPOS DADOS DE BAJA
+                        </div>
+                        <div class="tipo-card-numero">{{ $equiposDadosBaja }}</div>
+                        <div class="tipo-subtitulo">Fuera del inventario vigente</div>
                     </div>
                 </div>
             </div>

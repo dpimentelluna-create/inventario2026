@@ -43,7 +43,8 @@ class Equipo extends Model
     'modelo',
     'num_serie',
     'ubicacion_id',
-    'fecha_registro'
+    'fecha_registro',
+    'situacion_administrativa'
     ];
 
 
@@ -129,4 +130,15 @@ public function prestamoEquipos()
             'id');
     }
      
+    /**
+ * Registro de baja administrativa del equipo.
+ */
+public function bajaEquipo()
+{
+    return $this->hasOne(
+        \App\Models\BajaEquipo::class,
+        'equipo_id',
+        'id'
+    );
+}
 }
