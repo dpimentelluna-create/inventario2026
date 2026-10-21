@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PrestamoController;
 use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\BajaEquipoController;
 
 
 /*
@@ -44,6 +45,22 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         Route::resource('usuarios', \App\Http\Controllers\UsuarioController::class)
             ->parameters(['usuarios' => 'usuario'])
             ->except(['destroy']);   // quitamos 'show' del except
+    });
+
+    // BAJAS ADMINISTRATIVAS DE EQUIPOS (solo administradores activos)
+    Route::middleware('can:gestionar-bajas')->group(function () {
+        Route::get('/bajas-equipos', [BajaEquipoController::class, 'index'])
+            ->name('bajas-equipos.index');
+
+        Route::get('/bajas-equipos/create', [BajaEquipoController::class, 'create'])
+            ->name('bajas-equipos.create');
+
+        Route::post('/bajas-equipos', [BajaEquipoController::class, 'store'])
+            ->name('bajas-equipos.store');
+
+        Route::get('/bajas-equipos/{bajas_equipo}', [BajaEquipoController::class, 'show'])
+            ->whereNumber('bajas_equipo')
+            ->name('bajas-equipos.show');
     });
 
     //HOME:

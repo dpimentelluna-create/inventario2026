@@ -119,11 +119,40 @@ class PrestamoController extends Controller
             ->whereIn('id', $ids)
             ->orderBy('id')
             ->lockForUpdate()
-            ->get(['id', 'marca', 'modelo', 'num_serie']);
+            ->get([
+                'id',
+                'marca',
+                'modelo',
+                'num_serie',
+                'situacion_administrativa',
+            ]);
 
         if ($equipos->count() !== $ids->count()) {
             throw ValidationException::withMessages([
                 'equipos' => 'Uno o más equipos seleccionados ya no existen. Actualice el formulario e inténtelo nuevamente.',
+            ]);
+        }
+
+        // No permitir prestar equipos dados de baja administrativamente.
+        $equiposDeBaja = $equipos
+            ->whereIn('id', $idsValidar)
+            ->where('situacion_administrativa', 'DE_BAJA');
+
+        if ($equiposDeBaja->isNotEmpty()) {
+            $nombres = $equiposDeBaja
+                ->map(function ($equipo) {
+                    $identificador = $equipo->num_serie
+                        ?: trim(($equipo->marca ?? '') . ' ' . ($equipo->modelo ?? ''));
+
+                    return 'ID ' . $equipo->id
+                        . ($identificador !== '' ? ' (' . $identificador . ')' : '');
+                })
+                ->implode(', ');
+
+            throw ValidationException::withMessages([
+                'equipos' => 'No se puede guardar el préstamo. Estos equipos están dados de baja administrativamente: '
+                    . $nombres
+                    . '.',
             ]);
         }
 

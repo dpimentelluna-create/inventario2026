@@ -512,6 +512,15 @@
                             <span class="sidebar-text">Equipos</span>
                         </a>
 
+                        @can('gestionar-bajas')
+                            <a href="{{ route('bajas-equipos.index') }}"
+                                class="sidebar-link {{ request()->routeIs('bajas-equipos.*') ? 'active' : '' }}"
+                                title="Bajas Administrativas">
+                                <i class="bi bi-archive me-3 fs-5"></i>
+                                <span class="sidebar-text">Bajas Administrativas</span>
+                            </a>
+                        @endcan
+
                         <a href="{{ route('accesorios-equipo.index') }}"
                             class="sidebar-link {{ request()->routeIs('accesorios-equipo.*') ? 'active' : '' }}"
                             title="Accesorios Equipo">
