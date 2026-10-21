@@ -104,70 +104,102 @@
          </p>
      </div>
 
-     {{-- TARJETAS PRINCIPALES --}}
-     <div class="row g-3 mb-4">
+        
+    {{-- TARJETAS PRINCIPALES --}}
+    <div class="row g-3 mb-4">
 
-         <div class="col-12 col-sm-6 col-xl">
-             <a href="{{ route('equipos.index', ['desde_dashboard' => 1]) }}"
-                 class="dashboard-tarjeta p-3">
-                 <div class="d-flex justify-content-between align-items-center">
-                     <span class="dashboard-etiqueta">Total equipos</span>
-                     <i class="fas fa-laptop text-primary"></i>
-                 </div>
-                 <div class="dashboard-numero">{{ number_format($totalEquipos) }}</div>
-                 <span class="small text-primary">Ver todos los equipos <i class="fas fa-arrow-right"></i></span>
-             </a>
-         </div>
+        {{-- TOTAL EQUIPOS EN INVENTARIO --}}
+        <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('equipos.index', ['situacion' => 'EN_INVENTARIO', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">Total equipos</span>
+                    <i class="fas fa-laptop text-primary"></i>
+                </div>
+                <div class="dashboard-numero">{{ number_format($totalEquipos) }}</div>
+                <span class="small text-primary">
+                    Ver equipos en inventario <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-         <div class="col-12 col-sm-6 col-xl">
-             <a href="{{ route('equipos.index', ['estado' => 'BUENO', 'desde_dashboard' => 1]) }}"
-                 class="dashboard-tarjeta p-3">
-                 <div class="d-flex justify-content-between align-items-center">
-                     <span class="dashboard-etiqueta">En buen estado</span>
-                     <i class="fas fa-check-circle text-success"></i>
-                 </div>
-                 <div class="dashboard-numero text-success">{{ number_format($equiposBuenos) }}</div>
-                 <span class="small text-success">Ver equipos BUENOS <i class="fas fa-arrow-right"></i></span>
-             </a>
-         </div>
+        {{-- EQUIPOS BUENOS --}}
+        <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('equipos.index', ['situacion' => 'EN_INVENTARIO', 'estado' => 'BUENO', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">En buen estado</span>
+                    <i class="fas fa-check-circle text-success"></i>
+                </div>
+                <div class="dashboard-numero text-success">{{ number_format($equiposBuenos) }}</div>
+                <span class="small text-success">
+                    Ver equipos BUENOS <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-         <div class="col-12 col-sm-6 col-xl">
-             <a href="{{ route('equipos.index', ['estado' => 'REGULAR', 'desde_dashboard' => 1]) }}"
-                 class="dashboard-tarjeta p-3">
-                 <div class="d-flex justify-content-between align-items-center">
-                     <span class="dashboard-etiqueta">Estado regular</span>
-                     <i class="fas fa-exclamation-circle text-warning"></i>
-                 </div>
-                 <div class="dashboard-numero text-warning">{{ number_format($equiposRegulares) }}</div>
-                 <span class="small text-warning">Ver equipos REGULARES <i class="fas fa-arrow-right"></i></span>
-             </a>
-         </div>
+        {{-- EQUIPOS REGULARES --}}
+        <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('equipos.index', ['situacion' => 'EN_INVENTARIO', 'estado' => 'REGULAR', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">Estado regular</span>
+                    <i class="fas fa-exclamation-circle text-warning"></i>
+                </div>
+                <div class="dashboard-numero text-warning">{{ number_format($equiposRegulares) }}</div>
+                <span class="small text-warning">
+                    Ver equipos REGULARES <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-         <div class="col-12 col-sm-6 col-xl">
-             <a href="{{ route('equipos.index', ['estado' => 'MALOGRADO', 'desde_dashboard' => 1]) }}"
-                 class="dashboard-tarjeta p-3">
-                 <div class="d-flex justify-content-between align-items-center">
-                     <span class="dashboard-etiqueta">Equipos malogrados</span>
-                     <i class="fas fa-times-circle text-danger"></i>
-                 </div>
-                 <div class="dashboard-numero text-danger">{{ number_format($equiposMalogrados) }}</div>
-                 <span class="small text-danger">Ver equipos MALOGRADOS <i class="fas fa-arrow-right"></i></span>
-             </a>
-         </div>
+    {{-- EQUIPOS MALOGRADOS --}}
+    <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('equipos.index', ['situacion' => 'EN_INVENTARIO', 'estado' => 'MALOGRADO', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">Equipos malogrados</span>
+                    <i class="fas fa-times-circle text-danger"></i>
+                </div>
+                <div class="dashboard-numero text-danger">{{ number_format($equiposMalogrados) }}</div>
+                <span class="small text-danger">
+                    Ver equipos MALOGRADOS <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-         <div class="col-12 col-sm-6 col-xl">
-             <a href="{{ route('prestamos.index', ['estado' => 'ACTIVO', 'desde_dashboard' => 1]) }}"
-                 class="dashboard-tarjeta p-3">
-                 <div class="d-flex justify-content-between align-items-center">
-                     <span class="dashboard-etiqueta">Préstamos activos</span>
-                     <i class="fas fa-clipboard-list text-warning"></i>
-                 </div>
-                 <div class="dashboard-numero text-warning">{{ number_format($prestamosActivos) }}</div>
-                 <span class="small text-warning">Ver préstamos ACTIVOS <i class="fas fa-arrow-right"></i></span>
-             </a>
-         </div>
+        {{-- EQUIPOS DADOS DE BAJA --}}
+        <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('equipos.index', ['situacion' => 'DE_BAJA', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">Equipos dados de baja</span>
+                    <i class="fas fa-box-archive text-secondary"></i>
+                </div>
+                <div class="dashboard-numero text-secondary">{{ number_format($totalEquiposDadosBaja) }}</div>
+                <span class="small text-secondary">
+                    Ver equipos DE BAJA <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-     </div>
+        {{-- PRÉSTAMOS ACTIVOS --}}
+        <div class="col-12 col-sm-6 col-xl">
+            <a href="{{ route('prestamos.index', ['estado' => 'ACTIVO', 'desde_dashboard' => 1]) }}"
+                class="dashboard-tarjeta p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="dashboard-etiqueta">Préstamos activos</span>
+                    <i class="fas fa-clipboard-list text-warning"></i>
+                </div>
+                <div class="dashboard-numero text-warning">{{ number_format($prestamosActivos) }}</div>
+                <span class="small text-warning">
+                    Ver préstamos ACTIVOS <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
+
+    </div>
+
 
      {{-- RESUMEN ADICIONAL --}}
      <div class="row g-3 mb-4">

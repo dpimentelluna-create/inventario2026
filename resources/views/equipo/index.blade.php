@@ -1661,14 +1661,53 @@ window.addEventListener('load', function() {
     campos.situacion.value = 'EN_INVENTARIO';
     }
 
-    if (desdeDashboard) {
-        localStorage.removeItem(STORAGE_KEY);
-        Object.values(campos).forEach(el => { if (el) el.value = ''; });
-        if (campos.estado) campos.estado.value = parametrosURL.get('estado') || '';
-        if (panel) panel.style.display = (campos.estado && campos.estado.value) ? 'block' : 'none';
-        aplicarFiltros();
-        window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (!vieneDeCrear) {
+    
+if (desdeDashboard) {
+    localStorage.removeItem(STORAGE_KEY);
+
+    Object.values(campos).forEach(el => {
+        if (el) el.value = '';
+    });
+
+    // Valores enviados por las tarjetas del dashboard.
+    if (campos.situacion) {
+        const situacionURL = parametrosURL.get('situacion');
+
+        campos.situacion.value = [
+            'EN_INVENTARIO',
+            'DE_BAJA',
+            'TODOS'
+        ].includes(situacionURL)
+            ? situacionURL
+            : 'EN_INVENTARIO';
+    }
+
+    if (campos.estado) {
+        campos.estado.value = parametrosURL.get('estado') || '';
+    }
+
+    // Abrir el panel cuando hay filtros provenientes del dashboard.
+    const hayFiltrosDashboard =
+        (campos.situacion && campos.situacion.value !== 'EN_INVENTARIO') ||
+        (campos.estado && campos.estado.value !== '');
+
+    if (panel) {
+        panel.style.display = hayFiltrosDashboard ? 'block' : 'none';
+    }
+
+    if (btnToggle) {
+        btnToggle.classList.toggle('filtros-abiertos', hayFiltrosDashboard);
+        btnToggle.setAttribute('aria-expanded', String(hayFiltrosDashboard));
+    }
+
+    aplicarFiltros();
+
+    window.history.replaceState(
+        {},
+        document.title,
+        window.location.pathname
+    );
+} else if (!vieneDeCrear) {
         restaurarFiltros();
         actualizarBadge();
         if (filtrosActivos()) aplicarFiltros();

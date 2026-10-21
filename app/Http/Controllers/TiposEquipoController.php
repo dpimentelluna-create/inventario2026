@@ -64,7 +64,8 @@ class TiposEquipoController extends Controller
         ''
     )))";
 
-        // Obtener los totales sin cargar todos los equipos en memoria.
+        
+        // Resumen de equipos que siguen en inventario.
         $resumen = DB::table('equipos as e')
             ->leftJoin(
                 'especificaciones_laptop as el',
@@ -79,18 +80,25 @@ class TiposEquipoController extends Controller
                 'e.id'
             )
             ->where('e.tipo_equipo_id', $tiposEquipo->id)
+            ->where('e.situacion_administrativa', 'EN_INVENTARIO')
             ->selectRaw("
-            COUNT(DISTINCT e.id) AS total,
-            SUM(CASE WHEN {$estadoSQL} = 'BUENO' THEN 1 ELSE 0 END) AS buenos,
-            SUM(CASE WHEN {$estadoSQL} = 'REGULAR' THEN 1 ELSE 0 END) AS regulares,
-            SUM(CASE WHEN {$estadoSQL} = 'MALOGRADO' THEN 1 ELSE 0 END) AS malogrados
-        ")
+                COUNT(DISTINCT e.id) AS total,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'BUENO' THEN e.id END) AS buenos,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'REGULAR' THEN e.id END) AS regulares,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id END) AS malogrados
+            ")
             ->first();
 
         $totalEquipos = (int) $resumen->total;
         $buenos = (int) $resumen->buenos;
         $regulares = (int) $resumen->regulares;
         $malogrados = (int) $resumen->malogrados;
+
+        // Total de equipos dados de baja de este tipo.
+        $equiposDadosBaja = Equipo::where('tipo_equipo_id', $tiposEquipo->id)
+            ->where('situacion_administrativa', 'DE_BAJA')
+            ->count();
+
 
         // Equipos sin estado reconocido o sin especificaciones.
         $sinClasificar = max(
@@ -116,15 +124,19 @@ class TiposEquipoController extends Controller
             : 0;
 
         // Obtener solamente los cinco equipos más recientes.
+        
+        // Obtener los cinco equipos más recientes que siguen en inventario.
         $ultimosEquipos = Equipo::with([
             'especificacionesLaptops',
             'especificacionesEquipo'
         ])
             ->where('tipo_equipo_id', $tiposEquipo->id)
+            ->where('situacion_administrativa', 'EN_INVENTARIO')
             ->orderByDesc('fecha_registro')
             ->orderByDesc('id')
             ->limit(5)
             ->get();
+
 
         return view('tipos-equipo.show', compact(
             'tiposEquipo',
@@ -132,6 +144,7 @@ class TiposEquipoController extends Controller
             'buenos',
             'regulares',
             'malogrados',
+            'equiposDadosBaja',
             'sinClasificar',
             'porcentajeBueno',
             'porcentajeRegular',

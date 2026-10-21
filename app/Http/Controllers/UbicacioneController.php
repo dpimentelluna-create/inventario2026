@@ -63,7 +63,8 @@ class UbicacioneController extends Controller
         ''
     )))";
 
-        // Calcular las cantidades de equipos por estado.
+        
+        // Resumen de equipos que siguen en inventario.
         $resumen = DB::table('equipos as e')
             ->leftJoin(
                 'especificaciones_laptop as el',
@@ -78,24 +79,28 @@ class UbicacioneController extends Controller
                 'e.id'
             )
             ->where('e.ubicacion_id', $ubicacione->id)
+            ->where('e.situacion_administrativa', 'EN_INVENTARIO')
             ->selectRaw("
-            COUNT(DISTINCT e.id) AS total,
-            COUNT(DISTINCT CASE
-                WHEN {$estadoSQL} = 'BUENO' THEN e.id
-            END) AS buenos,
-            COUNT(DISTINCT CASE
-                WHEN {$estadoSQL} = 'REGULAR' THEN e.id
-            END) AS regulares,
-            COUNT(DISTINCT CASE
-                WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id
-            END) AS malogrados
-        ")
+                COUNT(DISTINCT e.id) AS total,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'BUENO' THEN e.id END) AS buenos,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'REGULAR' THEN e.id END) AS regulares,
+                COUNT(DISTINCT CASE WHEN {$estadoSQL} = 'MALOGRADO' THEN e.id END) AS malogrados
+            ")
             ->first();
 
         $totalEquipos = (int) $resumen->total;
         $buenos = (int) $resumen->buenos;
         $regulares = (int) $resumen->regulares;
         $malogrados = (int) $resumen->malogrados;
+
+        // Contar los equipos dados de baja en esta ubicación.
+        $equiposDadosBaja = \App\Models\Equipo::where(
+            'ubicacion_id',
+            $ubicacione->id
+        )
+            ->where('situacion_administrativa', 'DE_BAJA')
+            ->count();
+
 
         // Equipos sin estado reconocido o sin especificaciones.
         $sinClasificar = max(
@@ -120,16 +125,19 @@ class UbicacioneController extends Controller
             ? round(($sinClasificar / $totalEquipos) * 100, 1)
             : 0;
 
-        // Obtener los equipos de la ubicación con sus relaciones.
+        
+        // Obtener los equipos vigentes de la ubicación.
         $equipos = \App\Models\Equipo::with([
             'tipoEquipo',
             'especificacionesLaptops',
             'especificacionesEquipo'
         ])
             ->where('ubicacion_id', $ubicacione->id)
+            ->where('situacion_administrativa', 'EN_INVENTARIO')
             ->orderByDesc('fecha_registro')
             ->orderByDesc('id')
             ->get();
+
 
         return view('ubicacione.show', compact(
             'ubicacione',
@@ -137,6 +145,7 @@ class UbicacioneController extends Controller
             'buenos',
             'regulares',
             'malogrados',
+            'equiposDadosBaja',
             'sinClasificar',
             'porcentajeBueno',
             'porcentajeRegular',
