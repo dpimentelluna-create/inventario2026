@@ -77,7 +77,9 @@
                     <div class="row g-3">
                         <div class="col-12 col-md-6">
                             <small class="text-muted d-block">Fecha</small>
-                            <strong>{{ $baja->fecha?->format('d/m/Y') }}</strong>
+                            <strong>
+                                {{ $baja->fecha ? \Illuminate\Support\Carbon::parse($baja->fecha)->format('d/m/Y') : '—' }}
+                            </strong>
                         </div>
 
                         <div class="col-12 col-md-6">

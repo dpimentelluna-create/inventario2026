@@ -68,7 +68,9 @@
                                     @foreach ($bajas as $baja)
                                         <tr>
                                             <td>{{ $baja->id }}</td>
-                                            <td>{{ $baja->fecha?->format('d/m/Y') }}</td>
+                                            <td>
+                                                {{ $baja->fecha ? \Illuminate\Support\Carbon::parse($baja->fecha)->format('d/m/Y') : '—' }}
+                                            </td>
                                             <td>
                                                 <div class="fw-semibold">
                                                     {{ $baja->equipo->tipoEquipo->nombre ?? 'SIN TIPO' }}

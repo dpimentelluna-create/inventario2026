@@ -176,6 +176,26 @@
                                     </div>
                                 </div>
 
+                                {{-- SITUACIÓN ADMINISTRATIVA --}}
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <label for="filtro_situacion" class="form-label">
+                                        <i class="fa-solid fa-box-archive me-1"></i> SITUACIÓN ADMINISTRATIVA
+                                    </label>
+                                    <div class="input-group input-group-sm">
+                                        <select id="filtro_situacion" class="form-select">
+                                            <option value="EN_INVENTARIO" selected>EN INVENTARIO</option>
+                                            <option value="DE_BAJA">DE BAJA</option>
+                                            <option value="TODOS">TODOS</option>
+                                        </select>
+                                        <button type="button"
+                                            class="btn btn-limpiar-filtro btn-limpiar-campo"
+                                            data-target="filtro_situacion"
+                                            title="Restablecer situación administrativa">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 {{-- NÚMERO DE SERIE --}}
                                 <div class="col-12 col-md-6 col-xl-3">
                                     <label for="filtro_serie" class="form-label">
@@ -261,14 +281,17 @@
                                             ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d-m-Y')
                                             : '-';
                                     @endphp
+                    
                                     <tr data-equipo-id="{{ $equipo->id }}"
                                         data-tipo="{{ strtoupper($equipo->tipoEquipo->nombre ?? '') }}"
                                         data-serie="{{ strtoupper($equipo->num_serie ?? '') }}"
                                         data-marca="{{ strtoupper($equipo->marca ?? '') }}"
                                         data-modelo="{{ strtoupper($equipo->modelo ?? '') }}"
                                         data-estado="{{ $estado }}"
+                                        data-situacion="{{ strtoupper($equipo->situacion_administrativa ?? 'EN_INVENTARIO') }}"
                                         data-ubicacion="{{ strtoupper($equipo->ubicacione->nombre ?? '') }}"
                                         data-fecha="{{ $fechaIso }}">
+
                                         <td>{{ $equipo->id }}</td>
                                         <td>{{ $equipo->tipoEquipo->nombre ?? '-' }}</td>
                                         <td class="text-center">{{ $equipo->num_serie }}</td>
@@ -1359,6 +1382,7 @@ window.addEventListener('load', function() {
         modelo: document.getElementById('filtro_modelo'),
         ubicacion: document.getElementById('filtro_ubicacion'),
         estado: document.getElementById('filtro_estado'),
+        situacion: document.getElementById('filtro_situacion'),
         serie: document.getElementById('filtro_serie'),
         fecha: document.getElementById('filtro_fecha')
     };
@@ -1520,6 +1544,7 @@ window.addEventListener('load', function() {
         const modelo = val(campos.modelo);
         const ubic = val(campos.ubicacion);
         const est = val(campos.estado);
+        const situacion = val(campos.situacion) || 'EN_INVENTARIO';
         const serie = val(campos.serie);
         const fec = campos.fecha ? campos.fecha.value : '';
 
@@ -1528,6 +1553,14 @@ window.addEventListener('load', function() {
         if (modelo && !(fila.getAttribute('data-modelo') || '').includes(modelo)) return false;
         if (ubic && !(fila.getAttribute('data-ubicacion') || '').includes(ubic)) return false;
         if (est && (fila.getAttribute('data-estado') || '') !== est) return false;
+        const situacionFila = fila.getAttribute('data-situacion') || 'EN_INVENTARIO';
+
+        if (
+            situacion !== 'TODOS' &&
+            situacionFila !== situacion
+        ) {
+            return false;
+        }
         if (serie && !(fila.getAttribute('data-serie') || '').includes(serie)) return false;
         if (fec && (fila.getAttribute('data-fecha') || '') !== fec) return false;
 
@@ -1549,13 +1582,26 @@ window.addEventListener('load', function() {
     }
 
     function limpiarFiltros() {
-        Object.values(campos).forEach(el => { if (el) el.value = ''; });
+        Object.values(campos).forEach(el => {
+            if (el) el.value = '';
+        });
+
+        if (campos.situacion) {
+            campos.situacion.value = 'EN_INVENTARIO';
+        }
+
         localStorage.removeItem(STORAGE_KEY);
+
         actualizarEncadenados();
-        if (listas.serie) listas.serie.innerHTML = '';
+
+        if (listas.serie) {
+            listas.serie.innerHTML = '';
+        }
+
         actualizarBadge();
         tabla.draw();
         mostrarCoincidencias();
+        guardarFiltros();
     }
 
     // Eventos
@@ -1578,13 +1624,23 @@ window.addEventListener('load', function() {
         aplicarFiltros();
     });
 
+    
     document.querySelectorAll('.btn-limpiar-campo').forEach(btn => {
         btn.addEventListener('click', function() {
             const el = document.getElementById(btn.getAttribute('data-target'));
-            if (el) el.value = '';
+
+            if (el) {
+                if (el.id === 'filtro_situacion') {
+                    el.value = 'EN_INVENTARIO';
+                } else {
+                    el.value = '';
+                }
+            }
+
             aplicarFiltros();
         });
     });
+
 
     Object.values(campos).forEach(el => {
         if (!el) return;
@@ -1600,6 +1656,10 @@ window.addEventListener('load', function() {
     const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
     const NUEVO_KEY = STORAGE_KEY + '_nuevo_equipo';
     const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1' || @json(session('equipo_accion')) === 'crear';
+
+    if (campos.situacion) {
+    campos.situacion.value = 'EN_INVENTARIO';
+    }
 
     if (desdeDashboard) {
         localStorage.removeItem(STORAGE_KEY);
