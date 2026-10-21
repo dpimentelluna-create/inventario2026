@@ -42,6 +42,7 @@
             height: 100%;
             margin: 0;
             overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .btn-accion {
@@ -75,7 +76,7 @@
         #sidebar {
             width: 260px;
             min-width: 260px;
-            transition: all 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease, width 0.3s ease;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -92,7 +93,6 @@
             min-width: 72px;
         }
 
-        /* Modificaciones cuando la barra lateral está colapsada */
         #sidebar.collapsed .sidebar-text,
         #sidebar.collapsed .brand-text,
         #sidebar.collapsed .auth-buttons-container,
@@ -111,7 +111,6 @@
             font-size: 1.25rem;
         }
 
-        /* Ajuste del perfil de usuario colapsado para mostrar solo el avatar centrado */
         #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
             justify-content: center;
             padding: 0;
@@ -127,7 +126,7 @@
             padding: 0.6rem 0.75rem;
             border-radius: 0.5rem;
             text-decoration: none;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, color 0.2s;
             margin-bottom: 0.25rem;
         }
 
@@ -180,85 +179,22 @@
             background-color: #475569;
         }
 
-        .dot-spinner-container .dot:nth-child(1) {
-            transform: rotate(0deg) translate(45px);
-            opacity: 0.1;
-        }
-
-        .dot-spinner-container .dot:nth-child(2) {
-            transform: rotate(22.5deg) translate(45px);
-            opacity: 0.15;
-        }
-
-        .dot-spinner-container .dot:nth-child(3) {
-            transform: rotate(45deg) translate(45px);
-            opacity: 0.2;
-        }
-
-        .dot-spinner-container .dot:nth-child(4) {
-            transform: rotate(67.5deg) translate(45px);
-            opacity: 0.25;
-        }
-
-        .dot-spinner-container .dot:nth-child(5) {
-            transform: rotate(90deg) translate(45px);
-            opacity: 0.3;
-        }
-
-        .dot-spinner-container .dot:nth-child(6) {
-            transform: rotate(112.5deg) translate(45px);
-            opacity: 0.4;
-        }
-
-        .dot-spinner-container .dot:nth-child(7) {
-            transform: rotate(135deg) translate(45px);
-            opacity: 0.5;
-        }
-
-        .dot-spinner-container .dot:nth-child(8) {
-            transform: rotate(157.5deg) translate(45px);
-            opacity: 0.6;
-        }
-
-        .dot-spinner-container .dot:nth-child(9) {
-            transform: rotate(180deg) translate(45px);
-            opacity: 0.7;
-        }
-
-        .dot-spinner-container .dot:nth-child(10) {
-            transform: rotate(202.5deg) translate(45px);
-            opacity: 0.8;
-        }
-
-        .dot-spinner-container .dot:nth-child(11) {
-            transform: rotate(225deg) translate(45px);
-            opacity: 0.85;
-        }
-
-        .dot-spinner-container .dot:nth-child(12) {
-            transform: rotate(247.5deg) translate(45px);
-            opacity: 0.9;
-        }
-
-        .dot-spinner-container .dot:nth-child(13) {
-            transform: rotate(270deg) translate(45px);
-            opacity: 0.95;
-        }
-
-        .dot-spinner-container .dot:nth-child(14) {
-            transform: rotate(292.5deg) translate(45px);
-            opacity: 1;
-        }
-
-        .dot-spinner-container .dot:nth-child(15) {
-            transform: rotate(315deg) translate(45px);
-            opacity: 1;
-        }
-
-        .dot-spinner-container .dot:nth-child(16) {
-            transform: rotate(337.5deg) translate(45px);
-            opacity: 1;
-        }
+        .dot-spinner-container .dot:nth-child(1) { transform: rotate(0deg) translate(45px); opacity: 0.1; }
+        .dot-spinner-container .dot:nth-child(2) { transform: rotate(22.5deg) translate(45px); opacity: 0.15; }
+        .dot-spinner-container .dot:nth-child(3) { transform: rotate(45deg) translate(45px); opacity: 0.2; }
+        .dot-spinner-container .dot:nth-child(4) { transform: rotate(67.5deg) translate(45px); opacity: 0.25; }
+        .dot-spinner-container .dot:nth-child(5) { transform: rotate(90deg) translate(45px); opacity: 0.3; }
+        .dot-spinner-container .dot:nth-child(6) { transform: rotate(112.5deg) translate(45px); opacity: 0.4; }
+        .dot-spinner-container .dot:nth-child(7) { transform: rotate(135deg) translate(45px); opacity: 0.5; }
+        .dot-spinner-container .dot:nth-child(8) { transform: rotate(157.5deg) translate(45px); opacity: 0.6; }
+        .dot-spinner-container .dot:nth-child(9) { transform: rotate(180deg) translate(45px); opacity: 0.7; }
+        .dot-spinner-container .dot:nth-child(10) { transform: rotate(202.5deg) translate(45px); opacity: 0.8; }
+        .dot-spinner-container .dot:nth-child(11) { transform: rotate(225deg) translate(45px); opacity: 0.85; }
+        .dot-spinner-container .dot:nth-child(12) { transform: rotate(247.5deg) translate(45px); opacity: 0.9; }
+        .dot-spinner-container .dot:nth-child(13) { transform: rotate(270deg) translate(45px); opacity: 0.95; }
+        .dot-spinner-container .dot:nth-child(14) { transform: rotate(292.5deg) translate(45px); opacity: 1; }
+        .dot-spinner-container .dot:nth-child(15) { transform: rotate(315deg) translate(45px); opacity: 1; }
+        .dot-spinner-container .dot:nth-child(16) { transform: rotate(337.5deg) translate(45px); opacity: 1; }
 
         .loading-text {
             margin-top: 20px;
@@ -273,17 +209,19 @@
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* --- MODO OSCURO (AZUL PROFUNDO) --- */
+        /* ==========================================
+           FORZADO GLOBAL DE MODO OSCURO / CLARO
+           ========================================== */
         [data-bs-theme="dark"] body {
+            background-color: #0f172a !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-bs-theme="dark"] #content-wrapper {
             background-color: #0f172a !important;
             color: #e2e8f0 !important;
         }
@@ -294,27 +232,27 @@
             color: #e2e8f0 !important;
         }
 
-        [data-bs-theme="dark"] .sidebar-link {
-            color: #cbd5e1;
+        [data-bs-theme="dark"] #sidebar .sidebar-link {
+            color: #cbd5e1 !important;
         }
 
-        [data-bs-theme="dark"] .sidebar-link:hover,
-        [data-bs-theme="dark"] .sidebar-link.active {
+        [data-bs-theme="dark"] #sidebar .sidebar-link:hover,
+        [data-bs-theme="dark"] #sidebar .sidebar-link.active {
             background-color: #334155 !important;
             color: #ffffff !important;
         }
 
-        [data-bs-theme="dark"] .top-header-bar {
-            background-color: #1e293b !important;
-            border-bottom: 1px solid #334155 !important;
+        [data-bs-theme="dark"] #sidebar .sidebar-brand-text,
+        [data-bs-theme="dark"] #sidebar .user-name-text,
+        [data-bs-theme="dark"] #sidebar small {
+            color: #e2e8f0 !important;
         }
 
+        /* Tarjetas y contenedores generales en Modo Oscuro */
         [data-bs-theme="dark"] .card,
         [data-bs-theme="dark"] .card-body,
-        [data-bs-theme="dark"] .dropdown-menu,
-        [data-bs-theme="dark"] div[style*="background"],
-        [data-bs-theme="dark"] .collapse:not(.show)+div,
-        [data-bs-theme="dark"] .border {
+        [data-bs-theme="dark"] .bg-white,
+        [data-bs-theme="dark"] .dropdown-menu {
             background-color: #1e293b !important;
             border-color: #334155 !important;
             color: #e2e8f0 !important;
@@ -327,7 +265,11 @@
             color: #e2e8f0 !important;
         }
 
-        /* ANULACIÓN ABSOLUTA DE VERDES EN TABLAS EN MODO OSCURO */
+        [data-bs-theme="dark"] .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        /* Tablas en Modo Oscuro */
         [data-bs-theme="dark"] table.dataTable,
         [data-bs-theme="dark"] table.dataTable thead,
         [data-bs-theme="dark"] table.dataTable thead th,
@@ -335,10 +277,7 @@
         [data-bs-theme="dark"] .table,
         [data-bs-theme="dark"] .table thead,
         [data-bs-theme="dark"] .table thead th,
-        [data-bs-theme="dark"] .table thead td,
-        [data-bs-theme="dark"] .table-success,
-        [data-bs-theme="dark"] .table-success>th,
-        [data-bs-theme="dark"] .table-success>td {
+        [data-bs-theme="dark"] .table thead td {
             background-color: #0f172a !important;
             color: #e2e8f0 !important;
             border-color: #334155 !important;
@@ -356,8 +295,15 @@
             border-color: #334155 !important;
         }
 
-        /* --- MODO CLARO (BLANCO / ESTÁNDAR) --- */
+        /* ==========================================
+           MODO CLARO (ESTÁNDAR)
+           ========================================== */
         [data-bs-theme="light"] body {
+            background-color: #f8fafc !important;
+            color: #334155 !important;
+        }
+
+        [data-bs-theme="light"] #content-wrapper {
             background-color: #f8fafc !important;
             color: #334155 !important;
         }
@@ -368,19 +314,19 @@
             color: #334155 !important;
         }
 
-        [data-bs-theme="light"] .sidebar-link {
-            color: #475569;
+        [data-bs-theme="light"] #sidebar .sidebar-link {
+            color: #475569 !important;
         }
 
-        [data-bs-theme="light"] .sidebar-link:hover,
-        [data-bs-theme="light"] .sidebar-link.active {
+        [data-bs-theme="light"] #sidebar .sidebar-link:hover,
+        [data-bs-theme="light"] #sidebar .sidebar-link.active {
             background-color: #f1f5f9 !important;
             color: #0f172a !important;
         }
 
-        [data-bs-theme="light"] .top-header-bar {
-            background-color: #ffffff !important;
-            border-bottom: 1px solid #e2e8f0 !important;
+        [data-bs-theme="light"] #sidebar .sidebar-brand-text,
+        [data-bs-theme="light"] #sidebar .user-name-text {
+            color: #334155 !important;
         }
 
         [data-bs-theme="light"] .card,
@@ -424,12 +370,10 @@
             margin-top: auto;
         }
 
-        /* Ocultar tarjetas de rol y sesión cuando la barra está colapsada */
         #sidebar.collapsed .user-info-cards {
             display: none !important;
         }
 
-        /* Centrar el avatar cuando está colapsada */
         #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
             justify-content: center;
             padding-left: 0;
@@ -471,11 +415,11 @@
         <div id="app-container">
             <!-- BARRA LATERAL -->
             <nav id="sidebar" class="shadow-sm">
-    <script>
-        if (localStorage.getItem('sidebarCollapsed') === 'true') {
-            document.currentScript.parentElement.classList.add('collapsed');
-        }
-    </script>
+                <script>
+                    if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                        document.currentScript.parentElement.classList.add('collapsed');
+                    }
+                </script>
                 <div>
                     <!-- Cabecera de la Barra Lateral -->
                     <div class="d-flex align-items-center mb-3 px-1">
@@ -585,11 +529,10 @@
                         </form>
                     </div>
 
-                    {{-- Tarjetas de rol y sesión (se ocultan al colapsar) --}}
+                    {{-- Tarjetas de rol y sesión --}}
                     <div class="user-info-cards">
-                        {{-- Rol --}}
                         <div class="px-1 mb-2">
-                            <div class="card border-0 bg-light mb-0">
+                            <div class="card border-0 mb-0">
                                 <div class="card-body p-2 text-center">
                                     <small class="text-muted d-block" style="font-size: 0.7rem;">Rol</small>
                                     <span class="badge bg-primary">{{ Auth::user()->etiquetaRol() }}</span>
@@ -597,9 +540,8 @@
                             </div>
                         </div>
 
-                        {{-- Sesión activa --}}
                         <div class="px-1">
-                            <div class="card border-success bg-success bg-opacity-10 mb-0">
+                            <div class="card border-success mb-0">
                                 <div class="card-body p-2 d-flex align-items-center justify-content-center">
                                     <i class="bi bi-check-circle-fill text-success me-2"></i>
                                     <small class="text-success fw-semibold">Sesión activa</small>
@@ -690,43 +632,49 @@
         })();
     </script>
 
-    <!-- Script para alternar el tema y colapsar la barra lateral -->
+    <!-- Script de Sincronización de Tema Limpio y Efectivo -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-    const btnSwitch = document.getElementById('btn-switch-theme');
-    const themeIcon = document.getElementById('theme-icon');
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-    const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+        function actualizarBotonTema(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            if (themeIcon && themeText) {
+                if (theme === 'dark') {
+                    themeIcon.className = 'fas fa-sun me-1';
+                    themeText.textContent = 'Modo Claro';
+                } else {
+                    themeIcon.className = 'fas fa-moon me-1';
+                    themeText.textContent = 'Modo Oscuro';
+                }
+            }
+        }
 
-    if (themeIcon) {
-        themeIcon.className = (currentTheme === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
-    }
+        function toggleThemeDirecto() {
+            const htmlTag = document.documentElement;
+            const currentTheme = htmlTag.getAttribute('data-bs-theme') || 'light';
+            const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
 
-    if (btnSwitch) {
-        btnSwitch.addEventListener('click', function() {
-            let theme = document.documentElement.getAttribute('data-bs-theme');
-            let newTheme = (theme === 'dark') ? 'light' : 'dark';
-
-            document.documentElement.setAttribute('data-bs-theme', newTheme);
+            htmlTag.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
+            actualizarBotonTema(newTheme);
+        }
 
-            if (themeIcon) {
-                themeIcon.className = (newTheme === 'dark') ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        document.addEventListener('DOMContentLoaded', function() {
+            const temaGuardado = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', temaGuardado);
+            actualizarBotonTema(temaGuardado);
+
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            const sidebar = document.getElementById('sidebar');
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem(
+                        'sidebarCollapsed',
+                        sidebar.classList.contains('collapsed') ? 'true' : 'false'
+                    );
+                });
             }
         });
-    }
-
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem(
-                'sidebarCollapsed',
-                sidebar.classList.contains('collapsed') ? 'true' : 'false'
-            );
-        });
-    }
-});
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
