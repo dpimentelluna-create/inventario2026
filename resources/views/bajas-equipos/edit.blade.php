@@ -1,28 +1,58 @@
 @extends('layouts.app')
 
 @section('template_title')
-    Editar baja administrativa
+    Editar Baja Administrativa
 @endsection
 
 @section('content')
+@php
+    $entregantesGuardados = $baja->entregantes ?: [
+        [
+            'nombre' => $baja->quien_entrego ?? '',
+            'cargo' => '',
+        ],
+    ];
+
+    $receptoresGuardados = $baja->receptores ?: [
+        [
+            'nombre' => $baja->quien_recibio ?? '',
+            'cargo' => '',
+        ],
+    ];
+
+    $entregantesOld = old('entregantes', $entregantesGuardados);
+    $receptoresOld = old('receptores', $receptoresGuardados);
+
+    if (empty($entregantesOld)) {
+        $entregantesOld = [['nombre' => '', 'cargo' => '']];
+    }
+
+    if (empty($receptoresOld)) {
+        $receptoresOld = [['nombre' => '', 'cargo' => '']];
+    }
+@endphp
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-12 col-xl-10 mx-auto">
             <div class="card shadow-sm">
+
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-1 fw-bold">
                         <i class="bi bi-pencil-square me-2 text-primary"></i>
                         EDITAR BAJA ADMINISTRATIVA
                     </h5>
                     <small class="text-muted">
-                        Registro #{{ $baja->id }} — Corrige datos o cambia el equipo si fue un error.
+                        Registro #{{ $baja->id }} — Corrige los datos de la baja.
                     </small>
                 </div>
 
                 <div class="card-body">
-                    <div class="alert alert-info" role="alert">
-                        Si cambias el equipo, el anterior volverá automáticamente a <strong>EN_INVENTARIO</strong>
-                        y el nuevo pasará a <strong>DE_BAJA</strong>.
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-1"></i>
+                        En esta pantalla puedes corregir la información del acta.
+                        El equipo asociado y su situación administrativa no se modificarán.
                     </div>
 
                     @if ($errors->any())
@@ -36,153 +66,266 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('bajas-equipos.update', $baja->id) }}"
-                          method="POST"
-                          id="form-baja-equipo">
+                    <form
+                        action="{{ route('bajas-equipos.update', $baja->id) }}"
+                        method="POST"
+                        id="form-baja-equipo"
+                    >
                         @csrf
                         @method('PUT')
 
                         <div class="row g-3">
-                            {{-- FILTRO POR TIPO --}}
-                            <div class="col-12 col-md-4">
-                                <label for="filtro_tipo" class="form-label fw-semibold">
-                                    Tipo de equipo
-                                </label>
-                                <select id="filtro_tipo" class="form-select">
-                                    <option value="">TODOS</option>
-                                    @foreach ($tiposEquipo as $tipo)
-                                        <option value="{{ $tipo->id }}"
-                                            @selected(old('tipo_filtro', $baja->equipo->tipo_equipo_id) == $tipo->id)>
-                                            {{ $tipo->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="form-text">Filtra la lista de equipos.</div>
-                            </div>
 
-                            {{-- COMBOBOX HÍBRIDO DE EQUIPO --}}
-                            <div class="col-12 col-md-8">
-                                <label for="buscar_equipo" class="form-label fw-semibold">
-                                    Equipo <span class="text-danger">*</span>
-                                </label>
+                            {{-- EQUIPO ASOCIADO: SOLO LECTURA --}}
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <h6 class="fw-bold mb-2">
+                                        <i class="bi bi-pc-display me-2"></i>
+                                        EQUIPO ASOCIADO
+                                    </h6>
 
-                                <div class="position-relative">
-                                    <input type="text"
-                                           id="buscar_equipo"
-                                           class="form-control campo-mayusculas @error('equipo_id') is-invalid @enderror"
-                                           placeholder="Buscar por ID, tipo, serie, marca, modelo o ubicación..."
-                                           autocomplete="off">
+                                    <div class="row g-2">
+                                        <div class="col-12 col-md-6">
+                                            <small class="text-muted d-block">Tipo de equipo</small>
+                                            <strong>
+                                                {{ $baja->equipo->tipoEquipo->nombre ?? 'NO REGISTRADO' }}
+                                            </strong>
+                                        </div>
 
-                                    <input type="hidden" name="equipo_id" id="equipo_id"
-                                           value="{{ old('equipo_id', $baja->equipo_id) }}">
+                                        <div class="col-12 col-md-6">
+                                            <small class="text-muted d-block">Marca y modelo</small>
+                                            <strong>
+                                                {{ $baja->equipo->marca ?? '—' }}
+                                                {{ $baja->equipo->modelo ?? '' }}
+                                            </strong>
+                                        </div>
 
-                                    <div id="lista_equipos"
-                                         class="lista-equipos position-absolute w-100 bg-white border rounded shadow-sm"
-                                         style="display:none; z-index:9999; max-height:240px; overflow-y:auto;">
+                                        <div class="col-12 col-md-6">
+                                            <small class="text-muted d-block">Número de serie</small>
+                                            <strong>
+                                                {{ $baja->equipo->num_serie ?: '—' }}
+                                            </strong>
+                                        </div>
+
+                                        <div class="col-12 col-md-6">
+                                            <small class="text-muted d-block">Código de inventario</small>
+                                            <strong>
+                                                {{ $baja->equipo->codigo_inventario ?: '—' }}
+                                            </strong>
+                                        </div>
                                     </div>
                                 </div>
-
-                                @error('equipo_id')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-
-                                <div class="form-text">
-                                    Puedes mantener el equipo actual o elegir otro que esté EN_INVENTARIO.
-                                </div>
-
-                                <div id="equipo_seleccionado" class="mt-2 small text-success fw-semibold"></div>
                             </div>
 
+                            {{-- FECHA --}}
                             <div class="col-12 col-md-6">
                                 <label for="fecha" class="form-label fw-semibold">
                                     Fecha de salida <span class="text-danger">*</span>
                                 </label>
 
-                                <input type="date"
-                                       name="fecha"
-                                       id="fecha"
-                                       class="form-control @error('fecha') is-invalid @enderror"
-                                       value="{{ old('fecha', $baja->fecha ? \Illuminate\Support\Carbon::parse($baja->fecha)->format('Y-m-d') : '') }}"
-                                       required>
+                                <input
+                                    type="date"
+                                    name="fecha"
+                                    id="fecha"
+                                    class="form-control @error('fecha') is-invalid @enderror"
+                                    value="{{ old('fecha', $baja->fecha ? \Illuminate\Support\Carbon::parse($baja->fecha)->format('Y-m-d') : '') }}"
+                                    required
+                                >
 
                                 @error('fecha')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
+                            {{-- DESTINO --}}
                             <div class="col-12 col-md-6">
                                 <label for="destino" class="form-label fw-semibold">
                                     Destino <span class="text-danger">*</span>
                                 </label>
 
-                                <input type="text"
-                                       name="destino"
-                                       id="destino"
-                                       class="form-control campo-mayusculas @error('destino') is-invalid @enderror"
-                                       maxlength="150"
-                                       value="{{ old('destino', $baja->destino) }}"
-                                       required>
+                                <input
+                                    type="text"
+                                    name="destino"
+                                    id="destino"
+                                    class="form-control campo-mayusculas @error('destino') is-invalid @enderror"
+                                    maxlength="150"
+                                    value="{{ old('destino', $baja->destino) }}"
+                                    required
+                                >
 
                                 @error('destino')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <label for="quien_entrego" class="form-label fw-semibold">
-                                    Quién entrega <span class="text-danger">*</span>
-                                </label>
+                            {{-- QUIÉN ENTREGA --}}
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">
+                                                <i class="bi bi-box-arrow-up-right me-2"></i>
+                                                QUIÉN ENTREGA
+                                            </h6>
+                                            <small class="text-muted">
+                                                Registra al menos una persona e indica su cargo.
+                                            </small>
+                                        </div>
 
-                                <input type="text"
-                                       name="quien_entrego"
-                                       id="quien_entrego"
-                                       class="form-control campo-mayusculas @error('quien_entrego') is-invalid @enderror"
-                                       maxlength="150"
-                                       value="{{ old('quien_entrego', $baja->quien_entrego) }}"
-                                       required>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            data-agregar-integrante="entregantes"
+                                        >
+                                            <i class="bi bi-plus-circle me-1"></i>
+                                            AGREGAR PERSONA
+                                        </button>
+                                    </div>
 
-                                @error('quien_entrego')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    <div id="lista-entregantes">
+                                        @foreach ($entregantesOld as $i => $persona)
+                                            <div class="row g-2 mb-3 integrante-row">
+                                                <div class="col-12 col-md-5">
+                                                    <label class="form-label">Nombre o comisión *</label>
+                                                    <input
+                                                        type="text"
+                                                        name="entregantes[{{ $i }}][nombre]"
+                                                        class="form-control campo-mayusculas"
+                                                        maxlength="150"
+                                                        value="{{ $persona['nombre'] ?? '' }}"
+                                                        required
+                                                    >
+                                                </div>
+
+                                                <div class="col-12 col-md-5">
+                                                    <label class="form-label">Cargo *</label>
+                                                    <input
+                                                        type="text"
+                                                        name="entregantes[{{ $i }}][cargo]"
+                                                        class="form-control campo-mayusculas"
+                                                        maxlength="150"
+                                                        value="{{ $persona['cargo'] ?? '' }}"
+                                                        required
+                                                    >
+                                                </div>
+
+                                                <div class="col-12 col-md-2 d-flex align-items-end">
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-danger w-100"
+                                                        data-quitar-integrante
+                                                    >
+                                                        <i class="bi bi-trash"></i>
+                                                        QUITAR
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    @error('entregantes')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
-                            <div class="col-12 col-md-6">
-                                <label for="quien_recibio" class="form-label fw-semibold">
-                                    Quién recibe <span class="text-danger">*</span>
-                                </label>
+                            {{-- QUIÉN RECIBE --}}
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">
+                                                <i class="bi bi-box-arrow-in-down me-2"></i>
+                                                QUIÉN RECIBE
+                                            </h6>
+                                            <small class="text-muted">
+                                                Registra al menos una persona e indica su cargo.
+                                            </small>
+                                        </div>
 
-                                <input type="text"
-                                       name="quien_recibio"
-                                       id="quien_recibio"
-                                       class="form-control campo-mayusculas @error('quien_recibio') is-invalid @enderror"
-                                       maxlength="150"
-                                       value="{{ old('quien_recibio', $baja->quien_recibio) }}"
-                                       required>
+                                        <button
+                                            type="button"
+                                            class="btn btn-sm btn-outline-success"
+                                            data-agregar-integrante="receptores"
+                                        >
+                                            <i class="bi bi-plus-circle me-1"></i>
+                                            AGREGAR PERSONA
+                                        </button>
+                                    </div>
 
-                                @error('quien_recibio')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                    <div id="lista-receptores">
+                                        @foreach ($receptoresOld as $i => $persona)
+                                            <div class="row g-2 mb-3 integrante-row">
+                                                <div class="col-12 col-md-5">
+                                                    <label class="form-label">Nombre o comisión *</label>
+                                                    <input
+                                                        type="text"
+                                                        name="receptores[{{ $i }}][nombre]"
+                                                        class="form-control campo-mayusculas"
+                                                        maxlength="150"
+                                                        value="{{ $persona['nombre'] ?? '' }}"
+                                                        required
+                                                    >
+                                                </div>
+
+                                                <div class="col-12 col-md-5">
+                                                    <label class="form-label">Cargo *</label>
+                                                    <input
+                                                        type="text"
+                                                        name="receptores[{{ $i }}][cargo]"
+                                                        class="form-control campo-mayusculas"
+                                                        maxlength="150"
+                                                        value="{{ $persona['cargo'] ?? '' }}"
+                                                        required
+                                                    >
+                                                </div>
+
+                                                <div class="col-12 col-md-2 d-flex align-items-end">
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline-danger w-100"
+                                                        data-quitar-integrante
+                                                    >
+                                                        <i class="bi bi-trash"></i>
+                                                        QUITAR
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+
+                                    @error('receptores')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
 
+                            {{-- OBSERVACIONES --}}
                             <div class="col-12">
                                 <label for="observaciones" class="form-label fw-semibold">
                                     Observaciones
                                 </label>
 
-                                <textarea name="observaciones"
-                                          id="observaciones"
-                                          class="form-control campo-mayusculas @error('observaciones') is-invalid @enderror"
-                                          rows="4">{{ old('observaciones', $baja->observaciones) }}</textarea>
+                                <textarea
+                                    name="observaciones"
+                                    id="observaciones"
+                                    class="form-control campo-mayusculas @error('observaciones') is-invalid @enderror"
+                                    rows="4"
+                                    maxlength="5000"
+                                >{{ old('observaciones', $baja->observaciones) }}</textarea>
 
                                 @error('observaciones')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
+
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{{ route('bajas-equipos.index') }}"
-                               class="btn btn-outline-secondary">
+                        <div class="d-flex justify-content-end flex-wrap gap-2 mt-4">
+                            <a
+                                href="{{ route('bajas-equipos.show', $baja->id) }}"
+                                class="btn btn-outline-secondary"
+                            >
                                 <i class="bi bi-arrow-left me-1"></i>
                                 CANCELAR
                             </a>
@@ -193,163 +336,107 @@
                             </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const equipos = @json($equiposForJs);
+    ['entregantes', 'receptores'].forEach(function (grupo) {
+        const lista = document.getElementById('lista-' + grupo);
 
-    const inputBuscar = document.getElementById('buscar_equipo');
-    const inputId = document.getElementById('equipo_id');
-    const lista = document.getElementById('lista_equipos');
-    const filtroTipo = document.getElementById('filtro_tipo');
-    const seleccion = document.getElementById('equipo_seleccionado');
+        if (!lista) return;
 
-    let indiceActivo = -1;
+        let siguienteIndice = 0;
 
-    function etiquetaEquipo(eq) {
-        let txt = `ID ${eq.id} — ${eq.tipo} — ${eq.marca} ${eq.modelo}`;
-        if (eq.serie) txt += ` — Serie: ${eq.serie}`;
-        if (eq.ubicacion) txt += ` — ${eq.ubicacion}`;
-        return txt.trim();
-    }
+        lista.querySelectorAll('.integrante-row input[name]').forEach(function (input) {
+            const coincidencia = input.name.match(new RegExp('^' + grupo + '\\[(\\d+)\\]'));
 
-    function filtrar() {
-        const texto = (inputBuscar.value || '').trim().toUpperCase();
-        const tipoId = filtroTipo.value;
-
-        return equipos.filter(function (eq) {
-            if (tipoId && String(eq.tipo_id) !== String(tipoId)) return false;
-            if (!texto) return true;
-
-            const campos = [
-                String(eq.id),
-                eq.tipo,
-                eq.marca,
-                eq.modelo,
-                eq.serie,
-                eq.ubicacion
-            ].map(c => String(c || '').toUpperCase());
-
-            return campos.some(c => c.includes(texto));
-        });
-    }
-
-    function mostrarLista() {
-        const resultados = filtrar();
-        lista.innerHTML = '';
-        indiceActivo = -1;
-
-        if (resultados.length === 0) {
-            lista.innerHTML = '<div class="px-3 py-2 text-muted">No se encontraron equipos</div>';
-            lista.style.display = 'block';
-            return;
-        }
-
-        resultados.slice(0, 50).forEach(function (eq) {
-            const op = document.createElement('div');
-            op.className = 'px-3 py-2 opcion-equipo';
-            op.style.cursor = 'pointer';
-            op.textContent = etiquetaEquipo(eq);
-            op.dataset.id = eq.id;
-            op.addEventListener('mousedown', function (e) {
-                e.preventDefault();
-                elegir(eq);
-            });
-            lista.appendChild(op);
-        });
-
-        lista.style.display = 'block';
-    }
-
-    function elegir(eq) {
-        inputId.value = eq.id;
-        inputBuscar.value = etiquetaEquipo(eq);
-        seleccion.textContent = 'Seleccionado: ' + etiquetaEquipo(eq);
-        seleccion.style.display = 'block';
-        lista.style.display = 'none';
-        inputBuscar.classList.remove('is-invalid');
-    }
-
-    function itemsLista() {
-        return Array.from(lista.querySelectorAll('.opcion-equipo'));
-    }
-
-    function pintarActivo() {
-        const items = itemsLista();
-        items.forEach(function (el, i) {
-            el.style.backgroundColor = i === indiceActivo ? '#d1e7dd' : '';
-        });
-        const act = items[indiceActivo];
-        if (act) act.scrollIntoView({ block: 'nearest' });
-    }
-
-    inputBuscar.addEventListener('focus', mostrarLista);
-    inputBuscar.addEventListener('input', function () {
-        if (inputId.value) {
-            const actual = equipos.find(e => String(e.id) === String(inputId.value));
-            if (actual && inputBuscar.value !== etiquetaEquipo(actual)) {
-                inputId.value = '';
-                seleccion.style.display = 'none';
+            if (coincidencia) {
+                siguienteIndice = Math.max(
+                    siguienteIndice,
+                    Number(coincidencia[1]) + 1
+                );
             }
+        });
+
+        function actualizarBotones() {
+            const filas = lista.querySelectorAll('.integrante-row');
+
+            filas.forEach(function (fila) {
+                const boton = fila.querySelector('[data-quitar-integrante]');
+
+                if (boton) {
+                    boton.disabled = filas.length === 1;
+                }
+            });
         }
-        mostrarLista();
+
+        document.querySelectorAll('[data-agregar-integrante="' + grupo + '"]')
+            .forEach(function (boton) {
+                boton.addEventListener('click', function () {
+                    const indice = siguienteIndice++;
+
+                    const fila = document.createElement('div');
+                    fila.className = 'row g-2 mb-3 integrante-row';
+
+                    fila.innerHTML = `
+                        <div class="col-12 col-md-5">
+                            <label class="form-label">Nombre o comisión *</label>
+                            <input
+                                type="text"
+                                name="${grupo}[${indice}][nombre]"
+                                class="form-control campo-mayusculas"
+                                maxlength="150"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-12 col-md-5">
+                            <label class="form-label">Cargo *</label>
+                            <input
+                                type="text"
+                                name="${grupo}[${indice}][cargo]"
+                                class="form-control campo-mayusculas"
+                                maxlength="150"
+                                required
+                            >
+                        </div>
+
+                        <div class="col-12 col-md-2 d-flex align-items-end">
+                            <button
+                                type="button"
+                                class="btn btn-outline-danger w-100"
+                                data-quitar-integrante
+                            >
+                                <i class="bi bi-trash"></i>
+                                QUITAR
+                            </button>
+                        </div>
+                    `;
+
+                    lista.appendChild(fila);
+                    actualizarBotones();
+                    fila.querySelector('input').focus();
+                });
+            });
+
+        lista.addEventListener('click', function (evento) {
+            const boton = evento.target.closest('[data-quitar-integrante]');
+
+            if (!boton || lista.querySelectorAll('.integrante-row').length <= 1) {
+                return;
+            }
+
+            boton.closest('.integrante-row').remove();
+            actualizarBotones();
+        });
+
+        actualizarBotones();
     });
-    inputBuscar.addEventListener('click', mostrarLista);
-
-    inputBuscar.addEventListener('keydown', function (e) {
-        const items = itemsLista();
-        const visible = lista.style.display !== 'none' && items.length;
-
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            if (!visible) mostrarLista();
-            indiceActivo = Math.min(indiceActivo + 1, itemsLista().length - 1);
-            pintarActivo();
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            indiceActivo = Math.max(indiceActivo - 1, 0);
-            pintarActivo();
-        } else if (e.key === 'Enter' && visible && indiceActivo >= 0) {
-            e.preventDefault();
-            const id = itemsLista()[indiceActivo].dataset.id;
-            const eq = equipos.find(x => String(x.id) === String(id));
-            if (eq) elegir(eq);
-        } else if (e.key === 'Escape') {
-            lista.style.display = 'none';
-        }
-    });
-
-    filtroTipo.addEventListener('change', function () {
-        // No limpiar si el equipo actual coincide con el tipo
-        const actual = equipos.find(e => String(e.id) === String(inputId.value));
-        if (!actual || String(actual.tipo_id) !== String(filtroTipo.value) && filtroTipo.value) {
-            inputId.value = '';
-            inputBuscar.value = '';
-            seleccion.style.display = 'none';
-        }
-        mostrarLista();
-    });
-
-    document.addEventListener('click', function (e) {
-        if (!inputBuscar.contains(e.target) && !lista.contains(e.target)) {
-            lista.style.display = 'none';
-        }
-    });
-
-    // Restaurar selección inicial
-    if (inputId.value) {
-        const eq = equipos.find(e => String(e.id) === String(inputId.value));
-        if (eq) {
-            inputBuscar.value = etiquetaEquipo(eq);
-            seleccion.textContent = 'Seleccionado: ' + etiquetaEquipo(eq);
-            seleccion.style.display = 'block';
-        }
-    }
 });
 </script>
-
 @endsection

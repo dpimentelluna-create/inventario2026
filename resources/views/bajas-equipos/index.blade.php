@@ -2,6 +2,7 @@
 
 @section('template_title')
     Bajas administrativas
+@endsection
 
 <script>
 function confirmarAnularBaja(form) {
@@ -23,7 +24,7 @@ function confirmarAnularBaja(form) {
 }
 </script>
 
-@endsection
+
 
 @section('content')
 <div class="container-fluid">
