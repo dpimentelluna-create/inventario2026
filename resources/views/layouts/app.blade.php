@@ -3,6 +3,11 @@
 
 <head>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        };
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,6 +37,7 @@
         (function() {
             const t = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', t);
+            document.documentElement.classList.toggle('dark', t === 'dark');
         })();
     </script>
 
@@ -95,6 +101,7 @@
 
         #sidebar.collapsed .sidebar-text,
         #sidebar.collapsed .brand-text,
+        #sidebar.collapsed .sidebar-brand-text,
         #sidebar.collapsed .auth-buttons-container,
         #sidebar.collapsed .user-name-text {
             display: none !important;
@@ -252,6 +259,7 @@
         [data-bs-theme="dark"] .card,
         [data-bs-theme="dark"] .card-body,
         [data-bs-theme="dark"] .bg-white,
+        [data-bs-theme="dark"] .bg-light,
         [data-bs-theme="dark"] .dropdown-menu {
             background-color: #1e293b !important;
             border-color: #334155 !important;
@@ -265,8 +273,21 @@
             color: #e2e8f0 !important;
         }
 
-        [data-bs-theme="dark"] .text-muted {
+        [data-bs-theme="dark"] h1,
+        [data-bs-theme="dark"] h2,
+        [data-bs-theme="dark"] h3,
+        [data-bs-theme="dark"] h4,
+        [data-bs-theme="dark"] h5,
+        [data-bs-theme="dark"] h6,
+        [data-bs-theme="dark"] .text-muted,
+        [data-bs-theme="dark"] .text-dark,
+        [data-bs-theme="dark"] .text-secondary {
             color: #94a3b8 !important;
+        }
+
+        [data-bs-theme="dark"] .card-title,
+        [data-bs-theme="dark"] strong {
+            color: #f8fafc !important;
         }
 
         /* Tablas en Modo Oscuro */
@@ -277,7 +298,10 @@
         [data-bs-theme="dark"] .table,
         [data-bs-theme="dark"] .table thead,
         [data-bs-theme="dark"] .table thead th,
-        [data-bs-theme="dark"] .table thead td {
+        [data-bs-theme="dark"] .table thead td,
+        [data-bs-theme="dark"] .table-success,
+        [data-bs-theme="dark"] .table-success > th,
+        [data-bs-theme="dark"] .table-success > td {
             background-color: #0f172a !important;
             color: #e2e8f0 !important;
             border-color: #334155 !important;
@@ -492,6 +516,12 @@
                             <i class="bi bi-geo-alt me-3 fs-5"></i>
                             <span class="sidebar-text">Ubicaciones</span>
                         </a>
+
+                        <a class="sidebar-link" title="Manual del Usuario"
+                            href="{{ asset('manual/manual_usuario.pdf') }}" target="_blank" rel="noopener">
+                            <i class="bi bi-file-earmark-text me-3 fs-5"></i>
+                            <span class="sidebar-text">Manual del Usuario</span>
+                        </a>
                     </div>
                 </div>
 
@@ -506,6 +536,12 @@
 
                 <!-- Pie de la Barra Lateral -->
                 <div class="pt-2 border-top mt-2 flex-shrink-0">
+                    <button id="btn-switch-theme"
+                        class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 mb-2"
+                        type="button" title="Cambiar Tema" onclick="toggleThemeDirecto()">
+                        <i id="themeIcon" class="fas fa-moon me-1"></i>
+                        <span id="themeText" class="sidebar-text">Modo Oscuro</span>
+                    </button>
                     @auth
                     {{-- Nombre del usuario (con dropdown) --}}
                     <div class="dropdown user-dropdown-container px-1 mb-2">
@@ -527,7 +563,7 @@
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('logout') }}"
-                                    onclick="event.preventDefault(); document.getElementById('logout-form-dropdown').submit();">
+                                    onclick="confirmarCierreSesion(event, document.getElementById('logout-form-dropdown'));">
                                     <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
                                 </a>
                             </li>
@@ -663,6 +699,7 @@
             const newTheme = (currentTheme === 'dark') ? 'light' : 'dark';
 
             htmlTag.setAttribute('data-bs-theme', newTheme);
+            htmlTag.classList.toggle('dark', newTheme === 'dark');
             localStorage.setItem('theme', newTheme);
             actualizarBotonTema(newTheme);
         }
@@ -670,6 +707,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const temaGuardado = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', temaGuardado);
+            document.documentElement.classList.toggle('dark', temaGuardado === 'dark');
             actualizarBotonTema(temaGuardado);
 
             const sidebarToggle = document.getElementById('sidebar-toggle');
@@ -769,6 +807,7 @@
     </script>
     @endif
 
+    @stack('scripts')
 </body>
 
 </html>
