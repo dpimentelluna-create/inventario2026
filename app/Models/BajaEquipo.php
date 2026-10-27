@@ -14,6 +14,8 @@ class BajaEquipo extends Model
         'destino',
         'quien_entrego',
         'quien_recibio',
+        'entregantes',
+        'receptores',
         'observaciones',
     ];
 
@@ -21,6 +23,8 @@ class BajaEquipo extends Model
     {
         return [
             'fecha' => 'date',
+            'entregantes' => 'array',
+            'receptores' => 'array',
         ];
     }
 

@@ -39,11 +39,15 @@ class BajaEquipoController extends Controller
         $equipos = Equipo::query()
             ->where('situacion_administrativa', 'EN_INVENTARIO')
             ->with(['tipoEquipo', 'ubicacione'])
-            ->orderBy('marca')
-            ->orderBy('modelo')
+            ->orderBy('id', 'asc')
             ->get();
 
-        $tiposEquipo = TiposEquipo::orderBy('nombre')->get();
+        $tiposEquipo = TiposEquipo::whereIn(
+            'id',
+            $equipos->pluck('tipo_equipo_id')->unique()
+        )
+            ->orderBy('nombre')
+            ->get();
 
         $equiposForJs = $equipos->map(function ($e) {
             return [
@@ -60,93 +64,116 @@ class BajaEquipoController extends Controller
         return view('bajas-equipos.create', compact('equipos', 'tiposEquipo', 'equiposForJs'));
     }
 
-    /**
-     * Registrar una baja administrativa.
-     */
+
     public function store(Request $request): RedirectResponse
     {
+        // 1. Validar los datos recibidos del formulario.
         $datos = $request->validate([
-            'equipo_id' => [
-                'required',
-                'integer',
-                'exists:equipos,id',
-            ],
-            'fecha' => [
-                'required',
-                'date',
-            ],
-            'destino' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'quien_entrego' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'quien_recibio' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'observaciones' => [
-                'nullable',
-                'string',
-            ],
+            'equipo_id' => ['required', 'integer', 'exists:equipos,id'],
+            'fecha' => ['required', 'date'],
+            'destino' => ['required', 'string', 'max:150'],
+
+            'entregantes' => ['required', 'array', 'min:1'],
+            'entregantes.*.nombre' => ['required', 'string', 'max:150'],
+            'entregantes.*.cargo' => ['required', 'string', 'max:150'],
+
+            'receptores' => ['required', 'array', 'min:1'],
+            'receptores.*.nombre' => ['required', 'string', 'max:150'],
+            'receptores.*.cargo' => ['required', 'string', 'max:150'],
+
+            'observaciones' => ['nullable', 'string', 'max:5000'],
+        ], [
+            'equipo_id.required' => 'Debes seleccionar un equipo.',
+            'equipo_id.exists' => 'El equipo seleccionado no existe.',
+            'entregantes.required' => 'Registra al menos una persona que entrega.',
+            'entregantes.min' => 'Debe registrarse al menos una persona que entrega.',
+            'entregantes.*.nombre.required' => 'Ingresa el nombre de cada integrante que entrega.',
+            'entregantes.*.cargo.required' => 'Ingresa el cargo de cada integrante que entrega.',
+            'receptores.required' => 'Registra al menos una persona que recibe.',
+            'receptores.min' => 'Debe registrarse al menos una persona que recibe.',
+            'receptores.*.nombre.required' => 'Ingresa el nombre de cada integrante que recibe.',
+            'receptores.*.cargo.required' => 'Ingresa el cargo de cada integrante que recibe.',
         ]);
 
-        $baja = DB::transaction(function () use ($datos) {
-            $equipo = Equipo::query()
-                ->whereKey($datos['equipo_id'])
+        // 2. Mantener los campos antiguos obligatorios de la base de datos.
+        $primerEntregante = $datos['entregantes'][0];
+        $primerReceptor = $datos['receptores'][0];
+
+        $quienEntregoAnterior = mb_substr(
+            trim($primerEntregante['nombre'] . ' - ' . $primerEntregante['cargo']),
+            0,
+            150
+        );
+
+        $quienRecibioAnterior = mb_substr(
+            trim($primerReceptor['nombre'] . ' - ' . $primerReceptor['cargo']),
+            0,
+            150
+        );
+
+        // 3. Registrar la baja dentro de una transacción.
+        $baja = DB::transaction(function () use ($datos, $quienEntregoAnterior, $quienRecibioAnterior) {
+            // Bloquear el equipo mientras se comprueba su disponibilidad.
+            $equipo = Equipo::whereKey($datos['equipo_id'])
                 ->lockForUpdate()
                 ->firstOrFail();
 
+            // No permitir dar de baja un equipo que ya salió de inventario.
             if ($equipo->situacion_administrativa !== 'EN_INVENTARIO') {
                 throw ValidationException::withMessages([
-                    'equipo_id' => 'El equipo seleccionado ya no está disponible en el inventario.',
+                    'equipo_id' => 'El equipo seleccionado ya no se encuentra en inventario.',
                 ]);
             }
 
-            $tienePrestamoActivo = PrestamoEquipo::query()
-                ->where('equipo_id', $equipo->id)
-                ->whereHas('prestamo', function ($query) {
-                    $query->where('estado', 'ACTIVO');
+            // No permitir la baja si el equipo tiene un préstamo activo.
+            $tienePrestamoActivo = PrestamoEquipo::where('equipo_id', $equipo->id)
+                ->whereHas('prestamo', function ($consulta) {
+                    $consulta->where('estado', 'ACTIVO');
                 })
                 ->exists();
 
             if ($tienePrestamoActivo) {
                 throw ValidationException::withMessages([
-                    'equipo_id' => 'No se puede dar de baja este equipo porque tiene un préstamo activo.',
+                    'equipo_id' => 'No se puede dar de baja un equipo que tiene un préstamo activo.',
                 ]);
             }
 
+            // Crear el registro de baja con los integrantes completos.
             $baja = BajaEquipo::create([
                 'equipo_id' => $equipo->id,
                 'fecha' => $datos['fecha'],
-                'destino' => $datos['destino'],
-                'quien_entrego' => $datos['quien_entrego'],
-                'quien_recibio' => $datos['quien_recibio'],
+                'destino' => trim($datos['destino']),
+
+                // Compatibilidad con las columnas antiguas.
+                'quien_entrego' => $quienEntregoAnterior,
+                'quien_recibio' => $quienRecibioAnterior,
+
+                // Listas completas de integrantes.
+                'entregantes' => $datos['entregantes'],
+                'receptores' => $datos['receptores'],
+
                 'observaciones' => $datos['observaciones'] ?? null,
             ]);
 
-            $equipo->update([
-                'situacion_administrativa' => 'DE_BAJA',
-            ]);
+            // Cambiar la situación administrativa del equipo.
+            $equipo->situacion_administrativa = 'DE_BAJA';
+            $equipo->save();
 
+            // Registrar la operación en la auditoría.
             Auditoria::registrar(
                 'CREAR',
                 'BAJAS DE EQUIPOS',
-                "Se registró la baja administrativa del equipo #{$equipo->id}.",
+                'Se registró la baja administrativa del equipo ID ' . $equipo->id . '.',
                 $baja,
                 [
                     'nuevo' => [
                         'equipo_id' => $equipo->id,
                         'fecha' => $datos['fecha'],
-                        'destino' => $datos['destino'],
-                        'quien_entrego' => $datos['quien_entrego'],
-                        'quien_recibio' => $datos['quien_recibio'],
+                        'destino' => trim($datos['destino']),
+                        'entregantes' => $datos['entregantes'],
+                        'receptores' => $datos['receptores'],
                         'observaciones' => $datos['observaciones'] ?? null,
+                        'situacion_administrativa' => 'DE_BAJA',
                     ],
                 ]
             );
@@ -154,12 +181,12 @@ class BajaEquipoController extends Controller
             return $baja;
         });
 
+        // 4. Redirigir al detalle de la baja registrada.
         return redirect()
-            ->route('bajas-equipos.index')
-            ->with('success', 'Baja administrativa registrada correctamente.')
-            ->with('toast_tipo', 'exito')
-            ->with('baja_resaltada', $baja->id);
+            ->route('bajas-equipos.show', $baja->id)
+            ->with('success', 'La baja administrativa se registró correctamente.');
     }
+
 
     /**
      * Mostrar el detalle de una baja registrada.
@@ -188,11 +215,10 @@ class BajaEquipoController extends Controller
         $equipos = Equipo::query()
             ->where(function ($q) use ($baja) {
                 $q->where('situacion_administrativa', 'EN_INVENTARIO')
-                  ->orWhere('id', $baja->equipo_id);
+                    ->orWhere('id', $baja->equipo_id);
             })
             ->with(['tipoEquipo', 'ubicacione'])
-            ->orderBy('marca')
-            ->orderBy('modelo')
+            ->orderBy('id')
             ->get();
 
         $tiposEquipo = TiposEquipo::orderBy('nombre')->get();
@@ -212,121 +238,109 @@ class BajaEquipoController extends Controller
         return view('bajas-equipos.edit', compact('baja', 'equipos', 'tiposEquipo', 'equiposForJs'));
     }
 
-    /**
-     * Actualizar una baja administrativa.
-     */
+
+
     public function update(Request $request, BajaEquipo $bajas_equipo): RedirectResponse
     {
+        // 1. Validar los datos que se desean corregir.
         $datos = $request->validate([
-            'equipo_id' => [
-                'required',
-                'integer',
-                'exists:equipos,id',
-            ],
-            'fecha' => [
-                'required',
-                'date',
-            ],
-            'destino' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'quien_entrego' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'quien_recibio' => [
-                'required',
-                'string',
-                'max:150',
-            ],
-            'observaciones' => [
-                'nullable',
-                'string',
-            ],
+            'fecha' => ['required', 'date'],
+            'destino' => ['required', 'string', 'max:150'],
+
+            'entregantes' => ['required', 'array', 'min:1'],
+            'entregantes.*.nombre' => ['required', 'string', 'max:150'],
+            'entregantes.*.cargo' => ['required', 'string', 'max:150'],
+
+            'receptores' => ['required', 'array', 'min:1'],
+            'receptores.*.nombre' => ['required', 'string', 'max:150'],
+            'receptores.*.cargo' => ['required', 'string', 'max:150'],
+
+            'observaciones' => ['nullable', 'string', 'max:5000'],
+        ], [
+            'entregantes.required' => 'Registra al menos una persona que entrega.',
+            'entregantes.min' => 'Debe registrarse al menos una persona que entrega.',
+            'entregantes.*.nombre.required' => 'Ingresa el nombre de cada integrante que entrega.',
+            'entregantes.*.cargo.required' => 'Ingresa el cargo de cada integrante que entrega.',
+            'receptores.required' => 'Registra al menos una persona que recibe.',
+            'receptores.min' => 'Debe registrarse al menos una persona que recibe.',
+            'receptores.*.nombre.required' => 'Ingresa el nombre de cada integrante que recibe.',
+            'receptores.*.cargo.required' => 'Ingresa el cargo de cada integrante que recibe.',
         ]);
 
-        $baja = DB::transaction(function () use ($datos, $bajas_equipo) {
-            $baja = BajaEquipo::query()
-                ->whereKey($bajas_equipo->id)
+        // 2. Preparar los valores para las columnas antiguas.
+        $primerEntregante = $datos['entregantes'][0];
+        $primerReceptor = $datos['receptores'][0];
+
+        $quienEntregoAnterior = mb_substr(
+            trim($primerEntregante['nombre'] . ' - ' . $primerEntregante['cargo']),
+            0,
+            150
+        );
+
+        $quienRecibioAnterior = mb_substr(
+            trim($primerReceptor['nombre'] . ' - ' . $primerReceptor['cargo']),
+            0,
+            150
+        );
+
+        // 3. Conservar una copia de los datos anteriores para la auditoría.
+        $datosAnteriores = [
+            'equipo_id' => $bajas_equipo->equipo_id,
+            'fecha' => $bajas_equipo->fecha?->format('Y-m-d'),
+            'destino' => $bajas_equipo->destino,
+            'entregantes' => $bajas_equipo->entregantes,
+            'receptores' => $bajas_equipo->receptores,
+            'observaciones' => $bajas_equipo->observaciones,
+        ];
+
+        // 4. Actualizar únicamente los datos de la ficha.
+        DB::transaction(function () use ($bajas_equipo, $datos, $quienEntregoAnterior, $quienRecibioAnterior, $datosAnteriores) {
+            // Bloquear el registro de baja durante la actualización.
+            $baja = BajaEquipo::whereKey($bajas_equipo->id)
                 ->lockForUpdate()
                 ->firstOrFail();
-
-            $equipoAnteriorId = $baja->equipo_id;
-            $nuevoEquipoId = (int) $datos['equipo_id'];
-
-            $equipoNuevo = Equipo::query()
-                ->whereKey($nuevoEquipoId)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($nuevoEquipoId !== $equipoAnteriorId) {
-                if ($equipoNuevo->situacion_administrativa !== 'EN_INVENTARIO') {
-                    throw ValidationException::withMessages([
-                        'equipo_id' => 'El equipo seleccionado ya no está disponible en el inventario.',
-                    ]);
-                }
-
-                $tienePrestamoActivo = PrestamoEquipo::query()
-                    ->where('equipo_id', $equipoNuevo->id)
-                    ->whereHas('prestamo', function ($query) {
-                        $query->where('estado', 'ACTIVO');
-                    })
-                    ->exists();
-
-                if ($tienePrestamoActivo) {
-                    throw ValidationException::withMessages([
-                        'equipo_id' => 'No se puede dar de baja este equipo porque tiene un préstamo activo.',
-                    ]);
-                }
-
-                // Restaurar el equipo anterior
-                Equipo::query()
-                    ->whereKey($equipoAnteriorId)
-                    ->lockForUpdate()
-                    ->update(['situacion_administrativa' => 'EN_INVENTARIO']);
-
-                // Marcar el nuevo como DE_BAJA
-                $equipoNuevo->update(['situacion_administrativa' => 'DE_BAJA']);
-            }
 
             $baja->update([
-                'equipo_id' => $nuevoEquipoId,
                 'fecha' => $datos['fecha'],
-                'destino' => $datos['destino'],
-                'quien_entrego' => $datos['quien_entrego'],
-                'quien_recibio' => $datos['quien_recibio'],
+                'destino' => trim($datos['destino']),
+
+                // Mantener sincronizados los campos antiguos.
+                'quien_entrego' => $quienEntregoAnterior,
+                'quien_recibio' => $quienRecibioAnterior,
+
+                // Guardar las listas completas.
+                'entregantes' => $datos['entregantes'],
+                'receptores' => $datos['receptores'],
+
                 'observaciones' => $datos['observaciones'] ?? null,
             ]);
 
+            // Registrar los cambios sin alterar la situación del equipo.
             Auditoria::registrar(
-                'EDITAR',
+                'ACTUALIZAR',
                 'BAJAS DE EQUIPOS',
-                "Se actualizó la baja administrativa #{$baja->id}.",
+                'Se corrigieron los datos de la baja administrativa ID ' . $baja->id . '.',
                 $baja,
                 [
+                    'anterior' => $datosAnteriores,
                     'nuevo' => [
-                        'equipo_id' => $nuevoEquipoId,
+                        'equipo_id' => $baja->equipo_id,
                         'fecha' => $datos['fecha'],
-                        'destino' => $datos['destino'],
-                        'quien_entrego' => $datos['quien_entrego'],
-                        'quien_recibio' => $datos['quien_recibio'],
+                        'destino' => trim($datos['destino']),
+                        'entregantes' => $datos['entregantes'],
+                        'receptores' => $datos['receptores'],
                         'observaciones' => $datos['observaciones'] ?? null,
                     ],
                 ]
             );
-
-            return $baja;
         });
 
+        // 5. Regresar al detalle de la baja corregida.
         return redirect()
-            ->route('bajas-equipos.index')
-            ->with('success', 'Baja administrativa actualizada correctamente.')
-            ->with('toast_tipo', 'exito')
-            ->with('baja_resaltada', $baja->id);
+            ->route('bajas-equipos.show', $bajas_equipo->id)
+            ->with('success', 'Los datos de la baja administrativa se actualizaron correctamente.');
     }
+
 
     /**
      * Eliminar (anular) una baja administrativa y restaurar el equipo.
