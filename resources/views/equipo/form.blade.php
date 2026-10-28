@@ -381,6 +381,26 @@
 
                     </div>
 
+                    
+{{-- SISTEMA OPERATIVO --}}
+<div class="col-md-6 mb-3">
+
+    <label for="sistema_operativo" class="form-label">
+        SISTEMA OPERATIVO
+    </label>
+
+    <input
+        type="text"
+        name="sistema_operativo"
+        id="sistema_operativo"
+        class="form-control campo-mayusculas"
+        placeholder="EJ. WINDOWS 11 PRO"
+        maxlength="100"
+        value="{{ old('sistema_operativo', $equipo->especificacionesLaptops?->sistema_operativo ?? '') }}"
+    >
+
+</div>
+
 
                     {{-- COLOR --}}
                     <div class="col-md-6 mb-3">

@@ -16,6 +16,7 @@ class EspecificacionesLaptop extends Model
         'procesador',
         'ram',
         'disco_duro',
+        'sistema_operativo',
         'color',
         'estado',
         'observaciones'

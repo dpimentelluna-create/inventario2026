@@ -226,6 +226,13 @@
                                             </div>
                                         </div>
 
+                                        <div class="col-12 col-md-6">
+    <div class="etiqueta">SISTEMA OPERATIVO</div>
+    <div class="valor">
+        {{ $specLap->sistema_operativo ?: '—' }}
+    </div>
+</div>
+
                                         <div class="col-12 col-md-4">
                                             <div class="etiqueta">COLOR</div>
                                             <div class="valor">
