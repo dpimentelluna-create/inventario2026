@@ -191,10 +191,10 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th class="text-center">Equipo Relacionado</th>
                                     <th class="text-center">Tipo</th>
                                     <th class="text-center">Marca</th>
                                     <th class="text-center">N.º Serie</th>
+                                    <th class="text-center">Equipo Relacionado</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Observaciones</th>
                                     <th class="text-center columna-acciones">Acciones</th>
@@ -218,10 +218,10 @@
                                         data-estado="{{ $estado }}"
                                         data-observaciones="{{ $obs }}">
                                         <td>{{ $accesorio->id }}</td>
-                                        <td class="text-center">{{ $accesorio->equipo->num_serie ?? '-' }}</td>
                                         <td class="text-center">{{ $accesorio->tipo ?? '-' }}</td>
                                         <td>{{ $accesorio->marca ?? '-' }}</td>
                                         <td class="text-center">{{ $accesorio->num_serie }}</td>
+                                        <td class="text-center">{{ $accesorio->equipo->num_serie ?? '-' }}</td>
                                         <td class="text-center">
                                             @if($estado === 'BUENO')
                                                 <span class="badge bg-success">{{ $estado }}</span>

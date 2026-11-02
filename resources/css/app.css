@@ -1,0 +1,41 @@
+    /* ==========================================
+    SOLUCIÓN GLOBAL PARA MODO OSCURO EN TODO EL SISTEMA
+    ========================================== 
+
+    /* 1. Tarjetas, contenedores y cajas blancas del panel 
+    .dark .card, .dark-mode .card, [data-theme="dark"] .card,
+    body.dark .card, body.dark-mode .card,
+    .dark .bg-white, .dark-mode .bg-white, [data-theme="dark"] .bg-white,
+    body.dark .bg-white, body.dark-mode .bg-white,
+    .dark div[class*="bg-"], .dark-mode div[class*="bg-"],
+    body.dark div[class*="bg-white"], body.dark-mode div[class*="bg-white"] {
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        border-color: #334155 !important;
+    }
+
+    /* 2. Forzar fondos oscuros en TODAS las tablas y celdas de la app 
+    body.dark table, body.dark-mode table, .dark table, .dark-mode table,
+    body.dark tr, body.dark-mode tr, .dark tr, .dark-mode tr,
+    body.dark td, body.dark-mode td, .dark td, .dark-mode td,
+    body.dark th, body.dark-mode th, .dark th, .dark-mode th {
+        background-color: #1e293b !important;
+        color: #e2e8f0 !important;
+        border-color: #334155 !important;
+    }
+
+    /* 3. Encabezados de tablas más oscuros y legibles 
+    body.dark thead th, body.dark-mode thead th, 
+    .dark thead th, .dark-mode thead th {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+    }
+
+    /* 4. Textos dentro de las tarjetas y paneles que se queden oscuros 
+    body.dark .text-dark, body.dark-mode .text-dark,
+    .dark .text-gray-700, .dark .text-gray-800, .dark .text-gray-900,
+    .dark-mode .text-gray-700, .dark-mode .text-gray-800, .dark-mode .text-gray-900 {
+        color: #e2e8f0 !important;
+    }
+
+    */
