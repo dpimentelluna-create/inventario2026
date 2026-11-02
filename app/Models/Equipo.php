@@ -17,128 +17,125 @@ use Illuminate\Database\Eloquent\Model;
  * @property $created_at
  * @property $updated_at
  *
- * @property TiposEquipo $tiposEquipo
+ * @property TiposEquipo $tipoEquipo
  * @property Ubicacione $ubicacione
  * @property AccesoriosEquipo[] $accesoriosEquipos
  * @property EspecificacionesLaptop $especificacionesLaptops
  * @property EspecificacionesEquipo $especificacionesEquipo
  * @property Prestamo[] $prestamos
+ *
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
 class Equipo extends Model
 {
     protected $table = 'equipos';
+
     protected $perPage = 20;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    
     protected $fillable = [
-    'tipo_equipo_id',
-    'marca',
-    'modelo',
-    'num_serie',
-    'ubicacion_id',
-    'fecha_registro',
-    'situacion_administrativa'
+        'tipo_equipo_id',
+        'marca',
+        'modelo',
+        'num_serie',
+        'ubicacion_id',
+        'fecha_registro',
+        'situacion_administrativa'
     ];
 
-
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * Tipo de equipo al que pertenece.
      */
-
-    public function tipoEquipo(){
-    return $this->belongsTo(
-        \App\Models\TiposEquipo::class,
-        'tipo_equipo_id',
-        'id');
+    public function tipoEquipo()
+    {
+        return $this->belongsTo(
+            \App\Models\TiposEquipo::class,
+            'tipo_equipo_id',
+            'id'
+        );
     }
-    
-    /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
 
+    /**
+     * Ubicación del equipo.
+     */
     public function ubicacione()
     {
         return $this->belongsTo(
-            \App\Models\Ubicacione::class, 
-            'ubicacion_id', 
-            'id');
+            \App\Models\Ubicacione::class,
+            'ubicacion_id',
+            'id'
+        );
     }
-    
+
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Accesorios relacionados con este equipo.
      */
-    
     public function accesoriosEquipos()
     {
         return $this->hasMany(
             \App\Models\AccesoriosEquipo::class,
             'equipo_id',
-            'id');
+            'id'
+        );
     }
-    
+
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * Especificaciones de laptop.
      */
     public function especificacionesLaptops()
     {
         return $this->hasOne(
-            \App\Models\EspecificacionesLaptop::class, 
-            'equipo_id', 
-            'id');
+            \App\Models\EspecificacionesLaptop::class,
+            'equipo_id',
+            'id'
+        );
     }
 
     /**
- * @return \Illuminate\Database\Eloquent\Relations\HasOne
- */
-public function especificacionesEquipo()
-{
-    return $this->hasOne(
-        \App\Models\EspecificacionesEquipo::class,
-        'equipo_id',
-        'id'
-    );
-}
-    
-/**
- * Detalles de préstamos asociados a este equipo.
- */
-public function prestamoEquipos()
-{
-    return $this->hasMany(
-        \App\Models\PrestamoEquipo::class,
-        'equipo_id',
-        'id'
-    );
-}
-
+     * Especificaciones generales.
+     */
+    public function especificacionesEquipo()
+    {
+        return $this->hasOne(
+            \App\Models\EspecificacionesEquipo::class,
+            'equipo_id',
+            'id'
+        );
+    }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Detalles de préstamos asociados a este equipo.
+     */
+    public function prestamoEquipos()
+    {
+        return $this->hasMany(
+            \App\Models\PrestamoEquipo::class,
+            'equipo_id',
+            'id'
+        );
+    }
+
+    /**
+     * Préstamos asociados al equipo.
      */
     public function prestamos()
     {
         return $this->hasMany(
-            \App\Models\Prestamo::class, 
-            'equipo_id', 
-            'id');
+            \App\Models\Prestamo::class,
+            'equipo_id',
+            'id'
+        );
     }
-     
+
     /**
- * Registro de baja administrativa del equipo.
- */
-public function bajaEquipo()
-{
-    return $this->hasOne(
-        \App\Models\BajaEquipo::class,
-        'equipo_id',
-        'id'
-    );
-}
+     * Registro de baja administrativa del equipo.
+     */
+    public function bajaEquipo()
+    {
+        return $this->hasOne(
+            \App\Models\BajaEquipo::class,
+            'equipo_id',
+            'id'
+        );
+    }
 }
