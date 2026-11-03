@@ -7,15 +7,21 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, WithColumnWidths
+class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, WithColumnWidths, WithTitle
 {
     protected Collection $equipos;
+
+    public function title(): string
+    {
+        return 'ACCESORIOS';
+    }
 
     public function __construct(Collection $equipos)
     {

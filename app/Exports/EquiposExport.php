@@ -21,6 +21,7 @@ class EquiposExport implements WithMultipleSheets
             new EquiposInformacionGeneralSheet($this->equipos),
             new EquiposDetallesSheet($this->equipos),
             new EquiposAccesoriosSheet($this->equipos),
+            new AccesoriosSinEquiposSheet($this->equipos),
         ];
     }
 }

@@ -7,15 +7,21 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, WithColumnWidths
+class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, WithColumnWidths, WithTitle
 {
     protected Collection $equipos;
+
+    public function title(): string
+    {
+        return 'EQUIPOS COMPLETO';
+    }
 
     public function __construct(Collection $equipos)
     {
@@ -139,11 +145,11 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
             'G' => 20,
             'H' => 15,
             'I' => 30,
-            'J' => 35,
+            'J' => 36,
             'K' => 15,
             'L' => 18,
             'M' => 18,
-            'N' => 20,
+            'N' => 21,
             'O' => 14,
             'P' => 30,
         ];
