@@ -81,6 +81,34 @@
                                     <datalist id="lista_filtro_equipo"></datalist>
                                 </div>
 
+                                {{-- UBICACIÓN --}}
+<div class="col-12 col-md-6 col-xl-3">
+    <label for="filtro_ubicacion" class="form-label">
+        <i class="fa-solid fa-location-dot me-1"></i> UBICACIÓN
+    </label>
+
+    <div class="input-group input-group-sm">
+        <select id="filtro_ubicacion" class="form-select">
+            <option value="">TODAS</option>
+
+            @foreach ($ubicaciones as $ubicacion)
+                <option value="{{ strtoupper($ubicacion->nombre) }}">
+                    {{ strtoupper($ubicacion->nombre) }}
+                </option>
+            @endforeach
+
+            <option value="__SIN_UBICACION__">SIN UBICACIÓN</option>
+        </select>
+
+        <button type="button"
+            class="btn btn-limpiar-filtro btn-limpiar-campo"
+            data-target="filtro_ubicacion"
+            title="Limpiar ubicación">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+</div>
+
                                 {{-- TIPO --}}
                                 <div class="col-12 col-md-6 col-xl-3">
                                     <label for="filtro_tipo" class="form-label">
@@ -204,6 +232,7 @@
                                 @foreach ($accesoriosEquipos as $accesorio)
                                     @php
                                         $equipoSerie = strtoupper($accesorio->equipo->num_serie ?? '');
+                                        $ubicacionNombre = strtoupper($accesorio->equipo->ubicacione->nombre ?? '');
                                         $tipo = strtoupper($accesorio->tipo ?? '');
                                         $marca = strtoupper($accesorio->marca ?? '');
                                         $serie = strtoupper($accesorio->num_serie ?? '');
@@ -212,6 +241,7 @@
                                     @endphp
                                     <tr data-accesorio-id="{{ $accesorio->id }}"
                                         data-equipo="{{ $equipoSerie }}"
+                                        data-ubicacion="{{ $ubicacionNombre }}"
                                         data-tipo="{{ $tipo }}"
                                         data-marca="{{ $marca }}"
                                         data-serie="{{ $serie }}"
@@ -221,7 +251,9 @@
                                         <td class="text-center">{{ $accesorio->tipo ?? '-' }}</td>
                                         <td>{{ $accesorio->marca ?? '-' }}</td>
                                         <td class="text-center">{{ $accesorio->num_serie }}</td>
-                                        <td class="text-center">{{ $accesorio->equipo->num_serie ?? '-' }}</td>
+                                        <td class="text-center">
+                                            {{ $accesorio->equipo->num_serie ?? 'SIN EQUIPO' }}
+                                        </td>
                                         <td class="text-center">
                                             @if($estado === 'BUENO')
                                                 <span class="badge bg-success">{{ $estado }}</span>
@@ -819,6 +851,7 @@ window.addEventListener('load', function() {
 
     const campos = {
         equipo: document.getElementById('filtro_equipo'),
+        ubicacion: document.getElementById('filtro_ubicacion'),
         tipo: document.getElementById('filtro_tipo'),
         marca: document.getElementById('filtro_marca'),
         serie: document.getElementById('filtro_serie'),
@@ -950,6 +983,7 @@ window.addEventListener('load', function() {
         const serie = val(campos.serie);
         const estado = val(campos.estado);
         const obs = val(campos.observaciones);
+        const ubicacion = val(campos.ubicacion);
 
         if (equipo && !(fila.getAttribute('data-equipo') || '').includes(equipo)) return false;
         if (tipo && (fila.getAttribute('data-tipo') || '') !== tipo) return false;
@@ -957,6 +991,14 @@ window.addEventListener('load', function() {
         if (serie && !(fila.getAttribute('data-serie') || '').includes(serie)) return false;
         if (estado && (fila.getAttribute('data-estado') || '') !== estado) return false;
         if (obs && !(fila.getAttribute('data-observaciones') || '').includes(obs)) return false;
+        if (ubicacion === '__SIN_UBICACION__') {
+        if (fila.getAttribute('data-ubicacion') || '') return false;
+        } else if (
+            ubicacion &&
+            (fila.getAttribute('data-ubicacion') || '') !== ubicacion
+        ) {
+            return false;
+        }
 
         return true;
     });

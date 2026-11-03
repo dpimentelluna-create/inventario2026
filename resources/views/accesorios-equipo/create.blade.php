@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Create') }} Accesorios Equipo
+    Registrar Accesorio Equipo
 @endsection
 
 @section('content')
