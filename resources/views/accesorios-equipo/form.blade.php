@@ -110,6 +110,83 @@
         </div>
 
 
+{{-- ================================================= --}}
+{{-- UBICACIÓN DEL ACCESORIO INDEPENDIENTE --}}
+{{-- ================================================= --}}
+@php
+    $equipoIdSeleccionado = old(
+        'equipo_id',
+        $accesoriosEquipo->equipo_id ?? ''
+    );
+
+    $ubicacionSeleccionada = old(
+        'ubicacion_id',
+        $accesoriosEquipo->ubicacion_id ?? ''
+    );
+@endphp
+
+<div class="col-12" id="contenedor_ubicacion_accesorio"
+    style="{{ empty($equipoIdSeleccionado) ? '' : 'display: none;' }}">
+
+    <div class="card border-0 shadow-sm rounded-3">
+
+        <div class="card-header bg-white border-bottom py-3">
+            <div class="d-flex align-items-center">
+                <div class="rounded-2 bg-info bg-opacity-10 p-2 me-3">
+                    <i class="fas fa-map-marker-alt text-info"></i>
+                </div>
+
+                <div>
+                    <h6 class="mb-0 fw-bold">UBICACIÓN DEL ACCESORIO</h6>
+                    <small class="text-muted">
+                        Indique dónde se encuentra físicamente este accesorio independiente.
+                    </small>
+                </div>
+
+                <span class="badge bg-danger bg-opacity-10 text-danger ms-auto">
+                    OBLIGATORIO
+                </span>
+            </div>
+        </div>
+
+        <div class="card-body p-3 p-md-4">
+
+            <label for="ubicacion_id" class="form-label fw-semibold">
+                UBICACIÓN
+                <span class="text-danger">*</span>
+            </label>
+
+            <select
+                name="ubicacion_id"
+                id="ubicacion_id"
+                class="form-select @error('ubicacion_id') is-invalid @enderror"
+                {{ empty($equipoIdSeleccionado) ? 'required' : 'disabled' }}>
+
+                <option value="">SELECCIONE UNA UBICACIÓN</option>
+
+                @foreach($ubicaciones ?? [] as $ubicacion)
+                    <option value="{{ $ubicacion->id }}"
+                        {{ (string) $ubicacionSeleccionada === (string) $ubicacion->id ? 'selected' : '' }}>
+                        {{ $ubicacion->nombre }}
+                    </option>
+                @endforeach
+
+            </select>
+
+            <small class="text-muted">
+                Si selecciona un equipo relacionado, se utilizará automáticamente la ubicación de ese equipo.
+            </small>
+
+            @error('ubicacion_id')
+                <div class="invalid-feedback d-block">
+                    <strong>{{ $message }}</strong>
+                </div>
+            @enderror
+
+        </div>
+    </div>
+</div>
+
         {{-- ================================================= --}}
         {{-- 2. DATOS DEL ACCESORIO --}}
         {{-- ================================================= --}}
@@ -415,6 +492,27 @@ document.addEventListener('DOMContentLoaded', function () {
     const buscador        = document.getElementById('buscar_equipo');
     const resultados      = document.getElementById('resultados_equipos');
     const equipoId        = document.getElementById('equipo_id');
+    const contenedorUbicacion = document.getElementById('contenedor_ubicacion_accesorio');
+    const campoUbicacion = document.getElementById('ubicacion_id');
+
+    // ===================== UBICACIÓN DEL ACCESORIO =====================
+function actualizarCampoUbicacion() {
+    if (!contenedorUbicacion || !campoUbicacion || !equipoId) return;
+
+    const tieneEquipo = equipoId.value.trim() !== '';
+
+    if (tieneEquipo) {
+        // Si tiene equipo, utiliza la ubicación del equipo relacionado.
+        contenedorUbicacion.style.display = 'none';
+        campoUbicacion.disabled = true;
+        campoUbicacion.required = false;
+    } else {
+        // Si es independiente, debe seleccionar su propia ubicación.
+        contenedorUbicacion.style.display = '';
+        campoUbicacion.disabled = false;
+        campoUbicacion.required = true;
+    }
+}
 
     const campoTipo       = document.getElementById('tipo');
     const buscadorTipo    = document.getElementById('buscar_tipo_accesorio');
@@ -530,6 +628,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                             item.addEventListener('click', function () {
                                 equipoId.value = equipo.id;
+                                actualizarCampoUbicacion();
                                 tipoEquipoSeleccionado = (equipo.tipo_equipo || '').toUpperCase();
                                 buscador.value = (equipo.num_serie || '') + ' - ' + (equipo.tipo_equipo || '') + ' - ' + (equipo.marca || '') + (equipo.modelo ? ' ' + equipo.modelo : '');
                                 resultados.style.display = 'none';
@@ -550,31 +649,45 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 300);
     }
 
+        // Eventos del buscador de equipos
     if (buscador) {
         buscador.addEventListener('input', function () {
             equipoId.value = '';
             tipoEquipoSeleccionado = '';
+            actualizarCampoUbicacion();
+
             limpiarError(buscador);
             buscarEquipos();
-            if (this.value.trim() === '') sugerirMarcaAccesorio();
+
+            if (this.value.trim() === '') {
+                sugerirMarcaAccesorio();
+            }
         });
+
         buscador.addEventListener('focus', function () {
             limpiarError(buscador);
             buscarEquipos();
         });
+
         buscador.addEventListener('blur', function () {
             setTimeout(() => {
                 if (buscador.value.trim() !== '' && equipoId.value.trim() === '') {
-                    mostrarError(buscador, 'SELECCIONE UN EQUIPO DE LA LISTA O DEJE EL CAMPO VACÍO.', false);
+                    mostrarError(
+                        buscador,
+                        'SELECCIONE UN EQUIPO DE LA LISTA O DEJE EL CAMPO VACÍO.',
+                        false
+                    );
                 }
             }, 200);
         });
     }
 
+    // Evento del filtro por tipo de equipo
     if (filtroTipoEquipo) {
         filtroTipoEquipo.addEventListener('change', function () {
             equipoId.value = '';
             tipoEquipoSeleccionado = '';
+            actualizarCampoUbicacion();
             buscarEquipos();
         });
     }
@@ -719,19 +832,35 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Sugerencia inicial
+    // Estado inicial del formulario
+    actualizarCampoUbicacion();
+
+    // Sugerencia inicial de marca
     sugerirMarcaAccesorio();
 
     // ===================== VALIDACIÓN AL ENVIAR (fuerte) =====================
     if (formulario) {
         formulario.addEventListener('submit', function (event) {
-            [buscador, buscadorTipo, campoTipo, nuevoTipo, campoSerie, campoEstado]
+            [buscador, buscadorTipo, campoTipo, nuevoTipo, campoSerie, campoEstado,campoUbicacion]
                 .filter(Boolean)
                 .forEach(limpiarError);
 
             if (buscador && buscador.value.trim() !== '' && equipoId.value.trim() === '') {
                 event.preventDefault();
                 return mostrarError(buscador, 'SELECCIONE UN EQUIPO DE LA LISTA O DEJE EL CAMPO VACÍO.', true);
+            }
+
+            if (
+                equipoId.value.trim() === '' &&
+                campoUbicacion &&
+                campoUbicacion.value.trim() === ''
+            ) {
+                event.preventDefault();
+                return mostrarError(
+                    campoUbicacion,
+                    'SELECCIONE LA UBICACIÓN DEL ACCESORIO INDEPENDIENTE.',
+                    true
+                );
             }
 
             if (campoTipo.value.trim() === '') {

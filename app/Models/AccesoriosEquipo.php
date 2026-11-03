@@ -13,6 +13,7 @@ class AccesoriosEquipo extends Model
 
     protected $fillable = [
         'equipo_id',
+        'ubicacion_id',
         'tipo',
         'marca',
         'num_serie',
@@ -27,5 +28,14 @@ class AccesoriosEquipo extends Model
     public function equipo(): BelongsTo
     {
         return $this->belongsTo(Equipo::class, 'equipo_id', 'id');
+    }
+
+    /**
+     * Ubicación propia del accesorio.
+     * Se utiliza cuando el accesorio no pertenece a un equipo.
+     */
+    public function ubicacion(): BelongsTo
+    {
+        return $this->belongsTo(Ubicacione::class, 'ubicacion_id', 'id');
     }
 }

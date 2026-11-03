@@ -33,6 +33,67 @@
 
                 <div class="card-body accesorio-index-body">
 
+                {{-- INDICADORES DEL INVENTARIO --}}
+<div class="row g-3 mb-4 indicadores-accesorios">
+
+    {{-- TOTAL --}}
+    <div class="col-6 col-xl-3">
+        <div class="indicador-accesorio indicador-total">
+            <div class="indicador-icono">
+                <i class="fa-solid fa-plug"></i>
+            </div>
+            <div class="indicador-contenido">
+                <span class="indicador-titulo">TOTAL ACCESORIOS</span>
+                <strong id="indicador_total">0</strong>
+                {{--<small>Registros encontrados</small>--}}
+            </div>
+        </div>
+    </div>
+
+    {{-- BUENO --}}
+    <div class="col-6 col-xl-3">
+        <div class="indicador-accesorio indicador-bueno">
+            <div class="indicador-icono">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="indicador-contenido">
+                <span class="indicador-titulo">BUEN ESTADO</span>
+                <strong id="indicador_bueno">0</strong>
+                {{-- <small>Accesorios en buen estado</small> --}}
+            </div>
+        </div>
+    </div>
+
+    {{-- REGULAR --}}
+    <div class="col-6 col-xl-3">
+        <div class="indicador-accesorio indicador-regular">
+            <div class="indicador-icono">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div class="indicador-contenido">
+                <span class="indicador-titulo">ESTADO REGULAR</span>
+                <strong id="indicador_regular">0</strong>
+                {{-- <small>Requieren seguimiento</small>--}}
+            </div>
+        </div>
+    </div>
+
+    {{-- MALOGRADO --}}
+    <div class="col-6 col-xl-3">
+        <div class="indicador-accesorio indicador-malo">
+            <div class="indicador-icono">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div class="indicador-contenido">
+                <span class="indicador-titulo">MALOGRADOS</span>
+                <strong id="indicador_malogrado">0</strong>
+                {{--<small>Accesorios malogrados</small>--}}
+            </div>
+        </div>
+    </div>
+
+</div>
+
                     {{-- BARRA FILTROS --}}
                     <div class="barra-filtros-accesorios mb-3">
                         <div class="d-flex align-items-center flex-wrap gap-3">
@@ -110,22 +171,35 @@
 </div>
 
                                 {{-- TIPO --}}
-                                <div class="col-12 col-md-6 col-xl-3">
-                                    <label for="filtro_tipo" class="form-label">
-                                        <i class="fa-solid fa-tag me-1"></i> TIPO
-                                    </label>
-                                    <div class="input-group input-group-sm">
-                                        <select id="filtro_tipo" class="form-select">
-                                            <option value="">TODOS</option>
-                                            <option value="BATERÍA">BATERÍA</option>
-                                            <option value="CARGADOR">CARGADOR</option>
-                                        </select>
-                                        <button type="button" class="btn btn-limpiar-filtro btn-limpiar-campo"
-                                            data-target="filtro_tipo" title="Limpiar tipo">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                {{-- TIPO --}}
+<div class="col-12 col-md-6 col-xl-3">
+    <label for="filtro_tipo" class="form-label">
+        <i class="fa-solid fa-tag me-1"></i> TIPO DE ACCESORIO
+    </label>
+
+    <div class="input-group input-group-sm">
+        <select id="filtro_tipo" class="form-select">
+            <option value="">TODOS LOS TIPOS</option>
+
+            @foreach ($tiposAccesorios as $tipoAccesorio)
+                <option value="{{ $tipoAccesorio }}">
+                    {{ $tipoAccesorio }}
+                </option>
+            @endforeach
+        </select>
+
+        <button type="button"
+            class="btn btn-limpiar-filtro btn-limpiar-campo"
+            data-target="filtro_tipo"
+            title="Limpiar tipo">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    {{--<small class="text-muted mt-1 d-block">
+        Selecciona el tipo de accesorio que deseas consultar.
+    </small>--}}
+</div>
 
                                 {{-- MARCA --}}
                                 <div class="col-12 col-md-6 col-xl-3">
@@ -223,6 +297,7 @@
                                     <th class="text-center">Marca</th>
                                     <th class="text-center">N.º Serie</th>
                                     <th class="text-center">Equipo Relacionado</th>
+                                    <th class="text-center">Ubicación</th>
                                     <th class="text-center">Estado</th>
                                     <th class="text-center">Observaciones</th>
                                     <th class="text-center columna-acciones">Acciones</th>
@@ -232,7 +307,16 @@
                                 @foreach ($accesoriosEquipos as $accesorio)
                                     @php
                                         $equipoSerie = strtoupper($accesorio->equipo->num_serie ?? '');
-                                        $ubicacionNombre = strtoupper($accesorio->equipo->ubicacione->nombre ?? '');
+
+                                        // Obtener la ubicación efectiva:
+                                        // equipo relacionado = ubicación del equipo.
+                                        // accesorio independiente = ubicación propia.
+                                        $ubicacionNombre = strtoupper(
+                                            $accesorio->equipo
+                                                ? ($accesorio->equipo->ubicacione->nombre ?? '')
+                                                : ($accesorio->ubicacion->nombre ?? '')
+                                        );
+
                                         $tipo = strtoupper($accesorio->tipo ?? '');
                                         $marca = strtoupper($accesorio->marca ?? '');
                                         $serie = strtoupper($accesorio->num_serie ?? '');
@@ -247,13 +331,35 @@
                                         data-serie="{{ $serie }}"
                                         data-estado="{{ $estado }}"
                                         data-observaciones="{{ $obs }}">
+
                                         <td>{{ $accesorio->id }}</td>
-                                        <td class="text-center">{{ $accesorio->tipo ?? '-' }}</td>
-                                        <td>{{ $accesorio->marca ?? '-' }}</td>
-                                        <td class="text-center">{{ $accesorio->num_serie }}</td>
+
+                                        {{-- Tipo de accesorio --}}
+                                        <td class="text-center">
+                                            {{ $accesorio->tipo ?? '-' }}
+                                        </td>
+
+                                        {{-- Marca --}}
+                                        <td class="text-center">
+                                            {{ $accesorio->marca ?? '-' }}
+                                        </td>
+
+                                        {{-- Número de serie del accesorio --}}
+                                        <td class="text-center">
+                                            {{ $accesorio->num_serie ?? '-' }}
+                                        </td>
+
+                                        {{-- Equipo relacionado --}}
                                         <td class="text-center">
                                             {{ $accesorio->equipo->num_serie ?? 'SIN EQUIPO' }}
                                         </td>
+
+                                        {{-- Ubicación efectiva --}}
+                                        <td class="text-center">
+                                            {{ $ubicacionNombre ?: 'SIN UBICACIÓN' }}
+                                        </td>
+
+                                        {{-- Estado --}}
                                         <td class="text-center">
                                             @if($estado === 'BUENO')
                                                 <span class="badge bg-success">{{ $estado }}</span>
@@ -265,7 +371,13 @@
                                                 {{ $estado ?: '-' }}
                                             @endif
                                         </td>
-                                        <td>{{ $accesorio->observaciones ?? '-' }}</td>
+
+                                        {{-- Observaciones --}}
+                                        <td>
+                                            {{ $accesorio->observaciones ?? '-' }}
+                                        </td>
+
+                                        {{-- Acciones --}}
                                         <td class="text-center columna-acciones">
                                             <div class="d-flex justify-content-center align-items-center gap-1">
                                                 <form action="{{ route('accesorios-equipo.destroy', $accesorio->id) }}" method="POST">
@@ -273,22 +385,22 @@
                                                         href="{{ route('accesorios-equipo.show', $accesorio->id) }}">
                                                         <i class="fa-solid fa-eye"></i>
                                                     </a>
+
                                                     @can('registrar')
-                                                    <a class="btn btn-warning btn-accion"
-                                                        href="{{ route('accesorios-equipo.edit', $accesorio->id) }}">
-                                                        <i class="fa-solid fa-pen-to-square"></i>
-                                                    </a>
+                                                        <a class="btn btn-warning btn-accion"
+                                                            href="{{ route('accesorios-equipo.edit', $accesorio->id) }}">
+                                                            <i class="fa-solid fa-pen-to-square"></i>
+                                                        </a>
                                                     @endcan
 
                                                     @can('eliminar')
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-accion"
-                                                        onclick="event.preventDefault(); confirmarEliminarAccesorio(this.closest('form'));">
-                                                        <i class="fa-solid fa-trash"></i>
-                                                    </button>
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-accion"
+                                                            onclick="event.preventDefault(); confirmarEliminarAccesorio(this.closest('form'));">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
                                                     @endcan
-                                                    
                                                 </form>
                                             </div>
                                         </td>
@@ -697,13 +809,16 @@
     #example tbody td:nth-child(1),
     #example tbody td:nth-child(2),
     #example tbody td:nth-child(3),
+    #example tbody td:nth-child(4),
     #example tbody td:nth-child(5),
     #example tbody td:nth-child(6),
-    #example tbody td:last-child {
+    #example tbody td:nth-child(7),
+    #example tbody td:nth-child(9) {
         text-align: center;
     }
 
-    #example tbody td:nth-child(7) {
+    /* Observaciones */
+    #example tbody td:nth-child(8) {
         min-width: 180px;
         max-width: 340px;
         line-height: 1.5;
@@ -817,7 +932,114 @@
             overflow-x: auto;
             white-space: nowrap;
         }
+
     }
+
+    /* =========================================
+   INDICADORES DINÁMICOS
+========================================= */
+
+.indicador-accesorio {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-height: 105px;
+    padding: 16px;
+    border: 1px solid #e2e8e5;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .04);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.indicador-accesorio:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 13px rgba(0, 0, 0, .08);
+}
+
+.indicador-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    font-size: 1.2rem;
+}
+
+.indicador-contenido {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.indicador-titulo {
+    color: #6c757d;
+    font-size: .68rem;
+    font-weight: 800;
+    letter-spacing: .35px;
+}
+
+.indicador-contenido strong {
+    color: #212529;
+    font-size: 1.65rem;
+    line-height: 1.35;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    transition: color .2s ease;
+}
+
+.indicador-contenido small {
+    color: #8a9299;
+    font-size: .68rem;
+}
+
+.indicador-total .indicador-icono {
+    background: #e8f1ff;
+    color: #0d6efd;
+}
+
+.indicador-bueno .indicador-icono {
+    background: #d1e7dd;
+    color: #198754;
+}
+
+.indicador-regular .indicador-icono {
+    background: #fff3cd;
+    color: #997404;
+}
+
+.indicador-malo .indicador-icono {
+    background: #f8d7da;
+    color: #dc3545;
+}
+
+@media (max-width: 576px) {
+    .indicador-accesorio {
+        gap: 9px;
+        padding: 11px;
+        min-height: 95px;
+    }
+
+    .indicador-icono {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .indicador-titulo {
+        font-size: .59rem;
+    }
+
+    .indicador-contenido strong {
+        font-size: 1.35rem;
+    }
+
+    .indicador-contenido small {
+        font-size: .60rem;
+    }
+}
 </style>
 
 <script>
@@ -900,6 +1122,55 @@ window.addEventListener('load', function() {
         msg.style.display = 'inline-flex';
     }
 
+    // =========================================
+// ACTUALIZAR INDICADORES EN TIEMPO REAL
+// =========================================
+
+function actualizarIndicadores() {
+
+    const indicadores = {
+        total: 0,
+        bueno: 0,
+        regular: 0,
+        malogrado: 0
+    };
+
+    // Obtener todas las filas que coinciden con los filtros.
+    tabla.rows({ search: 'applied' }).every(function() {
+
+        const fila = this.node();
+
+        if (!fila) return;
+
+        indicadores.total++;
+
+        const estado = (
+            fila.getAttribute('data-estado') || ''
+        ).toUpperCase();
+
+        if (estado === 'BUENO') {
+            indicadores.bueno++;
+        } else if (estado === 'REGULAR') {
+            indicadores.regular++;
+        } else if (estado === 'MALOGRADO') {
+            indicadores.malogrado++;
+        }
+    });
+
+    // Actualizar los valores en pantalla.
+    document.getElementById('indicador_total').textContent =
+        indicadores.total;
+
+    document.getElementById('indicador_bueno').textContent =
+        indicadores.bueno;
+
+    document.getElementById('indicador_regular').textContent =
+        indicadores.regular;
+
+    document.getElementById('indicador_malogrado').textContent =
+        indicadores.malogrado;
+}
+
     function guardarFiltros() {
         const estado = { panel: panel && panel.style.display !== 'none' };
         Object.keys(campos).forEach(k => { estado[k] = campos[k] ? campos[k].value : ''; });
@@ -919,39 +1190,51 @@ window.addEventListener('load', function() {
         } catch (e) {}
     }
 
-    function llenarListas() {
-        const equipos = new Set();
-        const marcas = new Set();
-        const series = new Set();
 
-        tabla.rows().every(function() {
-            const tr = this.node();
-            if (!tr) return;
-            const eq = tr.getAttribute('data-equipo');
-            const ma = tr.getAttribute('data-marca');
-            const se = tr.getAttribute('data-serie');
-            if (eq) equipos.add(eq);
-            if (ma) marcas.add(ma);
-            if (se) series.add(se);
+function llenarListas() {
+    const equipos = new Set();
+    const marcas = new Set();
+    const series = new Set();
+
+    tabla.rows().every(function() {
+        const tr = this.node();
+        if (!tr) return;
+
+        const eq = tr.getAttribute('data-equipo');
+        const ma = tr.getAttribute('data-marca');
+        const se = tr.getAttribute('data-serie');
+
+        if (eq) equipos.add(eq);
+        if (ma) marcas.add(ma);
+        if (se) series.add(se);
+    });
+
+    if (listas.equipo) {
+        listas.equipo.innerHTML = '';
+
+        // Opción especial para accesorios independientes.
+        const opSinEquipo = document.createElement('option');
+        opSinEquipo.value = 'SIN EQUIPO';
+        listas.equipo.appendChild(opSinEquipo);
+
+        [...equipos].sort().forEach(v => {
+            const op = document.createElement('option');
+            op.value = v;
+            listas.equipo.appendChild(op);
         });
-
-        if (listas.equipo) {
-            listas.equipo.innerHTML = '';
-            [...equipos].sort().forEach(v => {
-                const op = document.createElement('option');
-                op.value = v;
-                listas.equipo.appendChild(op);
-            });
-        }
-        if (listas.marca) {
-            listas.marca.innerHTML = '';
-            [...marcas].sort().forEach(v => {
-                const op = document.createElement('option');
-                op.value = v;
-                listas.marca.appendChild(op);
-            });
-        }
     }
+
+    if (listas.marca) {
+        listas.marca.innerHTML = '';
+
+        [...marcas].sort().forEach(v => {
+            const op = document.createElement('option');
+            op.value = v;
+            listas.marca.appendChild(op);
+        });
+    }
+}
+
 
     function actualizarSeries() {
         if (!campos.serie || !listas.serie) return;
@@ -985,7 +1268,16 @@ window.addEventListener('load', function() {
         const obs = val(campos.observaciones);
         const ubicacion = val(campos.ubicacion);
 
-        if (equipo && !(fila.getAttribute('data-equipo') || '').includes(equipo)) return false;
+        const equipoFila = (fila.getAttribute('data-equipo') || '').toUpperCase().trim();
+
+if (equipo === 'SIN EQUIPO') {
+    // Mostrar únicamente accesorios sin equipo relacionado.
+    if (equipoFila !== '') return false;
+} else if (equipo && !equipoFila.includes(equipo)) {
+    // Búsqueda parcial por número de serie.
+    return false;
+}
+
         if (tipo && (fila.getAttribute('data-tipo') || '') !== tipo) return false;
         if (marca && !(fila.getAttribute('data-marca') || '').includes(marca)) return false;
         if (serie && !(fila.getAttribute('data-serie') || '').includes(serie)) return false;
@@ -1057,13 +1349,25 @@ window.addEventListener('load', function() {
     });
 
     // Inicialización
-    llenarListas();
-    restaurarFiltros();
-    actualizarBadge();
-    if (filtrosActivos()) aplicarFiltros();
 
-    // Resaltado de fila
-    function pintarFilaAccesorio() {
+// Actualizar indicadores cada vez que DataTables redibuje la tabla.
+$('#example').on('draw.dt', function() {
+    actualizarIndicadores();
+});
+
+llenarListas();
+restaurarFiltros();
+actualizarBadge();
+
+if (filtrosActivos()) {
+    aplicarFiltros();
+}
+
+// Mostrar los indicadores iniciales al cargar la página.
+actualizarIndicadores();
+
+// Resaltado de fila
+function pintarFilaAccesorio() {
     const idFila = @json(session('accesorio_resaltado'));
     const accFila = @json(session('accesorio_accion'));
 

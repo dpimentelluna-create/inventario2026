@@ -74,13 +74,28 @@ class AccesoriosEquipoController extends Controller
 
     public function index()
     {
-        $accesoriosEquipos = AccesoriosEquipo::with(['equipo.ubicacione'])
+        $accesoriosEquipos = AccesoriosEquipo::with([
+            'equipo.ubicacione',
+            'ubicacion'
+        ])
             ->latest()
             ->get();
 
         $ubicaciones = Ubicacione::orderBy('nombre')->get();
 
-        return view('accesorios-equipo.index', compact('accesoriosEquipos', 'ubicaciones'));
+        // Tipos de accesorios registrados en la base de datos.
+        $tiposAccesorios = $this->obtenerTiposAccesorios()
+            ->map(fn ($tipo) => mb_strtoupper(trim($tipo), 'UTF-8'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+
+        return view('accesorios-equipo.index', compact(
+            'accesoriosEquipos',
+            'ubicaciones',
+            'tiposAccesorios'
+        ));
     }
 
     public function create(): View
@@ -88,6 +103,8 @@ class AccesoriosEquipoController extends Controller
         $accesoriosEquipo = new AccesoriosEquipo();
         $tiposAccesorios = $this->obtenerTiposAccesorios();
         $ultimasMarcasAccesorio = $this->obtenerUltimasMarcasAccesorio();
+
+        $ubicaciones = Ubicacione::orderBy('nombre')->get();
 
         $tiposEquipoConRegistros = \App\Models\TiposEquipo::query()
         ->whereHas('equipos')
@@ -98,14 +115,21 @@ class AccesoriosEquipoController extends Controller
             'accesoriosEquipo',
             'tiposAccesorios',
             'ultimasMarcasAccesorio',
-            'tiposEquipoConRegistros'
+            'tiposEquipoConRegistros',
+            'ubicaciones'
         ));
     }
 
     public function store(AccesoriosEquipoRequest $request): RedirectResponse
     {
         $datos = $request->validated();
+
         unset($datos['nuevo_tipo']);
+
+        // Si tiene un equipo relacionado, utiliza la ubicación del equipo.
+        if (!empty($datos['equipo_id'])) {
+            $datos['ubicacion_id'] = null;
+        }
 
         $accesorio = AccesoriosEquipo::create($datos);
 
@@ -120,7 +144,8 @@ class AccesoriosEquipoController extends Controller
     {
         $accesoriosEquipo = AccesoriosEquipo::with([
             'equipo.tipoEquipo',
-            'equipo.ubicacione'
+            'equipo.ubicacione',
+            'ubicacion'
         ])->findOrFail($id);
 
         session([
@@ -135,11 +160,13 @@ class AccesoriosEquipoController extends Controller
     {
         $accesoriosEquipo = AccesoriosEquipo::with([
             'equipo.tipoEquipo',
-            'equipo.ubicacione'
+            'equipo.ubicacione',
+            'ubicacion'
         ])->findOrFail($id);
 
         $tiposAccesorios = $this->obtenerTiposAccesorios($accesoriosEquipo->tipo);
         $ultimasMarcasAccesorio = $this->obtenerUltimasMarcasAccesorio();
+        $ubicaciones = Ubicacione::orderBy('nombre')->get();
 
         $tiposEquipoConRegistros = \App\Models\TiposEquipo::query()
         ->whereHas('equipos')
@@ -150,14 +177,21 @@ class AccesoriosEquipoController extends Controller
             'accesoriosEquipo',
             'tiposAccesorios',
             'ultimasMarcasAccesorio',
-            'tiposEquipoConRegistros'
+            'tiposEquipoConRegistros',
+            'ubicaciones'
         ));
     }
 
     public function update(AccesoriosEquipoRequest $request, AccesoriosEquipo $accesoriosEquipo): RedirectResponse
     {
         $datos = $request->validated();
+
         unset($datos['nuevo_tipo']);
+
+        // Si tiene un equipo relacionado, utiliza la ubicación del equipo.
+        if (!empty($datos['equipo_id'])) {
+            $datos['ubicacion_id'] = null;
+        }
 
         $accesoriosEquipo->update($datos);
 

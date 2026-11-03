@@ -39,6 +39,13 @@ class AccesoriosEquipoRequest extends FormRequest
                 'exists:equipos,id',
             ],
 
+            'ubicacion_id' => [
+                'required_without:equipo_id',
+                'nullable',
+                'integer',
+                'exists:ubicaciones,id',
+            ],
+
             'tipo' => [
                 'required',
                 'string',
@@ -62,6 +69,8 @@ class AccesoriosEquipoRequest extends FormRequest
                 'required',
                 'string',
                 'max:100',
+                Rule::unique('accesorios_equipo', 'num_serie')
+                    ->ignore($this->route('accesorios_equipo')),
             ],
 
             'estado' => [
@@ -81,6 +90,10 @@ class AccesoriosEquipoRequest extends FormRequest
         return [
             'equipo_id.exists' => 'El equipo seleccionado no existe.',
 
+            'ubicacion_id.required_without' => 'Seleccione la ubicación donde se encuentra el accesorio independiente.',
+            'ubicacion_id.integer' => 'La ubicación seleccionada no es válida.',
+            'ubicacion_id.exists' => 'La ubicación seleccionada no existe.',
+
             'tipo.required' => 'Seleccione o registre el tipo de accesorio.',
             'tipo.max' => 'El tipo de accesorio no debe superar los 100 caracteres.',
 
@@ -88,6 +101,7 @@ class AccesoriosEquipoRequest extends FormRequest
             'nuevo_tipo.max' => 'El nuevo tipo no debe superar los 100 caracteres.',
 
             'num_serie.required' => 'El número de serie del accesorio es obligatorio.',
+            'num_serie.unique' => 'Este número de serie ya está registrado en otro accesorio. Ingrese uno diferente.',
 
             'estado.required' => 'Seleccione el estado del accesorio.',
             'estado.in' => 'El estado solo puede ser BUENO, REGULAR o MALOGRADO.',

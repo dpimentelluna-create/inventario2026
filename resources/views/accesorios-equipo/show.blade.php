@@ -15,6 +15,11 @@
 
     $equipo = $accesoriosEquipo->equipo;
 
+    // Ubicación efectiva: del equipo o propia del accesorio
+    $ubicacionEfectiva = $equipo
+        ? $equipo->ubicacione
+        : $accesoriosEquipo->ubicacion;
+
     $tipoEquipo = strtoupper($equipo->tipoEquipo->nombre ?? 'NO REGISTRADO');
     $estadoEquipo = strtoupper($equipo->estado ?? 'NO REGISTRADO');
 
@@ -302,9 +307,7 @@
             }
         }
     </style>
-
-    <section class="content container-fluid accesorio-contenedor">
-
+<section class="content container-fluid accesorio-contenedor">
         {{-- ENCABEZADO --}}
         <div class="accesorio-encabezado no-print">
             <div>
@@ -313,8 +316,7 @@
                     Información del accesorio y del equipo al que se encuentra asociado.
                 </p>
             </div>
-
-            <button type="button" class="btn btn-primary" id="btn_imprimir_accesorio" onclick="window.print()">
+            <button type="button" class="btn btn-primary" onclick="window.print()">
                 <i class="bi bi-printer"></i> IMPRIMIR FICHA
             </button>
         </div>
@@ -327,7 +329,6 @@
                     <h3 style="font-size:21px;font-weight:700;margin-bottom:5px;">
                         {{ $tipoAccesorio }}
                     </h3>
-
                     <p style="color:#6c757d;margin:0;">
                         Registro de Accesorio - ID: {{ $accesoriosEquipo->id }}
                     </p>
@@ -337,92 +338,50 @@
                 <div class="accesorio-resumen">
                     <div class="accesorio-resumen-item">
                         <span class="accesorio-resumen-label">Tipo de accesorio</span>
-                        <span class="accesorio-resumen-valor">
-                            {{ $tipoAccesorio }}
-                        </span>
+                        <span class="accesorio-resumen-valor">{{ $tipoAccesorio }}</span>
                     </div>
-
                     <div class="accesorio-resumen-item">
                         <span class="accesorio-resumen-label">Número de serie</span>
-                        <span class="accesorio-resumen-valor">
-                            {{ $accesoriosEquipo->num_serie ?: 'SIN REGISTRAR' }}
-                        </span>
+                        <span class="accesorio-resumen-valor">{{ $accesoriosEquipo->num_serie ?: 'SIN REGISTRAR' }}</span>
                     </div>
-
                     <div class="accesorio-resumen-item">
                         <span class="accesorio-resumen-label">Marca</span>
-                        <span class="accesorio-resumen-valor">
-                            {{ $marcaAccesorio }}
-                        </span>
+                        <span class="accesorio-resumen-valor">{{ $marcaAccesorio }}</span>
                     </div>
-
                     <div class="accesorio-resumen-item">
                         <span class="accesorio-resumen-label">Observaciones</span>
-                        <span class="accesorio-resumen-valor">
-                            {{ $accesoriosEquipo->observaciones ?: 'SIN OBSERVACIONES' }}
-                        </span>
+                        <span class="accesorio-resumen-valor">{{ $accesoriosEquipo->observaciones ?: 'SIN OBSERVACIONES' }}</span>
                     </div>
                 </div>
 
-
-                {{-- INFORMACIÓN DEL ACCESORIO
-                <h4 class="accesorio-seccion">INFORMACIÓN DEL ACCESORIO</h4>
-
-                <div class="accesorio-datos">
-                    <div class="accesorio-dato">
-                        <strong>ID del registro</strong>
-                        <p>{{ $accesoriosEquipo->id }}</p>
-                    </div>
-
-                    <div class="accesorio-dato">
-                        <strong>Tipo</strong>
-                        <p>{{ $tipoAccesorio }}</p>
-                    </div>
-
-                    <div class="accesorio-dato">
-                        <strong>Marca</strong>
-                        <p>{{ $accesoriosEquipo->marca ?: 'NO REGISTRADA' }}</p>
-                    </div>
-
-                    <div class="accesorio-dato">
-                        <strong>Número de serie</strong>
-                        <p>{{ $accesoriosEquipo->num_serie ?: 'NO REGISTRADO' }}</p>
-                    </div>
-                </div>--}}
-
-
                 {{-- EQUIPO RELACIONADO --}}
-                <h4 class="accesorio-seccion">EQUIPO RELACIONADO</h4>
+                <h4 class="accesorio-seccion">
+                    {{ $equipo ? 'EQUIPO RELACIONADO' : 'UBICACIÓN DEL ACCESORIO' }}
+                </h4>
 
                 @if($equipo)
                     <div class="accesorio-relacionado">
                         <div class="accesorio-datos">
-
                             <div class="accesorio-dato">
                                 <strong>ID del equipo</strong>
                                 <p>{{ $equipo->id }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Tipo de equipo</strong>
                                 <p>{{ $tipoEquipo }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Marca</strong>
                                 <p>{{ $equipo->marca ?: 'NO REGISTRADA' }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Modelo</strong>
                                 <p>{{ $equipo->modelo ?: 'NO REGISTRADO' }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Número de serie</strong>
                                 <p>{{ $equipo->num_serie ?: 'NO REGISTRADO' }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Estado del equipo</strong>
                                 <p>
@@ -431,34 +390,43 @@
                                     </span>
                                 </p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Ubicación</strong>
-                                <p>{{ $equipo->ubicacione->nombre ?? 'NO REGISTRADA' }}</p>
+                                <p>{{ $ubicacionEfectiva->nombre ?? 'NO REGISTRADA' }}</p>
                             </div>
-
                             <div class="accesorio-dato">
                                 <strong>Fecha de registro</strong>
                                 <p>{{ $fechaEquipo }}</p>
                             </div>
-
                             <div class="accesorio-dato accesorio-dato-completo">
                                 <strong>Observación del equipo</strong>
                                 <p>{{ $equipo->observacion ?: 'SIN OBSERVACIONES' }}</p>
                             </div>
-
                         </div>
                     </div>
                 @else
-                    <div class="accesorio-alerta">
-                        No se encontró información del equipo asociado a este accesorio.
-                    </div>
+                    @if($accesoriosEquipo->equipo_id)
+                        <div class="accesorio-alerta">
+                            No se encontró información del equipo asociado a este accesorio.
+                        </div>
+                    @else
+                        <div class="accesorio-relacionado">
+                            <div class="accesorio-datos">
+                                <div class="accesorio-dato accesorio-dato-completo">
+                                    <strong>Tipo de registro</strong>
+                                    <p>ACCESORIO INDEPENDIENTE (SIN EQUIPO RELACIONADO)</p>
+                                </div>
+                                <div class="accesorio-dato">
+                                    <strong>Ubicación del accesorio</strong>
+                                    <p>{{ $ubicacionEfectiva->nombre ?? 'NO REGISTRADA' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 @endif
 
-
-                {{-- ESTADO Y OBSERVACIONES: INFORMACIÓN PRIORITARIA --}}
+                {{-- ESTADO Y OBSERVACIONES --}}
                 <h4 class="accesorio-seccion">ESTADO Y OBSERVACIONES</h4>
-
                 <div class="accesorio-datos">
                     <div class="accesorio-dato">
                         <strong>Estado actual del accesorio</strong>
@@ -468,7 +436,6 @@
                             </span>
                         </p>
                     </div>
-
                     <div class="accesorio-dato">
                         <strong>Estado del equipo relacionado</strong>
                         <p>
@@ -481,12 +448,10 @@
                             @endif
                         </p>
                     </div>
-
                     <div class="accesorio-dato accesorio-dato-completo">
                         <strong>Observaciones del accesorio</strong>
                         <p>{{ $accesoriosEquipo->observaciones ?: 'SIN OBSERVACIONES' }}</p>
                     </div>
-
                     @if($equipo)
                         <div class="accesorio-dato accesorio-dato-completo">
                             <strong>Observación del equipo relacionado</strong>
@@ -503,7 +468,6 @@
             <a href="{{ route('accesorios-equipo.index') }}" class="btn btn-secondary">
                 <i class="bi bi-arrow-left"></i> VOLVER
             </a>
-
             <a href="{{ route('accesorios-equipo.edit', $accesoriosEquipo->id) }}" class="btn btn-warning">
                 <i class="bi bi-pencil-square"></i> EDITAR ACCESORIO
             </a>
