@@ -325,7 +325,7 @@
                                                         <i class="fa-solid fa-eye"></i>
                                                     </a>
                                                     @can('registrar')
-                                                    <a class="btn btn-warning btn-accion"
+                                                    <a class="btn btn-warning btn-accion btn-editar-equipo"
                                                         href="{{ route('equipos.edit', $equipo->id) }}">
                                                         <i class="fa-solid fa-pen-to-square"></i>
                                                     </a>
@@ -1071,6 +1071,7 @@ window.addEventListener('load', function() {
     tabla.order([[7, 'desc']]).draw();
 
 
+
     
     // ===================== EXPORTAR EQUIPOS =====================
 
@@ -1429,22 +1430,33 @@ window.addEventListener('load', function() {
     }
 
     function guardarFiltros() {
-        const estado = { panel: panel && panel.style.display !== 'none' };
+        const estado = { 
+            panel: panel && panel.style.display !== 'none',
+            pagina: tabla.page()
+        };
         Object.keys(campos).forEach(k => { estado[k] = campos[k] ? campos[k].value : ''; });
         localStorage.setItem(STORAGE_KEY, JSON.stringify(estado));
     }
 
     function restaurarFiltros() {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
+        if (!raw) return null;
         try {
             const estado = JSON.parse(raw);
             Object.keys(campos).forEach(k => {
                 if (campos[k] && estado[k] != null) campos[k].value = estado[k];
             });
-            if (panel && estado.panel) panel.style.display = 'block';
-            if (btnToggle) btnToggle.classList.toggle('filtros-abiertos', !!estado.panel);
-        } catch (e) {}
+            if (panel && estado.panel) {
+                panel.style.display = 'block';
+                if (btnToggle) {
+                    btnToggle.classList.add('filtros-abiertos');
+                    btnToggle.setAttribute('aria-expanded', 'true');
+                }
+            }
+            return estado.pagina != null ? parseInt(estado.pagina) : null;
+        } catch (e) {
+            return null;
+        }
     }
 
     // ===================== FILTROS ENCADENADOS =====================
@@ -1656,12 +1668,12 @@ window.addEventListener('load', function() {
     const desdeDashboard = parametrosURL.get('desde_dashboard') === '1';
     const NUEVO_KEY = STORAGE_KEY + '_nuevo_equipo';
     const vieneDeCrear = localStorage.getItem(NUEVO_KEY) === '1' || @json(session('equipo_accion')) === 'crear';
-
-    if (campos.situacion) {
-    campos.situacion.value = 'EN_INVENTARIO';
+    // Limpiar el flag de inmediato para que solo afecte esta carga (la vuelta desde crear)
+    if (localStorage.getItem(NUEVO_KEY) === '1') {
+        localStorage.removeItem(NUEVO_KEY);
+        localStorage.removeItem('equipos_filtros_nuevo_equipo');
     }
 
-    
 if (desdeDashboard) {
     localStorage.removeItem(STORAGE_KEY);
 
@@ -1708,10 +1720,29 @@ if (desdeDashboard) {
         window.location.pathname
     );
 } else if (!vieneDeCrear) {
-        restaurarFiltros();
+        const paginaGuardada = restaurarFiltros();
+        // Si no había filtros guardados, aplicar el default EN_INVENTARIO
+        if (paginaGuardada === null && campos.situacion && !campos.situacion.value) {
+            campos.situacion.value = 'EN_INVENTARIO';
+        }
         actualizarBadge();
-        if (filtrosActivos()) aplicarFiltros();
+        aplicarFiltros();
+        if (paginaGuardada !== null && paginaGuardada >= 0) {
+            setTimeout(() => {
+                tabla.page(paginaGuardada).draw('page');
+            }, 50);
+        }
+    } else {
+        // vieneDeCrear: aplicar el default sin restaurar filtros anteriores
+        if (campos.situacion) campos.situacion.value = 'EN_INVENTARIO';
+        aplicarFiltros();
     }
+
+    // Persistir página solo después de la inicialización
+    // (evita que el draw inicial borre los filtros guardados)
+    tabla.on('page.dt', function() {
+        guardarFiltros();
+    });
 
     // Resaltado de fila
     function pintarFilaEquipo() {
@@ -1745,11 +1776,14 @@ if (desdeDashboard) {
         }, 50);
     }
 
-    document.querySelectorAll('.btn-ver-equipo').forEach(a => {
+    document.querySelectorAll('.btn-ver-equipo, .btn-editar-equipo').forEach(a => {
         a.addEventListener('click', function() {
+            guardarFiltros(); // asegurar que filtros + página queden guardados antes de salir
             const partes = a.getAttribute('href').split('/').filter(Boolean);
-            sessionStorage.setItem('equipo_resaltado', partes.pop());
-            sessionStorage.setItem('equipo_accion', 'ver');
+            const id = partes.pop();
+            const accion = this.classList.contains('btn-editar-equipo') ? 'editar' : 'ver';
+            sessionStorage.setItem('equipo_resaltado', id);
+            sessionStorage.setItem('equipo_accion', accion);
         });
     });
 

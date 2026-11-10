@@ -3,8 +3,9 @@
 @section('content')
 
 <style>
+    /* Transición suave al cambiar de tema */
     body {
-        background: linear-gradient(135deg, #f4fff4 0%, #ffffff 50%, #eaffea 100%);
+        transition: background 0.3s ease;
     }
 
     .login-page {
@@ -26,10 +27,17 @@
         border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+        transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* Soporte Dark Mode para la tarjeta en general */
+    [data-bs-theme="dark"] .login-card {
+        background: #1e293b;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+        border: 1px solid #334155;
     }
 
     /* PANEL IZQUIERDO */
-
     .login-info {
         background: linear-gradient(145deg, #198754, #116b42);
         color: white;
@@ -41,6 +49,11 @@
         text-align: center;
         padding: 40px;
         position: relative;
+        overflow: hidden;
+    }
+
+    [data-bs-theme="dark"] .login-info {
+        background: linear-gradient(145deg, #065f46, #064e3b);
     }
 
     .login-info::before {
@@ -117,30 +130,50 @@
     }
 
     /* PANEL DERECHO */
-
     .login-form {
         padding: 55px 55px;
         min-height: 560px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        background-color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .login-form {
+        background-color: #1e293b;
     }
 
     .login-form h3 {
         font-weight: 800;
         color: #212529;
         margin-bottom: 5px;
+        transition: color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .login-form h3 {
+        color: #f8fafc;
     }
 
     .login-subtitle {
         color: #6c757d;
         margin-bottom: 30px;
+        transition: color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .login-subtitle {
+        color: #94a3b8;
     }
 
     .form-label {
         font-weight: 700;
         font-size: 13px;
         color: #343a40;
+        transition: color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .form-label {
+        color: #cbd5e1;
     }
 
     .form-control {
@@ -148,6 +181,20 @@
         border-radius: 8px;
         border: 1px solid #ced4da;
         padding-left: 15px;
+        transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .form-control {
+        background-color: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    [data-bs-theme="dark"] .form-control:focus {
+        background-color: #0f172a;
+        border-color: #10b981;
+        color: #e2e8f0;
+        box-shadow: 0 0 0 .2rem rgba(16,185,129,.2);
     }
 
     .form-control:focus {
@@ -163,12 +210,24 @@
         border: none;
         color: white;
         font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: .2s;
     }
 
     .btn-login:hover {
         background: #157347;
         transform: translateY(-1px);
+    }
+
+    .form-check-label {
+        color: #6c757d;
+        transition: color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .form-check-label {
+        color: #cbd5e1;
     }
 
     .registro-separador {
@@ -186,6 +245,12 @@
         flex: 1;
         height: 1px;
         background: #dee2e6;
+        transition: background 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .registro-separador::before,
+    [data-bs-theme="dark"] .registro-separador::after {
+        background: #334155;
     }
 
     .btn-registrar {
@@ -203,6 +268,12 @@
         transition: .2s;
     }
 
+    [data-bs-theme="dark"] .btn-registrar {
+        background: #1e293b;
+        border-color: #10b981;
+        color: #34d399;
+    }
+
     .btn-registrar:hover {
         background: #198754;
         color: white;
@@ -217,6 +288,11 @@
         color: #6c757d;
         text-decoration: none;
         font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+    [data-bs-theme="dark"] .volver a {
+        color: #94a3b8;
     }
 
     .volver a:hover {
@@ -224,7 +300,6 @@
     }
 
     @media (max-width: 767px) {
-
         .login-info {
             min-height: 300px;
             padding: 30px 20px;
@@ -248,232 +323,163 @@
 </style>
 
 <div class="login-page">
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="row g-0">
 
-<div class="login-wrapper">
+                {{-- ================================================= --}}
+                {{-- PANEL IZQUIERDO --}}
+                {{-- ================================================= --}}
+                <div class="col-md-5">
+                    <div class="login-info">
+                        {{-- LOGO DEL COLEGIO --}}
+                        <div class="logo-colegio">
+                            <img src="{{ asset('images/logo-colegio.png') }}"
+                                 alt="Logo del colegio"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <i class="bi bi-building logo-placeholder" style="display:none;"></i>
+                        </div>
 
-    <div class="login-card">
+                        <h2>SISTEMA DE GESTIÓN</h2>
+                        <h5>
+                            Control y administración<br>
+                            de equipos tecnológicos
+                        </h5>
 
-        <div class="row g-0">
-
-            {{-- ================================================= --}}
-            {{-- PANEL IZQUIERDO --}}
-            {{-- ================================================= --}}
-
-            <div class="col-md-5">
-
-                <div class="login-info">
-
-                    {{-- LOGO DEL COLEGIO --}}
-                    <div class="logo-colegio">
-
-                        {{-- 
-                            CUANDO TENGAS EL LOGO:
-                            coloca el archivo en public/images/logo-colegio.png
-                            y descomenta la siguiente línea.
-                        --}}
-
-                        <img src="{{ asset('images/logo-colegio.png') }}"
-                             alt="Logo del colegio"
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-
-                        <i class="bi bi-building logo-placeholder"
-                           style="display:none;"></i>
-
+                        <div class="area-badge">
+                            <i class="bi bi-cpu me-1"></i>
+                            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+                        </div>
                     </div>
-
-                    <h2>SISTEMA DE GESTIÓN</h2>
-
-                    <h5>
-                        Control y administración<br>
-                        de equipos tecnológicos
-                    </h5>
-
-                    <div class="area-badge">
-                        <i class="bi bi-cpu me-1"></i>
-                        COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
-                    </div>
-
                 </div>
 
-            </div>
+                {{-- ================================================= --}}
+                {{-- PANEL DERECHO --}}
+                {{-- ================================================= --}}
+                <div class="col-md-7">
+                    <div class="login-form">
+                        <div>
+                            <h3>Bienvenido</h3>
+                            <p class="login-subtitle">
+                                Ingresa a tu cuenta para continuar.
+                            </p>
 
+                            <form method="POST" action="{{ route('login') }}">
+                                @csrf
 
-            {{-- ================================================= --}}
-            {{-- PANEL DERECHO --}}
-            {{-- ================================================= --}}
+                                {{-- CORREO --}}
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">
+                                        CORREO ELECTRÓNICO
+                                    </label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        class="form-control @error('email') is-invalid @enderror"
+                                        name="email"
+                                        value="{{ old('email') }}"
+                                        required
+                                        autocomplete="email"
+                                        autofocus
+                                        placeholder="Ingrese su correo electrónico"
+                                    >
+                                    @error('email')
+                                        <div class="invalid-feedback">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                    @enderror
+                                </div>
 
-            <div class="col-md-7">
+                                {{-- CONTRASEÑA --}}
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        CONTRASEÑA
+                                    </label>
+                                    <input
+                                        id="password"
+                                        type="password"
+                                        class="form-control @error('password') is-invalid @enderror"
+                                        name="password"
+                                        required
+                                        autocomplete="current-password"
+                                        placeholder="Ingrese su contraseña"
+                                    >
+                                    @error('password')
+                                        <div class="invalid-feedback">
+                                            <strong>{{ $message }}</strong>
+                                        </div>
+                                    @enderror
+                                </div>
 
-                <div class="login-form">
+                                {{-- RECORDAR --}}
+                                <div class="form-check mb-4">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        name="remember"
+                                        id="remember"
+                                        {{ old('remember') ? 'checked' : '' }}
+                                    >
+                                    <label class="form-check-label" for="remember">
+                                        Recordarme
+                                    </label>
+                                </div>
 
-                    <div>
+                                {{-- INGRESAR --}}
+                                <button type="submit" class="btn-login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                                    INGRESAR AL SISTEMA
+                                </button>
 
-                        <h3>Bienvenido</h3>
-
-                        <p class="login-subtitle">
-                            Ingresa a tu cuenta para continuar.
-                        </p>
-
-
-                        <form method="POST" action="{{ route('login') }}">
-
-                            @csrf
-
-
-                            {{-- CORREO --}}
-
-                            <div class="mb-3">
-
-                                <label for="email" class="form-label">
-                                    CORREO ELECTRÓNICO
-                                </label>
-
-                                <input
-                                    id="email"
-                                    type="email"
-                                    class="form-control @error('email') is-invalid @enderror"
-                                    name="email"
-                                    value="{{ old('email') }}"
-                                    required
-                                    autocomplete="email"
-                                    autofocus
-                                    placeholder="Ingrese su correo electrónico"
-                                >
-
-                                @error('email')
-                                    <div class="invalid-feedback">
-                                        <strong>{{ $message }}</strong>
+                                {{-- RECUPERAR CONTRASEÑA --}}
+                                @if (Route::has('password.request'))
+                                    <div class="text-center mt-3">
+                                        <a
+                                            href="{{ route('password.request') }}"
+                                            class="text-success text-decoration-none small"
+                                        >
+                                            ¿Olvidaste tu contraseña?
+                                        </a>
                                     </div>
-                                @enderror
+                                @endif
 
-                            </div>
-
-
-                            {{-- CONTRASEÑA --}}
-
-                            <div class="mb-3">
-
-                                <label for="password" class="form-label">
-                                    CONTRASEÑA
-                                </label>
-
-                                <input
-                                    id="password"
-                                    type="password"
-                                    class="form-control @error('password') is-invalid @enderror"
-                                    name="password"
-                                    required
-                                    autocomplete="current-password"
-                                    placeholder="Ingrese su contraseña"
-                                >
-
-                                @error('password')
-                                    <div class="invalid-feedback">
-                                        <strong>{{ $message }}</strong>
+                                {{-- REGISTRO --}}
+                                @if (Route::has('register'))
+                                    <div class="registro-separador">
+                                        O
                                     </div>
-                                @enderror
-
-                            </div>
-
-
-                            {{-- RECORDAR --}}
-
-                            <div class="form-check mb-4">
-
-                                <input
-                                    class="form-check-input"
-                                    type="checkbox"
-                                    name="remember"
-                                    id="remember"
-                                    {{ old('remember') ? 'checked' : '' }}
-                                >
-
-                                <label class="form-check-label" for="remember">
-                                    Recordarme
-                                </label>
-
-                            </div>
-
-
-                            {{-- INGRESAR --}}
-
-                            <button type="submit" class="btn-login">
-                                <i class="bi bi-box-arrow-in-right me-1"></i>
-                                INGRESAR AL SISTEMA
-                            </button>
-
-
-                            {{-- RECUPERAR CONTRASEÑA --}}
-
-                            @if (Route::has('password.request'))
-
-                                <div class="text-center mt-3">
 
                                     <a
-                                        href="{{ route('password.request') }}"
-                                        class="text-success text-decoration-none small"
+                                        href="{{ route('register') }}"
+                                        class="btn-registrar"
                                     >
-                                        ¿Olvidaste tu contraseña?
+                                        <i class="bi bi-person-plus me-2"></i>
+                                        CREAR NUEVA CUENTA
                                     </a>
+                                @endif
 
+                                {{-- VOLVER --}}
+                                <div class="volver">
+                                    <a href="{{ url('/') }}">
+                                        <i class="bi bi-arrow-left"></i>
+                                        Volver a la portada
+                                    </a>
                                 </div>
 
-                            @endif
-
-
-                            {{-- REGISTRO --}}
-
-                            @if (Route::has('register'))
-
-                                <div class="registro-separador">
-                                    O
-                                </div>
-
-                                <a
-                                    href="{{ route('register') }}"
-                                    class="btn-registrar"
-                                >
-                                    <i class="bi bi-person-plus me-2"></i>
-                                    CREAR NUEVA CUENTA
-                                </a>
-
-                            @endif
-
-
-                            {{-- VOLVER --}}
-
-                            <div class="volver">
-
-                                <a href="{{ url('/') }}">
-                                    <i class="bi bi-arrow-left"></i>
-                                    Volver a la portada
-                                </a>
-
-                            </div>
-
-                        </form>
-
+                            </form>
+                        </div>
                     </div>
-
                 </div>
 
             </div>
-
         </div>
-
     </div>
-
-</div>
-
 </div>
 
 <script>
     document.addEventListener('keydown', function (e) {
-
         if (e.key !== 'Escape') return;
-
         window.location.href = @json(url('/'));
-
     });
 </script>
 

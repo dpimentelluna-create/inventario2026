@@ -17,6 +17,9 @@ class BajaEquipo extends Model
         'entregantes',
         'receptores',
         'observaciones',
+        'estado',
+        'anulada_at',
+        'anulada_por',
     ];
 
     protected function casts(): array
@@ -25,15 +28,17 @@ class BajaEquipo extends Model
             'fecha' => 'date',
             'entregantes' => 'array',
             'receptores' => 'array',
+            'anulada_at' => 'datetime',
         ];
     }
 
     public function equipo()
     {
-        return $this->belongsTo(
-            Equipo::class,
-            'equipo_id',
-            'id'
-        );
+        return $this->belongsTo(Equipo::class, 'equipo_id', 'id');
+    }
+
+    public function anuladaPor()
+    {
+        return $this->belongsTo(User::class, 'anulada_por');
     }
 }

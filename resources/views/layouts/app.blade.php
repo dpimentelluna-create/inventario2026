@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
+    <!-- Script antiparpadeo del tema -->
     <script>
         (function() {
             const t = localStorage.getItem('theme') || 'light';
@@ -103,7 +104,8 @@
         #sidebar.collapsed .brand-text,
         #sidebar.collapsed .sidebar-brand-text,
         #sidebar.collapsed .auth-buttons-container,
-        #sidebar.collapsed .user-name-text {
+        #sidebar.collapsed .user-name-text,
+        #sidebar.collapsed .user-info-cards {
             display: none !important;
         }
 
@@ -120,7 +122,8 @@
 
         #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
             justify-content: center;
-            padding: 0;
+            padding-left: 0;
+            padding-right: 0;
         }
 
         #sidebar.collapsed .user-dropdown-container .dropdown-toggle .rounded-circle {
@@ -221,7 +224,7 @@
         }
 
         /* ==========================================
-           FORZADO GLOBAL DE MODO OSCURO / CLARO
+            FORZADO GLOBAL DE MODO OSCURO / CLARO
            ========================================== */
         [data-bs-theme="dark"] body {
             background-color: #0f172a !important;
@@ -255,15 +258,16 @@
             color: #e2e8f0 !important;
         }
 
-        /* Tarjetas y contenedores generales en Modo Oscuro */
-        [data-bs-theme="dark"] .card,
-        [data-bs-theme="dark"] .card-body,
-        [data-bs-theme="dark"] .bg-white,
-        [data-bs-theme="dark"] .bg-light,
-        [data-bs-theme="dark"] .dropdown-menu {
+        /* SOLUCIÓN DEFINITIVA: FORZAR TARJETAS Y CUADROS BLANCOS A MODO OSCURO */
+        html[data-bs-theme="dark"] .card,
+        html[data-bs-theme="dark"] .bg-white,
+        html[data-bs-theme="dark"] [class*="bg-white"],
+        html.dark .card,
+        html.dark .bg-white,
+        html.dark [class*="bg-white"] {
             background-color: #1e293b !important;
-            border-color: #334155 !important;
             color: #e2e8f0 !important;
+            border-color: #334155 !important;
         }
 
         [data-bs-theme="dark"] .card-header,
@@ -290,7 +294,6 @@
             color: #f8fafc !important;
         }
 
-        /* Tablas en Modo Oscuro */
         [data-bs-theme="dark"] table.dataTable,
         [data-bs-theme="dark"] table.dataTable thead,
         [data-bs-theme="dark"] table.dataTable thead th,
@@ -320,7 +323,7 @@
         }
 
         /* ==========================================
-           MODO CLARO (ESTÁNDAR)
+            MODO CLARO (ESTÁNDAR)
            ========================================== */
         [data-bs-theme="light"] body {
             background-color: #f8fafc !important;
@@ -384,28 +387,8 @@
             border-color: #334155;
         }
 
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
         .sidebar-footer {
             margin-top: auto;
-        }
-
-        #sidebar.collapsed .user-info-cards {
-            display: none !important;
-        }
-
-        #sidebar.collapsed .user-dropdown-container .dropdown-toggle {
-            justify-content: center;
-            padding-left: 0;
-            padding-right: 0;
-        }
-
-        #sidebar.collapsed .user-dropdown-container .dropdown-toggle .rounded-circle {
-            margin-right: 0 !important;
         }
     </style>
 </head>
@@ -542,6 +525,7 @@
                         <i id="themeIcon" class="fas fa-moon me-1"></i>
                         <span id="themeText" class="sidebar-text">Modo Oscuro</span>
                     </button>
+                    
                     @auth
                     {{-- Nombre del usuario (con dropdown) --}}
                     <div class="dropdown user-dropdown-container px-1 mb-2">

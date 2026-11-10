@@ -17,6 +17,7 @@ class EquiposExport implements WithMultipleSheets
     public function sheets(): array
     {
         return [
+            new InventarioCompletoSheet($this->equipos), 
             new EquiposCompletoSheet($this->equipos),
             new EquiposInformacionGeneralSheet($this->equipos),
             new EquiposDetallesSheet($this->equipos),
