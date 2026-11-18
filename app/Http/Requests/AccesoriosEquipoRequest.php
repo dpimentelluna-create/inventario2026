@@ -24,6 +24,7 @@ class AccesoriosEquipoRequest extends FormRequest
             'tipo' => $tipo,
             'nuevo_tipo' => $nuevoTipo,
             'marca' => $this->aMayusculas($this->marca),
+            'modelo' => $this->aMayusculas($this->modelo),
             'num_serie' => $this->aMayusculas($this->num_serie),
             'estado' => $this->normalizarEstado($this->estado),
             'observaciones' => $this->aMayusculas($this->observaciones),
@@ -65,6 +66,12 @@ class AccesoriosEquipoRequest extends FormRequest
                 'max:80',
             ],
 
+            'modelo' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
             'num_serie' => [
                 'required',
                 'string',
@@ -100,6 +107,8 @@ class AccesoriosEquipoRequest extends FormRequest
             'nuevo_tipo.required' => 'Especifique el nuevo tipo de accesorio.',
             'nuevo_tipo.max' => 'El nuevo tipo no debe superar los 100 caracteres.',
 
+            'modelo.max' => 'El modelo del accesorio no debe superar los 100 caracteres.',
+            
             'num_serie.required' => 'El número de serie del accesorio es obligatorio.',
             'num_serie.unique' => 'Este número de serie ya está registrado en otro accesorio. Ingrese uno diferente.',
 

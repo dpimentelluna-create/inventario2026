@@ -16,6 +16,7 @@ class AccesoriosEquipo extends Model
         'ubicacion_id',
         'tipo',
         'marca',
+        'modelo',
         'num_serie',
         'estado',
         'observaciones',

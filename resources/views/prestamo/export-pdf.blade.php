@@ -253,7 +253,6 @@
             <tr>
                 <td class="cab-vacio-izq"></td>
                 <td class="cabecera-label">RESPONSABLE</td>
-                <td class="cabecera-valor">ING. MICHAEL CABOS OLIVARES</td>
                 <td class="cabecera-label">CARGO</td>
                 <td class="cabecera-valor">COORDINADOR DE INNOVACION Y SOPORTE TECNOLOGICO</td>
                 <td class="cab-vacio-der"></td>

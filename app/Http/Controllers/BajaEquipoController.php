@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\BajaEquipo;
 use App\Models\Equipo;
 use App\Models\PrestamoEquipo;
@@ -23,6 +23,7 @@ class BajaEquipoController extends Controller
         $bajas = BajaEquipo::with([
             'equipo.tipoEquipo',
             'equipo.ubicacione',
+            'anuladaPor',
         ])
             ->orderByDesc('fecha')
             ->orderByDesc('id')
@@ -125,6 +126,17 @@ class BajaEquipoController extends Controller
                 ]);
             }
 
+            // Evitar que el equipo tenga otra baja administrativa vigente.
+            $tieneBajaVigente = BajaEquipo::where('equipo_id', $equipo->id)
+                ->where('estado', 'VIGENTE')
+                ->exists();
+
+            if ($tieneBajaVigente) {
+                throw ValidationException::withMessages([
+                    'equipo_id' => 'Este equipo ya tiene una baja administrativa vigente.',
+                ]);
+            }
+
             // No permitir la baja si el equipo tiene un préstamo activo.
             $tienePrestamoActivo = PrestamoEquipo::where('equipo_id', $equipo->id)
                 ->whereHas('prestamo', function ($consulta) {
@@ -143,6 +155,7 @@ class BajaEquipoController extends Controller
                 'equipo_id' => $equipo->id,
                 'fecha' => $datos['fecha'],
                 'destino' => trim($datos['destino']),
+                'estado' => 'VIGENTE',
 
                 // Compatibilidad con las columnas antiguas.
                 'quien_entrego' => $quienEntregoAnterior,
@@ -196,6 +209,7 @@ class BajaEquipoController extends Controller
         $baja = $bajas_equipo->load([
             'equipo.tipoEquipo',
             'equipo.ubicacione',
+            'anuladaPor',
         ]);
 
         return view('bajas-equipos.show', compact('baja'));
@@ -204,14 +218,22 @@ class BajaEquipoController extends Controller
     /**
      * Mostrar formulario de edición.
      */
-    public function edit(BajaEquipo $bajas_equipo): View
+    public function edit(BajaEquipo $bajas_equipo): View|RedirectResponse
     {
         $baja = $bajas_equipo->load([
             'equipo.tipoEquipo',
             'equipo.ubicacione',
+            'anuladaPor',
         ]);
 
-        // Equipos EN_INVENTARIO + el equipo actual de esta baja
+        // No permitir editar registros anulados.
+        if ($baja->estado !== 'VIGENTE') {
+            return redirect()
+                ->route('bajas-equipos.show', $baja->id)
+                ->with('error', 'No se puede editar una baja administrativa que ya fue anulada.');
+        }
+
+        // Equipos EN_INVENTARIO + el equipo actual de esta baja.
         $equipos = Equipo::query()
             ->where(function ($q) use ($baja) {
                 $q->where('situacion_administrativa', 'EN_INVENTARIO')
@@ -235,9 +257,13 @@ class BajaEquipoController extends Controller
             ];
         })->values();
 
-        return view('bajas-equipos.edit', compact('baja', 'equipos', 'tiposEquipo', 'equiposForJs'));
+        return view('bajas-equipos.edit', compact(
+            'baja',
+            'equipos',
+            'tiposEquipo',
+            'equiposForJs'
+        ));
     }
-
 
 
     public function update(Request $request, BajaEquipo $bajas_equipo): RedirectResponse
@@ -283,22 +309,27 @@ class BajaEquipoController extends Controller
             150
         );
 
-        // 3. Conservar una copia de los datos anteriores para la auditoría.
-        $datosAnteriores = [
-            'equipo_id' => $bajas_equipo->equipo_id,
-            'fecha' => $bajas_equipo->fecha?->format('Y-m-d'),
-            'destino' => $bajas_equipo->destino,
-            'entregantes' => $bajas_equipo->entregantes,
-            'receptores' => $bajas_equipo->receptores,
-            'observaciones' => $bajas_equipo->observaciones,
-        ];
-
         // 4. Actualizar únicamente los datos de la ficha.
-        DB::transaction(function () use ($bajas_equipo, $datos, $quienEntregoAnterior, $quienRecibioAnterior, $datosAnteriores) {
+        DB::transaction(function () use ($bajas_equipo, $datos, $quienEntregoAnterior, $quienRecibioAnterior) {
             // Bloquear el registro de baja durante la actualización.
             $baja = BajaEquipo::whereKey($bajas_equipo->id)
                 ->lockForUpdate()
                 ->firstOrFail();
+
+            if ($baja->estado !== 'VIGENTE') {
+                throw ValidationException::withMessages([
+                    'baja' => 'No se pueden modificar los datos de una baja administrativa anulada.',
+                ]);
+            }
+
+            $datosAnteriores = [
+    'equipo_id' => $baja->equipo_id,
+    'fecha' => $baja->fecha?->format('Y-m-d'),
+    'destino' => $baja->destino,
+    'entregantes' => $baja->entregantes,
+    'receptores' => $baja->receptores,
+    'observaciones' => $baja->observaciones,
+];
 
             $baja->update([
                 'fecha' => $datos['fecha'],
@@ -341,51 +372,90 @@ class BajaEquipoController extends Controller
             ->with('success', 'Los datos de la baja administrativa se actualizaron correctamente.');
     }
 
-
     /**
-     * Eliminar (anular) una baja administrativa y restaurar el equipo.
+     * Anular lógicamente una baja administrativa y restaurar el equipo.
      */
     public function destroy(BajaEquipo $bajas_equipo): RedirectResponse
     {
         DB::transaction(function () use ($bajas_equipo) {
+
+            // Bloquear el registro de baja.
             $baja = BajaEquipo::query()
                 ->whereKey($bajas_equipo->id)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            $equipoId = $baja->equipo_id;
-
-            $equipo = Equipo::query()
-                ->whereKey($equipoId)
-                ->lockForUpdate()
-                ->first();
-
-            if ($equipo) {
-                $equipo->update([
-                    'situacion_administrativa' => 'EN_INVENTARIO',
+            // Evitar anular un registro más de una vez.
+            if ($baja->estado !== 'VIGENTE') {
+                throw ValidationException::withMessages([
+                    'baja' => 'Esta baja administrativa ya fue anulada.',
                 ]);
             }
 
+            // Bloquear el equipo relacionado.
+            $equipo = Equipo::query()
+                ->whereKey($baja->equipo_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$equipo) {
+                throw ValidationException::withMessages([
+                    'baja' => 'No se encontró el equipo relacionado. No se realizó la anulación.',
+                ]);
+            }
+
+            // Verificar que el equipo realmente se encuentre de baja.
+            if ($equipo->situacion_administrativa !== 'DE_BAJA') {
+                throw ValidationException::withMessages([
+                    'baja' => 'El equipo no se encuentra en estado DE_BAJA. Se requiere revisar su situación administrativa.',
+                ]);
+            }
+
+            // Guardar información anterior para la auditoría.
+            $datosAnteriores = [
+                'equipo_id' => $baja->equipo_id,
+                'fecha' => $baja->fecha?->format('Y-m-d'),
+                'destino' => $baja->destino,
+                'estado' => $baja->estado,
+                'situacion_administrativa' => $equipo->situacion_administrativa,
+            ];
+
+            $fechaAnulacion = now();
+
+            // Anular el registro sin eliminarlo físicamente.
+            $baja->update([
+                'estado' => 'ANULADA',
+                'anulada_at' => $fechaAnulacion->toDateTimeString(),
+                'anulada_por' => Auth::id(),
+            ]);
+
+            // Devolver el equipo al inventario.
+            $equipo->update([
+                'situacion_administrativa' => 'EN_INVENTARIO',
+            ]);
+
+            // Registrar la operación en la auditoría.
             Auditoria::registrar(
-                'ELIMINAR',
+                'ANULAR',
                 'BAJAS DE EQUIPOS',
-                "Se anuló la baja administrativa #{$baja->id} del equipo #{$equipoId}. El equipo vuelve a EN_INVENTARIO.",
+                "Se anuló la baja administrativa #{$baja->id} del equipo #{$equipo->id}. El equipo volvió a EN_INVENTARIO.",
                 $baja,
                 [
-                    'anterior' => [
-                        'equipo_id' => $equipoId,
-                        'fecha' => $baja->fecha,
-                        'destino' => $baja->destino,
+                    'anterior' => $datosAnteriores,
+                    'nuevo' => [
+                        'estado' => 'ANULADA',
+                        'anulada_at' => now()->toDateTimeString(),
+                        'anulada_por' => Auth::id(),
+                        'situacion_administrativa' => 'EN_INVENTARIO',
                     ],
                 ]
             );
-
-            $baja->delete();
         });
 
         return redirect()
             ->route('bajas-equipos.index')
-            ->with('success', 'Baja administrativa anulada. El equipo volvió a EN_INVENTARIO.')
+            ->with('success', 'La baja administrativa fue anulada. El historial se conservó y el equipo volvió a EN_INVENTARIO.')
             ->with('toast_tipo', 'exito');
     }
+
 }

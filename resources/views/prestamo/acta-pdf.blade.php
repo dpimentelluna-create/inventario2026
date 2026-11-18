@@ -197,11 +197,11 @@
             <th class="cabecera">ENTREGA</th>
             <th class="cabecera">DEVOLUCION</th>
         </tr>
-        <tr>
+        {{--  <tr>
             <td>{{ $nombreSolicitante }}</td>
             <td>MICHAEL RAUL CABOS OLIVARES</td>
             <td></td>
-        </tr>
+        </tr>--}}
         <tr>
             <td class="espacio-firma">
                 <div class="linea-firma">FIRMA</div>

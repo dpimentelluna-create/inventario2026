@@ -15,6 +15,7 @@ class Prestamo extends Model
         'docente_id',
         'cargo',
         'fecha',
+        'fecha_fin',
         'hora_inicio',
         'hora_fin',
         'estado',
@@ -22,6 +23,7 @@ class Prestamo extends Model
 
     protected $casts = [
         'fecha' => 'date',
+        'fecha_fin' => 'date',
     ];
 
     /**
