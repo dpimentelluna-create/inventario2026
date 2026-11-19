@@ -45,7 +45,7 @@ class PrestamoController extends Controller
             ->unique()
             ->values();
 
-        $filtroCargos = Prestamo::whereNotNull('cargo')
+        $filtroCargos = Docente::whereNotNull('cargo')
             ->where('cargo', '!=', '')
             ->distinct()
             ->orderBy('cargo')

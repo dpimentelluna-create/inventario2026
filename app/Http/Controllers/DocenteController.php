@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Docente;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Http\Requests\DocenteRequest;
@@ -98,15 +99,26 @@ class DocenteController extends Controller
      * Update the specified resource in storage.
      */
     public function update(DocenteRequest $request, Docente $docente): RedirectResponse
-{
-    $docente->update($request->validated());
+    {
+        $datos = $request->validated();
 
-    return Redirect::route('docentes.index')
-        ->with('success', 'Solicitante actualizado.')
-        ->with('toast_tipo', 'exito')
-        ->with('docente_resaltado', $docente->id)
-        ->with('docente_accion', 'editar');
-}
+        DB::transaction(function () use ($datos, $docente) {
+            $docente->update($datos);
+
+            // Actualizar el cargo guardado en todos los préstamos del solicitante.
+            if (array_key_exists('cargo', $datos)) {
+                $docente->prestamos()->update([
+                    'cargo' => $docente->cargo,
+                ]);
+            }
+        });
+
+        return Redirect::route('docentes.index')
+            ->with('success', 'Solicitante actualizado.')
+            ->with('toast_tipo', 'exito')
+            ->with('docente_resaltado', $docente->id)
+            ->with('docente_accion', 'editar');
+    }
 
     public function destroy($id): RedirectResponse
     {
