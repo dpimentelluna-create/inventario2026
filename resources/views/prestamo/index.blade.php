@@ -321,13 +321,12 @@
                                                                     @endphp
                                                                     <tr data-prestamo-id="{{ $prestamo->id }}"
                                                                         data-solicitante="{{ strtoupper($nombreSol) }}"
-                                                                        data-cargo="{{ strtoupper($prestamo->cargo ?? '') }}"
-                                                                        data-equipos="{{ strtoupper($textoEquipos) }}" data-fecha="{{ $fechaIso }}"
+                                                                        data-cargo="{{ strtoupper($prestamo->docente?->cargo ?? '') }}"                                                                        data-equipos="{{ strtoupper($textoEquipos) }}" data-fecha="{{ $fechaIso }}"
                                                                         data-hora-inicio="{{ $hIni }}" data-hora-fin="{{ $hFin }}"
                                                                         data-estado="{{ strtoupper($prestamo->estado ?? '') }}">
                                                                         <td>{{ $prestamo->id }}</td>
                                                                         <td>{{ strtoupper($nombreSol) ?: '-' }}</td>
-                                                                        <td>{{ strtoupper($prestamo->cargo ?? '-') }}</td>
+                                                                        <td>{{ strtoupper($prestamo->docente?->cargo ?? '-') }}</td>
                                                                         <td>
                                                                             @forelse ($prestamo->prestamoEquipos as $prestamoEquipo)
                                                                             <div class="mb-1">
