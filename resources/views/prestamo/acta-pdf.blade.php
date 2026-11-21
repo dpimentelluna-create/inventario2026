@@ -114,6 +114,25 @@
                 <td class="medio" colspan="7">SIN EQUIPOS REGISTRADOS</td>
             </tr>
         @endforelse
+        
+        @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
+            @php
+                $equipo = $prestamoEquipo->equipo;
+                $observacion = trim($prestamoEquipo->observacion ?? '');
+            @endphp
+
+            @if ($observacion !== '')
+                <tr>
+                    <td colspan="7">
+                        <strong>
+                            {{ mb_strtoupper($equipo->tipoEquipo->nombre ?? 'EQUIPO') }}
+                            – {{ mb_strtoupper($equipo->marca ?? '-') }}:
+                        </strong>
+                        {{ mb_strtoupper($observacion) }}
+                    </td>
+                </tr>
+            @endif
+        @endforeach
     </table>
 
     <table>
