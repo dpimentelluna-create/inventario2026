@@ -218,7 +218,7 @@
             <td>FECHA:
                 {{ $prestamo->estado === 'TERMINADO' && $prestamo->fecha_fin
                 ? $prestamo->fecha_fin->format('d/m/Y')
-                : '__ / __ / ____' }}
+                : '___ / ___ / _____' }}
             </td>
         </tr>
     </table></body>
