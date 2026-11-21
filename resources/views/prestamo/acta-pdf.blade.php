@@ -30,12 +30,17 @@
         .legal { font-size: 12px; text-align: justify; }
         .firmas { table-layout: fixed; width: 100%; }
         .firmas th, .firmas td { width: 33.33%; text-align: center; vertical-align: top; }
-        .espacio-firma { height: 72px; }
+        .espacio-firma { 
+            height: 100px;
+            vertical-align: bottom;
+            padding-bottom: 8px;
+        }
         .linea-firma {
-            margin-top: 34px;
+            margin-top: 0;
             border-top: 1px solid #000;
-            padding-top: 3px;
+            padding-top: 4px;
             font-size: 9px;
+            text-align: center;
         }
         .detalle-acc {
             width: 100%;
