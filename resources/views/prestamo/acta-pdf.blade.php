@@ -44,38 +44,38 @@
             margin-bottom: 12px;
         }
 
-        .tabla-especificaciones {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    margin-bottom: 7px;
-    font-size: 9px;
-}
+    .tabla-especificaciones {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        margin-bottom: 7px;
+        font-size: 9px;
+    }
 
-.tabla-especificaciones td {
-    padding: 3px 4px;
-    vertical-align: middle;
-    overflow-wrap: break-word;
-}
+    .tabla-especificaciones td {
+        padding: 3px 4px;
+        vertical-align: middle;
+        overflow-wrap: break-word;
+    }
 
-.col-especificaciones {
-    width: 70%;
-}
+    .col-especificaciones {
+        width: 70%;
+    }
 
-.col-color {
-    width: 15%;
-    white-space: normal;
-}
+    .col-color {
+        width: 15%;
+        white-space: normal;
+    }
 
-.col-estado {
-    width: 15%;
-    white-space: normal;
-}
+    .col-estado {
+        width: 15%;
+        white-space: normal;
+    }
 
-.fila-observaciones {
-    font-size: 8.5px;
-    line-height: 1.2;
-}
+    .fila-observaciones {
+        font-size: 8.5px;
+        line-height: 1.2;
+    }
     </style></head>
 <body>
     @php
@@ -217,15 +217,15 @@
             @endphp
 
             <tr>
-                <td class="col-especificaciones">
+                <td width="70%" style="width: 70%;" class="col-especificaciones">
                     <strong>{{ $tipo }}:</strong> {{ $especificaciones }}
                 </td>
 
-                <td class="col-color">
+                <td width="15%" style="width: 15%;" class="col-color">
                     <strong>COLOR:</strong> {{ $color }}
                 </td>
 
-                <td class="col-estado">
+                <td width="15%" style="width: 15%;" class="col-estado">
                     <strong>ESTADO:</strong> {{ $estado }}
                 </td>
             </tr>
