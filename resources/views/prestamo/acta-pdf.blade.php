@@ -170,6 +170,11 @@
 
 
     <table class="tabla-especificaciones">
+        <colgroup>
+            <col style="width: 70%;">
+            <col style="width: 15%;">
+            <col style="width: 15%;">
+        </colgroup>
         <tr>
             <td class="seccion" colspan="3">ESPECIFICACIONES GENERALES</td>
         </tr>
