@@ -43,6 +43,39 @@
             border-collapse: collapse;
             margin-bottom: 12px;
         }
+
+        .tabla-especificaciones {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin-bottom: 7px;
+    font-size: 9px;
+}
+
+.tabla-especificaciones td {
+    padding: 3px 4px;
+    vertical-align: middle;
+    overflow-wrap: break-word;
+}
+
+.col-especificaciones {
+    width: 70%;
+}
+
+.col-color {
+    width: 15%;
+    white-space: normal;
+}
+
+.col-estado {
+    width: 15%;
+    white-space: normal;
+}
+
+.fila-observaciones {
+    font-size: 8.5px;
+    line-height: 1.2;
+}
     </style></head>
 <body>
     @php
@@ -114,7 +147,7 @@
                 <td class="medio" colspan="7">SIN EQUIPOS REGISTRADOS</td>
             </tr>
         @endforelse
-        
+
         @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
             @php
                 $equipo = $prestamoEquipo->equipo;
@@ -135,32 +168,72 @@
         @endforeach
     </table>
 
-    <table>
-        <tr><td class="seccion" colspan="2">ESPECIFICACIONES GENERALES</td></tr>
+
+    <table class="tabla-especificaciones">
+        <tr>
+            <td class="seccion" colspan="3">ESPECIFICACIONES GENERALES</td>
+        </tr>
+
         @foreach ($prestamo->prestamoEquipos as $prestamoEquipo)
             @php
                 $equipo = $prestamoEquipo->equipo;
                 $laptop = $equipo->especificacionesLaptops;
                 $otro = $equipo->especificacionesEquipo;
-                $specs = mb_strtoupper(implode(' | ', array_filter([
-                    $laptop->procesador ?? null,
-                    $laptop->ram ?? null,
-                    $laptop->disco_duro ?? null,
-                    $otro->descripcion ?? null,
-                ]))) ?: '-';
-                $estadoEquipo = mb_strtoupper($prestamoEquipo->estado ?? $laptop->estado ?? $otro->estado ?? '-');
-                $obsEquipo = mb_strtoupper($prestamoEquipo->observacion ?? '-');
+
+                $tipo = mb_strtoupper($equipo->tipoEquipo->nombre ?? 'EQUIPO');
+
+                $especificaciones = mb_strtoupper(
+                    implode(' | ', array_filter([
+                        $laptop->procesador ?? null,
+                        $laptop->ram ?? null,
+                        $laptop->disco_duro ?? null,
+                        $otro->descripcion ?? null,
+                    ]))
+                ) ?: '-';
+
+                $color = mb_strtoupper(
+                    $laptop->color ?? $otro->color ?? '-'
+                );
+
+                $estado = mb_strtoupper(
+                    $prestamoEquipo->estado
+                    ?? $laptop->estado
+                    ?? $otro->estado
+                    ?? '-'
+                );
+
+                // Observación propia del equipo, no del préstamo.
+                $obsEquipo = mb_strtoupper(trim(
+                    $laptop->observaciones
+                    ?? $otro->observaciones
+                    ?? ''
+                ));
+
             @endphp
+
             <tr>
-                <td style="width: 62%;"><strong>{{ mb_strtoupper($equipo->tipoEquipo->nombre ?? 'EQUIPO') }}:</strong> {{ $specs }}</td>
-                <td style="width: 38%;"><strong>COLOR:</strong> {{ mb_strtoupper($laptop->color ?? $otro->color ?? '-') }}</td>
+                <td class="col-especificaciones">
+                    <strong>{{ $tipo }}:</strong> {{ $especificaciones }}
+                </td>
+
+                <td class="col-color">
+                    <strong>COLOR:</strong> {{ $color }}
+                </td>
+
+                <td class="col-estado">
+                    <strong>ESTADO:</strong> {{ $estado }}
+                </td>
             </tr>
+
             <tr>
-                <td style="width: 32%;"><strong>ESTADO:</strong> {{ $estadoEquipo }}</td>
-                <td style="width: 68%;"><strong>OBSERVACIONES:</strong> {{ $obsEquipo }}</td>
+                <td colspan="3" class="fila-observaciones">
+                    <strong>OBSERVACIONES:</strong>
+                    {{ $obsEquipo !== '' ? $obsEquipo : 'SIN OBSERVACIONES REGISTRADAS' }}
+                </td>
             </tr>
         @endforeach
     </table>
+
 
     <table class="detalle-acc">
         <colgroup>
