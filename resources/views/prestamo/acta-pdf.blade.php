@@ -64,12 +64,10 @@
 
     .col-color {
         width: 15%;
-        white-space: normal;
     }
 
     .col-estado {
         width: 15%;
-        white-space: normal;
     }
 
     .fila-observaciones {
@@ -170,11 +168,13 @@
 
 
     <table class="tabla-especificaciones">
-        <colgroup>
-            <col style="width: 70%;">
-            <col style="width: 15%;">
-            <col style="width: 15%;">
-        </colgroup>
+        {{-- Fila auxiliar para establecer los anchos de las columnas en DomPDF --}}
+        <tr>
+            <td style="width: 70%; height: 0; padding: 0; border: none; font-size: 0;"></td>
+            <td style="width: 15%; height: 0; padding: 0; border: none; font-size: 0;"></td>
+            <td style="width: 15%; height: 0; padding: 0; border: none; font-size: 0;"></td>
+        </tr>
+
         <tr>
             <td class="seccion" colspan="3">ESPECIFICACIONES GENERALES</td>
         </tr>
