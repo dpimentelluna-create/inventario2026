@@ -30,7 +30,7 @@
         .legal { font-size: 12px; text-align: justify; }
         .firmas { table-layout: fixed; width: 100%; }
         .firmas th, .firmas td { width: 33.33%; text-align: center; vertical-align: top; }
-        .espacio-firma { height: 58px; }
+        .espacio-firma { height: 72px; }
         .linea-firma {
             margin-top: 34px;
             border-top: 1px solid #000;
@@ -215,7 +215,11 @@
         <tr>
             <td>FECHA: {{ $fecha }}</td>
             <td>FECHA: {{ $fecha }}</td>
-            <td>FECHA:</td>
+            <td>FECHA:
+                {{ $prestamo->estado === 'TERMINADO' && $prestamo->fecha_fin
+                ? $prestamo->fecha_fin->format('d/m/Y')
+                : '__ / __ / ____' }}
+            </td>
         </tr>
     </table></body>
 </html>
