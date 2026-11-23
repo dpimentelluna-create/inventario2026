@@ -152,8 +152,9 @@ Route::middleware(['auth', 'acceso'])->group(function () {
     )->name('prestamos.auditar-impresion');
 
     Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
-});
 
-Route::get('/manual-usuario', function () {
-    return view('manual.index');
-})->name('manual.index');
+    // MANUAL DE USUARIO
+    Route::get('/manual-usuario', function () {
+        return view('manual.index');
+    })->name('manual.index');
+});

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
+use Carbon\Carbon;
 
 class PrestamoRequest extends FormRequest
 {
@@ -22,13 +23,23 @@ class PrestamoRequest extends FormRequest
         }
 
         foreach ($equipos as $i => $equipo) {
-            $equipos[$i]['estado'] = $this->normalizarEstado($equipo['estado'] ?? null);
+            if (!is_array($equipo)) {
+                continue;
+            }
+
+            $equipos[$i]['estado'] = $this->normalizarEstado(
+                $equipo['estado'] ?? null
+            );
 
             if (empty($equipo['accesorios']) || !is_array($equipo['accesorios'])) {
                 continue;
             }
 
-            foreach ($equipo['accesorios'] as $j => $accesorio) {
+            foreach ($equipos[$i]['accesorios'] as $j => $accesorio) {
+                if (!is_array($accesorio)) {
+                    continue;
+                }
+
                 $equipos[$i]['accesorios'][$j]['estado'] = $this->normalizarEstado(
                     $accesorio['estado'] ?? null
                 );
@@ -58,18 +69,30 @@ class PrestamoRequest extends FormRequest
         return [
             'docente_id' => ['required', 'exists:docentes,id'],
             'cargo' => ['required', 'string', 'max:100'],
+
             'fecha' => ['required', 'date'],
+            'fecha_fin' => ['required', 'date', 'after_or_equal:fecha'],
+
             'hora_inicio' => ['required', 'date_format:H:i'],
-            'hora_fin' => ['nullable', 'date_format:H:i', 'after:hora_inicio'],
+            'hora_fin' => ['nullable', 'date_format:H:i'],
 
             'equipos' => ['required', 'array', 'min:1'],
             'equipos.*.equipo_id' => ['required', 'exists:equipos,id', 'distinct'],
-            'equipos.*.estado' => ['required', Rule::in(['REGULAR', 'BUENO', 'MALOGRADO'])],
+            'equipos.*.estado' => [
+                'required',
+                Rule::in(['REGULAR', 'BUENO', 'MALOGRADO']),
+            ],
             'equipos.*.observacion' => ['nullable', 'string'],
 
             'equipos.*.accesorios' => ['nullable', 'array'],
-            'equipos.*.accesorios.*.accesorio_equipo_id' => ['required', 'exists:accesorios_equipo,id'],
-            'equipos.*.accesorios.*.estado' => ['required', Rule::in(['REGULAR', 'BUENO', 'MALOGRADO'])],
+            'equipos.*.accesorios.*.accesorio_equipo_id' => [
+                'required',
+                'exists:accesorios_equipo,id',
+            ],
+            'equipos.*.accesorios.*.estado' => [
+                'required',
+                Rule::in(['REGULAR', 'BUENO', 'MALOGRADO']),
+            ],
             'equipos.*.accesorios.*.observacion' => ['nullable', 'string'],
         ];
     }
@@ -80,11 +103,17 @@ class PrestamoRequest extends FormRequest
             'docente_id.required' => 'Seleccione un solicitante.',
             'docente_id.exists' => 'El solicitante no existe.',
             'cargo.required' => 'El cargo es obligatorio.',
-            'fecha.required' => 'La fecha es obligatoria.',
+
+            'fecha.required' => 'La fecha de inicio es obligatoria.',
+            'fecha.date' => 'La fecha de inicio no es válida.',
+            'fecha_fin.required' => 'La fecha final es obligatoria.',
+            'fecha_fin.date' => 'La fecha final no es válida.',
+            'fecha_fin.after_or_equal' => 'La fecha final no puede ser anterior a la fecha de inicio.',
+
             'hora_inicio.required' => 'La hora de inicio es obligatoria.',
             'hora_inicio.date_format' => 'La hora de inicio no tiene un formato válido.',
             'hora_fin.date_format' => 'La hora final no tiene un formato válido.',
-            'hora_fin.after' => 'La hora final debe ser mayor que la hora de inicio.',
+
             'equipos.required' => 'Debe seleccionar al menos un equipo.',
             'equipos.min' => 'Debe seleccionar al menos un equipo.',
             'equipos.*.equipo_id.required' => 'Hay un equipo sin identificar.',
@@ -95,32 +124,64 @@ class PrestamoRequest extends FormRequest
         ];
     }
 
-    
     public function after(): array
     {
         return [
             function (Validator $validator) {
+
+                /*
+                 * VALIDACIÓN DE FECHAS Y HORAS
+                 */
+
+                if (
+                    !$validator->errors()->has('fecha')
+                    && !$validator->errors()->has('fecha_fin')
+                    && !$validator->errors()->has('hora_inicio')
+                    && !$validator->errors()->has('hora_fin')
+                    && $this->filled('hora_fin')
+                ) {
+                    $inicio = Carbon::parse(
+                        $this->input('fecha') . ' ' . $this->input('hora_inicio')
+                    );
+
+                    $fin = Carbon::parse(
+                        $this->input('fecha_fin') . ' ' . $this->input('hora_fin')
+                    );
+
+                    if ($fin->lessThanOrEqualTo($inicio)) {
+                        $validator->errors()->add(
+                            'hora_fin',
+                            'La fecha y hora final deben ser posteriores a la fecha y hora de inicio.'
+                        );
+                    }
+                }
+
+                /*
+                 * VALIDACIÓN DE ACCESORIOS
+                 *
+                 * Un accesorio puede estar relacionado con otro equipo
+                 * o no tener equipo relacionado.
+                 *
+                 * Solo se evita repetirlo dentro del mismo préstamo.
+                 */
+
                 $equipos = $this->input('equipos', []);
 
                 if (!is_array($equipos)) {
                     return;
                 }
 
+                $idsAccesorios = [];
+
                 foreach ($equipos as $indiceEquipo => $equipo) {
                     if (
                         !is_array($equipo)
-                        || empty($equipo['equipo_id'])
                         || !is_array($equipo['accesorios'] ?? [])
                     ) {
                         continue;
                     }
 
-                    $equipoId = (int) $equipo['equipo_id'];
-                    $idsAccesorios = [];
-
-                    foreach (
-    ($equipo['accesorios'] ?? []) as $indiceAccesorio => $accesorio
-) {
+                    foreach ($equipo['accesorios'] as $indiceAccesorio => $accesorio) {
                         if (
                             !is_array($accesorio)
                             || empty($accesorio['accesorio_equipo_id'])
@@ -130,34 +191,19 @@ class PrestamoRequest extends FormRequest
 
                         $accesorioId = (int) $accesorio['accesorio_equipo_id'];
 
-                        // Evitar accesorios repetidos dentro del mismo equipo.
                         if (in_array($accesorioId, $idsAccesorios, true)) {
                             $validator->errors()->add(
                                 "equipos.{$indiceEquipo}.accesorios.{$indiceAccesorio}.accesorio_equipo_id",
-                                'No puede repetir el mismo accesorio para un equipo.'
+                                'No puede repetir el mismo accesorio dentro de un préstamo.'
                             );
 
                             continue;
                         }
 
                         $idsAccesorios[] = $accesorioId;
-
-                        // Verificar que el accesorio pertenezca al equipo indicado.
-                        $pertenece = \App\Models\AccesoriosEquipo::query()
-                            ->whereKey($accesorioId)
-                            ->where('equipo_id', $equipoId)
-                            ->exists();
-
-                        if (!$pertenece) {
-                            $validator->errors()->add(
-                                "equipos.{$indiceEquipo}.accesorios.{$indiceAccesorio}.accesorio_equipo_id",
-                                'El accesorio seleccionado no pertenece al equipo indicado.'
-                            );
-                        }
                     }
                 }
             },
         ];
     }
-
 }

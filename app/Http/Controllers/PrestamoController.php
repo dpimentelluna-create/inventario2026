@@ -7,6 +7,7 @@ use App\Models\PrestamoEquipo;
 use App\Models\PrestamoAccesorio;
 use App\Models\Equipo;
 use App\Models\TiposEquipo;
+use App\Models\AccesoriosEquipo;
 use App\Models\Docente;
 use App\Models\Auditoria;
 use Illuminate\Http\RedirectResponse;
@@ -86,15 +87,17 @@ class PrestamoController extends Controller
     ));
 }
 
+    
     /**
-     * Bloquear los equipos en un orden estable y rechazar los que ya tengan
-     * un préstamo ACTIVO. El bloqueo de las filas de equipos serializa las
-     * altas/ediciones concurrentes que utilizan esta misma regla.
+     * Bloquear equipos y accesorios en un orden estable.
+     * Rechazar los que ya tengan un préstamo ACTIVO.
      */
     private function bloquearYValidarDisponibilidad(
         array $equipoIds,
         ?int $prestamoId = null,
-        ?array $idsParaValidar = null
+        ?array $idsParaValidar = null,
+        array $accesorioIds = [],
+        ?array $accesoriosParaValidar = null
     ): void {
         $ids = collect($equipoIds)
             ->map(fn ($id) => (int) $id)
@@ -108,13 +111,30 @@ class PrestamoController extends Controller
             ->sort()
             ->values();
 
+        $idsAccesorios = collect($accesorioIds)
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values();
+
+        $idsAccesoriosValidar = collect(
+            $accesoriosParaValidar ?? $accesorioIds
+        )
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->sort()
+            ->values();
+
         if ($ids->isEmpty() || $idsValidar->isEmpty()) {
             throw ValidationException::withMessages([
                 'equipos' => 'Debe seleccionar al menos un equipo.',
             ]);
         }
 
-        // Todos los procesos de préstamo deben bloquear primero estas filas.
+        /*
+        * 1. BLOQUEAR EQUIPOS
+        */
+
         $equipos = Equipo::query()
             ->whereIn('id', $ids)
             ->orderBy('id')
@@ -133,7 +153,6 @@ class PrestamoController extends Controller
             ]);
         }
 
-        // No permitir prestar equipos dados de baja administrativamente.
         $equiposDeBaja = $equipos
             ->whereIn('id', $idsValidar)
             ->where('situacion_administrativa', 'DE_BAJA');
@@ -151,8 +170,7 @@ class PrestamoController extends Controller
 
             throw ValidationException::withMessages([
                 'equipos' => 'No se puede guardar el préstamo. Estos equipos están dados de baja administrativamente: '
-                    . $nombres
-                    . '.',
+                    . $nombres . '.',
             ]);
         }
 
@@ -177,27 +195,114 @@ class PrestamoController extends Controller
                     $identificador = $equipo->num_serie
                         ?: trim(($equipo->marca ?? '') . ' ' . ($equipo->modelo ?? ''));
 
-                    return 'ID ' . $equipo->id . ($identificador !== '' ? ' (' . $identificador . ')' : '');
+                    return 'ID ' . $equipo->id
+                        . ($identificador !== '' ? ' (' . $identificador . ')' : '');
                 })
                 ->implode(', ');
 
             throw ValidationException::withMessages([
-                'equipos' => 'No se puede guardar el préstamo. Estos equipos ya tienen un préstamo activo: ' . $nombres . '.',
+                'equipos' => 'No se puede guardar el préstamo. Estos equipos ya tienen un préstamo activo: '
+                    . $nombres . '.',
+            ]);
+        }
+
+        /*
+        * 2. BLOQUEAR ACCESORIOS
+        *
+        * Se bloquean también los accesorios actuales al editar,
+        * aunque después se retiren del préstamo.
+        */
+
+        if ($idsAccesorios->isEmpty()) {
+            return;
+        }
+
+        $accesorios = AccesoriosEquipo::query()
+            ->whereIn('id', $idsAccesorios)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get([
+                'id',
+                'tipo',
+                'marca',
+                'modelo',
+                'num_serie',
+            ]);
+
+        if ($accesorios->count() !== $idsAccesorios->count()) {
+            throw ValidationException::withMessages([
+                'equipos' => 'Uno o más accesorios seleccionados ya no existen. Actualice el formulario e inténtelo nuevamente.',
+            ]);
+        }
+
+        if ($idsAccesoriosValidar->isEmpty()) {
+            return;
+        }
+
+        /*
+        * 3. COMPROBAR SI LOS ACCESORIOS ESTÁN OCUPADOS
+        */
+
+        $idsAccesoriosOcupados = PrestamoAccesorio::query()
+            ->whereIn('accesorio_equipo_id', $idsAccesoriosValidar)
+            ->whereHas('prestamoEquipo.prestamo', function ($query) use ($prestamoId) {
+                $query->where('estado', 'ACTIVO');
+
+                if ($prestamoId !== null) {
+                    $query->where('id', '<>', $prestamoId);
+                }
+            })
+            ->pluck('accesorio_equipo_id')
+            ->unique();
+
+        if ($idsAccesoriosOcupados->isNotEmpty()) {
+            $nombres = $accesorios
+                ->whereIn('id', $idsAccesoriosOcupados)
+                ->map(function ($accesorio) {
+                    $identificador = $accesorio->num_serie
+                        ?: trim(
+                            ($accesorio->tipo ?? '') . ' '
+                            . ($accesorio->marca ?? '') . ' '
+                            . ($accesorio->modelo ?? '')
+                        );
+
+                    return 'ID ' . $accesorio->id
+                        . ($identificador !== '' ? ' (' . $identificador . ')' : '');
+                })
+                ->implode(', ');
+
+            throw ValidationException::withMessages([
+                'equipos' => 'No se puede guardar el préstamo. Estos accesorios ya tienen un préstamo activo: '
+                    . $nombres . '.',
             ]);
         }
     }
+
 
     /**
      * Guardar préstamo
      */
     public function store(PrestamoRequest $request): RedirectResponse
     {
-        $prestamo = DB::transaction(function () use ($request) {
+            $prestamo = DB::transaction(function () use ($request) {
+
+                        $equiposSolicitados = collect($request->input('equipos', []))
+                ->pluck('equipo_id')
+                ->all();
+
+            $accesoriosSolicitados = collect($request->input('equipos', []))
+                ->flatMap(function ($equipo) {
+                    return collect($equipo['accesorios'] ?? [])
+                        ->pluck('accesorio_equipo_id');
+                })
+                ->filter()
+                ->all();
 
             $this->bloquearYValidarDisponibilidad(
-                collect($request->input('equipos', []))
-                    ->pluck('equipo_id')
-                    ->all()
+                $equiposSolicitados,
+                null,
+                null,
+                $accesoriosSolicitados
             );
 
             $estadoPrestamo = $request->filled('hora_fin')
@@ -208,6 +313,7 @@ class PrestamoController extends Controller
                 'docente_id' => $request->docente_id,
                 'cargo' => $request->cargo,
                 'fecha' => $request->fecha,
+                'fecha_fin' => $request->fecha_fin,
                 'hora_inicio' => $request->hora_inicio,
                 'hora_fin' => $request->hora_fin,
                 'estado' => $estadoPrestamo,
@@ -510,17 +616,39 @@ class PrestamoController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            // Bloquear tanto los equipos actuales como los nuevos, incluso
-            // los que se retirarán de este préstamo durante la edición.
-            $equiposActuales = $prestamo->prestamoEquipos()->pluck('equipo_id')->all();
+            $equiposActuales = $prestamo->prestamoEquipos()
+                ->pluck('equipo_id')
+                ->all();
+
             $equiposSolicitados = collect($request->input('equipos', []))
                 ->pluck('equipo_id')
                 ->all();
 
+            // Obtener los accesorios que ya pertenecen al préstamo.
+            $accesoriosActuales = PrestamoAccesorio::query()
+                ->whereHas('prestamoEquipo', function ($query) use ($prestamo) {
+                    $query->where('prestamo_id', $prestamo->id);
+                })
+                ->pluck('accesorio_equipo_id')
+                ->all();
+
+            // Obtener los accesorios enviados en la edición.
+            $accesoriosSolicitados = collect($request->input('equipos', []))
+                ->flatMap(function ($equipo) {
+                    return collect($equipo['accesorios'] ?? [])
+                        ->pluck('accesorio_equipo_id');
+                })
+                ->filter()
+                ->all();
+
+            // Bloquear los accesorios actuales y los nuevos.
+            // Validar la disponibilidad de los que permanecerán en el préstamo.
             $this->bloquearYValidarDisponibilidad(
                 array_merge($equiposActuales, $equiposSolicitados),
                 $prestamo->id,
-                $equiposSolicitados
+                $equiposSolicitados,
+                array_merge($accesoriosActuales, $accesoriosSolicitados),
+                $accesoriosSolicitados
             );
 
             // 1. Guardar la información anterior antes de modificar.
@@ -556,6 +684,7 @@ class PrestamoController extends Controller
                 'docente_id' => $request->docente_id,
                 'cargo' => $request->cargo,
                 'fecha' => $request->fecha,
+                'fecha_fin' => $request->fecha_fin,
                 'hora_inicio' => $request->hora_inicio,
                 'hora_fin' => $request->hora_fin,
                 'estado' => $estadoPrestamo,
@@ -804,19 +933,19 @@ class PrestamoController extends Controller
     'especificacionesLaptops',
     'especificacionesEquipo',
     'accesoriosEquipos'
-])->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
-    $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
-        $prestamoQuery->where('estado', 'ACTIVO');
+    ])->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
+        $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
+            $prestamoQuery->where('estado', 'ACTIVO');
 
-        if ($request->filled('prestamo_id')) {
-            $prestamoQuery->where(
-                'id',
-                '!=',
-                (int) $request->input('prestamo_id')
-            );
-        }
+            if ($request->filled('prestamo_id')) {
+                $prestamoQuery->where(
+                    'id',
+                    '!=',
+                    (int) $request->input('prestamo_id')
+                );
+            }
+        });
     });
-});
 
         if ($request->filled('tipo_equipo_id')) {
             $query->where(
@@ -838,6 +967,7 @@ class PrestamoController extends Controller
                         'LIKE',
                         "%{$termino}%"
                     )
+
                         ->orWhere(
                             'modelo',
                             'LIKE',
@@ -855,7 +985,12 @@ class PrestamoController extends Controller
                                 "%{$termino}%"
                             );
                         });
+
+                        if (ctype_digit((string) $termino)) {
+                            $q->orWhere('id', (int) $termino);
+                        }
                 });
+                
             }
         }
 

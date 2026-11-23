@@ -159,61 +159,57 @@
                     </div>
 
 
-                    {{-------------- FECHA -----------------}}
-                    <div class="col-md-4 mb-3">
                     
+                    {{-- FECHA INICIO --}}
+                    <div class="col-md-6 mb-3">
+
                         <label for="fecha" class="form-label">
-                            FECHA
+                            FECHA INICIO
                             <span class="text-danger">*</span>
                         </label>
-                    
+
                         <div class="input-group">
-                            <input type="date" name="fecha" id="fecha" class="form-control @error('fecha') is-invalid @enderror" value="{{ old(
-    'fecha',
-    $prestamo->fecha
-    ? $prestamo->fecha->format('Y-m-d')
-    : now()->format('Y-m-d')
-) }}" required>
-                    
+                            <input type="date" name="fecha" id="fecha"
+                                class="form-control @error('fecha') is-invalid @enderror"
+                                value="{{ old('fecha', $prestamo->fecha
+                                    ? $prestamo->fecha->format('Y-m-d')
+                                    : now()->format('Y-m-d')) }}"
+                                required>
+
                             <button type="button" class="btn btn-outline-success" id="btn_hoy">
                                 <i class="bi bi-calendar-check"></i>
                                 HOY
                             </button>
                         </div>
-                    
+
                         @error('fecha')
-                            <div class="invalid-feedback">
+                            <div class="invalid-feedback d-block">
                                 {{ $message }}
                             </div>
                         @enderror
-                    
+
                     </div>
 
-
                     {{-- HORA INICIO --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
 
                         <label for="hora_inicio_texto" class="form-label">
                             HORA INICIO
                             <span class="text-danger">*</span>
                         </label>
 
-                        {{-- Campo visible --}}
                         <input type="text" id="hora_inicio_texto"
-                            class="form-control @error('hora_inicio') is-invalid @enderror" value="{{ old(
-    'hora_inicio',
-    $prestamo->hora_inicio
-    ? date('h:i A', strtotime($prestamo->hora_inicio))
-    : ''
-) }}" placeholder="00:00 AM" maxlength="8" autocomplete="off" inputmode="numeric" required>
+                            class="form-control @error('hora_inicio') is-invalid @enderror"
+                            value="{{ old('hora_inicio', $prestamo->hora_inicio
+                                ? date('h:i A', strtotime($prestamo->hora_inicio))
+                                : (!$prestamo->exists ? now()->format('h:i A') : '')) }}"
+                            placeholder="00:00 AM" maxlength="8"
+                            autocomplete="off" inputmode="numeric" required>
 
-                        {{-- Valor que realmente recibe Laravel --}}
-                        <input type="hidden" name="hora_inicio" id="hora_inicio" value="{{ old(
-    'hora_inicio',
-    $prestamo->hora_inicio
-    ? substr($prestamo->hora_inicio, 0, 5)
-    : ''
-) }}">
+                        <input type="hidden" name="hora_inicio" id="hora_inicio"
+                            value="{{ old('hora_inicio', $prestamo->hora_inicio
+                                ? substr($prestamo->hora_inicio, 0, 5)
+                                : (!$prestamo->exists ? now()->format('H:i') : '')) }}">
 
                         <small class="text-muted">
                             HORARIO: 06:00 AM - 04:00 PM
@@ -227,29 +223,50 @@
 
                     </div>
 
+                    {{-- FECHA FINAL --}}
+                    <div class="col-md-6 mb-3">
+
+                        <label for="fecha_fin" class="form-label">
+                            FECHA FINAL
+                            <span class="text-danger">*</span>
+                        </label>
+
+                        <input type="date" name="fecha_fin" id="fecha_fin"
+                            class="form-control @error('fecha_fin') is-invalid @enderror"
+                            value="{{ old('fecha_fin', $prestamo->fecha_fin
+                                ? $prestamo->fecha_fin->format('Y-m-d')
+                                : ($prestamo->fecha
+                                    ? $prestamo->fecha->format('Y-m-d')
+                                    : now()->format('Y-m-d'))) }}"
+                            required>
+
+                        @error('fecha_fin')
+                            <div class="invalid-feedback d-block">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
                     {{-- HORA FINAL --}}
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-6 mb-3">
 
                         <label for="hora_fin_texto" class="form-label">
                             HORA FINAL
                         </label>
 
-                        {{-- Campo visible --}}
                         <input type="text" id="hora_fin_texto"
-                            class="form-control @error('hora_fin') is-invalid @enderror" value="{{ old(
-    'hora_fin',
-    $prestamo->hora_fin
-    ? date('h:i A', strtotime($prestamo->hora_fin))
-    : ''
-) }}" placeholder="00:00 AM" maxlength="8" autocomplete="off" inputmode="numeric">
+                            class="form-control @error('hora_fin') is-invalid @enderror"
+                            value="{{ old('hora_fin', $prestamo->hora_fin
+                                ? date('h:i A', strtotime($prestamo->hora_fin))
+                                : '') }}"
+                            placeholder="00:00 AM" maxlength="8"
+                            autocomplete="off" inputmode="numeric">
 
-                        {{-- Valor que realmente recibe Laravel --}}
-                        <input type="hidden" name="hora_fin" id="hora_fin" value="{{ old(
-    'hora_fin',
-    $prestamo->hora_fin
-    ? substr($prestamo->hora_fin, 0, 5)
-    : ''
-) }}">
+                        <input type="hidden" name="hora_fin" id="hora_fin"
+                            value="{{ old('hora_fin', $prestamo->hora_fin
+                                ? substr($prestamo->hora_fin, 0, 5)
+                                : '') }}">
 
                         <small class="text-muted">
                             DEJAR VACÍO SI EL PRÉSTAMO CONTINÚA ACTIVO.
@@ -262,6 +279,7 @@
                         @enderror
 
                     </div>
+
 
                 </div>
 
@@ -501,6 +519,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const resultadosDocentes =
         document.getElementById('resultados_docentes');
 
+    // Conjunto de equipos seleccionados en el préstamo.
+    const equiposSeleccionados = new Set();
 
     // Lista de docentes existente en Laravel
     const docentes = @json($docentesParaJs);
@@ -521,7 +541,14 @@ function solicitanteListo() {
     return !!(docenteId && String(docenteId.value).trim() !== '');
 }
 
-const idsParte1 = ['cargo', 'fecha', 'btn_hoy', 'hora_inicio_texto', 'hora_fin_texto'];
+const idsParte1 = [
+    'cargo',
+    'fecha',
+    'btn_hoy',
+    'hora_inicio_texto',
+    'fecha_fin',
+    'hora_fin_texto'
+];
 
 function actualizarBloqueoParte1() {
     const listo = solicitanteListo();
@@ -668,6 +695,7 @@ actualizarBloqueoParte1();
     validarCampoVivo('buscar_docente', 'Seleccione un solicitante.');
     //validarCampoVivo('cargo', 'El cargo es obligatorio.');
     validarCampoVivo('fecha', 'La fecha es obligatoria.');
+    validarCampoVivo('fecha_fin', 'La fecha final es obligatoria.');
 
     validarCampoVivo('hora_inicio_texto', 'La hora de inicio es obligatoria.', function (campo) {
         procesarHora(campo, document.getElementById('hora_inicio'), true);
@@ -1584,55 +1612,95 @@ document.addEventListener(
  * =========================================================
  */
 
-const fecha =
-    document.getElementById('fecha');
 
-const btnHoy =
-    document.getElementById('btn_hoy');
+const fecha = document.getElementById('fecha');
+const fechaFin = document.getElementById('fecha_fin');
+const btnHoy = document.getElementById('btn_hoy');
 
-
-btnHoy.addEventListener(
-    'click',
-    function () {
-
-        const hoy =
-            new Date();
-
-        const año =
-            hoy.getFullYear();
-
-        const mes =
-            String(
-                hoy.getMonth() + 1
-            ).padStart(2, '0');
-
-        const dia =
-            String(
-                hoy.getDate()
-            ).padStart(2, '0');
-
-
-        fecha.value  =
-                 `${año}-${mes}-${dia}`;
-
-
-        /*
-         * Disparar evento por si
-         * alguna otra función depende
-         * del cambio de fecha.
-         */
-        fecha.dispatchEvent(
-            new Event('change')
-        );
-    }
+// Determinar si ambas fechas están vinculadas inicialmente.
+let fechaFinVinculada = !!(
+    fecha &&
+    fechaFin &&
+    fecha.value === fechaFin.value
 );
 
+let sincronizandoFechaFin = false;
 
-    const contenedor =
-        document.getElementById('equipos_seleccionados');
+// Mantener la fecha final igual a la inicial mientras
+// el usuario no haya modificado manualmente la fecha final.
+function sincronizarFechaFin() {
+    if (!fecha || !fechaFin) return;
 
-    const equiposSeleccionados =
-        new Set();
+    fechaFin.min = fecha.value || '';
+
+    if (fechaFinVinculada && fecha.value) {
+        sincronizandoFechaFin = true;
+        fechaFin.value = fecha.value;
+        sincronizandoFechaFin = false;
+    }
+}
+
+// Cuando cambia la fecha de inicio.
+
+// =====================================================
+// VALIDACIÓN DE FECHAS EN VIVO
+// =====================================================
+
+function cambioFechaInicio() {
+
+    sincronizarFechaFin();
+
+    validarHorasEntreSi();
+
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
+}
+
+function cambioFechaFinal() {
+
+    if (!sincronizandoFechaFin) {
+        fechaFinVinculada = false;
+    }
+
+    validarHorasEntreSi();
+
+    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+        actualizarEstadoBuscadorEquipos();
+    }
+}
+
+if (fecha) {
+    fecha.addEventListener('input', cambioFechaInicio);
+    fecha.addEventListener('change', cambioFechaInicio);
+}
+
+if (fechaFin) {
+    fechaFin.addEventListener('input', cambioFechaFinal);
+    fechaFin.addEventListener('change', cambioFechaFinal);
+}
+
+
+// BOTÓN HOY
+if (btnHoy) {
+    btnHoy.addEventListener('click', function () {
+        const hoy = new Date();
+
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+
+        fecha.value = `${año}-${mes}-${dia}`;
+
+        fecha.dispatchEvent(new Event('change'));
+    });
+}
+
+// Establecer el mínimo inicial de la fecha final.
+if (fecha && fechaFin) {
+    fechaFin.min = fecha.value || '';
+}
+
 
 // =========================================================
 // MÁSCARA Y VALIDACIÓN DE HORARIOS
@@ -1696,7 +1764,7 @@ function convertirA24(horas, minutos, periodo) {
 }
 
 
-    function procesarHora(campoTexto, campoReal, obligatorio) {
+    function procesarHora(campoTexto, campoReal, obligatorio, normalizarTexto = true) {
 
         if (!campoTexto || !campoReal) return;
 
@@ -1785,7 +1853,10 @@ function convertirA24(horas, minutos, periodo) {
             return;
         }
 
-        campoTexto.value = convertirHora12(horas24, minutos24);
+        if (normalizarTexto) {
+            campoTexto.value = convertirHora12(horas24, minutos24);
+        }
+
         campoReal.value = hora24;
         limpiarErrorCampo(campoTexto);
 
@@ -2069,61 +2140,196 @@ function controlarEntradaHora(campoTexto) {
 // (el blur lo aplica validarCampoVivo)
 // =========================================================
 
-controlarEntradaHora(horaInicioTexto);
+    controlarEntradaHora(horaInicioTexto);
+    controlarEntradaHora(horaFinTexto);
 
-if (horaInicioTexto && horaInicioReal) {
-    horaInicioTexto.addEventListener('input', function () {
-        horaInicioReal.value = '';
+    // =====================================================
+    // VALIDACIÓN DE HORAS EN VIVO
+    // =====================================================
+
+    function validarHoraEnVivo(campoTexto, campoReal, obligatorio) {
+
+        if (!campoTexto || !campoReal) return;
+
+        const valor = campoTexto.value.trim();
+
+        // Campo vacío.
+        if (valor === '') {
+
+            procesarHora(
+                campoTexto,
+                campoReal,
+                obligatorio,
+                false
+            );
+
+            validarHorasEntreSi();
+
+            if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+                actualizarEstadoBuscadorEquipos();
+            }
+
+            return;
+        }
+
+        // Comprobar si la entrada ya tiene suficiente información.
+        const limpio = valor.toUpperCase().replace(/\s/g, '');
+
+        const horaCompleta =
+            /^\d{2}$/.test(limpio) ||
+            /^\d{3,4}$/.test(limpio) ||
+            /^\d{1,2}:\d{2}$/.test(limpio);
+
+        // Mientras la hora está incompleta, esperar.
+        if (!horaCompleta) {
+
+            campoReal.value = '';
+
+            limpiarErrorCampo(campoTexto);
+            okHora(campoTexto);
+
+            validarHorasEntreSi();
+
+            if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+                actualizarEstadoBuscadorEquipos();
+            }
+
+            return;
+        }
+
+        // Procesar sin modificar el texto visible.
+        procesarHora(
+            campoTexto,
+            campoReal,
+            obligatorio,
+            false
+        );
+
+        // Comparar inmediatamente inicio y final.
+        validarHorasEntreSi();
+
         if (typeof actualizarEstadoBuscadorEquipos === 'function') {
             actualizarEstadoBuscadorEquipos();
         }
-    });
-}
-
-controlarEntradaHora(horaFinTexto);
-
-if (horaFinTexto && horaFinReal) {
-    horaFinTexto.addEventListener('input', function () {
-        horaFinReal.value = '';
-        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
-            actualizarEstadoBuscadorEquipos();
-        }
-    });
-}
-
-function validarHorasEntreSi() {
-    if (!horaInicioReal || !horaFinReal) {
-        if (typeof actualizarEstadoBuscadorEquipos === 'function') {
-            actualizarEstadoBuscadorEquipos();
-        }
-        return;
     }
 
-    if (!horaInicioReal.value || !horaFinReal.value) {
-        if (horaFinTexto && !horaFinTexto.value.trim()) {
+    // Eventos de escritura.
+    if (horaInicioTexto) {
+        horaInicioTexto.addEventListener('input', function () {
+            validarHoraEnVivo(
+                horaInicioTexto,
+                horaInicioReal,
+                true
+            );
+        });
+    }
+
+    if (horaFinTexto) {
+        horaFinTexto.addEventListener('input', function () {
+            validarHoraEnVivo(
+                horaFinTexto,
+                horaFinReal,
+                false
+            );
+        });
+    }
+
+
+    function validarHorasEntreSi() {
+        const fechaInicioCampo = document.getElementById('fecha');
+        const fechaFinCampo = document.getElementById('fecha_fin');
+
+        if (!horaInicioReal || !horaFinReal || !fechaInicioCampo || !fechaFinCampo) {
+            return;
+        }
+
+        const fechaInicio = fechaInicioCampo.value;
+        const fechaFin = fechaFinCampo.value;
+
+        // La fecha final no puede ser anterior a la inicial.
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            marcarError(
+                fechaFinCampo,
+                'LA FECHA FINAL NO PUEDE SER ANTERIOR A LA FECHA DE INICIO.'
+            );
+        } else {
+            limpiarErrorCampo(fechaFinCampo);
+        }
+
+        // La hora final puede quedar vacía mientras el préstamo esté ACTIVO.
+        if (!horaFinReal.value) {
+            if (horaFinTexto && !horaFinTexto.value.trim()) {
+                limpiarErrorCampo(horaFinTexto);
+            }
+
+            if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+                actualizarEstadoBuscadorEquipos();
+            }
+            return;
+        }
+
+        // No comparar hasta tener ambas horas procesadas.
+        if (!fechaInicio || !fechaFin || !horaInicioReal.value) {
+            if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+                actualizarEstadoBuscadorEquipos();
+            }
+            return;
+        }
+
+        // Convertir HH:mm a minutos desde la medianoche.
+        function convertirAMinutos(hora) {
+            const partes = hora.split(':');
+
+            if (partes.length !== 2) return null;
+
+            const horas = Number(partes[0]);
+            const minutos = Number(partes[1]);
+
+            if (
+                !Number.isInteger(horas) ||
+                !Number.isInteger(minutos) ||
+                horas < 0 || horas > 23 ||
+                minutos < 0 || minutos > 59
+            ) {
+                return null;
+            }
+
+            return horas * 60 + minutos;
+        }
+
+        const minutosInicio = convertirAMinutos(horaInicioReal.value);
+        const minutosFin = convertirAMinutos(horaFinReal.value);
+
+        if (minutosInicio === null || minutosFin === null) {
+            if (typeof actualizarEstadoBuscadorEquipos === 'function') {
+                actualizarEstadoBuscadorEquipos();
+            }
+            return;
+        }
+
+        const fechaInvalida =
+            fechaFin < fechaInicio ||
+            (
+                fechaFin === fechaInicio &&
+                minutosFin <= minutosInicio
+            );
+
+        if (fechaInvalida) {
+            marcarError(
+                horaFinTexto,
+                'LA FECHA Y HORA FINAL DEBEN SER POSTERIORES A LAS DE INICIO.'
+            );
+        } else {
             limpiarErrorCampo(horaFinTexto);
+            okHora(horaFinTexto);
         }
+
         if (typeof actualizarEstadoBuscadorEquipos === 'function') {
             actualizarEstadoBuscadorEquipos();
         }
-        return;
     }
 
-    const inicioPartes = horaInicioReal.value.split(':');
-    const finPartes = horaFinReal.value.split(':');
-    const inicioMinutos = (parseInt(inicioPartes[0], 10) * 60) + parseInt(inicioPartes[1], 10);
-    const finMinutos = (parseInt(finPartes[0], 10) * 60) + parseInt(finPartes[1], 10);
 
-    if (finMinutos <= inicioMinutos) {
-        marcarError(horaFinTexto, 'LA HORA FINAL DEBE SER MAYOR QUE LA HORA DE INICIO.');
-    } else {
-        limpiarErrorCampo(horaFinTexto);
-    }
-
-    if (typeof actualizarEstadoBuscadorEquipos === 'function') {
-        actualizarEstadoBuscadorEquipos();
-    }
-}
 
 
 // =========================================================
@@ -2149,16 +2355,17 @@ if (formularioPrestamo) {
 
     formularioPrestamo.addEventListener('submit', function (event) {
 
-        ['fecha', 'btn_hoy'].forEach(function (id) {
-        const el = document.getElementById(id);
-        if (el) el.disabled = false;
-    });
+        ['fecha', 'fecha_fin', 'btn_hoy'].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.disabled = false;
+        });
     
         limpiarErroresCampos();
 
         const docenteCampo = document.getElementById('docente_id');
         const buscarDocenteCampo = document.getElementById('buscar_docente');
         const fechaCampo = document.getElementById('fecha');
+        const fechaFinCampo = document.getElementById('fecha_fin');
 
         if (!docenteCampo || docenteCampo.value.trim() === '') {
             event.preventDefault();
@@ -2169,6 +2376,21 @@ if (formularioPrestamo) {
         if (!fechaCampo || fechaCampo.value.trim() === '') {
             event.preventDefault();
             mostrarErrorCampo(fechaCampo, 'La fecha es obligatoria.');
+            return;
+        }
+
+        if (!fechaFinCampo || fechaFinCampo.value.trim() === '') {
+            event.preventDefault();
+            mostrarErrorCampo(fechaFinCampo, 'La fecha final es obligatoria.');
+            return;
+        }
+
+        if (fechaFinCampo.value < fechaCampo.value) {
+            event.preventDefault();
+            mostrarErrorCampo(
+                fechaFinCampo,
+                'La fecha final no puede ser anterior a la fecha de inicio.'
+            );
             return;
         }
 
@@ -2229,19 +2451,35 @@ if (formularioPrestamo) {
 
 
         // ---------------------------------------------
-        // SI HORA FINAL ES INCORRECTA
-        // BLOQUEAR EL FORMULARIO
+        // BLOQUEAR SI EXISTE ALGÚN ERROR EN LAS HORAS
         // ---------------------------------------------
 
-        if (
-            horaFinTexto &&
-            !horaFinTexto.checkValidity()
-        ) {
+        const horaInicioInvalida =
+            horaInicioTexto &&
+            horaInicioTexto.classList.contains('is-invalid');
 
+        const horaFinInvalida =
+            horaFinTexto &&
+            horaFinTexto.classList.contains('is-invalid');
+
+        const fechaFinInvalida =
+            fechaFinCampo &&
+            fechaFinCampo.classList.contains('is-invalid');
+
+        if (horaInicioInvalida || horaFinInvalida || fechaFinInvalida) {
             event.preventDefault();
 
-            // Llevar automáticamente al campo incorrecto
-            horaFinTexto.focus();
+            const campoInvalido = horaInicioInvalida
+                ? horaInicioTexto
+                : horaFinInvalida
+                    ? horaFinTexto
+                    : fechaFinCampo;
+
+            campoInvalido.focus();
+            campoInvalido.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
 
             return;
         }
@@ -2302,6 +2540,7 @@ localStorage.setItem('prestamos_filtros_estado_nuevo_prestamo', '1');
     const docente = document.getElementById('docente_id');
     const cargo = document.getElementById('cargo');
     const fecha = document.getElementById('fecha');
+    const fechaFin = document.getElementById('fecha_fin');
     const horaInicio = document.getElementById('hora_inicio');
     const horaInicioTexto = document.getElementById('hora_inicio_texto');
     const horaFin = document.getElementById('hora_fin');
@@ -2310,6 +2549,8 @@ localStorage.setItem('prestamos_filtros_estado_nuevo_prestamo', '1');
     if (!docente || docente.value.trim() === '') return false;
     if (!cargo || cargo.value.trim() === '') return false;
     if (!fecha || fecha.value.trim() === '') return false;
+    if (!fechaFin || fechaFin.value.trim() === '') return false;
+    if (fechaFin.value < fecha.value) return false;
     if (!horaInicio || horaInicio.value.trim() === '') return false;
     if (horaInicioTexto && horaInicioTexto.classList.contains('is-invalid')) return false;
 
@@ -2528,32 +2769,24 @@ localStorage.setItem('prestamos_filtros_estado_nuevo_prestamo', '1');
                         <div>
 
                             <strong>
-
-                                ${equipo.tipo_equipo?.nombre ?? 'Sin tipo'}
-
+                                ${equipo.tipo_equipo?.nombre ?? 'SIN TIPO'} - #${equipo.id}
                             </strong>
 
                             <br>
 
                             <span>
-
                                 ${equipo.marca ?? ''}
                                 ${equipo.modelo ?? ''}
-
                             </span>
 
                             <br>
 
                             <small class="text-muted">
-
                                 N/S:
-
                                 ${equipo.num_serie ?? 'Sin número de serie'}
-
                             </small>
 
                         </div>
-
 
                         ${
                             yaSeleccionado
@@ -2800,7 +3033,7 @@ function mostrarCamposBusqueda() {
             if (tipoEquipo) tipoEquipo.disabled = false;
             if (buscarEquipo) {
                 buscarEquipo.disabled = false;
-                buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+                buscarEquipo.placeholder = 'Buscar por #ID, tipo, marca, modelo o N/S...';
             }
             return;
         }
@@ -2814,13 +3047,20 @@ function mostrarCamposBusqueda() {
         if (tipoEquipo) tipoEquipo.disabled = false;
         if (buscarEquipo) {
             buscarEquipo.disabled = false;
-            buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+            buscarEquipo.placeholder = 'Buscar por #ID, tipo, marca, modelo o N/S...';
         }
     }
 
-    ['docente_id', 'cargo', 'fecha', 'hora_inicio'].forEach(function (id) {
+    [
+        'docente_id',
+        'cargo',
+        'fecha',
+        'fecha_fin',
+        'hora_inicio'
+    ].forEach(function (id) {
         const el = document.getElementById(id);
         if (!el) return;
+
         el.addEventListener('change', actualizarEstadoBuscadorEquipos);
         el.addEventListener('input', actualizarEstadoBuscadorEquipos);
     });
@@ -2833,14 +3073,14 @@ function mostrarCamposBusqueda() {
     if (btnAgregarEquipo) {
         btnAgregarEquipo.addEventListener('click', function () {
             if (!parte1Completa()) {
-                alert('Complete primero SOLICITANTE, CARGO, FECHA y HORA INICIO.');
+                alert('Complete primero SOLICITANTE, CARGO, FECHA INICIO, FECHA FINAL y HORA INICIO.');
                 return;
             }
             mostrarCamposBusqueda();
             if (tipoEquipo) tipoEquipo.disabled = false;
             if (buscarEquipo) {
                 buscarEquipo.disabled = false;
-                buscarEquipo.placeholder = 'Buscar por tipo, marca, modelo o N/S...';
+                buscarEquipo.placeholder = 'Buscar por #ID, tipo, marca, modelo o N/S...';
                 buscarEquipo.focus();
             }
         });
