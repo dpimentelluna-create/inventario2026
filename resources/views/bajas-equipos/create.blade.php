@@ -111,6 +111,29 @@
                                          style="display:none;"></div>
                                 </div>
 
+                                {{-- ACCESORIOS --}}
+                                <div class="col-12" id="bloque-accesorios" style="display: none;">
+                                    <div class="border rounded p-3">
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold mb-1">ACCESORIOS INCLUIDOS EN LA BAJA</h6>
+                                            <small class="text-muted">
+                                                Marca únicamente los accesorios que también saldrán de la institución.
+                                                Los que no marques permanecerán relacionados al equipo en el inventario.
+                                            </small>
+                                        </div>
+
+                                        <div id="lista-accesorios">
+                                            <div class="text-muted small">
+                                                Selecciona un equipo para consultar sus accesorios relacionados.
+                                            </div>
+                                        </div>
+
+                                        @error('accesorios')
+                                            <div class="text-danger small mt-2">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+
                                 {{-- FECHA --}}
                                 <div class="col-12 col-md-6">
                                     <label for="fecha" class="form-label fw-semibold">
@@ -314,6 +337,66 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputEquipoId = document.getElementById('equipo_id');
     const listaEquipos = document.getElementById('lista_equipos');
     const equipoSeleccionado = document.getElementById('equipo_seleccionado');
+    const bloqueAccesorios = document.getElementById('bloque-accesorios');
+    const listaAccesorios = document.getElementById('lista-accesorios');
+    const accesoriosSeleccionados = @json(old('accesorios', []));
+
+    function mostrarAccesorios(eq) {
+        if (!bloqueAccesorios || !listaAccesorios) return;
+
+        listaAccesorios.innerHTML = '';
+        bloqueAccesorios.style.display = 'block';
+
+        const accesorios = Array.isArray(eq.accesorios) ? eq.accesorios : [];
+
+        if (accesorios.length === 0) {
+            const mensaje = document.createElement('div');
+            mensaje.className = 'text-muted small';
+            mensaje.textContent = 'Este equipo no tiene accesorios relacionados.';
+            listaAccesorios.appendChild(mensaje);
+            return;
+        }
+
+        accesorios.forEach(function (accesorio) {
+            const fila = document.createElement('div');
+            fila.className = 'form-check mb-2';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input';
+            checkbox.name = 'accesorios[]';
+            checkbox.value = accesorio.id;
+            checkbox.id = 'accesorio-' + accesorio.id;
+            checkbox.checked = accesoriosSeleccionados.some(function (id) {
+                return String(id) === String(accesorio.id);
+            });
+
+            const etiqueta = document.createElement('label');
+            etiqueta.className = 'form-check-label';
+            etiqueta.htmlFor = checkbox.id;
+
+            const descripcion = [
+                accesorio.tipo,
+                accesorio.marca,
+                accesorio.modelo,
+                accesorio.serie ? 'Serie: ' + accesorio.serie : '',
+                accesorio.estado ? 'Estado: ' + accesorio.estado : ''
+            ].filter(Boolean).join(' | ');
+
+            etiqueta.textContent = descripcion || 'Accesorio #' + accesorio.id;
+
+            fila.appendChild(checkbox);
+            fila.appendChild(etiqueta);
+            listaAccesorios.appendChild(fila);
+        });
+    }
+
+    function ocultarAccesorios() {
+        if (!bloqueAccesorios || !listaAccesorios) return;
+
+        listaAccesorios.innerHTML = '';
+        bloqueAccesorios.style.display = 'none';
+    }
 
     if (filtroTipo && inputBuscar && inputEquipoId && listaEquipos) {
         function filtrarEquipos() {
@@ -380,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     equipoSeleccionado.textContent = 'Equipo seleccionado: ' + descripcion;
                     equipoSeleccionado.style.display = 'block';
                     listaEquipos.style.display = 'none';
+                    mostrarAccesorios(eq);
                 });
 
                 listaEquipos.appendChild(opcion);
@@ -392,6 +476,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Si cambia la búsqueda, debe volver a seleccionar un resultado.
             inputEquipoId.value = '';
             equipoSeleccionado.style.display = 'none';
+            ocultarAccesorios();
             mostrarEquipos();
         });
 
@@ -399,6 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
         filtroTipo.addEventListener('change', function () {
             inputEquipoId.value = '';
             equipoSeleccionado.style.display = 'none';
+            ocultarAccesorios();
             mostrarEquipos();
         });
 
@@ -427,6 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
             inputBuscar.value = descripcion;
             equipoSeleccionado.textContent = 'Equipo seleccionado: ' + descripcion;
             equipoSeleccionado.style.display = 'block';
+            mostrarAccesorios(equipoAnterior);
         }
     }
 

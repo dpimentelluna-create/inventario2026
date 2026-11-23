@@ -63,6 +63,16 @@
 
         $entregantes = collect($entregantes);
         $receptores = collect($receptores);
+
+        // ACCESORIOS DE LA BAJA
+        $accesoriosIncluidos = $baja->accesoriosIncluidos;
+
+        $accesoriosNoIncluidos = $equipo->accesoriosEquipos
+            ->reject(function ($accesorio) use ($accesoriosIncluidos) {
+                return $accesoriosIncluidos->contains('id', $accesorio->id);
+            });
+
+        $mostrarSeccionAccesorios = $equipo->accesoriosEquipos->isNotEmpty();
     @endphp
 
     <section class="content container-fluid baja-show">
@@ -248,6 +258,89 @@
                                 </table>
                             </div>
                         </div>
+
+                        {{-- ACCESORIOS --}}
+                        @if ($mostrarSeccionAccesorios)
+                            <div class="seccion-contenido mb-4">
+                                <div class="titulo-seccion">
+                                    <div>
+                                        <h5>
+                                            <i class="bi bi-usb-symbol me-1"></i>
+                                            ACCESORIOS
+                                        </h5>
+                                        <p>Detalle de los accesorios relacionados con el equipo y su participación en la baja administrativa.</p>
+                                    </div>
+                                </div>
+
+                                {{-- ACCESORIOS INCLUIDOS --}}
+                                @if ($accesoriosIncluidos->isNotEmpty())
+                                    <div class="bloque-especificaciones mb-3">
+                                        <div class="etiqueta">ACCESORIOS INCLUIDOS EN LA BAJA</div>
+
+                                        <div class="tabla-responsables">
+                                            <table class="tabla-responsables-moderna">
+                                                <thead>
+                                                    <tr>
+                                                        <th>TIPO</th>
+                                                        <th>MARCA</th>
+                                                        <th>MODELO</th>
+                                                        <th>N.º DE SERIE</th>
+                                                        <th>ESTADO</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($accesoriosIncluidos as $accesorio)
+                                                        <tr>
+                                                            <td>{{ $accesorio->tipo ?: '—' }}</td>
+                                                            <td>{{ $accesorio->marca ?: '—' }}</td>
+                                                            <td>{{ $accesorio->modelo ?: '—' }}</td>
+                                                            <td>{{ $accesorio->num_serie ?: '—' }}</td>
+                                                            <td>{{ $accesorio->estado ? strtoupper($accesorio->estado) : '—' }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- ACCESORIOS NO INCLUIDOS --}}
+                                @if ($accesoriosNoIncluidos->isNotEmpty())
+                                    <div class="bloque-especificaciones">
+                                        <div class="etiqueta">ACCESORIOS RELACIONADOS NO INCLUIDOS</div>
+
+                                        <p class="small text-muted mb-3">
+                                            Los siguientes accesorios no forman parte de esta baja y permanecen relacionados con el equipo en el inventario.
+                                        </p>
+
+                                        <div class="tabla-responsables">
+                                            <table class="tabla-responsables-moderna">
+                                                <thead>
+                                                    <tr>
+                                                        <th>TIPO</th>
+                                                        <th>MARCA</th>
+                                                        <th>MODELO</th>
+                                                        <th>N.º DE SERIE</th>
+                                                        <th>ESTADO</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($accesoriosNoIncluidos as $accesorio)
+                                                        <tr>
+                                                            <td>{{ $accesorio->tipo ?: '—' }}</td>
+                                                            <td>{{ $accesorio->marca ?: '—' }}</td>
+                                                            <td>{{ $accesorio->modelo ?: '—' }}</td>
+                                                            <td>{{ $accesorio->num_serie ?: '—' }}</td>
+                                                            <td>{{ $accesorio->estado ? strtoupper($accesorio->estado) : '—' }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
 
                         {{-- OBSERVACIONES --}}
                         <div class="seccion-contenido mb-4">

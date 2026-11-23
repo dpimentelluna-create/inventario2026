@@ -23,6 +23,13 @@
     $entregantesOld = old('entregantes', $entregantesGuardados);
     $receptoresOld = old('receptores', $receptoresGuardados);
 
+    // ACCESORIOS INCLUIDOS EN LA BAJA
+    $accesoriosOld = collect(
+        old('accesorios', $accesoriosIncluidosIds->all())
+    )
+        ->map(fn ($id) => (int) $id)
+        ->all();
+
     if (empty($entregantesOld)) {
         $entregantesOld = [['nombre' => '', 'cargo' => '']];
     }
@@ -114,6 +121,73 @@
                                             </strong>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+
+                            {{-- ACCESORIOS INCLUIDOS EN LA BAJA --}}
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="mb-3">
+                                        <h6 class="fw-bold mb-1">
+                                            <i class="bi bi-usb-symbol me-2"></i>
+                                            ACCESORIOS INCLUIDOS EN LA BAJA
+                                        </h6>
+
+                                        <small class="text-muted">
+                                            Marca los accesorios que también saldrán de la institución.
+                                            Los que no marques permanecerán relacionados con el equipo.
+                                        </small>
+                                    </div>
+
+                                    @php
+                                        $accesoriosEquipo = $baja->equipo->accesoriosEquipos;
+                                    @endphp
+
+                                    @if ($accesoriosEquipo->isEmpty())
+                                        <div class="text-muted small">
+                                            Este equipo no tiene accesorios relacionados.
+                                        </div>
+                                    @else
+                                        <div id="lista-accesorios">
+                                            @foreach ($accesoriosEquipo as $accesorio)
+                                                <div class="form-check mb-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        class="form-check-input"
+                                                        name="accesorios[]"
+                                                        value="{{ $accesorio->id }}"
+                                                        id="accesorio-{{ $accesorio->id }}"
+                                                        {{ in_array((int) $accesorio->id, $accesoriosOld, true) ? 'checked' : '' }}
+                                                    >
+
+                                                    <label
+                                                        class="form-check-label"
+                                                        for="accesorio-{{ $accesorio->id }}"
+                                                    >
+                                                        {{ $accesorio->tipo ?: 'SIN TIPO' }}
+                                                        |
+                                                        {{ $accesorio->marca ?: 'SIN MARCA' }}
+                                                        |
+                                                        {{ $accesorio->modelo ?: 'SIN MODELO' }}
+
+                                                        @if ($accesorio->num_serie)
+                                                            | Serie: {{ $accesorio->num_serie }}
+                                                        @endif
+
+                                                        @if ($accesorio->estado)
+                                                            | Estado: {{ strtoupper($accesorio->estado) }}
+                                                        @endif
+                                                    </label>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    @error('accesorios')
+                                        <div class="text-danger small mt-2">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                             </div>
 

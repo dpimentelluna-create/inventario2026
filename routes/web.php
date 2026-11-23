@@ -58,6 +58,13 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         Route::post('/bajas-equipos', [BajaEquipoController::class, 'store'])
             ->name('bajas-equipos.store');
 
+        // Exportación de bajas administrativas.
+        Route::post('/bajas-equipos/export/excel', [BajaEquipoController::class, 'exportExcel'])
+            ->name('bajas-equipos.export.excel');
+
+        Route::post('/bajas-equipos/export/pdf', [BajaEquipoController::class, 'exportPdf'])
+            ->name('bajas-equipos.export.pdf');
+
         Route::get('/bajas-equipos/{bajas_equipo}', [BajaEquipoController::class, 'show'])
             ->whereNumber('bajas_equipo')
             ->name('bajas-equipos.show');

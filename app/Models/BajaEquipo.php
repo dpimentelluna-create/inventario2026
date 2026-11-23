@@ -37,6 +37,16 @@ class BajaEquipo extends Model
         return $this->belongsTo(Equipo::class, 'equipo_id', 'id');
     }
 
+    public function accesoriosIncluidos()
+    {
+        return $this->belongsToMany(
+            AccesoriosEquipo::class,
+            'baja_equipo_accesorios',
+            'baja_equipo_id',
+            'accesorio_equipo_id'
+        )->withTimestamps();
+    }
+
     public function anuladaPor()
     {
         return $this->belongsTo(User::class, 'anulada_por');

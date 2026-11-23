@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Support\Facades\Auth;
 use App\Models\BajaEquipo;
 use App\Models\Equipo;
+use App\Models\AccesoriosEquipo;
 use App\Models\PrestamoEquipo;
 use App\Models\Auditoria;
 use App\Models\TiposEquipo;
@@ -12,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class BajaEquipoController extends Controller
 {
@@ -27,7 +31,7 @@ class BajaEquipoController extends Controller
         ])
             ->orderByDesc('fecha')
             ->orderByDesc('id')
-            ->paginate(20);
+            ->get();
 
         return view('bajas-equipos.index', compact('bajas'));
     }
@@ -39,7 +43,7 @@ class BajaEquipoController extends Controller
     {
         $equipos = Equipo::query()
             ->where('situacion_administrativa', 'EN_INVENTARIO')
-            ->with(['tipoEquipo', 'ubicacione'])
+            ->with(['tipoEquipo', 'ubicacione', 'accesoriosEquipos'])
             ->orderBy('id', 'asc')
             ->get();
 
@@ -59,10 +63,24 @@ class BajaEquipoController extends Controller
                 'modelo' => $e->modelo ?? '',
                 'serie' => $e->num_serie ?? '',
                 'ubicacion' => $e->ubicacione->nombre ?? '',
+
+                'accesorios' => $e->accesoriosEquipos->map(function ($a) {
+                    return [
+                        'id' => $a->id,
+                        'tipo' => $a->tipo ?? '',
+                        'marca' => $a->marca ?? '',
+                        'modelo' => $a->modelo ?? '',
+                        'serie' => $a->num_serie ?? '',
+                        'estado' => $a->estado ?? '',
+                    ];
+                })->values()->all(),
             ];
         })->values();
 
-        return view('bajas-equipos.create', compact('equipos', 'tiposEquipo', 'equiposForJs'));
+        return view(
+            'bajas-equipos.create',
+            compact('equipos', 'tiposEquipo', 'equiposForJs')
+        );
     }
 
 
@@ -82,6 +100,9 @@ class BajaEquipoController extends Controller
             'receptores.*.nombre' => ['required', 'string', 'max:150'],
             'receptores.*.cargo' => ['required', 'string', 'max:150'],
 
+            'accesorios' => ['sometimes', 'array'],
+            'accesorios.*' => ['integer', 'distinct', 'exists:accesorios_equipo,id'],
+
             'observaciones' => ['nullable', 'string', 'max:5000'],
         ], [
             'equipo_id.required' => 'Debes seleccionar un equipo.',
@@ -95,6 +116,10 @@ class BajaEquipoController extends Controller
             'receptores.*.nombre.required' => 'Ingresa el nombre de cada integrante que recibe.',
             'receptores.*.cargo.required' => 'Ingresa el cargo de cada integrante que recibe.',
         ]);
+
+        $datos['entregantes'] = array_values($datos['entregantes']);
+        $datos['receptores'] = array_values($datos['receptores']);
+        $datos['accesorios'] = array_values($datos['accesorios'] ?? []);
 
         // 2. Mantener los campos antiguos obligatorios de la base de datos.
         $primerEntregante = $datos['entregantes'][0];
@@ -150,6 +175,24 @@ class BajaEquipoController extends Controller
                 ]);
             }
 
+            // Validar que los accesorios seleccionados pertenezcan al equipo elegido.
+            $accesoriosIds = $datos['accesorios'];
+
+            if (!empty($accesoriosIds)) {
+                $accesoriosValidos = AccesoriosEquipo::where('equipo_id', $equipo->id)
+                    ->whereIn('id', $accesoriosIds)
+                    ->lockForUpdate()
+                    ->pluck('id')
+                    ->map(fn($id) => (int) $id)
+                    ->all();
+
+                if (count($accesoriosValidos) !== count($accesoriosIds)) {
+                    throw ValidationException::withMessages([
+                        'accesorios' => 'Uno o más accesorios seleccionados no pertenecen al equipo elegido.',
+                    ]);
+                }
+            }
+
             // Crear el registro de baja con los integrantes completos.
             $baja = BajaEquipo::create([
                 'equipo_id' => $equipo->id,
@@ -168,6 +211,9 @@ class BajaEquipoController extends Controller
                 'observaciones' => $datos['observaciones'] ?? null,
             ]);
 
+            // Guardar los accesorios que también salen de la institución.
+            $baja->accesoriosIncluidos()->sync($accesoriosIds);
+
             // Cambiar la situación administrativa del equipo.
             $equipo->situacion_administrativa = 'DE_BAJA';
             $equipo->save();
@@ -181,6 +227,7 @@ class BajaEquipoController extends Controller
                 [
                     'nuevo' => [
                         'equipo_id' => $equipo->id,
+                        'accesorios_incluidos' => $accesoriosIds,
                         'fecha' => $datos['fecha'],
                         'destino' => trim($datos['destino']),
                         'entregantes' => $datos['entregantes'],
@@ -209,6 +256,8 @@ class BajaEquipoController extends Controller
         $baja = $bajas_equipo->load([
             'equipo.tipoEquipo',
             'equipo.ubicacione',
+            'equipo.accesoriosEquipos',
+            'accesoriosIncluidos',
             'anuladaPor',
         ]);
 
@@ -223,6 +272,8 @@ class BajaEquipoController extends Controller
         $baja = $bajas_equipo->load([
             'equipo.tipoEquipo',
             'equipo.ubicacione',
+            'equipo.accesoriosEquipos',
+            'accesoriosIncluidos',
             'anuladaPor',
         ]);
 
@@ -239,7 +290,11 @@ class BajaEquipoController extends Controller
                 $q->where('situacion_administrativa', 'EN_INVENTARIO')
                     ->orWhere('id', $baja->equipo_id);
             })
-            ->with(['tipoEquipo', 'ubicacione'])
+            ->with([
+                'tipoEquipo',
+                'ubicacione',
+                'accesoriosEquipos',
+            ])
             ->orderBy('id')
             ->get();
 
@@ -254,16 +309,34 @@ class BajaEquipoController extends Controller
                 'modelo' => $e->modelo ?? '',
                 'serie' => $e->num_serie ?? '',
                 'ubicacion' => $e->ubicacione->nombre ?? '',
+                'accesorios' => $e->accesoriosEquipos->map(function ($a) {
+                    return [
+                        'id' => $a->id,
+                        'tipo' => $a->tipo ?? '',
+                        'marca' => $a->marca ?? '',
+                        'modelo' => $a->modelo ?? '',
+                        'serie' => $a->num_serie ?? '',
+                        'estado' => $a->estado ?? '',
+                    ];
+                })->values()->all(),
             ];
         })->values();
+
+        // Recuperar los accesorios que ya fueron incluidos en esta baja.
+        $accesoriosIncluidosIds = $baja->accesoriosIncluidos
+            ->pluck('id')
+            ->map(fn($id) => (int) $id)
+            ->values();
 
         return view('bajas-equipos.edit', compact(
             'baja',
             'equipos',
             'tiposEquipo',
-            'equiposForJs'
+            'equiposForJs',
+            'accesoriosIncluidosIds'
         ));
     }
+
 
 
     public function update(Request $request, BajaEquipo $bajas_equipo): RedirectResponse
@@ -281,6 +354,8 @@ class BajaEquipoController extends Controller
             'receptores.*.nombre' => ['required', 'string', 'max:150'],
             'receptores.*.cargo' => ['required', 'string', 'max:150'],
 
+            'accesorios' => ['sometimes', 'array'],
+            'accesorios.*' => ['integer', 'distinct', 'exists:accesorios_equipo,id'],
             'observaciones' => ['nullable', 'string', 'max:5000'],
         ], [
             'entregantes.required' => 'Registra al menos una persona que entrega.',
@@ -292,6 +367,12 @@ class BajaEquipoController extends Controller
             'receptores.*.nombre.required' => 'Ingresa el nombre de cada integrante que recibe.',
             'receptores.*.cargo.required' => 'Ingresa el cargo de cada integrante que recibe.',
         ]);
+
+        $datos['entregantes'] = array_values($datos['entregantes']);
+        $datos['receptores'] = array_values($datos['receptores']);
+
+        // Normalizar los accesorios seleccionados.
+        $datos['accesorios'] = array_values($datos['accesorios'] ?? []);
 
         // 2. Preparar los valores para las columnas antiguas.
         $primerEntregante = $datos['entregantes'][0];
@@ -322,14 +403,39 @@ class BajaEquipoController extends Controller
                 ]);
             }
 
+            // Validar que los accesorios seleccionados pertenezcan al equipo de la baja.
+            $accesoriosIds = $datos['accesorios'];
+
+            if (!empty($accesoriosIds)) {
+                $accesoriosValidos = AccesoriosEquipo::where('equipo_id', $baja->equipo_id)
+                    ->whereIn('id', $accesoriosIds)
+                    ->lockForUpdate()
+                    ->pluck('id')
+                    ->map(fn($id) => (int) $id)
+                    ->all();
+
+                if (count($accesoriosValidos) !== count($accesoriosIds)) {
+                    throw ValidationException::withMessages([
+                        'accesorios' => 'Uno o más accesorios seleccionados no pertenecen al equipo de esta baja.',
+                    ]);
+                }
+            }
+
+            // Recuperar los accesorios que estaban incluidos antes de editar.
+            $accesoriosAnteriores = $baja->accesoriosIncluidos()
+                ->pluck('accesorio_equipo_id')
+                ->map(fn($id) => (int) $id)
+                ->all();
+
             $datosAnteriores = [
-    'equipo_id' => $baja->equipo_id,
-    'fecha' => $baja->fecha?->format('Y-m-d'),
-    'destino' => $baja->destino,
-    'entregantes' => $baja->entregantes,
-    'receptores' => $baja->receptores,
-    'observaciones' => $baja->observaciones,
-];
+                'equipo_id' => $baja->equipo_id,
+                'fecha' => $baja->fecha?->format('Y-m-d'),
+                'destino' => $baja->destino,
+                'entregantes' => $baja->entregantes,
+                'receptores' => $baja->receptores,
+                'accesorios_incluidos' => $accesoriosAnteriores,
+                'observaciones' => $baja->observaciones,
+            ];
 
             $baja->update([
                 'fecha' => $datos['fecha'],
@@ -346,6 +452,9 @@ class BajaEquipoController extends Controller
                 'observaciones' => $datos['observaciones'] ?? null,
             ]);
 
+            // Actualizar los accesorios incluidos en esta baja.
+            $baja->accesoriosIncluidos()->sync($accesoriosIds);
+
             // Registrar los cambios sin alterar la situación del equipo.
             Auditoria::registrar(
                 'ACTUALIZAR',
@@ -360,6 +469,7 @@ class BajaEquipoController extends Controller
                         'destino' => trim($datos['destino']),
                         'entregantes' => $datos['entregantes'],
                         'receptores' => $datos['receptores'],
+                        'accesorios_incluidos' => $accesoriosIds,
                         'observaciones' => $datos['observaciones'] ?? null,
                     ],
                 ]
@@ -458,4 +568,123 @@ class BajaEquipoController extends Controller
             ->with('toast_tipo', 'exito');
     }
 
+        /**
+     * Exportar las bajas administrativas seleccionadas a Excel.
+     */
+    public function exportExcel(Request $request)
+    {
+        // 1. Validar los identificadores recibidos.
+        $datos = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct', 'min:1'],
+        ]);
+
+        $ids = array_map('intval', $datos['ids']);
+
+        // 2. Recuperar las bajas y sus relaciones.
+        $bajasEncontradas = BajaEquipo::with([
+            'equipo.tipoEquipo',
+            'equipo.ubicacione',
+            'accesoriosIncluidos',
+            'anuladaPor',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        // 3. Mantener el orden recibido desde DataTables.
+        $bajas = collect($ids)
+            ->map(fn($id) => $bajasEncontradas->get($id))
+            ->filter()
+            ->values();
+
+        if ($bajas->isEmpty()) {
+            return response()->json([
+                'message' => 'NO HAY BAJAS ADMINISTRATIVAS PARA EXPORTAR.',
+            ], 422);
+        }
+
+        // 4. Preparar el nombre del archivo.
+        $nombreArchivo = 'Bajas_Administrativas_' . now()->format('d-m-Y_g-ia') . '.xlsx';
+
+        // 5. Registrar la exportación en la auditoría.
+        Auditoria::registrar(
+            'EXPORTAR_EXCEL',
+            'BAJAS DE EQUIPOS',
+            'Se exportaron ' . $bajas->count() . ' bajas administrativas a Excel.',
+            null,
+            [
+                'formato' => 'EXCEL',
+                'cantidad' => $bajas->count(),
+                'archivo' => $nombreArchivo,
+                'ids' => $bajas->pluck('id')->all(),
+            ]
+        );
+
+        // 6. Descargar el archivo Excel.
+        return Excel::download(
+            new \App\Exports\BajasEquiposExport($bajas),
+            $nombreArchivo
+        );
+    }
+
+        /**
+     * Exportar las bajas administrativas seleccionadas a PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        // 1. Validar los identificadores recibidos.
+        $datos = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct', 'min:1'],
+        ]);
+
+        $ids = array_map('intval', $datos['ids']);
+
+        // 2. Recuperar las bajas y sus relaciones.
+        $bajasEncontradas = BajaEquipo::with([
+            'equipo.tipoEquipo',
+            'equipo.ubicacione',
+            'accesoriosIncluidos',
+            'anuladaPor',
+        ])
+            ->whereIn('id', $ids)
+            ->get()
+            ->keyBy('id');
+
+        // 3. Mantener el orden recibido desde DataTables.
+        $bajas = collect($ids)
+            ->map(fn($id) => $bajasEncontradas->get($id))
+            ->filter()
+            ->values();
+
+        if ($bajas->isEmpty()) {
+            return response()->json([
+                'message' => 'NO HAY BAJAS ADMINISTRATIVAS PARA EXPORTAR.',
+            ], 422);
+        }
+
+        // 4. Preparar el nombre del archivo.
+        $nombreArchivo = 'Bajas_Administrativas_' . now()->format('d-m-Y_g-ia') . '.pdf';
+
+        // 5. Registrar la exportación en la auditoría.
+        Auditoria::registrar(
+            'EXPORTAR_PDF',
+            'BAJAS DE EQUIPOS',
+            'Se exportaron ' . $bajas->count() . ' bajas administrativas a PDF.',
+            null,
+            [
+                'formato' => 'PDF',
+                'cantidad' => $bajas->count(),
+                'archivo' => $nombreArchivo,
+                'ids' => $bajas->pluck('id')->all(),
+            ]
+        );
+
+        // 6. Generar y descargar el PDF.
+        $pdf = Pdf::loadView('bajas-equipos.export-pdf', compact('bajas'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download($nombreArchivo);
+    }
 }

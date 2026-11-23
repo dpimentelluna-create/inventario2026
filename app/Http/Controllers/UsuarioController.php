@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use App\Models\Auditoria;
+use App\Models\AccesoriosEquipo;
 
 class UsuarioController extends Controller
 {
@@ -191,6 +192,29 @@ public function show(Request $request, User $usuario): View
         ->paginate(10)
         ->withQueryString();
 
+    // Recuperar los accesorios mencionados en las auditorías
+    // de bajas de equipos que aparecen en esta página.
+    $idsAccesoriosAuditoria = $auditorias->getCollection()
+        ->filter(function ($auditoria) {
+            return $auditoria->modulo === 'BAJAS DE EQUIPOS'
+                && is_array($auditoria->cambios);
+        })
+        ->flatMap(function ($auditoria) {
+            return collect(['anterior', 'nuevo'])
+                ->flatMap(function ($lado) use ($auditoria) {
+                    return $auditoria->cambios[$lado]['accesorios_incluidos'] ?? [];
+                });
+        })
+        ->map(fn ($id) => (int) $id)
+        ->filter()
+        ->unique()
+        ->values();
+
+    $accesoriosAuditoria = AccesoriosEquipo::whereIn(
+        'id',
+        $idsAccesoriosAuditoria
+    )->get()->keyBy('id');
+
     // Opciones de módulos existentes en el historial.
     $modulosAuditoria = Auditoria::where(
         'usuario_id',
@@ -211,7 +235,8 @@ public function show(Request $request, User $usuario): View
         'hasta',
         'modulo',
         'operaciones',
-        'modulosAuditoria'
+        'modulosAuditoria',
+        'accesoriosAuditoria'
     ));
 }
 

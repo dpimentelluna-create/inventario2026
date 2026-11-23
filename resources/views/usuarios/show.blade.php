@@ -659,6 +659,240 @@ Usuario {{ $usuario->name }}
 
                                                 {!! $renderAuditoria($auditoria->cambios) !!}
 
+                                                @elseif ($auditoria->modulo === 'BAJAS DE EQUIPOS')
+
+                                                {{-- Aquí irá la presentación especial de las bajas. --}}
+                                                @php
+                                                    $datosAnterioresBaja = $auditoria->cambios['anterior'] ?? [];
+                                                    $datosNuevosBaja = $auditoria->cambios['nuevo'] ?? [];
+
+                                                    $nombresCamposBaja = [
+                                                        'equipo_id' => 'Equipo',
+                                                        'fecha' => 'Fecha de baja',
+                                                        'destino' => 'Destino',
+                                                        'entregantes' => 'Responsables de entrega',
+                                                        'receptores' => 'Responsables de recepción',
+                                                        'observaciones' => 'Observaciones',
+                                                    ];
+
+                                                    $idsAccesoriosAnteriores = collect(
+                                                        $datosAnterioresBaja['accesorios_incluidos'] ?? []
+                                                    )->map(fn ($id) => (int) $id)->all();
+
+                                                    $idsAccesoriosNuevos = collect(
+                                                        $datosNuevosBaja['accesorios_incluidos'] ?? []
+                                                    )->map(fn ($id) => (int) $id)->all();
+
+                                                    $idsAccesoriosAgregados = array_values(
+                                                        array_diff($idsAccesoriosNuevos, $idsAccesoriosAnteriores)
+                                                    );
+
+                                                    $idsAccesoriosRetirados = array_values(
+                                                        array_diff($idsAccesoriosAnteriores, $idsAccesoriosNuevos)
+                                                    );
+
+                                                    $idsAccesoriosConservados = array_values(
+                                                        array_intersect($idsAccesoriosAnteriores, $idsAccesoriosNuevos)
+                                                    );
+                                                @endphp
+
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm table-bordered align-middle usuario-tabla-baja">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width: 22%;">CAMPO</th>
+                                                                <th style="width: 39%;">VALOR ANTERIOR</th>
+                                                                <th style="width: 39%;">VALOR NUEVO</th>
+                                                            </tr>
+                                                        </thead>
+
+                                                        <tbody>
+                                                            @foreach ($nombresCamposBaja as $campo => $nombreCampo)
+                                                                @php
+                                                                    $valorAnterior = $datosAnterioresBaja[$campo] ?? null;
+                                                                    $valorNuevo = $datosNuevosBaja[$campo] ?? null;
+                                                                @endphp
+
+                                                                <tr>
+                                                                    <td class="fw-semibold">
+                                                                        {{ $nombreCampo }}
+                                                                    </td>
+
+                                                                    <td>
+                                                                        @if (in_array($campo, ['entregantes', 'receptores']))
+                                                                            @forelse ((array) $valorAnterior as $persona)
+                                                                                <div class="mb-1">
+                                                                                    <strong>{{ $persona['nombre'] ?? 'SIN NOMBRE' }}</strong>
+                                                                                    <span class="text-muted">
+                                                                                        — {{ $persona['cargo'] ?? 'SIN CARGO' }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            @empty
+                                                                                <span class="text-muted">No especificado</span>
+                                                                            @endforelse
+
+                                                                        @elseif ($campo === 'equipo_id')
+                                                                            <span class="valor-anterior">
+                                                                                {{ $valorAnterior !== null ? 'Equipo #' . $valorAnterior : 'No especificado' }}
+                                                                            </span>
+
+                                                                        @else
+                                                                            <span class="valor-anterior">
+                                                                                {{ $mostrarValorAuditoria($valorAnterior) }}
+                                                                            </span>
+                                                                        @endif
+                                                                    </td>
+
+                                                                    <td>
+                                                                        @if (in_array($campo, ['entregantes', 'receptores']))
+                                                                            @forelse ((array) $valorNuevo as $persona)
+                                                                                <div class="mb-1">
+                                                                                    <strong>{{ $persona['nombre'] ?? 'SIN NOMBRE' }}</strong>
+                                                                                    <span class="text-muted">
+                                                                                        — {{ $persona['cargo'] ?? 'SIN CARGO' }}
+                                                                                    </span>
+                                                                                </div>
+                                                                            @empty
+                                                                                <span class="text-muted">No especificado</span>
+                                                                            @endforelse
+
+                                                                        @elseif ($campo === 'equipo_id')
+                                                                            <span class="valor-nuevo">
+                                                                                {{ $valorNuevo !== null ? 'Equipo #' . $valorNuevo : 'No especificado' }}
+                                                                            </span>
+
+                                                                        @else
+                                                                            <span class="valor-nuevo">
+                                                                                {{ $mostrarValorAuditoria($valorNuevo) }}
+                                                                            </span>
+                                                                        @endif
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <div class="fw-bold mb-2">
+                                                        <i class="bi bi-usb-drive me-1"></i>
+                                                        ACCESORIOS INCLUIDOS EN LA BAJA
+                                                    </div>
+
+                                                    @if (
+                                                        empty($idsAccesoriosAnteriores)
+                                                        && empty($idsAccesoriosNuevos)
+                                                    )
+                                                        <div class="text-muted small">
+                                                            No se incluyeron accesorios en esta operación.
+                                                        </div>
+                                                    @else
+                                                        <div class="table-responsive">
+                                                            <table class="table table-sm table-bordered align-middle usuario-tabla-baja">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th>ACCESORIO</th>
+                                                                        <th>DETALLE</th>
+                                                                        <th>OPERACIÓN</th>
+                                                                    </tr>
+                                                                </thead>
+
+                                                                <tbody>
+                                                                    @foreach ($idsAccesoriosAgregados as $idAccesorio)
+                                                                        @php
+                                                                            $accesorio = $accesoriosAuditoria->get($idAccesorio);
+                                                                        @endphp
+
+                                                                        <tr>
+                                                                            <td>ACCESORIO #{{ $idAccesorio }}</td>
+
+                                                                            <td>
+                                                                                @if ($accesorio)
+                                                                                    <strong>{{ $accesorio->tipo }}</strong>
+                                                                                    <div>{{ $accesorio->marca ?? 'SIN MARCA' }}</div>
+                                                                                    <div>{{ $accesorio->modelo ?? 'SIN MODELO' }}</div>
+                                                                                    <small class="text-muted">
+                                                                                        Serie: {{ $accesorio->num_serie ?? 'SIN SERIE' }}
+                                                                                        · Estado: {{ $accesorio->estado ?? 'NO ESPECIFICADO' }}
+                                                                                    </small>
+                                                                                @else
+                                                                                    <span class="text-muted">
+                                                                                        Registro de accesorio no disponible.
+                                                                                    </span>
+                                                                                @endif
+                                                                            </td>
+
+                                                                            <td>
+                                                                                <span class="badge bg-success">AGREGADO</span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+
+                                                                    @foreach ($idsAccesoriosRetirados as $idAccesorio)
+                                                                        @php
+                                                                            $accesorio = $accesoriosAuditoria->get($idAccesorio);
+                                                                        @endphp
+
+                                                                        <tr>
+                                                                            <td>ACCESORIO #{{ $idAccesorio }}</td>
+
+                                                                            <td>
+                                                                                @if ($accesorio)
+                                                                                    <strong>{{ $accesorio->tipo }}</strong>
+                                                                                    <div>{{ $accesorio->marca ?? 'SIN MARCA' }}</div>
+                                                                                    <div>{{ $accesorio->modelo ?? 'SIN MODELO' }}</div>
+                                                                                    <small class="text-muted">
+                                                                                        Serie: {{ $accesorio->num_serie ?? 'SIN SERIE' }}
+                                                                                        · Estado: {{ $accesorio->estado ?? 'NO ESPECIFICADO' }}
+                                                                                    </small>
+                                                                                @else
+                                                                                    <span class="text-muted">
+                                                                                        Registro de accesorio no disponible.
+                                                                                    </span>
+                                                                                @endif
+                                                                            </td>
+
+                                                                            <td>
+                                                                                <span class="badge bg-danger">RETIRADO</span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+
+                                                                    @foreach ($idsAccesoriosConservados as $idAccesorio)
+                                                                        @php
+                                                                            $accesorio = $accesoriosAuditoria->get($idAccesorio);
+                                                                        @endphp
+
+                                                                        <tr>
+                                                                            <td>ACCESORIO #{{ $idAccesorio }}</td>
+
+                                                                            <td>
+                                                                                @if ($accesorio)
+                                                                                    <strong>{{ $accesorio->tipo }}</strong>
+                                                                                    <div>{{ $accesorio->marca ?? 'SIN MARCA' }}</div>
+                                                                                    <div>{{ $accesorio->modelo ?? 'SIN MODELO' }}</div>
+                                                                                    <small class="text-muted">
+                                                                                        Serie: {{ $accesorio->num_serie ?? 'SIN SERIE' }}
+                                                                                        · Estado: {{ $accesorio->estado ?? 'NO ESPECIFICADO' }}
+                                                                                    </small>
+                                                                                @else
+                                                                                    <span class="text-muted">
+                                                                                        Registro de accesorio no disponible.
+                                                                                    </span>
+                                                                                @endif
+                                                                            </td>
+
+                                                                            <td>
+                                                                                <span class="badge bg-secondary">CONSERVADO</span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    @endif
+                                                </div>
+
                                                 @else
 
                                                 {{-- Se conserva el tratamiento existente para Equipos y otros módulos. --}}

@@ -31,10 +31,8 @@ class AdministradorSeeder extends Seeder
         $usuario->rol = User::ROL_ADMINISTRADOR;
         $usuario->activo = true;
 
-        if ($nuevo) {
-            $usuario->password = $password;
-            $usuario->debe_cambiar_password = true;
-        }
+        $usuario->password = $password;
+        $usuario->debe_cambiar_password = true;
 
         $usuario->save();
 

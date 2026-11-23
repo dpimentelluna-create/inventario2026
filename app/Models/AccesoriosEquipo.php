@@ -35,6 +35,23 @@ class AccesoriosEquipo extends Model
      * Ubicación propia del accesorio.
      * Se utiliza cuando el accesorio no pertenece a un equipo.
      */
+    //public function ubicacion(): BelongsTo
+
+
+
+    public function bajasEquipos()
+    {
+        return $this->belongsToMany(
+            BajaEquipo::class,
+            'baja_equipo_accesorios',
+            'accesorio_equipo_id',
+            'baja_equipo_id'
+        )->withTimestamps();
+    }
+    /**
+     * Ubicación propia del accesorio.
+     * Se utiliza cuando el accesorio no pertenece a un equipo.
+     */
     public function ubicacion(): BelongsTo
     {
         return $this->belongsTo(Ubicacione::class, 'ubicacion_id', 'id');
