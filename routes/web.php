@@ -153,3 +153,7 @@ Route::middleware(['auth', 'acceso'])->group(function () {
 
     Route::resource('prestamos', App\Http\Controllers\PrestamoController::class);
 });
+
+Route::get('/manual-usuario', function () {
+    return view('manual.index');
+})->name('manual.index');

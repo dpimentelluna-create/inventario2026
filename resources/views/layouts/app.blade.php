@@ -391,6 +391,340 @@
             margin-top: auto;
         }
     </style>
+<style id="legibilidad-final">
+  /* Tablas en modo oscuro */
+  html.dark table tbody tr, html.dark table tbody td, html.dark table tbody th,
+  body.dark table tbody tr, body.dark table tbody td, body.dark table tbody th,
+  body.dark-mode table tbody tr, body.dark-mode table tbody td, body.dark-mode table tbody th,
+  body.tema-oscuro-activo table tbody tr, body.tema-oscuro-activo table tbody td, body.tema-oscuro-activo table tbody th {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #475569 !important;
+    opacity: 1 !important;
+  }
+  html.dark table tbody td *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path),
+  body.dark table tbody td *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path),
+  body.dark-mode table tbody td *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path),
+  body.tema-oscuro-activo table tbody td *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path) {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* Tablas en modo claro */
+  html:not(.dark):not([data-theme="dark"]):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) table tbody tr,
+  html:not(.dark):not([data-theme="dark"]):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) table tbody td,
+  html:not(.dark):not([data-theme="dark"]):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) table tbody th {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    border-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Numeros y textos dentro de tarjetas/cajas blancas */
+  [class*="bg-white"]:not(table):not(tr):not(td):not(th) {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    opacity: 1 !important;
+  }
+  [class*="bg-white"]:not(table):not(tr):not(td):not(th) *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path) {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* Controles de tabla y etiquetas sobre fondo oscuro (Mostrar, registros por pagina, Buscar) */
+  html.dark label:not([class*="bg-white"] *),
+  html.dark .dataTables_wrapper label, html.dark .dataTables_wrapper .dataTables_info,
+  html.dark .dataTables_wrapper .dataTables_length, html.dark .dataTables_wrapper .dataTables_filter,
+  body.dark label:not([class*="bg-white"] *),
+  body.dark .dataTables_wrapper label, body.dark .dataTables_wrapper .dataTables_info,
+  body.dark .dataTables_wrapper .dataTables_length, body.dark .dataTables_wrapper .dataTables_filter,
+  body.dark-mode label:not([class*="bg-white"] *),
+  body.dark-mode .dataTables_wrapper label, body.dark-mode .dataTables_wrapper .dataTables_info,
+  body.dark-mode .dataTables_wrapper .dataTables_length, body.dark-mode .dataTables_wrapper .dataTables_filter,
+  body.tema-oscuro-activo label:not([class*="bg-white"] *),
+  body.tema-oscuro-activo .dataTables_wrapper label, body.tema-oscuro-activo .dataTables_wrapper .dataTables_info,
+  body.tema-oscuro-activo .dataTables_wrapper .dataTables_length, body.tema-oscuro-activo .dataTables_wrapper .dataTables_filter {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Texto "Mostrando X a Y de Z registros" y pie de tabla en modo oscuro */
+  html.dark .dataTables_info, html.dark .pagination, html.dark .page-link,
+  body.dark .dataTables_info, body.dark .pagination, body.dark .page-link,
+  body.dark-mode .dataTables_info, body.dark-mode .pagination, body.dark-mode .page-link,
+  body.tema-oscuro-activo .dataTables_info, body.tema-oscuro-activo .pagination, body.tema-oscuro-activo .page-link,
+  html.dark [class*="dataTables"] .dataTables_info,
+  body.dark [class*="dataTables"] .dataTables_info,
+  body.dark-mode [class*="dataTables"] .dataTables_info,
+  body.tema-oscuro-activo [class*="dataTables"] .dataTables_info {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+  html.dark .card-body > div:last-child p, html.dark .card-body > div:last-child span, html.dark .card-body > div:last-child small,
+  body.dark .card-body > div:last-child p, body.dark .card-body > div:last-child span, body.dark .card-body > div:last-child small,
+  body.dark-mode .card-body > div:last-child p, body.dark-mode .card-body > div:last-child span, body.dark-mode .card-body > div:last-child small,
+  body.tema-oscuro-activo .card-body > div:last-child p, body.tema-oscuro-activo .card-body > div:last-child span, body.tema-oscuro-activo .card-body > div:last-child small {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Info de registros y paginacion en modo oscuro */
+  html.dark [class*="paginacion"], html.dark [class*="paginacion"] *,
+  html.dark div[id$="_info"], html.dark div[id$="_info"] *,
+  body.dark [class*="paginacion"], body.dark [class*="paginacion"] *,
+  body.dark div[id$="_info"], body.dark div[id$="_info"] *,
+  body.dark-mode [class*="paginacion"], body.dark-mode [class*="paginacion"] *,
+  body.dark-mode div[id$="_info"], body.dark-mode div[id$="_info"] *,
+  body.tema-oscuro-activo [class*="paginacion"], body.tema-oscuro-activo [class*="paginacion"] *,
+  body.tema-oscuro-activo div[id$="_info"], body.tema-oscuro-activo div[id$="_info"] * {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* Numeros grandes y textos en tarjetas claras (Accesorios, Dashboard, etc.) */
+  [class*="bg-white"] h1, [class*="bg-white"] h2, [class*="bg-white"] h3, [class*="bg-white"] h4,
+  [class*="bg-white"] p, [class*="bg-white"] span:not(.badge), [class*="bg-white"] div,
+  .card.bg-white *, .card[style*="background: #fff"] *, .card[style*="background-color: #fff"] *,
+  .card[style*="background: white"] *, .card[style*="background-color: white"] * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* Numeros de tarjetas indicadoras (Accesorios y modulos con .indicador-contenido) */
+  .indicador-contenido strong,
+  .indicador-contenido [id^="indicador_"],
+  strong[id^="indicador_"],
+  html.dark .indicador-contenido strong,
+  html.dark strong[id^="indicador_"],
+  body.dark .indicador-contenido strong,
+  body.dark strong[id^="indicador_"],
+  body.dark-mode .indicador-contenido strong,
+  body.dark-mode strong[id^="indicador_"],
+  body.tema-oscuro-activo .indicador-contenido strong,
+  body.tema-oscuro-activo strong[id^="indicador_"] {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* Textos y etiquetas en tarjetas blancas del manual de usuario */
+  .card strong, .card b, .card span:not(.badge), .card p, .card li, .card small,
+  [class*="card"] strong, [class*="card"] b, [class*="card"] span:not(.badge), [class*="card"] p, [class*="card"] li,
+  html.dark .card strong, html.dark .card b, html.dark .card span:not(.badge), html.dark .card p, html.dark .card li,
+  body.dark .card strong, body.dark .card b, body.dark .card span:not(.badge), body.dark .card p, body.dark .card li,
+  body.dark-mode .card strong, body.dark-mode .card b, body.dark-mode .card span:not(.badge), body.dark-mode .card p, body.dark-mode .card li,
+  body.tema-oscuro-activo .card strong, body.tema-oscuro-activo .card b, body.tema-oscuro-activo .card span:not(.badge), body.tema-oscuro-activo .card p, body.tema-oscuro-activo .card li {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* Visibilidad de Sesion activa y estado en la barra lateral */
+  #sidebar [class*="sesion"], #sidebar [class*="sesion"] *,
+  #sidebar [class*="status"], #sidebar [class*="status"] *,
+  #sidebar .badge, #sidebar .alert,
+  aside [class*="sesion"], aside [class*="sesion"] *,
+  html.dark #sidebar [class*="sesion"], html.dark #sidebar [class*="sesion"] *,
+  body.dark #sidebar [class*="sesion"], body.dark #sidebar [class*="sesion"] *,
+  body.dark-mode #sidebar [class*="sesion"], body.dark-mode #sidebar [class*="sesion"] *,
+  body.tema-oscuro-activo #sidebar [class*="sesion"], body.tema-oscuro-activo #sidebar [class*="sesion"] * {
+    color: #bbf7d0 !important;
+    -webkit-text-fill-color: #bbf7d0 !important;
+    opacity: 1 !important;
+  }
+  #sidebar [class*="sesion"],
+  aside [class*="sesion"] {
+    background-color: rgba(22, 163, 74, 0.22) !important;
+    border-color: rgba(74, 222, 128, 0.45) !important;
+  }
+
+  /* Sidebar inferior (Rol / Sesion activa), FILTROS y encabezado superior en modo oscuro */
+  html.dark aside [class*="sesion"], html.dark aside [class*="sesion"] *,
+  html.dark #sidebar [class*="sesion"], html.dark #sidebar [class*="sesion"] *,
+  html.dark aside small, html.dark #sidebar small,
+  body.dark aside [class*="sesion"], body.dark aside [class*="sesion"] *,
+  body.dark #sidebar [class*="sesion"], body.dark #sidebar [class*="sesion"] *,
+  body.dark aside small, body.dark #sidebar small,
+  body.dark-mode aside [class*="sesion"], body.dark-mode aside [class*="sesion"] *,
+  body.dark-mode #sidebar [class*="sesion"], body.dark-mode #sidebar [class*="sesion"] *,
+  body.dark-mode aside small, body.dark-mode #sidebar small,
+  body.tema-oscuro-activo aside [class*="sesion"], body.tema-oscuro-activo aside [class*="sesion"] *,
+  body.tema-oscuro-activo #sidebar [class*="sesion"], body.tema-oscuro-activo #sidebar [class*="sesion"] *,
+  body.tema-oscuro-activo aside small, body.tema-oscuro-activo #sidebar small {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+  html.dark .barra-filtros-equipos, html.dark .barra-filtros-equipos button, html.dark .barra-filtros-equipos span, html.dark .barra-filtros-equipos label,
+  body.dark .barra-filtros-equipos, body.dark .barra-filtros-equipos button, body.dark .barra-filtros-equipos span, body.dark .barra-filtros-equipos label,
+  body.dark-mode .barra-filtros-equipos, body.dark-mode .barra-filtros-equipos button, body.dark-mode .barra-filtros-equipos span, body.dark-mode .barra-filtros-equipos label,
+  body.tema-oscuro-activo .barra-filtros-equipos, body.tema-oscuro-activo .barra-filtros-equipos button, body.tema-oscuro-activo .barra-filtros-equipos span, body.tema-oscuro-activo .barra-filtros-equipos label {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+  html.dark .card-header h1, html.dark .card-header h2, html.dark .card-header h3, html.dark .card-header h4, html.dark .card-header p,
+  body.dark .card-header h1, body.dark .card-header h2, body.dark .card-header h3, body.dark .card-header h4, body.dark .card-header p,
+  body.dark-mode .card-header h1, body.dark-mode .card-header h2, body.dark-mode .card-header h3, body.dark-mode .card-header h4, body.dark-mode .card-header p,
+  body.tema-oscuro-activo .card-header h1, body.tema-oscuro-activo .card-header h2, body.tema-oscuro-activo .card-header h3, body.tema-oscuro-activo .card-header h4, body.tema-oscuro-activo .card-header p {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+
+  /* 1. Textos oscuros sobre tarjetas/contenedores claros en modo oscuro (Detalle prestamo, fichas, etc.) */
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h1,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h2,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h3,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h4,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h5,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) h6,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) p,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) span:not(.badge),
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) small,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) strong,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .card:not(.bg-dark):not([class*="bg-slate-9"]):not([class*="bg-gray-9"]) div:not(.badge) {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* 2. Dropdowns (Exportar Excel/PDF), filtros y controles en modo oscuro */
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu .dropdown-item,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu button,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu a {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu .dropdown-item:hover,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu button:hover,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu a:hover {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo [class*="filtro"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo [class*="filtro"] *,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo button[data-bs-toggle*="filtro"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo button[data-bs-toggle*="filtro"] * {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* 3. Parte inferior del sidebar (Rol, badge y Sesion activa) */
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo aside,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo nav[class*="sidebar"] {
+    overflow-y: auto !important;
+  }
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo aside .badge,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar .badge,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo aside [class*="rol"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="rol"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo aside [class*="sesion"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="sesion"],
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo aside [class*="sesion"] *,
+  html.dark, body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="sesion"] * {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+</style>
+<style id="solo-logo-sidebar-cerrado">
+  aside.w-16 a[href*="password"], aside.w-16 button[onclick*="password"],
+  aside.w-20 a[href*="password"], aside.w-20 button[onclick*="password"],
+  aside.collapsed a[href*="password"], aside.collapsed button[onclick*="password"],
+  aside.w-16 a[href*="logout"], aside.w-16 button[type="submit"],
+  aside.w-20 a[href*="logout"], aside.w-20 button[type="submit"],
+  aside.collapsed a[href*="logout"], aside.collapsed button[type="submit"] {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    justify-content: center !important;
+  }
+</style>
+<style id="logo-menu-usuario-cerrado">
+  aside.collapsed .texto-menu-usuario,
+  aside.sidebar-collapsed .texto-menu-usuario,
+  aside.is-collapsed .texto-menu-usuario,
+  aside.mini .texto-menu-usuario,
+  aside.w-16 .texto-menu-usuario,
+  aside.w-20 .texto-menu-usuario,
+  .sidebar.collapsed .texto-menu-usuario,
+  .sidebar.sidebar-collapsed .texto-menu-usuario,
+  .sidebar.is-collapsed .texto-menu-usuario,
+  .sidebar.mini .texto-menu-usuario,
+  .sidebar.w-16 .texto-menu-usuario,
+  .sidebar.w-20 .texto-menu-usuario,
+  body.sidebar-collapsed .texto-menu-usuario,
+  body.sb-collapsed .texto-menu-usuario {
+    display: none !important;
+  }
+  aside.collapsed .dropdown-menu .dropdown-item,
+  aside.sidebar-collapsed .dropdown-menu .dropdown-item,
+  aside.is-collapsed .dropdown-menu .dropdown-item,
+  aside.mini .dropdown-menu .dropdown-item,
+  aside.w-16 .dropdown-menu .dropdown-item,
+  aside.w-20 .dropdown-menu .dropdown-item,
+  .sidebar.collapsed .dropdown-menu .dropdown-item,
+  .sidebar.sidebar-collapsed .dropdown-menu .dropdown-item,
+  .sidebar.is-collapsed .dropdown-menu .dropdown-item,
+  .sidebar.mini .dropdown-menu .dropdown-item,
+  .sidebar.w-16 .dropdown-menu .dropdown-item,
+  .sidebar.w-20 .dropdown-menu .dropdown-item {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  aside.collapsed .dropdown-menu .dropdown-item i,
+  aside.sidebar-collapsed .dropdown-menu .dropdown-item i,
+  aside.is-collapsed .dropdown-menu .dropdown-item i,
+  aside.mini .dropdown-menu .dropdown-item i,
+  aside.w-16 .dropdown-menu .dropdown-item i,
+  aside.w-20 .dropdown-menu .dropdown-item i,
+  .sidebar.collapsed .dropdown-menu .dropdown-item i,
+  .sidebar.sidebar-collapsed .dropdown-menu .dropdown-item i,
+  .sidebar.is-collapsed .dropdown-menu .dropdown-item i,
+  .sidebar.mini .dropdown-menu .dropdown-item i,
+  .sidebar.w-16 .dropdown-menu .dropdown-item i,
+  .sidebar.w-20 .dropdown-menu .dropdown-item i {
+    margin-right: 0 !important;
+  }
+</style>
+<style id="sidebar-collapsed-user-logo">
+  #sidebar.collapsed .user-dropdown-container .dropdown-menu {
+    min-width: auto !important;
+    width: auto !important;
+    padding: 4px !important;
+  }
+  #sidebar.collapsed .user-dropdown-container .dropdown-item {
+    justify-content: center !important;
+    padding: 6px 8px !important;
+    font-size: 0 !important;
+    gap: 0 !important;
+  }
+  #sidebar.collapsed .user-dropdown-container .dropdown-item .texto-menu-usuario {
+    display: none !important;
+    font-size: 0 !important;
+  }
+  #sidebar.collapsed .user-dropdown-container .dropdown-item i,
+  #sidebar.collapsed .user-dropdown-container .dropdown-item svg {
+    font-size: 1.1rem !important;
+    margin-right: 0 !important;
+  }
+</style>
 </head>
 
 <body>
@@ -501,7 +835,7 @@
                         </a>
 
                         <a class="sidebar-link" title="Manual del Usuario"
-                            href="{{ asset('manual/manual_usuario.pdf') }}" target="_blank" rel="noopener">
+                            href="/manual-usuario">
                             <i class="bi bi-file-earmark-text me-3 fs-5"></i>
                             <span class="sidebar-text">Manual del Usuario</span>
                         </a>
@@ -542,13 +876,13 @@
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser" style="min-width: 200px;">
                             <li>
                                 <a class="dropdown-item d-flex align-items-center text-dark" href="{{ route('cuenta.password.edit') }}">
-                                    <i class="bi bi-key me-2"></i> Cambiar contraseña
+                                    <i class="bi bi-key me-2"></i> <span class="texto-menu-usuario">Cambiar contraseña</span>
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item d-flex align-items-center text-danger" href="{{ route('logout') }}"
                                     onclick="confirmarCierreSesion(event, document.getElementById('logout-form-dropdown'));">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                                    <i class="bi bi-box-arrow-right me-2"></i> <span class="texto-menu-usuario">Cerrar sesión</span>
                                 </a>
                             </li>
                         </ul>
@@ -795,3 +1129,52 @@
 </body>
 
 </html>
+
+
+
+
+
+<style id="legibilidad-override-final">
+  /* Bloques de detalle (.bloque-dato, .etiqueta, .valor) sobre tarjetas claras en modo oscuro */
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .bloque-dato,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .bloque-dato *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .etiqueta,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .etiqueta *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .valor,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .valor * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* Mantener blanco/claro si el .bloque-dato esta dentro de un contenedor oscuro */
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .bloque-dato,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .bloque-dato *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .etiqueta,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .etiqueta *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .valor,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="bg-dark"] .valor * {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+  }
+
+  /* Botones y paneles de FILTROS, dropdowns y sidebar inferior */
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo button[id*="filtro"], [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo button[id*="filtro"] *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo button[class*="filtro"], [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo button[class*="filtro"] *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [id*="filtro"], [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [id*="filtro"] *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="filtro"], [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo [class*="filtro"] *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu, [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar small, [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="sesion"], [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="sesion"] *,
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar [class*="rol"] {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo .dropdown-menu {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+  }
+  [data-bs-theme="dark"], html[data-bs-theme="dark"], body.dark, body.dark-mode, body.tema-oscuro-activo #sidebar {
+    overflow-y: auto !important;
+  }
+</style>

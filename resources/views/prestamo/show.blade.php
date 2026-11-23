@@ -1331,3 +1331,27 @@ return 'borde-neutro';
     });
 </script>
 @endsection
+<style id="fix-bloque-dato">
+  .bloque-dato,
+  .bloque-dato *,
+  .etiqueta,
+  .etiqueta *,
+  .valor,
+  .valor * {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+  @media print {
+    .bloque-dato,
+    .bloque-dato *,
+    .etiqueta,
+    .etiqueta *,
+    .valor,
+    .valor * {
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      opacity: 1 !important;
+    }
+  }
+</style>
