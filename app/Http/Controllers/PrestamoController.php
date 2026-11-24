@@ -1017,6 +1017,79 @@ class PrestamoController extends Controller
         return response()->json($equipos);
     }
 
+    /**
+     * Buscar accesorios disponibles para agregarlos manualmente a un préstamo.
+     * No modifica la relación permanente con ningún equipo.
+     */
+    public function buscarAccesorios(Request $request)
+    {
+        $buscar = trim((string) $request->input('buscar', ''));
+
+        // Evitar devolver todo el inventario si el campo está vacío.
+        if ($buscar === '') {
+            return response()->json([]);
+        }
+
+        $prestamoId = $request->filled('prestamo_id')
+            ? (int) $request->input('prestamo_id')
+            : null;
+
+        $query = AccesoriosEquipo::query()
+            ->whereNotIn('id', function ($subquery) use ($prestamoId) {
+                $subquery
+                    ->select('prestamo_accesorios.accesorio_equipo_id')
+                    ->from('prestamo_accesorios')
+                    ->join(
+                        'prestamo_equipos',
+                        'prestamo_equipos.id',
+                        '=',
+                        'prestamo_accesorios.prestamo_equipo_id'
+                    )
+                    ->join(
+                        'prestamos',
+                        'prestamos.id',
+                        '=',
+                        'prestamo_equipos.prestamo_id'
+                    )
+                    ->where('prestamos.estado', 'ACTIVO');
+
+                // Al editar, no excluir los accesorios del mismo préstamo.
+                if ($prestamoId !== null) {
+                    $subquery->where('prestamos.id', '<>', $prestamoId);
+                }
+            });
+
+        $terminos = preg_split('/\s+/', $buscar);
+
+        foreach ($terminos as $termino) {
+            $query->where(function ($q) use ($termino) {
+                $q->where('tipo', 'LIKE', "%{$termino}%")
+                    ->orWhere('marca', 'LIKE', "%{$termino}%")
+                    ->orWhere('modelo', 'LIKE', "%{$termino}%")
+                    ->orWhere('num_serie', 'LIKE', "%{$termino}%");
+
+                if (ctype_digit((string) $termino)) {
+                    $q->orWhere('id', (int) $termino);
+                }
+            });
+        }
+
+        $accesorios = $query
+            ->orderBy('tipo')
+            ->orderBy('marca')
+            ->get([
+                'id',
+                'equipo_id',
+                'tipo',
+                'marca',
+                'modelo',
+                'num_serie',
+                'estado',
+                'observaciones',
+            ]);
+
+        return response()->json($accesorios);
+    }
     public function registrarDocente(Request $request)
     {
         $request->validate([

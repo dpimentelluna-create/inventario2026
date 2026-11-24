@@ -31,7 +31,10 @@ class PrestamoRequest extends FormRequest
                 $equipo['estado'] ?? null
             );
 
-            if (empty($equipo['accesorios']) || !is_array($equipo['accesorios'])) {
+            if (
+                empty($equipo['accesorios'])
+                || !is_array($equipo['accesorios'])
+            ) {
                 continue;
             }
 
@@ -77,7 +80,11 @@ class PrestamoRequest extends FormRequest
             'hora_fin' => ['nullable', 'date_format:H:i'],
 
             'equipos' => ['required', 'array', 'min:1'],
-            'equipos.*.equipo_id' => ['required', 'exists:equipos,id', 'distinct'],
+            'equipos.*.equipo_id' => [
+                'required',
+                'exists:equipos,id',
+                'distinct',
+            ],
             'equipos.*.estado' => [
                 'required',
                 Rule::in(['REGULAR', 'BUENO', 'MALOGRADO']),
@@ -174,14 +181,18 @@ class PrestamoRequest extends FormRequest
                 $idsAccesorios = [];
 
                 foreach ($equipos as $indiceEquipo => $equipo) {
-                    if (
-                        !is_array($equipo)
-                        || !is_array($equipo['accesorios'] ?? [])
-                    ) {
+                    if (!is_array($equipo)) {
                         continue;
                     }
 
-                    foreach ($equipo['accesorios'] as $indiceAccesorio => $accesorio) {
+                    // Si el equipo no envía accesorios, se considera una lista vacía.
+                    $accesorios = $equipo['accesorios'] ?? [];
+
+                    if (!is_array($accesorios)) {
+                        continue;
+                    }
+
+                    foreach ($accesorios as $indiceAccesorio => $accesorio) {
                         if (
                             !is_array($accesorio)
                             || empty($accesorio['accesorio_equipo_id'])
