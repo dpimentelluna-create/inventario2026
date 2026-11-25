@@ -1125,7 +1125,246 @@
     </script>
     @endif
 
-    @stack('scripts')
+    @stack('scripts')<style id="fix-both-modes-clean">
+  /* MODO CLARO: cabecera de tabla clara con texto oscuro legible */
+  html:not(.dark):not([data-bs-theme="dark"]) table thead,
+  html:not(.dark):not([data-bs-theme="dark"]) table thead tr,
+  html:not(.dark):not([data-bs-theme="dark"]) table thead th,
+  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead,
+  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead tr,
+  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead th {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+
+  html:not(.dark):not([data-bs-theme="dark"]) table thead th *,
+  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead th * {
+    color: #0f172a !important;
+    fill: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  /* MODO OSCURO: cabecera de tabla oscura con texto blanco y titulos visibles */
+  html.dark table thead,
+  html.dark table thead tr,
+  html.dark table thead th,
+  html[data-bs-theme="dark"] table thead,
+  html[data-bs-theme="dark"] table thead tr,
+  html[data-bs-theme="dark"] table thead th,
+  body.dark table thead,
+  body.dark table thead tr,
+  body.dark table thead th,
+  body.dark-mode table thead,
+  body.dark-mode table thead tr,
+  body.dark-mode table thead th,
+  body.tema-oscuro-activo table thead,
+  body.tema-oscuro-activo table thead tr,
+  body.tema-oscuro-activo table thead th {
+    background-color: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+    opacity: 1 !important;
+  }
+
+  html.dark table thead th *,
+  html[data-bs-theme="dark"] table thead th *,
+  body.dark table thead th *,
+  body.dark-mode table thead th *,
+  body.tema-oscuro-activo table thead th * {
+    color: #ffffff !important;
+    fill: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* Botones de acciones en tabla: conservar visibilidad clara en ambos modos */
+  table tbody td .btn,
+  table tbody td button,
+  table tbody td a.btn {
+    opacity: 1 !important;
+  }
+</style>
+<script id="fix-both-modes-clean">
+(function() {
+  function detectDarkMode() {
+    var attrHtml = (document.documentElement.getAttribute("data-bs-theme") || "").toLowerCase();
+    var attrBody = (document.body && document.body.getAttribute("data-bs-theme") || "").toLowerCase();
+    var cls = ((document.documentElement.className || "") + " " + ((document.body && document.body.className) || "")).toLowerCase();
+    var btnText = (document.body && document.body.innerText) || "";
+    if (attrHtml === "dark" || attrBody === "dark") return true;
+    if (cls.indexOf("dark") !== -1 || cls.indexOf("tema-oscuro") !== -1) return true;
+    if (btnText.indexOf("Modo Claro") !== -1) return true;
+    return false;
+  }
+
+  function applyThemeLegibility() {
+    var isDark = detectDarkMode();
+
+    // 1. Encabezado de tabla segun modo claro u oscuro
+    document.querySelectorAll("table thead th").forEach(function(th) {
+      var bg = isDark ? "#0f172a" : "#e2e8f0";
+      var fg = isDark ? "#ffffff" : "#0f172a";
+      th.style.setProperty("background-color", bg, "important");
+      th.style.setProperty("color", fg, "important");
+      th.style.setProperty("opacity", "1", "important");
+      th.querySelectorAll("*").forEach(function(ch) {
+        ch.style.setProperty("color", fg, "important");
+        ch.style.setProperty("fill", fg, "important");
+        ch.style.setProperty("opacity", "1", "important");
+      });
+    });
+
+    // 2. Boton FILTROS fuera de la tabla
+    document.querySelectorAll("button, a").forEach(function(el) {
+      if (el.closest("table")) return;
+      var txt = (el.innerText || el.textContent || "").trim().toUpperCase();
+      if (txt.indexOf("FILTRO") === -1 || txt.length > 35) return;
+
+      var bg = isDark ? "#1e293b" : "#f1f5f9";
+      var fg = isDark ? "#f8fafc" : "#0f172a";
+      var bd = isDark ? "#64748b" : "#cbd5e1";
+
+      el.style.setProperty("background-color", bg, "important");
+      el.style.setProperty("border-color", bd, "important");
+      el.style.setProperty("color", fg, "important");
+      el.style.setProperty("opacity", "1", "important");
+
+      el.querySelectorAll("*").forEach(function(ch) {
+        ch.style.setProperty("color", fg, "important");
+        ch.style.setProperty("fill", fg, "important");
+        ch.style.setProperty("stroke", fg, "important");
+        ch.style.setProperty("opacity", "1", "important");
+      });
+    });
+
+    // 3. Titulos, subtitulos y etiquetas fuera de tablas/botones/badges
+    document.querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, span, div").forEach(function(el) {
+      if (el.closest("table") || el.closest("button") || el.closest("a") || el.closest(".badge") || el.closest(".btn")) return;
+      var hasDirectText = Array.prototype.some.call(el.childNodes, function(n) {
+        return n.nodeType === 3 && n.textContent.trim().length > 0;
+      });
+      if (!hasDirectText) return;
+
+      var cs = window.getComputedStyle(el);
+      var col = cs.color || "";
+      var m = col.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return;
+
+      var r = parseInt(m[1], 10), g = parseInt(m[2], 10), b = parseInt(m[3], 10);
+
+      if (isDark) {
+        // En modo oscuro, si el texto es oscuro o transparente, volverlo claro
+        if ((r < 115 && g < 115 && b < 115) || parseFloat(cs.opacity || "1") < 0.5) {
+          var targetDark = /^H[1-6]$/.test(el.tagName) ? "#ffffff" : "#e2e8f0";
+          el.style.setProperty("color", targetDark, "important");
+          el.style.setProperty("opacity", "1", "important");
+        }
+      } else {
+        // En modo claro, si el texto es muy claro (blanco/gris claro), volverlo oscuro
+        if ((r > 210 && g > 210 && b > 210) || parseFloat(cs.opacity || "1") < 0.5) {
+          var targetLight = /^H[1-6]$/.test(el.tagName) ? "#0f172a" : "#334155";
+          el.style.setProperty("color", targetLight, "important");
+          el.style.setProperty("opacity", "1", "important");
+        }
+      }
+    });
+  }
+
+  applyThemeLegibility();
+  document.addEventListener("DOMContentLoaded", function() {
+    applyThemeLegibility();
+    setTimeout(applyThemeLegibility, 200);
+    setTimeout(applyThemeLegibility, 650);
+  });
+  window.addEventListener("load", applyThemeLegibility);
+  document.addEventListener("click", function() {
+    setTimeout(applyThemeLegibility, 90);
+  });
+})();
+</script><style id="fix-btn-accion-dark">
+  /* Solo en Modo Oscuro: iconos dentro de .btn-accion bien visibles */
+  html.dark .btn-accion,
+  html.dark .btn-accion i,
+  html.dark .btn-accion svg,
+  html[data-bs-theme="dark"] .btn-accion,
+  html[data-bs-theme="dark"] .btn-accion i,
+  html[data-bs-theme="dark"] .btn-accion svg,
+  body.dark .btn-accion,
+  body.dark .btn-accion i,
+  body.dark .btn-accion svg,
+  body.dark-mode .btn-accion,
+  body.dark-mode .btn-accion i,
+  body.dark-mode .btn-accion svg,
+  body.tema-oscuro-activo .btn-accion,
+  body.tema-oscuro-activo .btn-accion i,
+  body.tema-oscuro-activo .btn-accion svg {
+    opacity: 1 !important;
+  }
+
+  html.dark .btn-accion i,
+  html.dark .btn-accion svg,
+  html[data-bs-theme="dark"] .btn-accion i,
+  html[data-bs-theme="dark"] .btn-accion svg,
+  body.dark .btn-accion i,
+  body.dark .btn-accion svg,
+  body.dark-mode .btn-accion i,
+  body.dark-mode .btn-accion svg,
+  body.tema-oscuro-activo .btn-accion i,
+  body.tema-oscuro-activo .btn-accion svg {
+    color: #0f172a !important;
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+  }
+</style>
+<script id="fix-btn-accion-dark">
+(function() {
+  function esOscuro() {
+    var hAttr = (document.documentElement.getAttribute("data-bs-theme") || "").toLowerCase();
+    var bAttr = (document.body && document.body.getAttribute("data-bs-theme") || "").toLowerCase();
+    var cls = ((document.documentElement.className || "") + " " + ((document.body && document.body.className) || "")).toLowerCase();
+    var txt = (document.body && document.body.innerText) || "";
+    return hAttr === "dark" || bAttr === "dark" || cls.indexOf("dark") !== -1 || cls.indexOf("tema-oscuro") !== -1 || txt.indexOf("Modo Claro") !== -1;
+  }
+
+  function aplicarAjustePuntual() {
+    if (!esOscuro()) return;
+
+    // 1. Iconos dentro de .btn-accion (y botones de acciones en tbody)
+    document.querySelectorAll(".btn-accion, table tbody td .btn, table tbody td button, table tbody td a").forEach(function(el) {
+      el.style.setProperty("opacity", "1", "important");
+      el.querySelectorAll("i, svg, path").forEach(function(ic) {
+        ic.style.setProperty("color", "#0f172a", "important");
+        ic.style.setProperty("fill", "#0f172a", "important");
+        ic.style.setProperty("stroke", "#0f172a", "important");
+        ic.style.setProperty("opacity", "1", "important");
+      });
+    });
+
+    // 2. Titulo PRÉSTAMOS y subtitulo "Consulta y administra los préstamos..."
+    document.querySelectorAll("h1, h2, h3, h4, p, span, div, small, label").forEach(function(el) {
+      if (el.closest("table") || el.closest("button") || el.closest("a") || el.closest(".btn") || el.closest(".badge")) return;
+      var t = (el.textContent || "").trim();
+      var up = t.toUpperCase();
+      if (up === "PRÉSTAMOS" || up === "PRESTAMOS") {
+        el.style.setProperty("color", "#ffffff", "important");
+        el.style.setProperty("opacity", "1", "important");
+      } else if (t.indexOf("Consulta y administra los préstamos") !== -1 || t.indexOf("Consulta y administra los prestamos") !== -1) {
+        el.style.setProperty("color", "#cbd5e1", "important");
+        el.style.setProperty("opacity", "1", "important");
+      }
+    });
+  }
+
+  aplicarAjustePuntual();
+  document.addEventListener("DOMContentLoaded", function() {
+    aplicarAjustePuntual();
+    setTimeout(aplicarAjustePuntual, 250);
+    setTimeout(aplicarAjustePuntual, 700);
+  });
+  window.addEventListener("load", aplicarAjustePuntual);
+})();
+</script>
 </body>
 
 </html>

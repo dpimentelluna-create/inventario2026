@@ -1379,3 +1379,165 @@ return 'borde-neutro';
     border: 1px solid #334155 !important;
   }
 </style>
+<!-- FIX_PRESTAMO_SHOW_DARK_START -->
+<style id="prestamo-show-dark-style">
+  /* SOLO MODO OSCURO en /prestamos/{id}: todo oscuro y textos claros legibles */
+  html.dark .card,
+  html.dark .card-body,
+  html.dark .card-header,
+  html.dark .bg-white,
+  html.dark .bg-light,
+  html.dark [class*="bg-white"],
+  html.dark [class*="bg-light"],
+  html[data-bs-theme="dark"] .card,
+  html[data-bs-theme="dark"] .card-body,
+  html[data-bs-theme="dark"] .card-header,
+  html[data-bs-theme="dark"] .bg-white,
+  html[data-bs-theme="dark"] .bg-light,
+  html[data-bs-theme="dark"] [class*="bg-white"],
+  html[data-bs-theme="dark"] [class*="bg-light"],
+  body.dark .card,
+  body.dark .card-body,
+  body.dark .card-header,
+  body.dark .bg-white,
+  body.dark .bg-light,
+  body.dark [class*="bg-white"],
+  body.dark [class*="bg-light"],
+  body.dark-mode .card,
+  body.dark-mode .card-body,
+  body.dark-mode .card-header,
+  body.dark-mode .bg-white,
+  body.dark-mode .bg-light,
+  body.dark-mode [class*="bg-white"],
+  body.dark-mode [class*="bg-light"],
+  body.tema-oscuro-activo .card,
+  body.tema-oscuro-activo .card-body,
+  body.tema-oscuro-activo .card-header,
+  body.tema-oscuro-activo .bg-white,
+  body.tema-oscuro-activo .bg-light,
+  body.tema-oscuro-activo [class*="bg-white"],
+  body.tema-oscuro-activo [class*="bg-light"] {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+    color: #f8fafc !important;
+  }
+
+  html.dark .text-muted,
+  html.dark small,
+  html[data-bs-theme="dark"] .text-muted,
+  html[data-bs-theme="dark"] small,
+  body.dark .text-muted,
+  body.dark small,
+  body.dark-mode .text-muted,
+  body.dark-mode small,
+  body.tema-oscuro-activo .text-muted,
+  body.tema-oscuro-activo small {
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+</style>
+<script id="prestamo-show-dark-script">
+(function () {
+  function esOscuroShow() {
+    var h = document.documentElement;
+    var b = document.body;
+    if (!b) return false;
+    var txt = b.innerText || "";
+    if (
+      h.classList.contains("dark") ||
+      h.getAttribute("data-bs-theme") === "dark" ||
+      b.classList.contains("dark") ||
+      b.classList.contains("dark-mode") ||
+      b.classList.contains("tema-oscuro-activo") ||
+      b.getAttribute("data-bs-theme") === "dark"
+    ) {
+      return true;
+    }
+    return txt.indexOf("Modo Claro") !== -1;
+  }
+
+  function fijarShowDark() {
+    var oscuro = esOscuroShow();
+    var body = document.body;
+    if (!body) return;
+
+    body.querySelectorAll("div, section, article, button, a, span, p, small, label, h1, h2, h3, h4, h5, h6, strong, b, i, svg").forEach(function (el) {
+      if (el.closest("table, nav, aside, .sidebar")) return;
+      if (el === body || el.tagName === "HTML") return;
+      if (el.closest(".badge.bg-success, .badge.bg-warning")) return;
+
+      var cs = window.getComputedStyle(el);
+      var bg = cs.backgroundColor || "";
+      var m = bg.match(/\d+/g);
+      var esFondoClaro = false;
+      if (m && m.length >= 3) {
+        var r = parseInt(m[0], 10), g = parseInt(m[1], 10), bl = parseInt(m[2], 10);
+        var a = m.length >= 4 ? parseFloat(m[3]) : 1;
+        var lum = (r + g + bl) / 3;
+        if (a > 0.1 && lum > 150) {
+          esFondoClaro = true;
+        }
+      }
+
+      if (oscuro && esFondoClaro) {
+        el.dataset.showDarkBg = "1";
+        var isPill = el.tagName === "BUTTON" || el.classList.contains("btn") || el.classList.contains("badge") || el.closest("button, .btn");
+        el.style.setProperty("background-color", isPill ? "#1e293b" : "#111827", "important");
+        el.style.setProperty("border-color", "#334155", "important");
+        el.style.setProperty("color", "#f8fafc", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+      } else if (!oscuro && el.dataset.showDarkBg === "1") {
+        delete el.dataset.showDarkBg;
+        el.style.removeProperty("background-color");
+        el.style.removeProperty("border-color");
+        el.style.removeProperty("color");
+        el.style.removeProperty("-webkit-text-fill-color");
+      }
+
+      if (el.querySelector("div, p, h1, h2, h3, h4, h5, h6, table")) return;
+      var t = (el.textContent || "").trim();
+      if (!t && el.tagName !== "I" && el.tagName !== "SVG") return;
+
+      if (oscuro) {
+        el.dataset.showDarkFg = "1";
+        var esSubtitulo =
+          t.indexOf("Estado general") !== -1 ||
+          t.indexOf("Detalle de cada equipo") !== -1 ||
+          t.indexOf("Sin observaciones") !== -1 ||
+          el.classList.contains("text-muted");
+        var fg = esSubtitulo ? "#cbd5e1" : "#f8fafc";
+        el.style.setProperty("color", fg, "important");
+        el.style.setProperty("-webkit-text-fill-color", fg, "important");
+        el.style.setProperty("fill", fg, "important");
+        el.style.setProperty("opacity", "1", "important");
+        el.style.setProperty("visibility", "visible", "important");
+      } else if (el.dataset.showDarkFg === "1") {
+        delete el.dataset.showDarkFg;
+        el.style.removeProperty("color");
+        el.style.removeProperty("-webkit-text-fill-color");
+        el.style.removeProperty("fill");
+        el.style.removeProperty("opacity");
+        el.style.removeProperty("visibility");
+      }
+    });
+  }
+
+  fijarShowDark();
+  document.addEventListener("DOMContentLoaded", function () {
+    fijarShowDark();
+    setTimeout(fijarShowDark, 150);
+    setTimeout(fijarShowDark, 500);
+    setTimeout(fijarShowDark, 1000);
+  });
+  window.addEventListener("load", function () {
+    fijarShowDark();
+    setTimeout(fijarShowDark, 300);
+  });
+  document.addEventListener("click", function () {
+    setTimeout(fijarShowDark, 60);
+    setTimeout(fijarShowDark, 250);
+  });
+})();
+</script>
+<!-- FIX_PRESTAMO_SHOW_DARK_END -->

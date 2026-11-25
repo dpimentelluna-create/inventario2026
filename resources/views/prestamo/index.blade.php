@@ -1988,3 +1988,374 @@ $('#btn_cancelar_exportacion')
     border: 1px solid #334155 !important;
   }
 </style>
+<!-- FIX_PRESTAMOS_DARK_START -->
+<style id="prestamos-dark-fix-style">
+  /* MODO OSCURO */
+  html.dark #card_title,
+  html[data-bs-theme="dark"] #card_title,
+  body.dark #card_title,
+  body.dark-mode #card_title,
+  body.tema-oscuro-activo #card_title,
+  html.dark #card_title .prestamos-titulo-txt,
+  html[data-bs-theme="dark"] #card_title .prestamos-titulo-txt,
+  body.dark #card_title .prestamos-titulo-txt,
+  body.dark-mode #card_title .prestamos-titulo-txt,
+  body.tema-oscuro-activo #card_title .prestamos-titulo-txt {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  html.dark #card_title small,
+  html.dark #card_title .text-muted,
+  html[data-bs-theme="dark"] #card_title small,
+  html[data-bs-theme="dark"] #card_title .text-muted,
+  body.dark #card_title small,
+  body.dark #card_title .text-muted,
+  body.dark-mode #card_title small,
+  body.dark-mode #card_title .text-muted,
+  body.tema-oscuro-activo #card_title small,
+  body.tema-oscuro-activo #card_title .text-muted {
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+    opacity: 1 !important;
+  }
+
+  /* MODO CLARO */
+  html:not(.dark):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) #card_title,
+  html:not(.dark):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) #card_title .prestamos-titulo-txt {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    opacity: 1 !important;
+  }
+
+  html:not(.dark):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) #card_title small,
+  html:not(.dark):not([data-bs-theme="dark"]) body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo) #card_title .text-muted {
+    color: #475569 !important;
+    -webkit-text-fill-color: #475569 !important;
+    opacity: 1 !important;
+  }
+
+  /* Iconos de .btn-accion siempre nitidos */
+  .btn-accion i,
+  .btn-accion svg {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+    opacity: 1 !important;
+  }
+</style>
+<script id="prestamos-dark-fix-script">
+(function () {
+  function esOscuro() {
+    var h = document.documentElement;
+    var b = document.body;
+    if (!b) return false;
+    var txt = b.innerText || "";
+    if (
+      h.classList.contains("dark") ||
+      h.getAttribute("data-bs-theme") === "dark" ||
+      b.classList.contains("dark") ||
+      b.classList.contains("dark-mode") ||
+      b.classList.contains("tema-oscuro-activo") ||
+      b.getAttribute("data-bs-theme") === "dark"
+    ) {
+      return true;
+    }
+    if (txt.indexOf("Modo Claro") !== -1) return true;
+    if (txt.indexOf("Modo Oscuro") !== -1) return false;
+
+    // Fallback por color de fondo del body si el texto del boton no coincide
+    var bg = window.getComputedStyle(b).backgroundColor || "";
+    var m = bg.match(/\d+/g);
+    if (m && m.length >= 3) {
+      var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+      if (lum < 90) return true;
+    }
+    return false;
+  }
+
+  function prepararTitulo(titleEl) {
+    if (!titleEl) return;
+    Array.prototype.forEach.call(titleEl.childNodes, function (node) {
+      if (node.nodeType === 3 && node.textContent.trim().length > 0) {
+        var sp = document.createElement("span");
+        sp.className = "prestamos-titulo-txt";
+        sp.textContent = node.textContent;
+        node.parentNode.replaceChild(sp, node);
+      }
+    });
+  }
+
+  function aplicarAmbosModos() {
+    var titleEl = document.getElementById("card_title");
+    if (!titleEl) return;
+    prepararTitulo(titleEl);
+
+    var oscuro = esOscuro();
+    var colorTitulo = oscuro ? "#ffffff" : "#0f172a";
+    var colorSub = oscuro ? "#cbd5e1" : "#475569";
+
+    titleEl.style.setProperty("color", colorTitulo, "important");
+    titleEl.style.setProperty("-webkit-text-fill-color", colorTitulo, "important");
+    titleEl.style.setProperty("opacity", "1", "important");
+
+    titleEl.querySelectorAll(".prestamos-titulo-txt").forEach(function (sp) {
+      sp.style.setProperty("color", colorTitulo, "important");
+      sp.style.setProperty("-webkit-text-fill-color", colorTitulo, "important");
+      sp.style.setProperty("opacity", "1", "important");
+    });
+
+    titleEl.querySelectorAll("small, .text-muted").forEach(function (sm) {
+      sm.style.setProperty("color", colorSub, "important");
+      sm.style.setProperty("-webkit-text-fill-color", colorSub, "important");
+      sm.style.setProperty("opacity", "1", "important");
+    });
+
+    document.querySelectorAll(".btn-accion").forEach(function (btn) {
+      btn.style.setProperty("opacity", "1", "important");
+      btn.querySelectorAll("i, svg, path").forEach(function (ic) {
+        ic.style.setProperty("color", "#0f172a", "important");
+        ic.style.setProperty("-webkit-text-fill-color", "#0f172a", "important");
+        ic.style.setProperty("fill", "#0f172a", "important");
+        ic.style.setProperty("stroke", "#0f172a", "important");
+        ic.style.setProperty("opacity", "1", "important");
+      });
+    });
+  }
+
+  aplicarAmbosModos();
+  document.addEventListener("DOMContentLoaded", function () {
+    aplicarAmbosModos();
+    setTimeout(aplicarAmbosModos, 150);
+    setTimeout(aplicarAmbosModos, 500);
+  });
+  window.addEventListener("load", aplicarAmbosModos);
+  document.addEventListener("click", function () {
+    setTimeout(aplicarAmbosModos, 50);
+    setTimeout(aplicarAmbosModos, 200);
+  });
+})();
+</script>
+<!-- FIX_PRESTAMOS_DARK_END -->
+
+<!-- FIX_FILTROS_DARK_START -->
+<style id="prestamos-filtros-dark-style">
+  /* SOLO MODO OSCURO: panel de filtros y boton FILTROS visibles */
+  html.dark #panel_filtros,
+  html[data-bs-theme="dark"] #panel_filtros,
+  body.dark #panel_filtros,
+  body.dark-mode #panel_filtros,
+  body.tema-oscuro-activo #panel_filtros {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+  }
+
+  html.dark #panel_filtros .card,
+  html.dark #panel_filtros .card-body,
+  html.dark #panel_filtros .card-header,
+  html[data-bs-theme="dark"] #panel_filtros .card,
+  html[data-bs-theme="dark"] #panel_filtros .card-body,
+  html[data-bs-theme="dark"] #panel_filtros .card-header,
+  body.dark #panel_filtros .card,
+  body.dark #panel_filtros .card-body,
+  body.dark #panel_filtros .card-header,
+  body.dark-mode #panel_filtros .card,
+  body.dark-mode #panel_filtros .card-body,
+  body.dark-mode #panel_filtros .card-header,
+  body.tema-oscuro-activo #panel_filtros .card,
+  body.tema-oscuro-activo #panel_filtros .card-body,
+  body.tema-oscuro-activo #panel_filtros .card-header {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+    color: #f8fafc !important;
+  }
+
+  html.dark #panel_filtros label,
+  html.dark #panel_filtros .form-label,
+  html.dark #panel_filtros .form-check-label,
+  html.dark #panel_filtros small,
+  html.dark #panel_filtros .text-muted,
+  html[data-bs-theme="dark"] #panel_filtros label,
+  html[data-bs-theme="dark"] #panel_filtros .form-label,
+  html[data-bs-theme="dark"] #panel_filtros .form-check-label,
+  html[data-bs-theme="dark"] #panel_filtros small,
+  html[data-bs-theme="dark"] #panel_filtros .text-muted,
+  body.dark #panel_filtros label,
+  body.dark #panel_filtros .form-label,
+  body.dark #panel_filtros .form-check-label,
+  body.dark #panel_filtros small,
+  body.dark #panel_filtros .text-muted,
+  body.dark-mode #panel_filtros label,
+  body.dark-mode #panel_filtros .form-label,
+  body.dark-mode #panel_filtros .form-check-label,
+  body.dark-mode #panel_filtros small,
+  body.dark-mode #panel_filtros .text-muted,
+  body.tema-oscuro-activo #panel_filtros label,
+  body.tema-oscuro-activo #panel_filtros .form-label,
+  body.tema-oscuro-activo #panel_filtros .form-check-label,
+  body.tema-oscuro-activo #panel_filtros small,
+  body.tema-oscuro-activo #panel_filtros .text-muted {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  html.dark #panel_filtros .input-group-text,
+  html.dark #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html.dark #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html[data-bs-theme="dark"] #panel_filtros .input-group-text,
+  html[data-bs-theme="dark"] #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html[data-bs-theme="dark"] #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark #panel_filtros .input-group-text,
+  body.dark #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark-mode #panel_filtros .input-group-text,
+  body.dark-mode #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark-mode #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.tema-oscuro-activo #panel_filtros .input-group-text,
+  body.tema-oscuro-activo #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.tema-oscuro-activo #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger) {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+  }
+</style>
+<script id="prestamos-filtros-dark-script">
+(function () {
+  function esOscuroFiltros() {
+    var h = document.documentElement;
+    var b = document.body;
+    if (!b) return false;
+    var txt = b.innerText || "";
+    if (
+      h.classList.contains("dark") ||
+      h.getAttribute("data-bs-theme") === "dark" ||
+      b.classList.contains("dark") ||
+      b.classList.contains("dark-mode") ||
+      b.classList.contains("tema-oscuro-activo") ||
+      b.getAttribute("data-bs-theme") === "dark"
+    ) {
+      return true;
+    }
+    return txt.indexOf("Modo Claro") !== -1;
+  }
+
+  function fijarFiltrosDark() {
+    var oscuro = esOscuroFiltros();
+
+    // Solo boton toggle que dice FILTROS en Modo Oscuro
+    document.querySelectorAll("button, a, .btn").forEach(function (el) {
+      if (el.closest("#panel_filtros, table, .modal")) return;
+      var t = (el.textContent || "").trim().toUpperCase();
+      if (t === "FILTROS" || t.indexOf("FILTROS") !== -1 && el.getAttribute("data-bs-toggle") === "collapse") {
+        if (oscuro) {
+          el.dataset.btnFiltroDark = "1";
+          el.style.setProperty("color", "#f8fafc", "important");
+          el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+          el.style.setProperty("opacity", "1", "important");
+          el.querySelectorAll("i, svg, span").forEach(function (ch) {
+            ch.style.setProperty("color", "#f8fafc", "important");
+            ch.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+            ch.style.setProperty("fill", "#f8fafc", "important");
+            ch.style.setProperty("opacity", "1", "important");
+          });
+        } else if (el.dataset.btnFiltroDark === "1") {
+          delete el.dataset.btnFiltroDark;
+          el.style.removeProperty("color");
+          el.style.removeProperty("-webkit-text-fill-color");
+          el.style.removeProperty("opacity");
+          el.querySelectorAll("i, svg, span").forEach(function (ch) {
+            ch.style.removeProperty("color");
+            ch.style.removeProperty("-webkit-text-fill-color");
+            ch.style.removeProperty("fill");
+            ch.style.removeProperty("opacity");
+          });
+        }
+      }
+    });
+
+    var panel = document.getElementById("panel_filtros");
+    if (!panel) return;
+
+    var targets = [panel].concat(Array.prototype.slice.call(panel.querySelectorAll(".card, .card-body, .card-header, div")));
+    targets.forEach(function (el) {
+      if (el.closest("select, input, textarea, .select2-container")) return;
+      if (el.closest("button, .btn") && !el.classList.contains("input-group")) return;
+      var bg = window.getComputedStyle(el).backgroundColor || "";
+      var m = bg.match(/\d+/g);
+      var esClaro = false;
+      if (m && m.length >= 3) {
+        var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+        if (lum > 185) esClaro = true;
+      }
+
+      if (oscuro && (el === panel || el.classList.contains("card") || el.classList.contains("card-body") || el.classList.contains("card-header") || esClaro)) {
+        el.dataset.filtroDarkApplied = "1";
+        el.style.setProperty("background-color", "#111827", "important");
+        el.style.setProperty("border-color", "#1f2937", "important");
+      } else if (!oscuro && el.dataset.filtroDarkApplied === "1") {
+        delete el.dataset.filtroDarkApplied;
+        el.style.removeProperty("background-color");
+        el.style.removeProperty("border-color");
+      }
+    });
+
+    panel.querySelectorAll("button, .btn, .input-group-text").forEach(function (btn) {
+      var txt = (btn.textContent || "").trim();
+      if (txt === "HOY" || btn.classList.contains("btn-success") || btn.classList.contains("btn-primary") || btn.classList.contains("btn-danger")) return;
+      var bg = window.getComputedStyle(btn).backgroundColor || "";
+      var m = bg.match(/\d+/g);
+      var esClaro = false;
+      if (m && m.length >= 3) {
+        var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+        if (lum > 170) esClaro = true;
+      }
+      if (oscuro && (esClaro || btn.closest(".input-group"))) {
+        btn.dataset.filtroAddonDark = "1";
+        btn.style.setProperty("background-color", "#1e293b", "important");
+        btn.style.setProperty("border-color", "#334155", "important");
+        btn.style.setProperty("color", "#cbd5e1", "important");
+        btn.style.setProperty("-webkit-text-fill-color", "#cbd5e1", "important");
+      } else if (!oscuro && btn.dataset.filtroAddonDark === "1") {
+        delete btn.dataset.filtroAddonDark;
+        btn.style.removeProperty("background-color");
+        btn.style.removeProperty("border-color");
+        btn.style.removeProperty("color");
+        btn.style.removeProperty("-webkit-text-fill-color");
+      }
+    });
+
+    panel.querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, small, .form-label, .form-check-label, .text-muted, span").forEach(function (el) {
+      if (el.closest("select, input, textarea, .select2-container")) return;
+      if (el.closest("button, .btn, .input-group-text")) return;
+      if (oscuro) {
+        el.dataset.filtroTxtDark = "1";
+        el.style.setProperty("color", "#f8fafc", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+        el.style.setProperty("opacity", "1", "important");
+      } else if (el.dataset.filtroTxtDark === "1") {
+        delete el.dataset.filtroTxtDark;
+        el.style.removeProperty("color");
+        el.style.removeProperty("-webkit-text-fill-color");
+        el.style.removeProperty("opacity");
+      }
+    });
+  }
+
+  fijarFiltrosDark();
+  document.addEventListener("DOMContentLoaded", function () {
+    fijarFiltrosDark();
+    setTimeout(fijarFiltrosDark, 200);
+  });
+  window.addEventListener("load", fijarFiltrosDark);
+  document.addEventListener("click", function () {
+    setTimeout(fijarFiltrosDark, 80);
+    setTimeout(fijarFiltrosDark, 220);
+  });
+})();
+</script>
+<!-- FIX_FILTROS_DARK_END -->
