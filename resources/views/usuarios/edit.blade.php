@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Update') }} Usuario
+    {{ __('Actualizar') }} Usuario
 @endsection
 
 @section('content')

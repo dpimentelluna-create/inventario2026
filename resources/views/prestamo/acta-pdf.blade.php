@@ -221,3 +221,39 @@
     </table>
 </body>
 </html>
+
+
+<style id="fix-prestamos-dark">
+  /* Fondo oscuro + letras blancas visibles en todos los niveles del encabezado */
+  table.dataTable thead th,
+  table.dataTable thead th *,
+  table.dataTable thead td,
+  table.dataTable thead td *,
+  table thead th,
+  table thead th * {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+    opacity: 1 !important;
+  }
+
+  /* Iconos de ordenamiento de DataTables */
+  table.dataTable thead .sorting:before,
+  table.dataTable thead .sorting:after,
+  table.dataTable thead .sorting_asc:before,
+  table.dataTable thead .sorting_asc:after,
+  table.dataTable thead .sorting_desc:before,
+  table.dataTable thead .sorting_desc:after,
+  table.dataTable thead th.dt-orderable-asc .dt-column-order,
+  table.dataTable thead th.dt-orderable-desc .dt-column-order {
+    color: #cbd5e1 !important;
+    opacity: 0.9 !important;
+  }
+
+  /* Botones de acciones con mejor contraste en modo oscuro */
+  table tbody td .btn,
+  table tbody td button,
+  table tbody td a.btn {
+    opacity: 1 !important;
+  }
+</style>

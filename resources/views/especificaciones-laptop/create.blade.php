@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Create') }} Especificaciones Laptop
+    {{ __('Crear') }} Especificaciones Laptop
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Create') }} Especificaciones Laptop</span>
+                        <span class="card-title">{{ __('Crear') }} Especificaciones Laptop</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('especificaciones-laptop.store') }}"  role="form" enctype="multipart/form-data">

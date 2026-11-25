@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Create') }} Accesorios Equipo</span>
+                        <span class="card-title">{{ __('Crear') }} Accesorios Equipo</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('accesorios-equipo.store') }}"  role="form" enctype="multipart/form-data">

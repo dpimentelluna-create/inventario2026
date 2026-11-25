@@ -26,3 +26,45 @@
     });
 
 </script>
+<script id="fix-tipo-cantidad-order">
+(function() {
+  function aplicarOrdenMayorAMenor() {
+    const table = document.querySelector("table");
+    if (!table) return false;
+
+    const headers = Array.from(table.querySelectorAll("thead th"));
+    const qtyIdx = headers.findIndex(th => th.innerText.trim().toUpperCase().includes("CANTIDAD"));
+    if (qtyIdx === -1) return false;
+
+    table.querySelectorAll("tbody tr").forEach(tr => {
+      const td = tr.children[qtyIdx];
+      if (td) {
+        const val = parseInt(td.innerText.replace(/[^0-9-]/g, ""), 10) || 0;
+        td.setAttribute("data-order", val);
+      }
+    });
+
+    if (window.jQuery && $.fn && $.fn.DataTable && $.fn.DataTable.isDataTable(table)) {
+      const dt = $(table).DataTable();
+      const current = dt.order();
+      if (!current.length || current[0][0] !== qtyIdx || current[0][1] !== "desc") {
+        dt.order([qtyIdx, "desc"]).draw();
+      }
+      return true;
+    }
+    return false;
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!aplicarOrdenMayorAMenor()) {
+      let intentos = 0;
+      const timer = setInterval(function() {
+        intentos++;
+        if (aplicarOrdenMayorAMenor() || intentos >= 20) {
+          clearInterval(timer);
+        }
+      }, 100);
+    }
+  });
+})();
+</script>

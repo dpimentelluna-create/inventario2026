@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ __('Create') }} Tipos Equipo
+    {{ __('Crear') }} Tipos Equipo
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
 
                 <div class="card card-default">
                     <div class="card-header">
-                        <span class="card-title">{{ __('Create') }} Tipos Equipo</span>
+                        <span class="card-title">{{ __('Crear') }} Tipos Equipo</span>
                     </div>
                     <div class="card-body bg-white">
                         <form method="POST" action="{{ route('tipos-equipo.store') }}"  role="form" enctype="multipart/form-data">

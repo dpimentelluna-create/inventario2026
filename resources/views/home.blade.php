@@ -823,3 +823,137 @@
      }
  </script>
  @endsection
+
+
+
+<style id="fix-dark-kpi-cards">
+  /* MODO OSCURO */
+  html.home-dark .dashboard-tarjeta,
+  html.home-dark .card,
+  html.home-dark .bg-white,
+  html.home-dark [class*="tarjeta"],
+  html.home-dark [class*="modulo"] {
+    background-color: #162032 !important;
+    border-color: #283852 !important;
+    color: #f8fafc !important;
+  }
+  html.home-dark .dashboard-tarjeta .dashboard-numero,
+  html.home-dark .card h1, html.home-dark .card h2, html.home-dark .card h3,
+  html.home-dark .card h4, html.home-dark .card h5, html.home-dark .card h6,
+  html.home-dark [class*="tarjeta"] h5, html.home-dark [class*="tarjeta"] h6,
+  html.home-dark [class*="tarjeta"] .fw-bold {
+    color: #ffffff !important;
+  }
+  html.home-dark .dashboard-tarjeta .dashboard-etiqueta,
+  html.home-dark .dashboard-tarjeta span.small,
+  html.home-dark .card p, html.home-dark .card small,
+  html.home-dark [class*="tarjeta"] p, html.home-dark [class*="tarjeta"] small {
+    color: #cbd5e1 !important;
+  }
+  html.home-dark .card a,
+  html.home-dark [class*="tarjeta"] a {
+    color: #38bdf8 !important;
+  }
+
+  /* MODO CLARO */
+  html.home-light .dashboard-tarjeta,
+  html.home-light .card,
+  html.home-light .bg-white,
+  html.home-light [class*="tarjeta"],
+  html.home-light [class*="modulo"] {
+    background-color: #ffffff !important;
+    border-color: #dbe3ee !important;
+    color: #0f172a !important;
+  }
+  html.home-light .dashboard-tarjeta .dashboard-numero,
+  html.home-light .card h1, html.home-light .card h2, html.home-light .card h3,
+  html.home-light .card h4, html.home-light .card h5, html.home-light .card h6,
+  html.home-light [class*="tarjeta"] h5, html.home-light [class*="tarjeta"] h6,
+  html.home-light [class*="tarjeta"] .fw-bold {
+    color: #0f172a !important;
+  }
+  html.home-light .dashboard-tarjeta .dashboard-etiqueta,
+  html.home-light .dashboard-tarjeta span.small,
+  html.home-light .card p, html.home-light .card small,
+  html.home-light [class*="tarjeta"] p, html.home-light [class*="tarjeta"] small {
+    color: #475569 !important;
+  }
+</style>
+<script id="fix-dark-kpi-js">
+document.addEventListener("DOMContentLoaded", function() {
+  function syncHomeTheme() {
+    const isDark = document.body.innerText.includes("Modo Claro") ||
+                   document.documentElement.classList.contains("dark") ||
+                   document.body.classList.contains("dark-mode") ||
+                   document.body.classList.contains("dark") ||
+                   document.documentElement.getAttribute("data-bs-theme") === "dark" ||
+                   document.documentElement.getAttribute("data-theme") === "dark";
+
+    document.documentElement.classList.toggle("home-dark", isDark);
+    document.documentElement.classList.toggle("home-light", !isDark);
+
+    const targets = document.querySelectorAll(
+      ".dashboard-tarjeta, .card, .bg-white, [class*=\"tarjeta\"], [class*=\"modulo\"]"
+    );
+
+    targets.forEach(el => {
+      if (isDark) {
+        el.style.setProperty("background-color", "#162032", "important");
+        el.style.setProperty("border-color", "#283852", "important");
+        el.querySelectorAll("h1, h2, h3, h4, h5, h6, .dashboard-numero, .fw-bold").forEach(t => {
+          t.style.setProperty("color", "#ffffff", "important");
+        });
+        el.querySelectorAll("p, span, small, .dashboard-etiqueta").forEach(t => {
+          if (!t.classList.contains("dashboard-numero") && !t.classList.contains("fw-bold") && !t.closest("a")) {
+            t.style.setProperty("color", "#cbd5e1", "important");
+          }
+        });
+        el.querySelectorAll("a").forEach(a => {
+          a.style.setProperty("color", "#38bdf8", "important");
+        });
+      } else {
+        el.style.setProperty("background-color", "#ffffff", "important");
+        el.style.setProperty("border-color", "#dbe3ee", "important");
+        el.querySelectorAll("h1, h2, h3, h4, h5, h6, .dashboard-numero, .fw-bold").forEach(t => {
+          t.style.setProperty("color", "#0f172a", "important");
+        });
+        el.querySelectorAll("p, span, small, .dashboard-etiqueta").forEach(t => {
+          if (!t.classList.contains("dashboard-numero") && !t.classList.contains("fw-bold") && !t.closest("a")) {
+            t.style.setProperty("color", "#475569", "important");
+          }
+        });
+      }
+    });
+  }
+
+  syncHomeTheme();
+  new MutationObserver(syncHomeTheme).observe(document.documentElement, {
+    attributes: true,
+    subtree: true,
+    childList: true
+  });
+});
+</script>
+<style id="fix-all-tables-dark">
+  html.home-dark table.dataTable thead th,
+  html.home-dark table thead th,
+  body.dark-mode table.dataTable thead th,
+  body.dark table.dataTable thead th,
+  [data-bs-theme="dark"] table.dataTable thead th,
+  [data-theme="dark"] table.dataTable thead th {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  html.home-dark .dataTables_wrapper .dataTables_length select,
+  html.home-dark .dataTables_wrapper .dataTables_filter input,
+  body.dark-mode .dataTables_wrapper .dataTables_length select,
+  body.dark-mode .dataTables_wrapper .dataTables_filter input,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+  }
+</style>

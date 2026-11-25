@@ -1480,3 +1480,26 @@ window.addEventListener('pageshow', function() {
     if (typeof pintarFilaAccesorio === 'function') setTimeout(pintarFilaAccesorio, 200);
 });
 </script>
+<style id="fix-all-tables-dark">
+  html.home-dark table.dataTable thead th,
+  html.home-dark table thead th,
+  body.dark-mode table.dataTable thead th,
+  body.dark table.dataTable thead th,
+  [data-bs-theme="dark"] table.dataTable thead th,
+  [data-theme="dark"] table.dataTable thead th {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  html.home-dark .dataTables_wrapper .dataTables_length select,
+  html.home-dark .dataTables_wrapper .dataTables_filter input,
+  body.dark-mode .dataTables_wrapper .dataTables_length select,
+  body.dark-mode .dataTables_wrapper .dataTables_filter input,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+  }
+</style>

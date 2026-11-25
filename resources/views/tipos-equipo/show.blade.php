@@ -530,3 +530,92 @@
         </div>
     </section>
 @endsection
+<script id="fix-tipo-cantidad-equipos">
+document.addEventListener("DOMContentLoaded", function() {
+  const counts = @json(\App\Models\Equipo::selectRaw("tipo_equipo_id, COUNT(*) as total")->groupBy("tipo_equipo_id")->pluck("total", "tipo_equipo_id"));
+  const table = document.querySelector("table");
+  if (!table) return;
+  const headers = Array.from(table.querySelectorAll("thead th"));
+  const nombreIdx = headers.findIndex(th => th.innerText.trim().toUpperCase() === "NOMBRE");
+  if (nombreIdx === -1) return;
+
+  table.querySelectorAll("tbody tr").forEach(tr => {
+    const tds = Array.from(tr.children);
+    if (!tds.length) return;
+    const id = tds[0].innerText.trim();
+    const qty = counts[id] ?? 0;
+    const td = document.createElement("td");
+    td.innerText = qty;
+    if (tds[nombreIdx + 1]) {
+      tr.insertBefore(td, tds[nombreIdx + 1]);
+    } else {
+      tr.appendChild(td);
+    }
+  });
+});
+</script>
+<script id="fix-tipo-cantidad-order">
+(function() {
+  function aplicarOrdenMayorAMenor() {
+    const table = document.querySelector("table");
+    if (!table) return false;
+
+    const headers = Array.from(table.querySelectorAll("thead th"));
+    const qtyIdx = headers.findIndex(th => th.innerText.trim().toUpperCase().includes("CANTIDAD"));
+    if (qtyIdx === -1) return false;
+
+    table.querySelectorAll("tbody tr").forEach(tr => {
+      const td = tr.children[qtyIdx];
+      if (td) {
+        const val = parseInt(td.innerText.replace(/[^0-9-]/g, ""), 10) || 0;
+        td.setAttribute("data-order", val);
+      }
+    });
+
+    if (window.jQuery && $.fn && $.fn.DataTable && $.fn.DataTable.isDataTable(table)) {
+      const dt = $(table).DataTable();
+      const current = dt.order();
+      if (!current.length || current[0][0] !== qtyIdx || current[0][1] !== "desc") {
+        dt.order([qtyIdx, "desc"]).draw();
+      }
+      return true;
+    }
+    return false;
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!aplicarOrdenMayorAMenor()) {
+      let intentos = 0;
+      const timer = setInterval(function() {
+        intentos++;
+        if (aplicarOrdenMayorAMenor() || intentos >= 20) {
+          clearInterval(timer);
+        }
+      }, 100);
+    }
+  });
+})();
+</script>
+<style id="fix-all-tables-dark">
+  html.home-dark table.dataTable thead th,
+  html.home-dark table thead th,
+  body.dark-mode table.dataTable thead th,
+  body.dark table.dataTable thead th,
+  [data-bs-theme="dark"] table.dataTable thead th,
+  [data-theme="dark"] table.dataTable thead th {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  html.home-dark .dataTables_wrapper .dataTables_length select,
+  html.home-dark .dataTables_wrapper .dataTables_filter input,
+  body.dark-mode .dataTables_wrapper .dataTables_length select,
+  body.dark-mode .dataTables_wrapper .dataTables_filter input,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_length select,
+  [data-bs-theme="dark"] .dataTables_wrapper .dataTables_filter input {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border: 1px solid #334155 !important;
+  }
+</style>
