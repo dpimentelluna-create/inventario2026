@@ -91,7 +91,7 @@ class PrestamoRequest extends FormRequest
             ],
             'equipos.*.observacion' => ['nullable', 'string'],
 
-            'equipos.*.accesorios' => ['nullable', 'array'],
+            'equipos.*.accesorios' => ['nullable', 'array', 'max:3'],
             'equipos.*.accesorios.*.accesorio_equipo_id' => [
                 'required',
                 'exists:accesorios_equipo,id',
@@ -128,6 +128,7 @@ class PrestamoRequest extends FormRequest
             'equipos.*.estado.required' => 'El estado del equipo es obligatorio.',
             'equipos.*.accesorios.*.accesorio_equipo_id.required' => 'Hay un accesorio sin identificar.',
             'equipos.*.accesorios.*.estado.required' => 'El estado del accesorio es obligatorio.',
+            'equipos.*.accesorios.max' => 'No puede seleccionar más de tres accesorios por equipo.',
         ];
     }
 

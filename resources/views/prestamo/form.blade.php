@@ -449,7 +449,44 @@ const prestamosExistentes = {!! json_encode(
                     'nombre' => $equipo->tipoEquipo->nombre ?? 'SIN TIPO'
                 ],
 
-                // Accesorios históricos de este préstamo.
+                // Accesorios originales relacionados actualmente con el equipo.
+                'accesorios_originales' => $equipo->accesoriosEquipos
+                    ->map(function ($accesorio) {
+                        return [
+                            'id' => $accesorio->id,
+                            'tipo' => $accesorio->tipo,
+                            'marca' => $accesorio->marca,
+                            'num_serie' => $accesorio->num_serie,
+                            'estado' => $accesorio->estado,
+                            'observacion' => $accesorio->observaciones ?? '',
+                        ];
+                    })
+                    ->values()
+                    ->toArray(),
+
+                // Accesorios históricos guardados en este préstamo.
+                'accesorios_historicos' => $prestamoEquipo->prestamoAccesorios
+                    ->map(function ($detalleAccesorio) {
+                        $accesorio = $detalleAccesorio->accesorioEquipo;
+
+                        if (!$accesorio) {
+                            return null;
+                        }
+
+                        return [
+                            'id' => $detalleAccesorio->accesorio_equipo_id,
+                            'tipo' => $accesorio->tipo,
+                            'marca' => $accesorio->marca,
+                            'num_serie' => $accesorio->num_serie,
+                            'estado' => $detalleAccesorio->estado,
+                            'observacion' => $detalleAccesorio->observacion ?? '',
+                        ];
+                    })
+                    ->filter()
+                    ->values()
+                    ->toArray(),
+
+                // Compatibilidad temporal con la carga actual de edición.
                 'accesorios_equipos' => $prestamoEquipo->prestamoAccesorios
                     ->map(function ($detalleAccesorio) {
                         $accesorio = $detalleAccesorio->accesorioEquipo;
@@ -464,7 +501,7 @@ const prestamosExistentes = {!! json_encode(
                             'marca' => $accesorio->marca,
                             'num_serie' => $accesorio->num_serie,
                             'estado' => $detalleAccesorio->estado,
-                            'observacion' => $detalleAccesorio->observacion,
+                            'observacion' => $detalleAccesorio->observacion ?? '',
                         ];
                     })
                     ->filter()
@@ -3133,7 +3170,8 @@ actualizarEstadoBuscadorEquipos();
         equipo,
         estadoEquipo = null,
         observacionEquipo = '',
-        accesoriosExistentes = null
+        accesoriosOriginales = null,
+        accesoriosHistoricos = null
     ) {
 
         /*
@@ -3161,105 +3199,198 @@ actualizarEstadoBuscadorEquipos();
            ACCESORIOS DEL EQUIPO
         ========================================================= */
 
-        let accesoriosHtml = '';
-
-        const accesorios =
-            accesoriosExistentes ??
+        // Accesorios originales relacionados actualmente con el equipo.
+        const originales =
+            accesoriosOriginales ??
+            equipo.accesorios_originales ??
             equipo.accesorios_equipos ??
             [];
 
+        // Accesorios históricos guardados en el préstamo.
+        const historicos =
+            accesoriosHistoricos ??
+            equipo.accesorios_historicos ??
+            [];
 
-        if (accesorios.length > 0) {
+        // En edición se conservan todos los accesorios históricos.
+        // En creación se seleccionan los accesorios originales.
+        const accesorios = esEdicion
+            ? historicos
+            : originales;
 
-            accesoriosHtml = accesorios.map(
-                (accesorio, accesorioIndex) => {
+        // No descartar registros históricos automáticamente.
+        // En creación se limita la selección inicial a tres.
+        const accesoriosIniciales = esEdicion
+            ? [...accesorios]
+            : accesorios.slice(0, 3);
 
-                    /*
-                     * En creación:
-                     * usamos el estado actual del accesorio.
-                     *
-                     * En edición:
-                     * accesoriosExistentes contiene el estado
-                     * guardado en el préstamo.
-                     */
-                    const estado =
-                        normalizarEstado(accesorio.estado);
+        // IDs de accesorios que ya están seleccionados.
+        const idsAccesoriosSeleccionados = new Set(
+            accesoriosIniciales.map(accesorio => String(accesorio.id))
+        );
 
-                    const observacion =
-                        accesorio.observacion ?? '';
+        // Accesorios originales que todavía pueden agregarse.
+        const originalesDisponibles = originales.filter(
+            accesorio =>
+                !idsAccesoriosSeleccionados.has(String(accesorio.id))
+        );
 
+        // Construir las tarjetas de accesorios seleccionados.
+        accesoriosHtml = `
+            <div class="accesorios-seleccionados mb-3">
+                ${accesoriosIniciales.map(
+                    (accesorio, accesorioIndex) => {
 
-                    return `
-                    <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light">
-                        <input type="hidden"
-                            name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
-                            value="${accesorio.id}">
-                        <div class="fw-semibold small mb-2">ACCESORIO ${accesorioIndex + 1}</div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">TIPO</label>
-                            <input type="text" class="form-control form-control-sm" value="${accesorio.tipo ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">MARCA</label>
-                            <input type="text" class="form-control form-control-sm" value="${accesorio.marca ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">NÚM. SERIE</label>
-                            <input type="text" class="form-control form-control-sm" value="${accesorio.num_serie ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">ESTADO</label>
-                            ${esEdicion ? `
-                            <select name="equipos[${indice}][accesorios][${accesorioIndex}][estado]" class="form-select form-select-sm" required>
-                                <option value="REGULAR" ${estado === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
-                                <option value="BUENO" ${estado === 'BUENO' ? 'selected' : ''}>BUENO</option>
-                                <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
-                            </select>
-                            ` : `
-                            <input type="text" class="form-control form-control-sm" value="${estado}" readonly>
-                            <input type="hidden" name="equipos[${indice}][accesorios][${accesorioIndex}][estado]" value="${estado}">
-                            `}
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label small mb-0">OBSERVACIÓN</label>
-                            ${esEdicion ? `
-                            <input type="text"
-                                name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
-                                class="form-control form-control-sm"
-                                value="${observacion}"
-                                placeholder="Observación...">
-                            ` : `
-                            <input type="text" class="form-control form-control-sm" value="${observacion ?? ''}" readonly>
-                            <input type="hidden" name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]" value="${observacion ?? ''}">
-                            `}
-                        </div>
+                        const estado = normalizarEstado(accesorio.estado);
+                        const observacion =
+                            accesorio.observacion ??
+                            accesorio.observaciones ??
+                            '';
+
+                        return `
+                            <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light"
+                                data-accesorio-id="${escaparHtmlAccesorio(accesorio.id)}"
+                                data-tipo="${escaparHtmlAccesorio(accesorio.tipo)}"
+                                data-marca="${escaparHtmlAccesorio(accesorio.marca)}"
+                                data-modelo="${escaparHtmlAccesorio(accesorio.modelo)}"
+                                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}">
+
+                                <input type="hidden"
+                                    name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
+                                    value="${escaparHtmlAccesorio(accesorio.id)}">
+
+                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                                    <strong class="small titulo-accesorio">
+                                        ACCESORIO ${accesorioIndex + 1}
+                                    </strong>
+
+                                    <button type="button"
+                                        class="btn btn-outline-danger btn-sm quitar-accesorio">
+                                        QUITAR
+                                    </button>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small mb-0">TIPO</label>
+                                    <input type="text"
+                                        class="form-control form-control-sm"
+                                        value="${escaparHtmlAccesorio(accesorio.tipo)}"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small mb-0">MARCA</label>
+                                    <input type="text"
+                                        class="form-control form-control-sm"
+                                        value="${escaparHtmlAccesorio(accesorio.marca)}"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small mb-0">NÚM. SERIE</label>
+                                    <input type="text"
+                                        class="form-control form-control-sm"
+                                        value="${escaparHtmlAccesorio(accesorio.num_serie)}"
+                                        readonly>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label class="form-label small mb-0">ESTADO</label>
+
+                                    ${esEdicion ? `
+                                        <select
+                                            name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
+                                            class="form-select form-select-sm"
+                                            required>
+                                            <option value="REGULAR" ${estado === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                                            <option value="BUENO" ${estado === 'BUENO' ? 'selected' : ''}>BUENO</option>
+                                            <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
+                                        </select>
+                                    ` : `
+                                        <input type="text"
+                                            class="form-control form-control-sm"
+                                            value="${estado}"
+                                            readonly>
+
+                                        <input type="hidden"
+                                            name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
+                                            value="${estado}">
+                                    `}
+                                </div>
+
+                                <div class="mb-1">
+                                    <label class="form-label small mb-0">OBSERVACIÓN</label>
+
+                                    ${esEdicion ? `
+                                        <input type="text"
+                                            name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
+                                            class="form-control form-control-sm"
+                                            value="${escaparHtmlAccesorio(observacion)}"
+                                            placeholder="Observación...">
+                                    ` : `
+                                        <input type="text"
+                                            class="form-control form-control-sm"
+                                            value="${escaparHtmlAccesorio(observacion)}"
+                                            readonly>
+
+                                        <input type="hidden"
+                                            name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
+                                            value="${escaparHtmlAccesorio(observacion)}">
+                                    `}
+                                </div>
+                            </div>
+                        `;
+                    }
+                ).join('')}
+            </div>
+
+            <div class="accesorios-originales-disponibles mb-3">
+                ${originales.length > 0 ? `
+                    <div class="small fw-semibold mb-2">
+                        ACCESORIOS ORIGINALES DEL EQUIPO
                     </div>
-                `;
-                }
-            ).join('');
 
-        } else {
+                    ${originales.map(accesorio => {
+                        const yaSeleccionado = idsAccesoriosSeleccionados.has(
+                            String(accesorio.id)
+                        );
 
-            accesoriosHtml = `
-                <div class="manual-accesorio-busqueda" data-indice="${indice}">
-                    <div class="text-muted small mb-2">
-                        Este equipo no tiene accesorios registrados.
-                        Puedes buscar un accesorio disponible para incluirlo en este préstamo.
-                    </div>
+                        return `
+                            <button type="button"
+                                class="btn btn-outline-primary btn-sm w-100 text-start mb-1 agregar-accesorio-original"
+                                data-accesorio-id="${escaparHtmlAccesorio(accesorio.id)}"
+                                data-accesorio='${escaparHtmlAccesorio(JSON.stringify(accesorio))}'
+                                ${yaSeleccionado ? 'hidden' : ''}>
+                                + ${escaparHtmlAccesorio(accesorio.tipo)}
+                                ${escaparHtmlAccesorio(accesorio.marca)}
+                                ${escaparHtmlAccesorio(accesorio.num_serie)}
+                            </button>
+                        `;
+                    }).join('')}
+                ` : ''}
+            </div>
 
-                    <label class="form-label small mb-1">BUSCAR ACCESORIO</label>
-                    <input
-                        type="search"
-                        class="form-control form-control-sm buscar-accesorio-manual"
-                        placeholder="Tipo, marca, modelo, serie o ID..."
-                        autocomplete="off"
-                    >
-
-                    <div class="resultados-accesorios-manuales mt-2"></div>
-                    <div class="accesorio-manual-seleccionado mt-2"></div>
+            <div class="manual-accesorio-busqueda" data-indice="${indice}">
+                <div class="text-muted small mb-2">
+                    Puedes agregar accesorios alternativos disponibles.
+                    Máximo 3 accesorios por equipo.
                 </div>
-            `;
-        }
+
+                <label class="form-label small mb-1">
+                    BUSCAR ACCESORIO ALTERNATIVO
+                </label>
+
+                <input
+                    type="search"
+                    class="form-control form-control-sm buscar-accesorio-manual"
+                    placeholder="Tipo, marca, modelo, serie o ID..."
+                    autocomplete="off">
+
+                <div class="resultados-accesorios-manuales mt-2"
+                    style="max-height: 280px; overflow-y: auto;">
+                </div>
+            </div>
+        `;
 
 
         /* =========================================================
@@ -3272,13 +3403,26 @@ actualizarEstadoBuscadorEquipos();
             equipo.num_serie ?? 'S/N'
         ].filter(Boolean).join('  |  ');
 
-        const accesorioResumen = accesorios[0] || null;
+        const resumenAccesoriosHtml = accesoriosIniciales.length > 0
+            ? accesoriosIniciales.map((accesorio, accesorioIndex) => {
+                const resumen = [
+                    accesorio.tipo ?? 'SIN TIPO',
+                    accesorio.marca ?? '',
+                    accesorio.num_serie ?? 'S/N'
+                ].filter(Boolean).join('  |  ');
 
-        const resumenAccesorio = accesorioResumen
-            ? [accesorioResumen.tipo ?? 'SIN TIPO', accesorioResumen.marca ?? '', accesorioResumen.num_serie ?? 'S/N']
-                .filter(Boolean)
-                .join('  |  ')
-            : '';
+                return `
+                    <label class="form-label small mb-1">
+                        ACCESORIO ${accesorioIndex + 1}
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control form-control-sm mb-2"
+                        value="${escaparHtmlAccesorio(resumen)}"
+                        readonly>
+                `;
+            }).join('')
+            : '<div class="text-muted small">Sin accesorios</div>';
 
         const equipoHtml = `
 
@@ -3319,13 +3463,15 @@ actualizarEstadoBuscadorEquipos();
 
                 <div class="resumen-equipo mb-0">
                     <label class="form-label small mb-1">EQUIPO</label>
-                    <input type="text" class="form-control form-control-sm mb-2" value="${resumenEquipo}" readonly>
-                    ${resumenAccesorio ? `
-                    <label class="form-label small mb-1">ACCESORIO 1</label>
-                    <input type="text" class="form-control form-control-sm" value="${resumenAccesorio}" readonly>
-                    ` : `
-                    <div class="text-muted small">Sin accesorios</div>
-                    `}
+                    <input
+                        type="text"
+                        class="form-control form-control-sm mb-2"
+                        value="${escaparHtmlAccesorio(resumenEquipo)}"
+                        readonly>
+
+                    <div class="resumen-accesorios">
+                        ${resumenAccesoriosHtml}
+                    </div>
                 </div>
 
                 <div class="detalle-equipo" style="display: none;">
@@ -3421,11 +3567,17 @@ actualizarEstadoBuscadorEquipos();
     }
 
     /* =========================================================
-    BÚSQUEDA MANUAL DE ACCESORIOS
+       GESTIÓN UNIFICADA DE ACCESORIOS
     ========================================================= */
 
     const urlBuscarAccesoriosManual =
         @json(route('prestamos.buscarAccesorios'));
+
+    const prestamoIdAccesorios = @json(
+        isset($prestamo) && $prestamo->exists
+            ? $prestamo->id
+            : null
+    );
 
     function escaparHtmlAccesorio(valor) {
         return String(valor ?? '').replace(/[&<>"']/g, function (caracter) {
@@ -3439,34 +3591,427 @@ actualizarEstadoBuscadorEquipos();
         });
     }
 
+    /* =========================================================
+       ACTUALIZAR RESUMEN DE ACCESORIOS
+    ========================================================= */
+
+    function actualizarResumenAccesorios(tarjetaEquipo) {
+
+        const resumen =
+            tarjetaEquipo.querySelector('.resumen-accesorios');
+
+        if (!resumen) return;
+
+        const accesorios =
+            tarjetaEquipo.querySelectorAll(
+                '.accesorios-seleccionados .accesorio-prestamo'
+            );
+
+        if (accesorios.length === 0) {
+            resumen.innerHTML =
+                '<div class="text-muted small">Sin accesorios</div>';
+
+            return;
+        }
+
+        resumen.innerHTML = '';
+
+        accesorios.forEach(function (accesorio, indice) {
+
+            const descripcion = [
+                accesorio.dataset.tipo || 'SIN TIPO',
+                accesorio.dataset.marca || '',
+                accesorio.dataset.numSerie || 'S/N'
+            ].filter(Boolean).join('  |  ');
+
+            const etiqueta = document.createElement('label');
+            etiqueta.className = 'form-label small mb-1';
+            etiqueta.textContent = `ACCESORIO ${indice + 1}`;
+
+            const campo = document.createElement('input');
+            campo.type = 'text';
+            campo.className = 'form-control form-control-sm mb-2';
+            campo.value = descripcion;
+            campo.readOnly = true;
+
+            resumen.appendChild(etiqueta);
+            resumen.appendChild(campo);
+
+        });
+    }
+
+
+    /* =========================================================
+       RENUMERAR ACCESORIOS DE UN EQUIPO
+    ========================================================= */
+
+    function renumerarAccesorios(tarjetaEquipo) {
+
+        const indiceEquipo = Array.from(
+            document.querySelectorAll('.equipo-seleccionado')
+        ).indexOf(tarjetaEquipo);
+
+        if (indiceEquipo < 0) return;
+
+        const accesorios =
+            tarjetaEquipo.querySelectorAll(
+                '.accesorios-seleccionados .accesorio-prestamo'
+            );
+
+        accesorios.forEach(function (accesorio, indice) {
+
+            const titulo =
+                accesorio.querySelector('.titulo-accesorio');
+
+            if (titulo) {
+                titulo.textContent = `ACCESORIO ${indice + 1}`;
+            }
+
+            accesorio.querySelectorAll('[name]').forEach(function (campo) {
+
+                campo.name = campo.name.replace(
+                    /^equipos\[\d+\]\[accesorios\]\[\d+\]/,
+                    `equipos[${indiceEquipo}][accesorios][${indice}]`
+                );
+
+            });
+
+        });
+
+        const buscador =
+            tarjetaEquipo.querySelector('.manual-accesorio-busqueda');
+
+        if (buscador) {
+            buscador.dataset.indice = indiceEquipo;
+        }
+
+        actualizarResumenAccesorios(tarjetaEquipo);
+    }
+
+
+    /* =========================================================
+       AGREGAR ACCESORIO ORIGINAL O ALTERNATIVO
+    ========================================================= */
+
+    function agregarAccesorio(tarjetaEquipo, accesorio) {
+
+        if (!tarjetaEquipo || !accesorio || !accesorio.id) {
+            return;
+        }
+
+        const zonaSeleccionados =
+            tarjetaEquipo.querySelector('.accesorios-seleccionados');
+
+        if (!zonaSeleccionados) return;
+
+        const cantidadActual =
+            zonaSeleccionados.querySelectorAll(
+                '.accesorio-prestamo'
+            ).length;
+
+        if (cantidadActual >= 3) {
+            mostrarToast(
+                'No puede seleccionar más de tres accesorios por equipo.',
+                'danger'
+            );
+
+            return;
+        }
+
+        const idAccesorio = String(accesorio.id);
+
+        // Evitar duplicados dentro de todo el préstamo.
+        const duplicado = Array.from(
+            document.querySelectorAll(
+                '.accesorios-seleccionados .accesorio-prestamo'
+            )
+        ).some(function (elemento) {
+            return elemento.dataset.accesorioId === idAccesorio;
+        });
+
+        if (duplicado) {
+            mostrarToast(
+                'Este accesorio ya está seleccionado en el préstamo.',
+                'danger'
+            );
+
+            return;
+        }
+
+        const estado = normalizarEstado(accesorio.estado);
+
+        const observacion =
+            accesorio.observacion ??
+            accesorio.observaciones ??
+            '';
+
+        const indiceEquipo = Array.from(
+            document.querySelectorAll('.equipo-seleccionado')
+        ).indexOf(tarjetaEquipo);
+
+        if (indiceEquipo < 0) return;
+
+        const indiceAccesorio = cantidadActual;
+
+        const nombreBase =
+            `equipos[${indiceEquipo}][accesorios][${indiceAccesorio}]`;
+
+        const accesorioHtml = `
+            <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light"
+                data-accesorio-id="${escaparHtmlAccesorio(idAccesorio)}"
+                data-tipo="${escaparHtmlAccesorio(accesorio.tipo)}"
+                data-marca="${escaparHtmlAccesorio(accesorio.marca)}"
+                data-modelo="${escaparHtmlAccesorio(accesorio.modelo)}"
+                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}">
+
+                <input type="hidden"
+                    name="${nombreBase}[accesorio_equipo_id]"
+                    value="${escaparHtmlAccesorio(idAccesorio)}">
+
+                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                    <strong class="small titulo-accesorio">
+                        ACCESORIO ${indiceAccesorio + 1}
+                    </strong>
+
+                    <button type="button"
+                        class="btn btn-outline-danger btn-sm quitar-accesorio">
+                        QUITAR
+                    </button>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-0">TIPO</label>
+                    <input type="text"
+                        class="form-control form-control-sm"
+                        value="${escaparHtmlAccesorio(accesorio.tipo)}"
+                        readonly>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-0">MARCA</label>
+                    <input type="text"
+                        class="form-control form-control-sm"
+                        value="${escaparHtmlAccesorio(accesorio.marca)}"
+                        readonly>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-0">NÚM. SERIE</label>
+                    <input type="text"
+                        class="form-control form-control-sm"
+                        value="${escaparHtmlAccesorio(accesorio.num_serie)}"
+                        readonly>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label small mb-0">ESTADO</label>
+
+                    ${esEdicion ? `
+                        <select
+                            name="${nombreBase}[estado]"
+                            class="form-select form-select-sm"
+                            required>
+                            <option value="REGULAR" ${estado === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                            <option value="BUENO" ${estado === 'BUENO' ? 'selected' : ''}>BUENO</option>
+                            <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
+                        </select>
+                    ` : `
+                        <input type="text"
+                            class="form-control form-control-sm"
+                            value="${estado}"
+                            readonly>
+
+                        <input type="hidden"
+                            name="${nombreBase}[estado]"
+                            value="${estado}">
+                    `}
+                </div>
+
+                <div class="mb-1">
+                    <label class="form-label small mb-0">OBSERVACIÓN</label>
+
+                    ${esEdicion ? `
+                        <input type="text"
+                            name="${nombreBase}[observacion]"
+                            class="form-control form-control-sm"
+                            value="${escaparHtmlAccesorio(observacion)}"
+                            placeholder="Observación...">
+                    ` : `
+                        <input type="text"
+                            class="form-control form-control-sm"
+                            value="${escaparHtmlAccesorio(observacion)}"
+                            readonly>
+
+                        <input type="hidden"
+                            name="${nombreBase}[observacion]"
+                            value="${escaparHtmlAccesorio(observacion)}">
+                    `}
+                </div>
+            </div>
+        `;
+
+        zonaSeleccionados.insertAdjacentHTML(
+            'beforeend',
+            accesorioHtml
+        );
+
+        // Ocultar el botón original si corresponde.
+        tarjetaEquipo.querySelectorAll(
+            '.agregar-accesorio-original'
+        ).forEach(function (boton) {
+
+            if (boton.dataset.accesorioId === idAccesorio) {
+                boton.hidden = true;
+            }
+
+        });
+
+        renumerarAccesorios(tarjetaEquipo);
+
+        mostrarToast(
+            'Accesorio agregado correctamente.',
+            'success'
+        );
+    }
+
+
+    /* =========================================================
+       AGREGAR ACCESORIOS ORIGINALES
+    ========================================================= */
+
+    document.addEventListener('click', function (event) {
+
+        const boton = event.target.closest(
+            '.agregar-accesorio-original'
+        );
+
+        if (!boton) return;
+
+        event.preventDefault();
+
+        const tarjetaEquipo =
+            boton.closest('.equipo-seleccionado');
+
+        if (!tarjetaEquipo) return;
+
+        try {
+
+            const accesorio = JSON.parse(
+                boton.dataset.accesorio
+            );
+
+            agregarAccesorio(
+                tarjetaEquipo,
+                accesorio
+            );
+
+        } catch (error) {
+
+            mostrarToast(
+                'No se pudo recuperar la información del accesorio.',
+                'danger'
+            );
+
+        }
+
+    });
+
+
+    /* =========================================================
+       QUITAR ACCESORIOS SELECCIONADOS
+    ========================================================= */
+
+    document.addEventListener('click', function (event) {
+
+        const boton = event.target.closest('.quitar-accesorio');
+
+        if (!boton) return;
+
+        event.preventDefault();
+
+        const tarjetaEquipo =
+            boton.closest('.equipo-seleccionado');
+
+        const tarjetaAccesorio =
+            boton.closest('.accesorio-prestamo');
+
+        if (!tarjetaEquipo || !tarjetaAccesorio) return;
+
+        const idAccesorio =
+            tarjetaAccesorio.dataset.accesorioId;
+
+        tarjetaAccesorio.remove();
+
+        // Volver a mostrar el botón del accesorio original.
+        tarjetaEquipo.querySelectorAll(
+            '.agregar-accesorio-original'
+        ).forEach(function (botonOriginal) {
+
+            if (botonOriginal.dataset.accesorioId === idAccesorio) {
+                botonOriginal.hidden = false;
+            }
+
+        });
+
+        renumerarAccesorios(tarjetaEquipo);
+
+        mostrarToast(
+            'Accesorio retirado del préstamo.',
+            'success'
+        );
+
+    });
+
+
+    /* =========================================================
+       BÚSQUEDA DE ACCESORIOS ALTERNATIVOS
+    ========================================================= */
+
     document.addEventListener('input', async function (event) {
-        const campo = event.target.closest('.buscar-accesorio-manual');
+
+        const campo = event.target.closest(
+            '.buscar-accesorio-manual'
+        );
 
         if (!campo) return;
 
-        const contenedorBusqueda = campo.closest('.manual-accesorio-busqueda');
-        const resultados = contenedorBusqueda?.querySelector(
-            '.resultados-accesorios-manuales'
-        );
+        const contenedorBusqueda =
+            campo.closest('.manual-accesorio-busqueda');
 
-        if (!resultados) return;
+        const tarjetaEquipo =
+            campo.closest('.equipo-seleccionado');
+
+        const resultados =
+            contenedorBusqueda?.querySelector(
+                '.resultados-accesorios-manuales'
+            );
+
+        if (!resultados || !tarjetaEquipo) return;
 
         const termino = campo.value.trim();
 
         resultados.innerHTML = '';
 
-        if (termino.length < 2) {
-            return;
-        }
+        if (termino.length < 2) return;
 
         resultados.innerHTML = `
-            <div class="text-muted small">Buscando accesorios...</div>
+            <div class="text-muted small">
+                Buscando accesorios...
+            </div>
         `;
 
         try {
+
             const parametros = new URLSearchParams({
                 buscar: termino
             });
+
+            if (prestamoIdAccesorios !== null) {
+                parametros.append(
+                    'prestamo_id',
+                    prestamoIdAccesorios
+                );
+            }
 
             const respuesta = await fetch(
                 `${urlBuscarAccesoriosManual}?${parametros.toString()}`,
@@ -3478,160 +4023,74 @@ actualizarEstadoBuscadorEquipos();
             );
 
             if (!respuesta.ok) {
-                throw new Error('No se pudo realizar la búsqueda.');
+                throw new Error('Error en la búsqueda.');
             }
 
             const accesorios = await respuesta.json();
 
-            // Evitar mostrar una respuesta antigua si el usuario siguió escribiendo.
-            if (campo.value.trim() !== termino) {
-                return;
-            }
+            // Evitar mostrar respuestas antiguas.
+            if (campo.value.trim() !== termino) return;
 
             resultados.innerHTML = '';
 
             if (!accesorios.length) {
+
                 resultados.innerHTML = `
                     <div class="text-muted small">
                         No se encontraron accesorios disponibles.
                     </div>
                 `;
+
                 return;
             }
 
             accesorios.forEach(function (accesorio) {
+
                 const boton = document.createElement('button');
 
                 boton.type = 'button';
-                boton.className = 'btn btn-outline-secondary btn-sm w-100 text-start mb-1';
-                boton.dataset.accesorioId = accesorio.id;
+                boton.className =
+                    'btn btn-outline-secondary btn-sm w-100 text-start mb-1';
 
                 boton.textContent = [
+                    `ID: ${accesorio.id}`,
                     accesorio.tipo,
                     accesorio.marca,
                     accesorio.modelo,
-                    accesorio.num_serie ? `Serie: ${accesorio.num_serie}` : `ID: ${accesorio.id}`
+                    accesorio.num_serie
+                        ? `Serie: ${accesorio.num_serie}`
+                        : ''
                 ].filter(Boolean).join(' | ');
 
                 boton.addEventListener('click', function () {
-                    const indiceEquipo = contenedorBusqueda.dataset.indice;
-                    const tarjetaEquipo = contenedorBusqueda.closest('.equipo-seleccionado');
 
-                    if (!tarjetaEquipo) return;
-
-                    const zonaSeleccionado = contenedorBusqueda.querySelector(
-                        '.accesorio-manual-seleccionado'
+                    agregarAccesorio(
+                        tarjetaEquipo,
+                        accesorio
                     );
 
-                    if (!zonaSeleccionado) return;
-
-                    const nombreBase = `equipos[${indiceEquipo}][accesorios][0]`;
-                    const estado = escaparHtmlAccesorio(accesorio.estado || 'BUENO');
-                    const id = escaparHtmlAccesorio(accesorio.id);
-
-                    zonaSeleccionado.innerHTML = `
-                        <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light">
-                            <input
-                                type="hidden"
-                                name="${nombreBase}[accesorio_equipo_id]"
-                                value="${id}"
-                            >
-
-                            <div class="fw-semibold small mb-2">
-                                ACCESORIO MANUAL
-                            </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small mb-0">TIPO</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${escaparHtmlAccesorio(accesorio.tipo)}"
-                                    readonly
-                                >
-                            </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small mb-0">MARCA</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${escaparHtmlAccesorio(accesorio.marca)}"
-                                    readonly
-                                >
-                            </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small mb-0">MODELO</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${escaparHtmlAccesorio(accesorio.modelo)}"
-                                    readonly
-                                >
-                            </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small mb-0">NÚM. SERIE</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${escaparHtmlAccesorio(accesorio.num_serie)}"
-                                    readonly
-                                >
-                            </div>
-
-                            <div class="mb-2">
-                                <label class="form-label small mb-0">ESTADO</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${estado}"
-                                    readonly
-                                >
-                                <input
-                                    type="hidden"
-                                    name="${nombreBase}[estado]"
-                                    value="${estado}"
-                                >
-                            </div>
-
-                            <div class="mb-1">
-                                <label class="form-label small mb-0">OBSERVACIÓN</label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    value="${escaparHtmlAccesorio(accesorio.observaciones)}"
-                                    readonly
-                                >
-                                <input
-                                    type="hidden"
-                                    name="${nombreBase}[observacion]"
-                                    value="${escaparHtmlAccesorio(accesorio.observaciones)}"
-                                >
-                            </div>
-
-                            <div class="text-muted small mt-2">
-                                Se incluirá en este préstamo sin cambiar su equipo relacionado.
-                            </div>
-                        </div>
-                    `;
-
-                    campo.disabled = true;
+                    campo.value = '';
                     resultados.innerHTML = '';
+                    campo.focus();
+
                 });
 
                 resultados.appendChild(boton);
+
             });
 
         } catch (error) {
+
             resultados.innerHTML = `
                 <div class="text-danger small">
                     No se pudo buscar accesorios. Intenta nuevamente.
                 </div>
             `;
+
         }
+
     });
+
 
     function actualizarEventosVerMasMenos() {
         document.querySelectorAll('.equipo-seleccionado').forEach(function (card) {
@@ -3773,6 +4232,8 @@ actualizarEstadoBuscadorEquipos();
 
                     });
 
+                    // Actualizar índices de accesorios y resumen.
+                    renumerarAccesorios(equipo);
             }
         );
 
@@ -3798,29 +4259,22 @@ if (
 
         equiposSeleccionados.add(String(equipo.id));
 
-        // Recuperar los accesorios guardados en este préstamo.
-        const accesoriosHistoricos = (
-            prestamoEquipo.prestamo_accesorios ?? []
-        ).map(detalleAccesorio => {
-            const accesorio = detalleAccesorio.accesorio_equipo;
+        // Recuperar los accesorios originales del equipo.
+        const accesoriosOriginales =
+            equipo.accesorios_originales ?? [];
 
-            if (!accesorio) {
-                return null;
-            }
-
-            return {
-                ...accesorio,
-                estado: detalleAccesorio.estado,
-                observacion: detalleAccesorio.observacion ?? ''
-            };
-        }).filter(Boolean);
+        // Recuperar los accesorios históricos del préstamo.
+        const accesoriosHistoricos =
+            equipo.accesorios_historicos ?? [];
 
         mostrarEquipoSeleccionado(
-    equipo,
-    prestamoEquipo.estado ?? 'BUENO',
-    prestamoEquipo.observacion ?? '',
-    equipo.accesorios_equipos ?? []
-);
+            equipo,
+            prestamoEquipo.estado ?? 'BUENO',
+            prestamoEquipo.observacion ?? '',
+            accesoriosOriginales,
+            accesoriosHistoricos
+        );
+
     });
 
     ocultarCamposBusqueda();
