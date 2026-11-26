@@ -162,3 +162,6 @@ Route::middleware(['auth', 'acceso'])->group(function () {
         return view('manual.index');
     })->name('manual.index');
 });
+Route::get('/inicio-previo', function () {
+    return view('inicio-previo');
+})->name('inicio.previo');
