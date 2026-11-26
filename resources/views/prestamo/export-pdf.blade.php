@@ -228,8 +228,7 @@
             border-bottom: 1px solid #999;
             margin: 2px 0;
         }
-    </style>
-</head>
+    </style></head>
 
 <body>
 
@@ -403,9 +402,7 @@
                 </tr>
             @endforeach
         </tbody>
-    </table>
-
-</body>
+    </table></body>
 
 </html>
 <style id="fix-all-tables-dark">

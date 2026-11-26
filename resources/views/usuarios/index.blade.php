@@ -212,8 +212,7 @@
             }
         });
     }
-</script>
-@endsection
+</script>@endsection
 
 {{-- ESTILOS DEL MÓDULO --}}
 <style>

@@ -1329,8 +1329,7 @@ return 'borde-neutro';
             controladorDescarga.abort();
         });
     });
-</script>
-@endsection
+</script>@endsection
 <style id="fix-bloque-dato">
   .bloque-dato,
   .bloque-dato *,

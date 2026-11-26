@@ -204,8 +204,7 @@
 
 </div>
 
-</div>
-@endsection
+</div>@endsection
 
 <script>
     function mostrarPassword(id, boton) {

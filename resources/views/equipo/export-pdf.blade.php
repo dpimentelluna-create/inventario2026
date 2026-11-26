@@ -241,8 +241,7 @@
         .cabecera-datos td:nth-child(6) {
             width: 20%;
         }
-    </style>
-</head>
+    </style></head>
 <body>
 
     {{-- Header fijo --}}
@@ -433,8 +432,7 @@
         </tbody>
 
     </table>
-
-</body>
+</body>
 
 </html>
 <style id="fix-all-tables-dark">

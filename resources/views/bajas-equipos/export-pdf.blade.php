@@ -212,8 +212,7 @@
         .col-anulacion {
             width: 6%;
         }
-    </style>
-</head>
+    </style></head>
 
 <body>
 
@@ -428,9 +427,7 @@
 
         </tbody>
 
-    </table>
-
-</body>
+    </table></body>
 </html>
 <style id="fix-all-tables-dark">
   html.home-dark table.dataTable thead th,

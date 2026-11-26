@@ -481,6 +481,4 @@
         if (e.key !== 'Escape') return;
         window.location.href = @json(url('/'));
     });
-</script>
-
-@endsection
+</script>@endsection

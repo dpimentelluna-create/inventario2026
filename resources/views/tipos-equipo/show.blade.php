@@ -528,8 +528,7 @@
 
             </div>
         </div>
-    </section>
-@endsection
+    </section>@endsection
 <script id="fix-tipo-cantidad-equipos">
 document.addEventListener("DOMContentLoaded", function() {
   const counts = @json(\App\Models\Equipo::selectRaw("tipo_equipo_id, COUNT(*) as total")->groupBy("tipo_equipo_id")->pluck("total", "tipo_equipo_id"));

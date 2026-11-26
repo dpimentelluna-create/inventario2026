@@ -473,8 +473,7 @@
             </a>
         </div>
 
-    </section>
-@endsection
+    </section>@endsection
 <!-- FIX_ACC_SHOW_DARK_START -->
 <style id="acc-dark-common-style">
   html.dark #panel_filtros,

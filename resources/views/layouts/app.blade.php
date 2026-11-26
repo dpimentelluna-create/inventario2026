@@ -724,8 +724,112 @@
     font-size: 1.1rem !important;
     margin-right: 0 !important;
   }
+</style><!-- INV_THEME_FIX_CSS_START -->
+<style id="inv-theme-fix-css">
+  /* Solo corregir textos con bajo contraste en Modo Oscuro sin pisar componentes propios */
+  html.dark main .text-muted,
+  body.dark main .text-muted,
+  html[data-bs-theme="dark"] main .text-muted {
+    color: #94a3b8 !important;
+  }
+
+  /* Tarjetas o cajas blancas dentro de modo oscuro: evitar texto blanco sobre blanco */
+  html.dark main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
+  body.dark main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
+  html[data-bs-theme="dark"] main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]) {
+    background-color: #111827 !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+  }
+
+  /* Modo Claro: asegurar texto oscuro legible en textos apagados */
+  html:not(.dark):not([data-bs-theme="dark"]) body:not(.dark) main .text-muted {
+    color: #475569 !important;
+  }
 </style>
-</head>
+<!-- INV_THEME_FIX_CSS_END -->
+
+<!-- FIX_FILTROS_EXPORTAR_START -->
+<style id="fix-filtros-exportar-css">
+  html.dark :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item),
+  body.dark :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item),
+  html[data-bs-theme="dark"] :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item) {
+    color: inherit;
+  }
+
+  html.dark .dropdown-menu a,
+  html.dark .dropdown-menu button,
+  html.dark .dropdown-item,
+  body.dark .dropdown-menu a,
+  body.dark .dropdown-menu button,
+  body.dark .dropdown-item,
+  html[data-bs-theme="dark"] .dropdown-menu a,
+  html[data-bs-theme="dark"] .dropdown-menu button,
+  html[data-bs-theme="dark"] .dropdown-item {
+    color: #f8fafc !important;
+    -webkit-text-fill-color: #f8fafc !important;
+    opacity: 1 !important;
+  }
+
+  html.dark .dropdown-menu a:hover,
+  html.dark .dropdown-menu button:hover,
+  html.dark .dropdown-item:hover,
+  body.dark .dropdown-menu a:hover,
+  body.dark .dropdown-menu button:hover,
+  body.dark .dropdown-item:hover,
+  html[data-bs-theme="dark"] .dropdown-menu a:hover,
+  html[data-bs-theme="dark"] .dropdown-menu button:hover,
+  html[data-bs-theme="dark"] .dropdown-item:hover {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+</style>
+<script id="fix-filtros-exportar-js">
+(function () {
+  function esOscuro() {
+    var h = document.documentElement, b = document.body;
+    return h.classList.contains("dark") || (b && b.classList.contains("dark")) || h.getAttribute("data-bs-theme") === "dark";
+  }
+  function ajustarPuntual() {
+    if (!esOscuro()) return;
+    var nodos = document.querySelectorAll("button, a, .dropdown-item, [role=\"menuitem\"]");
+    for (var i = 0; i < nodos.length; i++) {
+      var el = nodos[i];
+      var txt = (el.textContent || "").trim().toLowerCase();
+      var enDropdown = !!el.closest(".dropdown-menu, [class*=\"dropdown\"]");
+      var esFiltro = txt === "filtros" || txt.indexOf("filtros") === 0;
+      var esExportItem = enDropdown && (txt.indexOf("excel") !== -1 || txt.indexOf("pdf") !== -1);
+      if (esFiltro || esExportItem) {
+        el.style.setProperty("color", "#f8fafc", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+        el.style.setProperty("opacity", "1", "important");
+        var hijos = el.querySelectorAll("span, i, svg");
+        for (var j = 0; j < hijos.length; j++) {
+          hijos[j].style.setProperty("color", "#f8fafc", "important");
+          hijos[j].style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+          hijos[j].style.setProperty("opacity", "1", "important");
+        }
+      }
+    }
+  }
+  ajustarPuntual();
+  document.addEventListener("DOMContentLoaded", ajustarPuntual);
+  document.addEventListener("click", function () {
+    setTimeout(ajustarPuntual, 30);
+  });
+})();
+</script>
+<!-- FIX_FILTROS_EXPORTAR_END --><!-- FIX_HAMBURGER_LINES_START -->
+<style id="fix-hamburger-lines-css">
+  html.dark :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i),
+  body.dark :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i),
+  html[data-bs-theme="dark"] :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i) {
+    color: #f8fafc !important;
+    stroke: #f8fafc !important;
+  }
+</style>
+<!-- FIX_HAMBURGER_LINES_END --></head>
 
 <body>
     <!-- PANTALLA DE CARGA (LOADER) -->
@@ -768,7 +872,7 @@
                             title="Ocultar/Mostrar menú">
                             <i class="bi bi-list"></i>
                         </button>
-                        <a class="sidebar-brand d-flex align-items-center px-3 py-3 text-decoration-none" href="{{ url('/home') }}">
+                        <a class="sidebar-brand d-flex align-items-center px-3 py-3 text-decoration-none" href="{{ url('/inicio-previo') }}">
                             <img src="{{ asset('logo/logo.jpg') }}" alt="Logo" style="height: 36px; width: auto; border-radius: 6px; margin-right: 10px;">
                             <span class="sidebar-brand-text fw-bold" style="font-size: 0.95rem; line-height: 1.2;">
                                 Inventario de Equipos<br>Tecnológicos 2026
@@ -1365,6 +1469,38 @@
   window.addEventListener("load", aplicarAjustePuntual);
 })();
 </script>
+<!-- FIX_ALL_THEMES_AUTO_START -->
+<style id="fix-solo-boton-tema-css">
+  [id*="tema"], [id*="theme"], [class*="btn-tema"], [class*="theme-toggle"], [data-theme-toggle] {
+    display: none !important;
+  }
+
+  main, main * {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+</style>
+<script id="fix-solo-boton-tema-js">
+(function () {
+  function ocultarSoloBotonTema() {
+    var items = document.querySelectorAll("aside button, aside a, nav button, nav a, [class*=\"sidebar\"] button, [class*=\"sidebar\"] a");
+    for (var i = 0; i < items.length; i++) {
+      var txt = (items[i].textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      if (txt === "modo oscuro" || txt === "modo claro") {
+        var box = items[i].closest("button, a, div, li") || items[i];
+        box.style.setProperty("display", "none", "important");
+      }
+    }
+  }
+  ocultarSoloBotonTema();
+  document.addEventListener("DOMContentLoaded", ocultarSoloBotonTema);
+  window.addEventListener("load", ocultarSoloBotonTema);
+})();
+</script>
+<!-- FIX_ALL_THEMES_AUTO_END -->
 </body>
 
 </html>

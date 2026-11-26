@@ -120,8 +120,7 @@
     font-weight: 600;
   }
   .sublink:hover { color: #ffffff; }
-</style>
-</head>
+</style></head>
 <body>
   <div class="wrap">
     <div class="top">
@@ -149,6 +148,5 @@
         <a class="sublink" href="/manual-usuario">Ver Manual de Usuario</a>
       </div>
     </div>
-  </div>
-</body>
+  </div></body>
 </html>

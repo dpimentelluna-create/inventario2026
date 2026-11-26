@@ -541,8 +541,7 @@
         </a>
     </div>
 
-</section>
-@endsection
+</section>@endsection
 
 <style id="fix-all-tables-dark">
   html.home-dark table.dataTable thead th,

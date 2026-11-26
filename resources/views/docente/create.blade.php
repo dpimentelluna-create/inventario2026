@@ -24,8 +24,7 @@
                 </div>
             </div>
         </div>
-    </section>
-@endsection
+    </section>@endsection
 @include('aviso-cambios')
 <!-- FIX_DOC_CREATE_DARK_START -->
 <style id="doc-dark-common-style">

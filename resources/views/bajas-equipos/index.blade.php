@@ -1755,9 +1755,7 @@ window.addEventListener('load', function () {
         }
     }
 
-</style>
-
-@endsection
+</style>@endsection
 <style id="fix-all-tables-dark">
   html.home-dark table.dataTable thead th,
   html.home-dark table thead th,

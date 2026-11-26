@@ -43,8 +43,7 @@
             border-collapse: collapse;
             margin-bottom: 12px;
         }
-    </style>
-</head>
+    </style></head>
 <body>
     @php
         $docente = $prestamo->docente;
@@ -218,8 +217,7 @@
             <td>FECHA: {{ $fecha }}</td>
             <td>FECHA:</td>
         </tr>
-    </table>
-</body>
+    </table></body>
 </html>
 
 

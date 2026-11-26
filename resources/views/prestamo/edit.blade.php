@@ -26,8 +26,7 @@
             </div>
         </div>
     </div>
-</section>
-@endsection
+</section>@endsection
 
 <style>
     .encabezado-verde {

@@ -77,8 +77,7 @@
                 {!! $especificacionesLaptops->withQueryString()->links() !!}
             </div>
         </div>
-    </div>
-@endsection
+    </div>@endsection
 
 <style id="fix-all-tables-dark">
   html.home-dark table.dataTable thead th,

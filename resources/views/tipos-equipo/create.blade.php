@@ -24,8 +24,7 @@
                 </div>
             </div>
         </div>
-    </section>
-@endsection
+    </section>@endsection
 @include('aviso-cambios')
 <!-- FIX_TE_CREATE_DARK_START -->
 <style id="te-dark-common-style">

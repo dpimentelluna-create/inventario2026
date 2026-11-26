@@ -21,6 +21,5 @@
                 </div>
             </div>
         </div>
-    </section>
-@endsection
+    </section>@endsection
 @include('aviso-cambios')

@@ -512,5 +512,4 @@ document.addEventListener('DOMContentLoaded', function () {
         actualizarBotones();
     });
 });
-</script>
-@endsection
+</script>@endsection

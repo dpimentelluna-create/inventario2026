@@ -25,8 +25,7 @@
                 </div>
             </div>
         </div>
-    </section>
-@endsection
+    </section>@endsection
 @include('aviso-cambios')
 <!-- FIX_ACC_EDIT_DARK_START -->
 <style id="acc-dark-common-style">

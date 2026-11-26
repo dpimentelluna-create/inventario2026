@@ -435,10 +435,7 @@
             </div>
 
         </div>
-    </div>
-
-
-@endsection
+    </div>@endsection
 <style>
     /* =========================================
        TARJETA PRINCIPAL

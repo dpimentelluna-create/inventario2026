@@ -535,8 +535,7 @@
                 flex-direction: column;
             }
         }
-    </style>
-</head>
+    </style></head>
 
 <body>
 
@@ -705,7 +704,6 @@
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
             updateThemeUI(savedTheme);
         });
-    </script>
-</body>
+    </script></body>
 
 </html>
