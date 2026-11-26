@@ -1868,3 +1868,277 @@ window.addEventListener('pageshow', function() {
     border: 1px solid #334155 !important;
   }
 </style>
+<!-- FIX_EQUIPOS_DARK_START -->
+<style id="equipos-dark-style">
+  /* SOLO MODO OSCURO en /equipos */
+  html.dark #panel_filtros,
+  html.dark #panel_filtros .card,
+  html.dark #panel_filtros .card-body,
+  html.dark #panel_filtros .card-header,
+  html[data-bs-theme="dark"] #panel_filtros,
+  html[data-bs-theme="dark"] #panel_filtros .card,
+  html[data-bs-theme="dark"] #panel_filtros .card-body,
+  html[data-bs-theme="dark"] #panel_filtros .card-header,
+  body.dark #panel_filtros,
+  body.dark #panel_filtros .card,
+  body.dark #panel_filtros .card-body,
+  body.dark #panel_filtros .card-header,
+  body.dark-mode #panel_filtros,
+  body.dark-mode #panel_filtros .card,
+  body.dark-mode #panel_filtros .card-body,
+  body.dark-mode #panel_filtros .card-header,
+  body.tema-oscuro-activo #panel_filtros,
+  body.tema-oscuro-activo #panel_filtros .card,
+  body.tema-oscuro-activo #panel_filtros .card-body,
+  body.tema-oscuro-activo #panel_filtros .card-header {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+    color: #f8fafc !important;
+  }
+
+  html.dark #panel_filtros label,
+  html.dark #panel_filtros .form-label,
+  html.dark #panel_filtros small,
+  html.dark #panel_filtros .text-muted,
+  html[data-bs-theme="dark"] #panel_filtros label,
+  html[data-bs-theme="dark"] #panel_filtros .form-label,
+  html[data-bs-theme="dark"] #panel_filtros small,
+  html[data-bs-theme="dark"] #panel_filtros .text-muted,
+  body.dark #panel_filtros label,
+  body.dark #panel_filtros .form-label,
+  body.dark #panel_filtros small,
+  body.dark #panel_filtros .text-muted,
+  body.dark-mode #panel_filtros label,
+  body.dark-mode #panel_filtros .form-label,
+  body.dark-mode #panel_filtros small,
+  body.dark-mode #panel_filtros .text-muted,
+  body.tema-oscuro-activo #panel_filtros label,
+  body.tema-oscuro-activo #panel_filtros .form-label,
+  body.tema-oscuro-activo #panel_filtros small,
+  body.tema-oscuro-activo #panel_filtros .text-muted {
+    color: #e2e8f0 !important;
+    -webkit-text-fill-color: #e2e8f0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  html.dark #panel_filtros .input-group-text,
+  html.dark #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html.dark #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html[data-bs-theme="dark"] #panel_filtros .input-group-text,
+  html[data-bs-theme="dark"] #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  html[data-bs-theme="dark"] #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark #panel_filtros .input-group-text,
+  body.dark #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark-mode #panel_filtros .input-group-text,
+  body.dark-mode #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.dark-mode #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.tema-oscuro-activo #panel_filtros .input-group-text,
+  body.tema-oscuro-activo #panel_filtros .input-group > button:not(.btn-success):not(.btn-primary):not(.btn-danger),
+  body.tema-oscuro-activo #panel_filtros .input-group > .btn:not(.btn-success):not(.btn-primary):not(.btn-danger) {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+    -webkit-text-fill-color: #cbd5e1 !important;
+  }
+
+  .btn-accion i,
+  .btn-accion svg {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    fill: #0f172a !important;
+    stroke: #0f172a !important;
+    opacity: 1 !important;
+  }
+</style>
+<script id="equipos-dark-script">
+(function () {
+  function esOscuroEquipos() {
+    var h = document.documentElement;
+    var b = document.body;
+    if (!b) return false;
+    var txt = b.innerText || "";
+    if (
+      h.classList.contains("dark") ||
+      h.getAttribute("data-bs-theme") === "dark" ||
+      b.classList.contains("dark") ||
+      b.classList.contains("dark-mode") ||
+      b.classList.contains("tema-oscuro-activo") ||
+      b.getAttribute("data-bs-theme") === "dark"
+    ) {
+      return true;
+    }
+    return txt.indexOf("Modo Claro") !== -1;
+  }
+
+  function fijarEquiposDark() {
+    var oscuro = esOscuroEquipos();
+    var body = document.body;
+    if (!body) return;
+
+    // Caja/pill de coincidencias, boton FILTROS y su contador al lado
+    body.querySelectorAll("div, span, button, .btn, .badge, a").forEach(function (el) {
+      if (el.closest("nav, aside, .sidebar, table, #panel_filtros")) return;
+      var t = (el.textContent || "").trim().toUpperCase();
+      var enBotonFiltro = false;
+      var cur = el;
+      for (var i = 0; i < 4 && cur; i++) {
+        var ct = (cur.textContent || "").trim().toUpperCase();
+        if (ct.indexOf("FILTROS") !== -1 && ct.length <= 25) {
+          enBotonFiltro = true;
+          break;
+        }
+        cur = cur.parentElement;
+      }
+
+      if (t.indexOf("COINCIDENCIA") !== -1 || enBotonFiltro) {
+        var bg = window.getComputedStyle(el).backgroundColor || "";
+        var m = bg.match(/\d+/g);
+        var esClaro = false;
+        if (m && m.length >= 3) {
+          var a = m.length >= 4 ? parseFloat(m[3]) : 1;
+          var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+          if (a > 0.1 && lum > 140) esClaro = true;
+        }
+
+        if (oscuro) {
+          if (esClaro || t.indexOf("COINCIDENCIA") !== -1) {
+            el.dataset.eqDarkPill = "1";
+            el.style.setProperty("background-color", "#334155", "important");
+            el.style.setProperty("border-color", "#475569", "important");
+            el.style.setProperty("color", "#f8fafc", "important");
+            el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+            el.style.setProperty("opacity", "1", "important");
+            el.style.setProperty("visibility", "visible", "important");
+          } else {
+            el.dataset.eqDarkPill = "1";
+            el.style.setProperty("color", "#f8fafc", "important");
+            el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+            el.style.setProperty("opacity", "1", "important");
+            el.style.setProperty("visibility", "visible", "important");
+          }
+          el.querySelectorAll("span, i, svg, path").forEach(function (ch) {
+            ch.style.setProperty("color", "#f8fafc", "important");
+            ch.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
+            ch.style.setProperty("fill", "#f8fafc", "important");
+            ch.style.setProperty("opacity", "1", "important");
+            ch.style.setProperty("visibility", "visible", "important");
+          });
+        } else if (el.dataset.eqDarkPill === "1") {
+          delete el.dataset.eqDarkPill;
+          el.style.removeProperty("background-color");
+          el.style.removeProperty("border-color");
+          el.style.removeProperty("color");
+          el.style.removeProperty("-webkit-text-fill-color");
+          el.style.removeProperty("opacity");
+          el.style.removeProperty("visibility");
+          el.querySelectorAll("span, i, svg, path").forEach(function (ch) {
+            ch.style.removeProperty("color");
+            ch.style.removeProperty("-webkit-text-fill-color");
+            ch.style.removeProperty("fill");
+            ch.style.removeProperty("opacity");
+            ch.style.removeProperty("visibility");
+          });
+        }
+      }
+    });
+
+    var panel = document.getElementById("panel_filtros");
+    if (panel) {
+      var boxes = [panel].concat(Array.prototype.slice.call(panel.querySelectorAll(".card, .card-body, .card-header, div")));
+      boxes.forEach(function (el) {
+        if (el.closest("select, input, textarea, .select2-container")) return;
+        if (el.closest("button, .btn") && !el.classList.contains("input-group")) return;
+        var bg = window.getComputedStyle(el).backgroundColor || "";
+        var m = bg.match(/\d+/g);
+        var esClaro = false;
+        if (m && m.length >= 3) {
+          var a = m.length >= 4 ? parseFloat(m[3]) : 1;
+          var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+          if (a > 0.1 && lum > 155) esClaro = true;
+        }
+        if (oscuro && (el === panel || el.classList.contains("card") || el.classList.contains("card-body") || el.classList.contains("card-header") || esClaro)) {
+          el.dataset.eqDarkBox = "1";
+          el.style.setProperty("background-color", "#111827", "important");
+          el.style.setProperty("border-color", "#1f2937", "important");
+        } else if (!oscuro && el.dataset.eqDarkBox === "1") {
+          delete el.dataset.eqDarkBox;
+          el.style.removeProperty("background-color");
+          el.style.removeProperty("border-color");
+        }
+      });
+
+      panel.querySelectorAll("button, .btn, .input-group-text").forEach(function (btn) {
+        var txt = (btn.textContent || "").trim();
+        if (txt === "HOY" || btn.classList.contains("btn-success") || btn.classList.contains("btn-primary") || btn.classList.contains("btn-danger")) return;
+        var bg = window.getComputedStyle(btn).backgroundColor || "";
+        var m = bg.match(/\d+/g);
+        var esClaro = false;
+        if (m && m.length >= 3) {
+          var lum = (parseInt(m[0], 10) + parseInt(m[1], 10) + parseInt(m[2], 10)) / 3;
+          if (lum > 160) esClaro = true;
+        }
+        if (oscuro && (esClaro || btn.closest(".input-group"))) {
+          btn.dataset.eqAddonDark = "1";
+          btn.style.setProperty("background-color", "#1e293b", "important");
+          btn.style.setProperty("border-color", "#334155", "important");
+          btn.style.setProperty("color", "#cbd5e1", "important");
+          btn.style.setProperty("-webkit-text-fill-color", "#cbd5e1", "important");
+        } else if (!oscuro && btn.dataset.eqAddonDark === "1") {
+          delete btn.dataset.eqAddonDark;
+          btn.style.removeProperty("background-color");
+          btn.style.removeProperty("border-color");
+          btn.style.removeProperty("color");
+          btn.style.removeProperty("-webkit-text-fill-color");
+        }
+      });
+
+      panel.querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, small, .form-label, .text-muted, span, i, svg").forEach(function (el) {
+        if (el.closest("select, input, textarea, .select2-container, button, .btn, .input-group-text")) return;
+        if (oscuro) {
+          el.dataset.eqDarkTxt = "1";
+          var isSub = el.tagName === "SMALL" || el.classList.contains("text-muted") || (el.textContent || "").indexOf("Utiliza los campos") !== -1 || (el.textContent || "").indexOf("Puedes combinar") !== -1;
+          var fg = isSub ? "#cbd5e1" : "#f8fafc";
+          el.style.setProperty("color", fg, "important");
+          el.style.setProperty("-webkit-text-fill-color", fg, "important");
+          el.style.setProperty("fill", fg, "important");
+          el.style.setProperty("opacity", "1", "important");
+          el.style.setProperty("visibility", "visible", "important");
+        } else if (el.dataset.eqDarkTxt === "1") {
+          delete el.dataset.eqDarkTxt;
+          el.style.removeProperty("color");
+          el.style.removeProperty("-webkit-text-fill-color");
+          el.style.removeProperty("fill");
+          el.style.removeProperty("opacity");
+          el.style.removeProperty("visibility");
+        }
+      });
+    }
+
+    body.querySelectorAll(".btn-accion").forEach(function (btn) {
+      btn.style.setProperty("opacity", "1", "important");
+      btn.querySelectorAll("i, svg, path").forEach(function (ic) {
+        ic.style.setProperty("color", "#0f172a", "important");
+        ic.style.setProperty("-webkit-text-fill-color", "#0f172a", "important");
+        ic.style.setProperty("fill", "#0f172a", "important");
+        ic.style.setProperty("stroke", "#0f172a", "important");
+        ic.style.setProperty("opacity", "1", "important");
+      });
+    });
+  }
+
+  fijarEquiposDark();
+  document.addEventListener("DOMContentLoaded", function () {
+    fijarEquiposDark();
+    setTimeout(fijarEquiposDark, 150);
+    setTimeout(fijarEquiposDark, 450);
+  });
+  window.addEventListener("load", fijarEquiposDark);
+  document.addEventListener("click", function () {
+    setTimeout(fijarEquiposDark, 60);
+    setTimeout(fijarEquiposDark, 220);
+  });
+})();
+</script>
+<!-- FIX_EQUIPOS_DARK_END -->

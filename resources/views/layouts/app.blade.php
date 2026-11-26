@@ -1417,3 +1417,68 @@
     overflow-y: auto !important;
   }
 </style>
+
+<!-- FIX_BURGER_CIRCLE_START -->
+<style id="burger-circle-fix-style">
+  .navbar-toggler,
+  .sidebar-toggle,
+  [data-toggle="sidebar"] {
+    flex-shrink: 0 !important;
+  }
+</style>
+<script id="burger-circle-fix-script">
+(function () {
+  function fijarBotonesSidebar() {
+    var candidatos = document.querySelectorAll("aside button, nav button, .sidebar button, [class*=\"sidebar\"] button, header button, .navbar-toggler, .sidebar-toggle");
+    candidatos.forEach(function (btn) {
+      if (!btn || btn.closest("table, form")) return;
+      var txt = (btn.textContent || "").trim();
+      var esBotonTema = txt.indexOf("Modo Claro") !== -1 || txt.indexOf("Modo Oscuro") !== -1;
+
+      if (esBotonTema) {
+        btn.style.setProperty("border-radius", "8px", "important");
+        btn.style.setProperty("width", "100%", "important");
+        btn.style.setProperty("min-width", "0", "important");
+        btn.style.setProperty("max-width", "100%", "important");
+        btn.style.setProperty("height", "auto", "important");
+        btn.style.setProperty("min-height", "38px", "important");
+        btn.style.setProperty("max-height", "none", "important");
+        btn.style.setProperty("flex", "none", "important");
+        btn.style.setProperty("padding", "8px 12px", "important");
+        return;
+      }
+
+      if (txt.length > 0) return;
+      var rect = btn.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0 && Math.abs(rect.width - rect.height) > 2) {
+        var size = Math.round(Math.min(rect.width, rect.height, 44));
+        if (size < 28) size = 38;
+        btn.style.setProperty("width", size + "px", "important");
+        btn.style.setProperty("height", size + "px", "important");
+        btn.style.setProperty("min-width", size + "px", "important");
+        btn.style.setProperty("max-width", size + "px", "important");
+        btn.style.setProperty("min-height", size + "px", "important");
+        btn.style.setProperty("max-height", size + "px", "important");
+        btn.style.setProperty("flex", "0 0 " + size + "px", "important");
+        btn.style.setProperty("padding", "0", "important");
+        btn.style.setProperty("border-radius", "50%", "important");
+        btn.style.setProperty("display", "inline-flex", "important");
+        btn.style.setProperty("align-items", "center", "important");
+        btn.style.setProperty("justify-content", "center", "important");
+      }
+    });
+  }
+  fijarBotonesSidebar();
+  document.addEventListener("DOMContentLoaded", function () {
+    fijarBotonesSidebar();
+    setTimeout(fijarBotonesSidebar, 150);
+    setTimeout(fijarBotonesSidebar, 500);
+  });
+  window.addEventListener("load", fijarBotonesSidebar);
+  document.addEventListener("click", function () {
+    setTimeout(fijarBotonesSidebar, 60);
+    setTimeout(fijarBotonesSidebar, 200);
+  });
+})();
+</script>
+<!-- FIX_BURGER_CIRCLE_END -->
