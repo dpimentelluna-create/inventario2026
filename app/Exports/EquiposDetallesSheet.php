@@ -228,6 +228,10 @@ class EquiposDetallesSheet implements FromCollection, WithEvents, WithStyles, Wi
                         ],
                     ]);
 
+                    for ($fila = 7; $fila <= $highestRow; $fila++) {
+                        $sheet->getRowDimension($fila)->setRowHeight(24);
+                    }
+
                     // N.º: centrado y con formato numérico 00.
                     $sheet->getStyle('A7:A' . $highestRow)
                         ->getAlignment()
