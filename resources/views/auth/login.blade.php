@@ -720,3 +720,35 @@
     });
   });
 </script>
+
+<style id="login-marco-verde-fix">
+  .login-wrapper,
+  .login-container,
+  .login-box,
+  .login-panel,
+  .login-right,
+  .login-form-side,
+  .auth-wrapper,
+  .auth-container,
+  .auth-box,
+  .auth-panel,
+  .card,
+  .card-body,
+  form {
+    background-color: #d1fae5 !important;
+    background: #d1fae5 !important;
+    color: #052e16 !important;
+  }
+
+  .login-wrapper > div,
+  .login-container > div,
+  .login-box > div,
+  .login-panel > div,
+  .auth-wrapper > div,
+  .auth-container > div,
+  .auth-box > div,
+  .auth-panel > div {
+    background-color: #d1fae5 !important;
+    background: #d1fae5 !important;
+  }
+</style>
