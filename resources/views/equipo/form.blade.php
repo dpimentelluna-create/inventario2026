@@ -62,7 +62,7 @@
                         {{-- RESULTADOS --}}
                         <div
                             id="lista_tipos_equipo"
-                            class="position-absolute w-100 bg-white border rounded shadow-sm"
+                            class="position-absolute w-100 bg-success-subtle border rounded shadow-sm"
                             style="
                                 display: none;
                                 z-index: 1050;
@@ -673,7 +673,7 @@
                                             class="form-control tipo-accesorio campo-mayusculas" value="{{ $accesorio->tipo }}"
                                             placeholder="ESCRIBA O SELECCIONE..." autocomplete="off">
 
-                                        <div class="lista-tipos-accesorio position-absolute w-100 bg-white border rounded shadow-sm" style="
+                                        <div class="lista-tipos-accesorio position-absolute w-100 bg-success-subtle border rounded shadow-sm" style="
                                                                         display: none;
                                                                         z-index: 1050;
                                                                         max-height: 220px;

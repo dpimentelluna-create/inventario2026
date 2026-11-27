@@ -13,7 +13,7 @@
                     <div class="card-header">
                         <span class="card-title">{{ __('Actualizar') }} Docente</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <form method="POST" action="{{ route('docentes.update', $docente->id) }}"  role="form" enctype="multipart/form-data">
                             {{ method_field('PATCH') }}
                             @csrf

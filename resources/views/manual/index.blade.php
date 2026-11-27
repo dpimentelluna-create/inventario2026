@@ -15,7 +15,7 @@
   }
 
   .manual-blanco-hero {
-    background: #ffffff;
+    background: #d1fae5;
     border: 1px solid #e2e8f0;
     border-left: 6px solid #16a34a;
     border-radius: 12px;
@@ -60,7 +60,7 @@
     padding: 9px 13px;
     border-radius: 8px;
     border: 1px solid #cbd5e1;
-    background-color: #ffffff;
+    background-color: #ecfdf5;
     color: #0f172a;
     font-size: 14px;
     outline: none;
@@ -81,7 +81,7 @@
     padding: 8px 13px;
     border-radius: 8px;
     border: 1px solid #cbd5e1;
-    background-color: #ffffff;
+    background-color: #ecfdf5;
     color: #0f172a;
     font-size: 13px;
     font-weight: 600;
@@ -96,7 +96,7 @@
   }
 
   .manual-blanco-card {
-    background-color: #ffffff;
+    background-color: #ecfdf5;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px 24px;
@@ -154,7 +154,7 @@
   }
 
   .manual-blanco-table td {
-    background-color: #ffffff;
+    background-color: #ecfdf5;
     color: #1e293b;
     padding: 8px 12px;
     border: 1px solid #e2e8f0;
@@ -170,7 +170,7 @@
     height: 760px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
-    background-color: #ffffff;
+    background-color: #ecfdf5;
     display: block;
   }
 </style>
@@ -357,7 +357,7 @@
     }
     body.light-mode .meq-shell,
     body[data-theme="light"] .meq-shell {
-      background: #ffffff;
+      background: #d1fae5;
       color: #0f172a;
       border-color: #cbd5e1;
       box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
@@ -590,7 +590,7 @@
     body.light-mode .meq-field input,
     body[data-theme="light"] .meq-field select,
     body[data-theme="light"] .meq-field input {
-      background: #ffffff;
+      background: #d1fae5;
       color: #0f172a;
       border-color: #cbd5e1;
     }
@@ -934,3 +934,169 @@
     border: 1px solid #334155 !important;
   }
 </style>
+<style id="manual-tema-verde-completo">
+  /* Fondo general del manual en verde menta */
+  body,
+  main,
+  .container,
+  .container-fluid,
+  .manual-wrapper,
+  .manual-container {
+    background-color: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Barra de búsqueda y botón Limpiar en verde */
+  input[placeholder*="Buscar en el manual"],
+  .manual-search input,
+  .manual-buscador input,
+  input.form-control[type="search"],
+  input.form-control[type="text"] {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #34d399 !important;
+  }
+
+  input[placeholder*="Buscar en el manual"]::placeholder {
+    color: #166534 !important;
+    opacity: 1 !important;
+  }
+
+  /* Botones / píldoras de navegación rápida (1. Objetivo, 2.1 Registro, etc.) y botón Limpiar */
+  main button:not(.btn-primary):not(.btn-danger),
+  main .btn:not(.btn-primary):not(.btn-danger),
+  main a.badge,
+  main span.badge,
+  .filtro-seccion,
+  .nav-pill-manual,
+  .btn-filtro-manual {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #22c55e !important;
+  }
+
+  main button:not(.btn-primary):not(.btn-danger):hover,
+  main .btn:not(.btn-primary):not(.btn-danger):hover,
+  .filtro-seccion:hover,
+  .filtro-seccion.active,
+  .nav-pill-manual.active {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #047857 !important;
+  }
+
+  /* Acordeones, tarjetas y secciones del manual (1. Objetivo del módulo, 2.1, 2.2...) */
+  main .card,
+  main .card-header,
+  main .card-body,
+  main .accordion,
+  main .accordion-item,
+  main .accordion-header,
+  main .accordion-button,
+  main .accordion-collapse,
+  main .accordion-body,
+  main .alert,
+  main .callout,
+  main .nota-importantes,
+  main [class*="simulador"],
+  main [class*="seccion"],
+  main [class*="bloque"] {
+    background-color: #d1fae5 !important;
+    background: #d1fae5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  /* Encabezados de acordeones / secciones con un tono verde ligeramente más marcado para distinguirlos */
+  main .accordion-button,
+  main .accordion-button:not(.collapsed),
+  main .card-header {
+    background-color: #a7f3d0 !important;
+    background: #a7f3d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  main .accordion-button::after {
+    filter: none !important;
+  }
+
+  /* Textos, listas, strong y párrafos dentro de las secciones del manual */
+  main .card-body *,
+  main .accordion-body *,
+  main .alert *,
+  main [class*="simulador"] * {
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  /* Selects dentro del simulador rápido */
+  main select,
+  main .form-select {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #22c55e !important;
+  }
+
+  /* Tabla dentro del manual */
+  main table thead th {
+    background-color: #a7f3d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  main table tbody td {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  /* Impresión en blanco limpio */
+  @media print {
+    html, body, main, .card, .card-body, .accordion-item, .accordion-button, .accordion-body, table, table td, table th, .btn {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<script id="manual-tema-verde-js">
+(function() {
+  function pintarManualVerde() {
+    document.querySelectorAll("main div, main section, main article, main button, main a, main input, main select").forEach(el => {
+      if (el.closest("#sidebar") || el.closest("aside") || el.closest(".navbar")) return;
+      const bg = getComputedStyle(el).backgroundColor;
+      const m = bg && bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (!m) return;
+      const r = parseInt(m[1], 10), g = parseInt(m[2], 10), b = parseInt(m[3], 10);
+      if (r + g + b < 130) {
+        const esBoton = (el.tagName === "BUTTON" || el.classList.contains("btn"));
+        const nuevoBg = esBoton ? "#bbf7d0" : "#d1fae5";
+        el.style.setProperty("background-color", nuevoBg, "important");
+        el.style.setProperty("background", nuevoBg, "important");
+        el.style.setProperty("color", "#052e16", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+        el.style.setProperty("border-color", "#34d399", "important");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", pintarManualVerde);
+  } else {
+    pintarManualVerde();
+  }
+  setTimeout(pintarManualVerde, 150);
+  setTimeout(pintarManualVerde, 500);
+})();
+</script>

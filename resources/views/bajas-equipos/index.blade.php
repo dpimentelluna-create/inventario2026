@@ -1217,7 +1217,7 @@ window.addEventListener('load', function () {
         border-radius: 5px;
         color: #343a40;
         font-size: 0.82rem;
-        background-color: #fff;
+        background-color: #ecfdf5;
     }
 
     .panel-filtros-equipos .form-control:focus,
@@ -1275,7 +1275,7 @@ window.addEventListener('load', function () {
         padding: 7px 12px;
         border: 1px solid #ced4da;
         border-radius: 6px;
-        background: #fff;
+        background: #d1fae5;
         color: #495057;
         font-weight: 600;
         font-size: 0.76rem;
@@ -1319,7 +1319,7 @@ window.addEventListener('load', function () {
         padding: 7px 13px;
         border: 1px solid #198754;
         border-radius: 7px;
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
         font-size: 0.78rem;
         font-weight: 700;
@@ -1371,7 +1371,7 @@ window.addEventListener('load', function () {
     .btn-filtros-equipos:hover .badge-filtros-contador,
     .btn-filtros-equipos.filtros-abiertos .badge-filtros-contador {
         border-color: rgba(255, 255, 255, 0.45);
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
     }
 
@@ -1463,7 +1463,7 @@ window.addEventListener('load', function () {
         border: 1px solid #ced4da;
         border-radius: 6px;
         padding: 5px 9px;
-        background: #fff;
+        background: #d1fae5;
         color: #212529;
     }
 
@@ -1606,7 +1606,7 @@ window.addEventListener('load', function () {
     ========================================= */
 
     .baja-index-card {
-        background: #fff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -1687,7 +1687,7 @@ window.addEventListener('load', function () {
         max-width: 440px;
         padding: 30px;
         text-align: center;
-        background: #fff;
+        background: #d1fae5;
         border-radius: 16px;
         box-shadow: 0 15px 45px rgba(0, 0, 0, 0.20);
     }

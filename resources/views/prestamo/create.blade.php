@@ -16,7 +16,7 @@
                         Registrar Préstamo
                     </h4>
                 </div>
-                <div class="card-body bg-white">
+                <div class="card-body bg-success-subtle">
                     <form method="POST" action="{{ route('prestamos.store') }}" role="form">
                         @csrf
                         @include('prestamo.form')

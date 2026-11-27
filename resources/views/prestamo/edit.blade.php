@@ -16,7 +16,7 @@
                         Editar Préstamo
                     </h4>
                 </div>
-                <div class="card-body bg-white">
+                <div class="card-body bg-success-subtle">
                     <form method="POST" action="{{ route('prestamos.update', $prestamo->id) }}" role="form">
                         @method('PATCH')
                         @csrf

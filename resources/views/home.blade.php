@@ -12,7 +12,7 @@
      }
 
      .dashboard-tarjeta {
-         background: #fff;
+         background: #d1fae5;
          border: 1px solid #dee2e6;
          border-radius: 8px;
          box-shadow: 0 2px 5px rgba(0, 0, 0, .06);
@@ -203,15 +203,17 @@
 
      {{-- RESUMEN ADICIONAL --}}
      <div class="row g-3 mb-4">
-         <div class="col-12 col-md-6">
-             <div class="dashboard-tarjeta p-3">
-                 <div class="dashboard-etiqueta">Equipos sin clasificar</div>
-                 <div class="dashboard-numero">{{ number_format($equiposSinClasificar) }}</div>
-                 <p class="dashboard-subtitulo small mb-0">
-                     Equipos sin un estado reconocido en las especificaciones.
-                 </p>
-             </div>
-         </div>
+        <div class="col-12 col-md-6">
+            @php
+                $totalTiposDashboard = $totalTiposEquipos
+                    ?? (isset($tiposEquipos) ? (is_countable($tiposEquipos) ? count($tiposEquipos) : $tiposEquipos->count()) : \App\Models\TiposEquipo::count());
+            @endphp
+            <a href="{{ route('tipos-equipo.index') }}" class="dashboard-tarjeta p-3">
+                <div class="dashboard-etiqueta">Tipos de equipos</div>
+                <div class="dashboard-numero">{{ number_format($totalTiposDashboard) }}</div>
+                <span class="small text-primary">Consultar tipos de equipos <i class="fas fa-arrow-right"></i></span>
+            </a>
+        </div>
 
          <div class="col-12 col-md-6">
              <a href="{{ route('ubicaciones.index') }}" class="dashboard-tarjeta p-3">
@@ -694,7 +696,7 @@
          height: 100%;
          min-height: 145px;
          padding: 15px;
-         background: #fff;
+         background: #d1fae5;
          border: 1px solid #dee2e6;
          border-radius: 8px;
          color: #212529;
@@ -830,7 +832,7 @@
   /* MODO OSCURO */
   html.home-dark .dashboard-tarjeta,
   html.home-dark .card,
-  html.home-dark .bg-white,
+  html.home-dark .bg-success-subtle,
   html.home-dark [class*="tarjeta"],
   html.home-dark [class*="modulo"] {
     background-color: #162032 !important;
@@ -858,11 +860,11 @@
   /* MODO CLARO */
   html.home-light .dashboard-tarjeta,
   html.home-light .card,
-  html.home-light .bg-white,
+  html.home-light .bg-success-subtle,
   html.home-light [class*="tarjeta"],
   html.home-light [class*="modulo"] {
-    background-color: #ffffff !important;
-    border-color: #dbe3ee !important;
+    background-color: #d1fae5 !important;
+    border-color: #6ee7b7 !important;
     color: #0f172a !important;
   }
   html.home-light .dashboard-tarjeta .dashboard-numero,
@@ -893,7 +895,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.documentElement.classList.toggle("home-light", !isDark);
 
     const targets = document.querySelectorAll(
-      ".dashboard-tarjeta, .card, .bg-white, [class*=\"tarjeta\"], [class*=\"modulo\"]"
+      ".dashboard-tarjeta, .card, .bg-success-subtle, [class*=\"tarjeta\"], [class*=\"modulo\"]"
     );
 
     targets.forEach(el => {
@@ -912,8 +914,8 @@ document.addEventListener("DOMContentLoaded", function() {
           a.style.setProperty("color", "#38bdf8", "important");
         });
       } else {
-        el.style.setProperty("background-color", "#ffffff", "important");
-        el.style.setProperty("border-color", "#dbe3ee", "important");
+        el.style.setProperty("background-color", "#d1fae5", "important");
+        el.style.setProperty("border-color", "#6ee7b7", "important");
         el.querySelectorAll("h1, h2, h3, h4, h5, h6, .dashboard-numero, .fw-bold").forEach(t => {
           t.style.setProperty("color", "#0f172a", "important");
         });
@@ -957,3 +959,197 @@ document.addEventListener("DOMContentLoaded", function() {
     border: 1px solid #334155 !important;
   }
 </style>
+
+
+
+
+<style id="colores-tarjetas-resumen">
+  /* Base estilística para letras y números en tarjetas del dashboard */
+  a.dashboard-tarjeta {
+    border-radius: 12px !important;
+    text-decoration: none !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  /* 1. TOTAL EQUIPOS - Azul zafiro */
+  a.dashboard-tarjeta[href*="equipos"]:not([href*="estado="]):not([href*="bajas"]) {
+    border-left: 4px solid #2563eb !important;
+  }
+  a.dashboard-tarjeta[href*="equipos"]:not([href*="estado="]):not([href*="bajas"]) * {
+    color: #1d4ed8 !important;
+    -webkit-text-fill-color: #1d4ed8 !important;
+  }
+
+  /* 2. EN BUEN ESTADO - Verde esmeralda */
+  a.dashboard-tarjeta[href*="BUENO"] {
+    border-left: 4px solid #10b981 !important;
+  }
+  a.dashboard-tarjeta[href*="BUENO"] * {
+    color: #047857 !important;
+    -webkit-text-fill-color: #047857 !important;
+  }
+
+  /* 3. ESTADO REGULAR - Ámbar cálido */
+  a.dashboard-tarjeta[href*="REGULAR"] {
+    border-left: 4px solid #f59e0b !important;
+  }
+  a.dashboard-tarjeta[href*="REGULAR"] * {
+    color: #b45309 !important;
+    -webkit-text-fill-color: #b45309 !important;
+  }
+
+  /* 4. EQUIPOS MALOGRADOS - Rojo coral */
+  a.dashboard-tarjeta[href*="MALOGRADO"] {
+    border-left: 4px solid #ef4444 !important;
+  }
+  a.dashboard-tarjeta[href*="MALOGRADO"] * {
+    color: #b91c1c !important;
+    -webkit-text-fill-color: #b91c1c !important;
+  }
+
+  /* 5. EQUIPOS DADOS DE BAJA - Gris pizarra */
+  a.dashboard-tarjeta[href*="bajas"] {
+    border-left: 4px solid #64748b !important;
+  }
+  a.dashboard-tarjeta[href*="bajas"] * {
+    color: #334155 !important;
+    -webkit-text-fill-color: #334155 !important;
+  }
+
+  /* 6. PRÉSTAMOS ACTIVOS - Cian */
+  a.dashboard-tarjeta[href*="prestamos"] {
+    border-left: 4px solid #06b6d4 !important;
+  }
+  a.dashboard-tarjeta[href*="prestamos"] * {
+    color: #0e7490 !important;
+    -webkit-text-fill-color: #0e7490 !important;
+  }
+</style>
+
+
+
+
+<style id="fix-parches-blancos-home">
+  html.home-light .row,
+  html.home-light .container,
+  html.home-light .container-fluid,
+  html.home-light [class*="encabezado"],
+  html.home-light [class*="header"],
+  html.home-light [class*="banner"] {
+    background-color: #dcfce7 !important;
+  }
+  html.home-light .dashboard-tarjeta,
+  html.home-light .card,
+  html.home-light .card-body {
+    background-color: #d1fae5 !important;
+    border-color: #6ee7b7 !important;
+  }
+  html.home-light .dashboard-tarjeta *,
+  html.home-light .card-body * {
+    background-color: transparent !important;
+  }
+  html.home-dark .dashboard-tarjeta,
+  html.home-dark .card,
+  html.home-dark .card-body {
+    background-color: #113020 !important;
+    border-color: #1f5136 !important;
+  }
+  html.home-dark .dashboard-tarjeta *,
+  html.home-dark .card-body * {
+    background-color: transparent !important;
+  }
+</style>
+<script id="fix-parches-blancos-home-js">
+document.addEventListener("DOMContentLoaded", function() {
+  function pintarTodoVerde() {
+    const isDark = document.documentElement.classList.contains("home-dark") ||
+                   document.documentElement.getAttribute("data-bs-theme") === "dark";
+    const bgCard = isDark ? "#113020" : "#d1fae5";
+    const bgWrap = isDark ? "#091e13" : "#dcfce7";
+
+    document.querySelectorAll("div, section, header, nav, aside, main").forEach(el => {
+      if (el.classList.contains("btn") || el.classList.contains("badge") || el.closest("button") || el.closest(".badge")) return;
+      const comp = getComputedStyle(el).backgroundColor;
+      if (comp === "rgb(255, 255, 255)" || comp === "rgb(248, 249, 250)") {
+        const esTarjeta = el.classList.contains("dashboard-tarjeta") || el.classList.contains("card") || el.classList.contains("card-body");
+        el.style.setProperty("background-color", esTarjeta ? bgCard : bgWrap, "important");
+      }
+    });
+  }
+  pintarTodoVerde();
+  setTimeout(pintarTodoVerde, 250);
+});
+</script>
+
+<style id="fix-encabezado-verde-home">
+  /* Eliminar franjas blancas detrás de PANEL DE CONTROL y su subtítulo */
+  html.home-light h1,
+  html.home-light h2,
+  html.home-light .dashboard-subtitulo,
+  html.home-light [class*="titulo"],
+  html.home-light [class*="subtitulo"],
+  html.home-light [class*="encabezado"],
+  html.home-light .d-flex.justify-content-between,
+  html.home-light .mb-4 > div,
+  html.home-light .mb-3 > div {
+    background-color: transparent !important;
+  }
+
+  /* Asegurar contraste nítido en título y subtítulo sobre el verde menta */
+  html.home-light h1,
+  html.home-light h2 {
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  html.home-light .dashboard-subtitulo {
+    color: #14532d !important;
+    -webkit-text-fill-color: #14532d !important;
+  }
+</style>
+<script id="fix-encabezado-verde-home-js">
+document.addEventListener("DOMContentLoaded", function() {
+  function limpiarFranjasHeader() {
+    const isDark = document.documentElement.classList.contains("home-dark") ||
+                   document.documentElement.getAttribute("data-bs-theme") === "dark";
+    const bg = isDark ? "#091e13" : "#dcfce7";
+
+    document.querySelectorAll("h1, h2, h3, p, span, div").forEach(el => {
+      if (el.closest(".dashboard-tarjeta") || el.closest(".card") || el.classList.contains("btn") || el.classList.contains("badge")) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top < 260 && rect.height > 0 && rect.height < 120) {
+        const bgComp = getComputedStyle(el).backgroundColor;
+        if (bgComp === "rgb(255, 255, 255)" || bgComp === "rgb(248, 249, 250)") {
+          el.style.setProperty("background-color", bg, "important");
+        }
+      }
+    });
+  }
+  limpiarFranjasHeader();
+  setTimeout(limpiarFranjasHeader, 200);
+});
+</script>
+
+<script id="fix-tablas-verde-js">
+document.addEventListener("DOMContentLoaded", function() {
+  function aplicarVerdeTablas() {
+    const isDark = document.documentElement.classList.contains("home-dark") ||
+                   document.documentElement.getAttribute("data-bs-theme") === "dark";
+    const bgCelda = isDark ? "#113020" : "#ecfdf5";
+    const bgHead  = isDark ? "#17422c" : "#bbf7d0";
+    const txtColor = isDark ? "#f1f5f9" : "#0f172a";
+
+    document.querySelectorAll("table tbody tr, table tbody td").forEach(el => {
+      el.style.setProperty("background-color", bgCelda, "important");
+      el.style.setProperty("color", txtColor, "important");
+    });
+
+    document.querySelectorAll("table thead th").forEach(th => {
+      th.style.setProperty("background-color", bgHead, "important");
+      th.style.setProperty("color", isDark ? "#ffffff" : "#052e16", "important");
+    });
+  }
+  aplicarVerdeTablas();
+  setTimeout(aplicarVerdeTablas, 300);
+});
+</script>

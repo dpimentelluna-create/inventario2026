@@ -1189,7 +1189,7 @@ Usuario {{ $usuario->name }}
     }
 
     .usuario-show-card {
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -1289,7 +1289,7 @@ Usuario {{ $usuario->name }}
         height: 100%;
         min-height: 112px;
         padding: 16px;
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #e2e8f0;
         border-radius: 9px;
     }
@@ -1351,7 +1351,7 @@ Usuario {{ $usuario->name }}
 
     .usuario-seccion {
         padding: 18px;
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
     }
@@ -1476,7 +1476,7 @@ Usuario {{ $usuario->name }}
         min-width: 0;
         flex: 1;
         padding: 14px 15px;
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #e2e8f0;
         border-radius: 9px;
     }
@@ -1898,7 +1898,7 @@ Usuario {{ $usuario->name }}
     .auditoria-registro-anidado {
         min-width: 0;
         padding: 12px;
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 8px;
     }
@@ -2044,7 +2044,7 @@ Usuario {{ $usuario->name }}
     align-items: center;
     gap: 7px;
     padding: 8px 11px;
-    background: #fff;
+    background: #d1fae5;
     border: 1px solid #dee2e6;
     border-radius: 7px;
     color: #495057;

@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <span class="card-title">{{ __('Actualizar') }} Usuario</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <form method="POST" action="{{ route('usuarios.update', $usuario->id) }}" role="form" autocomplete="off">
                             @method('PUT')
                             @csrf
@@ -25,7 +25,7 @@
                     <div class="card-header">
                         <span class="card-title">Restablecer contraseña</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <p class="text-muted">
                             Define una contraseña nueva para este usuario. Deberá cambiarla la próxima vez que ingrese.
                         </p>

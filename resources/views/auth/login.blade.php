@@ -348,7 +348,7 @@
 
                         <div class="area-badge">
                             <i class="bi bi-cpu me-1"></i>
-                            COORDINACIÓN Y SERVICIO DE TECNOLOGÍA
+                            COORDINACIÓN DE INNOVACIÓN Y SOPORTE TECNOLÓGICO
                         </div>
                     </div>
                 </div>
@@ -482,3 +482,241 @@
         window.location.href = @json(url('/'));
     });
 </script>@endsection
+<!-- LOGIN_CREATIVE_COLOR_START -->
+<style id="login-creative-color-css">
+  *, *::before, *::after {
+    box-sizing: border-box !important;
+  }
+
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    background-color: #dcfce7 !important;
+    background-image: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 55%, #ecfdf5 100%) !important;
+  }
+
+  .login-page {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 16px !important;
+    margin: 0 !important;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 55%, #ecfdf5 100%) !important;
+    z-index: 999 !important;
+  }
+
+  .login-wrapper {
+    width: 100% !important;
+    max-width: 1000px !important;
+    margin: 0 auto !important;
+  }
+
+  .login-info {
+    background: linear-gradient(160deg, #ecfdf5 0%, #bbf7d0 100%) !important;
+    border-right: 1px solid #86efac !important;
+  }
+
+  .login-info h2,
+  .login-info p,
+  .login-info span,
+  .login-info p *,
+  .login-info span * {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    mix-blend-mode: normal !important;
+  }
+
+  .login-info h2 {
+    color: #064e3b !important;
+    -webkit-text-fill-color: #064e3b !important;
+  }
+
+  .login-info p,
+  .login-info span {
+    color: #065f46 !important;
+    -webkit-text-fill-color: #065f46 !important;
+  }
+
+  .logo-colegio {
+    background: #ffffff !important;
+    border: 2px solid #4ade80 !important;
+  }
+
+  .login-form h3 {
+    color: #064e3b !important;
+    -webkit-text-fill-color: #064e3b !important;
+  }
+
+  .login-form input[type="email"]:focus,
+  .login-form input[type="text"]:focus,
+  .login-form input[type="password"]:focus {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+    outline: none !important;
+  }
+
+  .login-form button[type="submit"],
+  .login-form input[type="submit"] {
+    background: linear-gradient(135deg, #16a34a 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 10px 20px -6px rgba(22, 163, 74, 0.42) !important;
+  }
+
+  .login-form button[type="submit"] *,
+  .login-form input[type="submit"] * {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+  }
+
+  .login-form button[type="submit"] svg,
+  .login-form button[type="submit"] img {
+    background: transparent !important;
+    background-color: transparent !important;
+    mix-blend-mode: screen !important;
+  }
+
+  .volver a:hover {
+    color: #15803d !important;
+  }
+</style>
+<script id="login-creative-color-js">
+(function () {
+  var nuevoTexto = "COORDINACIÓN DE INNOVACIÓN Y SOPORTE TECNOLÓGICO";
+  function limpiarLogin() {
+    var info = document.querySelector(".login-info");
+    if (info) {
+      var walker = document.createTreeWalker(info, NodeFilter.SHOW_TEXT, null, false);
+      var tNode;
+      while ((tNode = walker.nextNode())) {
+        if (/COORDINACI[ÓO]N\s+Y\s+SERVICIO\s+DE\s+TECNOLOG[ÍI]A/i.test(tNode.nodeValue)) {
+          tNode.nodeValue = tNode.nodeValue.replace(/COORDINACI[ÓO]N\s+Y\s+SERVICIO\s+DE\s+TECNOLOG[ÍI]A/gi, nuevoTexto);
+        }
+      }
+      var all = info.querySelectorAll("*");
+      for (var i = 0; i < all.length; i++) {
+        var el = all[i];
+        if (el.closest(".logo-colegio, [class*=badge], [class*=pill], button, a")) continue;
+        var txt = (el.textContent || "").trim();
+        if (txt.indexOf("Control y administraci") !== -1 || el.tagName === "P" || el.tagName === "SPAN") {
+          if (el.hasAttribute("style")) {
+            var st = el.getAttribute("style").replace(/background[^;]*;?/gi, "").replace(/box-shadow[^;]*;?/gi, "");
+            if (st.trim()) el.setAttribute("style", st);
+            else el.removeAttribute("style");
+          }
+          el.style.setProperty("background", "transparent", "important");
+          el.style.setProperty("background-color", "transparent", "important");
+          el.style.setProperty("background-image", "none", "important");
+          el.style.setProperty("box-shadow", "none", "important");
+          el.style.setProperty("mix-blend-mode", "normal", "important");
+        }
+      }
+    }
+    var btnKids = document.querySelectorAll(".login-form button[type=submit] *, .login-form input[type=submit] *");
+    for (var k = 0; k < btnKids.length; k++) {
+      var bEl = btnKids[k];
+      if (bEl.hasAttribute("style")) {
+        var bSt = bEl.getAttribute("style").replace(/background[^;]*;?/gi, "").replace(/box-shadow[^;]*;?/gi, "");
+        if (bSt.trim()) bEl.setAttribute("style", bSt);
+        else bEl.removeAttribute("style");
+      }
+      bEl.style.setProperty("background", "transparent", "important");
+      bEl.style.setProperty("background-color", "transparent", "important");
+      bEl.style.setProperty("background-image", "none", "important");
+      bEl.style.setProperty("box-shadow", "none", "important");
+    }
+  }
+  limpiarLogin();
+  document.addEventListener("DOMContentLoaded", limpiarLogin);
+  window.addEventListener("load", limpiarLogin);
+  setTimeout(limpiarLogin, 100);
+  setTimeout(limpiarLogin, 400);
+})();
+</script>
+<!-- LOGIN_CREATIVE_COLOR_END -->
+
+
+
+<style id="fix-checkbox-recordarme-check">
+  input[type="checkbox"][name="remember"],
+  input[type="checkbox"]#remember {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    position: relative !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    border: 2px solid #2563eb !important;
+    border-radius: 4px !important;
+    background-color: #ffffff !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+    display: inline-grid !important;
+    place-content: center !important;
+    transition: background-color 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  input[type="checkbox"][name="remember"]:focus,
+  input[type="checkbox"]#remember:focus {
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+  }
+
+  input[type="checkbox"][name="remember"]:checked,
+  input[type="checkbox"]#remember:checked {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+  }
+
+  /* Dibuja el check (✓) al marcarlo */
+  input[type="checkbox"][name="remember"]:checked::after,
+  input[type="checkbox"]#remember:checked::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 44% !important;
+    left: 50% !important;
+    width: 5px !important;
+    height: 10px !important;
+    border: solid #ffffff !important;
+    border-width: 0 2.2px 2.2px 0 !important;
+    transform: translate(-50%, -50%) rotate(42deg) !important;
+  }
+</style>
+
+<script id="fix-checkbox-recordarme-js">
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="remember"], input[type="checkbox"]#remember');
+    checkboxes.forEach((cb) => {
+      const label = cb.closest('label') || document.querySelector(`label[for="${cb.id}"]`);
+      if (label) {
+        label.style.cursor = 'pointer';
+        label.style.userSelect = 'none';
+      }
+      cb.addEventListener('change', () => {
+        cb.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  });
+</script>

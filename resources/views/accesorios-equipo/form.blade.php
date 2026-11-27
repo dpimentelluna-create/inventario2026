@@ -16,7 +16,7 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
 
-                <div class="card-header bg-white border-bottom py-3">
+                <div class="card-header bg-success-subtle border-bottom py-3">
                     <div class="d-flex align-items-center">
                         <div class="rounded-2 bg-primary bg-opacity-10 p-2 me-3">
                             <i class="fas fa-desktop text-primary"></i>
@@ -84,7 +84,7 @@
 
                                 <div id="resultados_equipos"
                                     class="list-group position-absolute w-100 shadow-sm"
-                                    style="z-index: 1000; display: none; max-height: 220px; overflow-y: auto; background: #fff;">
+                                    style="z-index: 1000; display: none; max-height: 220px; overflow-y: auto; background: #d1fae5;">
                                 </div>
                             </div>
                         </div>
@@ -130,7 +130,7 @@
 
     <div class="card border-0 shadow-sm rounded-3">
 
-        <div class="card-header bg-white border-bottom py-3">
+        <div class="card-header bg-success-subtle border-bottom py-3">
             <div class="d-flex align-items-center">
                 <div class="rounded-2 bg-info bg-opacity-10 p-2 me-3">
                     <i class="fas fa-map-marker-alt text-info"></i>
@@ -193,7 +193,7 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
 
-                <div class="card-header bg-white border-bottom py-3">
+                <div class="card-header bg-success-subtle border-bottom py-3">
                     <div class="d-flex align-items-center">
                         <div class="rounded-2 bg-success bg-opacity-10 p-2 me-3">
                             <i class="fas fa-plug text-success"></i>
@@ -233,7 +233,7 @@
                                     required>
 
                                 <div id="lista_tipos_accesorio"
-                                    class="position-absolute w-100 bg-white border rounded shadow-sm"
+                                    class="position-absolute w-100 bg-success-subtle border rounded shadow-sm"
                                     style="display: none; z-index: 1050; max-height: 220px; overflow-y: auto;">
                                 </div>
                             </div>
@@ -329,7 +329,7 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-3">
 
-                <div class="card-header bg-white border-bottom py-3">
+                <div class="card-header bg-success-subtle border-bottom py-3">
                     <div class="d-flex align-items-center">
                         <div class="rounded-2 bg-warning bg-opacity-10 p-2 me-3">
                             <i class="fas fa-clipboard-check text-warning"></i>

@@ -9,7 +9,7 @@
     <div class="row">
         <div class="col-12 col-xl-10 mx-auto">
             <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
+                <div class="card-header bg-success-subtle py-3">
                     <h5 class="mb-1 fw-bold">
                         <i class="bi bi-box-arrow-up-right me-2 text-success"></i>
                         REGISTRAR BAJA ADMINISTRATIVA
@@ -92,7 +92,7 @@
                                                value="{{ old('equipo_id') }}">
 
                                         <div id="lista_equipos"
-                                             class="position-absolute w-100 bg-white border rounded shadow-sm"
+                                             class="position-absolute w-100 bg-success-subtle border rounded shadow-sm"
                                              style="display:none; z-index:9999; max-height:260px; overflow-y:auto;">
                                         </div>
                                     </div>
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
             resultados.forEach(function (eq) {
                 const opcion = document.createElement('button');
                 opcion.type = 'button';
-                opcion.className = 'w-100 text-start border-0 border-bottom bg-white p-3';
+                opcion.className = 'w-100 text-start border-0 border-bottom bg-success-subtle p-3';
                 opcion.style.cursor = 'pointer';
 
                 const descripcion = [

@@ -524,7 +524,7 @@ return 'borde-neutro';
         flex-wrap: wrap;
         gap: 1rem;
         padding: 1.25rem 1.5rem;
-        background: #fff;
+        background: #d1fae5;
         border-bottom: 1px solid #e9ecef;
         border-radius: 12px 12px 0 0;
     }
@@ -585,7 +585,7 @@ return 'borde-neutro';
     /* CUERPO */
     .cuerpo-show {
         padding: 1.5rem;
-        background: #fff;
+        background: #d1fae5;
         border-radius: 0 0 12px 12px;
     }
 
@@ -912,7 +912,7 @@ return 'borde-neutro';
     }
 
     .acta-descarga-panel {
-        background: #fff;
+        background: #d1fae5;
         border-radius: 12px;
         padding: 24px;
         width: 100%;
@@ -945,7 +945,7 @@ return 'borde-neutro';
         }
 
         body {
-            background: #fff !important;
+            background: #d1fae5 !important;
         }
 
         .card,
@@ -1403,37 +1403,37 @@ return 'borde-neutro';
   html.dark .card,
   html.dark .card-body,
   html.dark .card-header,
-  html.dark .bg-white,
+  html.dark .bg-success-subtle,
   html.dark .bg-light,
-  html.dark [class*="bg-white"],
+  html.dark [class*="bg-success-subtle"],
   html.dark [class*="bg-light"],
   html[data-bs-theme="dark"] .card,
   html[data-bs-theme="dark"] .card-body,
   html[data-bs-theme="dark"] .card-header,
-  html[data-bs-theme="dark"] .bg-white,
+  html[data-bs-theme="dark"] .bg-success-subtle,
   html[data-bs-theme="dark"] .bg-light,
-  html[data-bs-theme="dark"] [class*="bg-white"],
+  html[data-bs-theme="dark"] [class*="bg-success-subtle"],
   html[data-bs-theme="dark"] [class*="bg-light"],
   body.dark .card,
   body.dark .card-body,
   body.dark .card-header,
-  body.dark .bg-white,
+  body.dark .bg-success-subtle,
   body.dark .bg-light,
-  body.dark [class*="bg-white"],
+  body.dark [class*="bg-success-subtle"],
   body.dark [class*="bg-light"],
   body.dark-mode .card,
   body.dark-mode .card-body,
   body.dark-mode .card-header,
-  body.dark-mode .bg-white,
+  body.dark-mode .bg-success-subtle,
   body.dark-mode .bg-light,
-  body.dark-mode [class*="bg-white"],
+  body.dark-mode [class*="bg-success-subtle"],
   body.dark-mode [class*="bg-light"],
   body.tema-oscuro-activo .card,
   body.tema-oscuro-activo .card-body,
   body.tema-oscuro-activo .card-header,
-  body.tema-oscuro-activo .bg-white,
+  body.tema-oscuro-activo .bg-success-subtle,
   body.tema-oscuro-activo .bg-light,
-  body.tema-oscuro-activo [class*="bg-white"],
+  body.tema-oscuro-activo [class*="bg-success-subtle"],
   body.tema-oscuro-activo [class*="bg-light"] {
     background-color: #111827 !important;
     border-color: #1f2937 !important;

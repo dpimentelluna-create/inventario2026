@@ -70,7 +70,7 @@
         }
 
         .accesorio-panel {
-            background: #fff;
+            background: #d1fae5;
             border: 1px solid #dee2e6;
             border-left: 5px solid #0d6efd;
             border-radius: 10px;
@@ -241,7 +241,7 @@
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
             }
 
             body * {
@@ -264,7 +264,7 @@
                 border-radius: 0 !important;
                 box-shadow: none !important;
                 overflow: visible !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
             }
 
             #accesorio-ficha-print .no-print,

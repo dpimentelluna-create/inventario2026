@@ -15,7 +15,7 @@
                         Editar Ubicación
                     </h4>
                 </div>
-                <div class="card-body bg-white">
+                <div class="card-body bg-success-subtle">
                     <form method="POST" action="{{ route('ubicaciones.update', $ubicacione->id) }}" role="form">
                         @method('PATCH')
                         @csrf

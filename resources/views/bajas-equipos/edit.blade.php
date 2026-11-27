@@ -44,7 +44,7 @@
         <div class="col-12 col-xl-10 mx-auto">
             <div class="card shadow-sm">
 
-                <div class="card-header bg-white py-3">
+                <div class="card-header bg-success-subtle py-3">
                     <h5 class="mb-1 fw-bold">
                         <i class="bi bi-pencil-square me-2 text-primary"></i>
                         EDITAR BAJA ADMINISTRATIVA

@@ -403,7 +403,7 @@
        TARJETA PRINCIPAL
     ========================================= */
     .equipo-index-card {
-        background: #fff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -504,7 +504,7 @@
         border-radius: 5px;
         color: #343a40;
         font-size: 0.82rem;
-        background-color: #fff;
+        background-color: #ecfdf5;
     }
 
     .panel-filtros-equipos .input-group > .form-control,
@@ -576,7 +576,7 @@
         padding: 7px 12px;
         border: 1px solid #ced4da;
         border-radius: 6px;
-        background: #fff;
+        background: #d1fae5;
         color: #495057;
         font-weight: 600;
         font-size: 0.76rem;
@@ -619,7 +619,7 @@
         padding: 7px 13px;
         border: 1px solid #198754;
         border-radius: 7px;
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
         font-size: 0.78rem;
         font-weight: 700;
@@ -671,7 +671,7 @@
     .btn-filtros-equipos:hover .badge-filtros-contador,
     .btn-filtros-equipos.filtros-abiertos .badge-filtros-contador {
         border-color: rgba(255, 255, 255, 0.45);
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
     }
 
@@ -755,7 +755,7 @@
         border: 1px solid #ced4da;
         border-radius: 6px;
         padding: 5px 9px;
-        background: #fff;
+        background: #d1fae5;
         color: #212529;
     }
 
@@ -953,7 +953,7 @@
     padding: 30px 28px;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    background: #fff;
+    background: #d1fae5;
     color: #334155;
     text-align: center;
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);

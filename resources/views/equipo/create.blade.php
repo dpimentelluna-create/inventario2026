@@ -20,7 +20,7 @@
             </div>
 
             <div class="card shadow-sm">
-                <div class="card-body bg-white">
+                <div class="card-body bg-success-subtle">
                     <form method="POST" action="{{ route('equipos.store') }}" role="form">
                         @csrf
                         @include('equipo.form')

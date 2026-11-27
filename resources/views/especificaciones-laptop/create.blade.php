@@ -13,7 +13,7 @@
                     <div class="card-header">
                         <span class="card-title">{{ __('Crear') }} Especificaciones Laptop</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <form method="POST" action="{{ route('especificaciones-laptop.store') }}"  role="form" enctype="multipart/form-data">
                             @csrf
 

@@ -29,7 +29,7 @@
                         </div>
                     @endif
 
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <div class="table-responsive">
                             <table id = "example" class="table table-striped table-hover">
                                 <thead class="thead">

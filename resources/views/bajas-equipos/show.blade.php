@@ -415,7 +415,7 @@
             flex-wrap: wrap;
             gap: 1rem;
             padding: 1.25rem 1.5rem;
-            background: #fff;
+            background: #d1fae5;
             border-bottom: 1px solid #e9ecef;
         }
 
@@ -460,7 +460,7 @@
 
         .cuerpo-show {
             padding: 1.5rem;
-            background: #fff;
+            background: #d1fae5;
         }
 
         .etiqueta {
@@ -518,7 +518,7 @@
 
         .bloque-especificaciones {
             padding: 1.1rem;
-            background: #fff;
+            background: #d1fae5;
             border: 1px solid #e3e7eb;
             border-radius: 9px;
         }
@@ -632,7 +632,7 @@
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -677,7 +677,7 @@
             #baja-ficha-print .card-body,
             #baja-ficha-print .bloque-dato,
             #baja-ficha-print .bloque-especificaciones {
-                background: #fff !important;
+                background: #d1fae5 !important;
                 box-shadow: none !important;
             }
 
@@ -702,7 +702,7 @@
             #baja-ficha-print .tabla-responsables-moderna td {
                 padding: 5px 7px !important;
                 font-size: 9pt !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
             }
 
             #baja-ficha-print .tabla-responsables-moderna .fila-grupo td {
@@ -722,12 +722,12 @@
             #baja-ficha-print .badge {
                 border: 1px solid #adb5bd !important;
                 color: #212529 !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
             }
 
             #baja-ficha-print .icono-encabezado {
                 color: #212529 !important;
-                background: #fff !important;
+                background: #d1fae5 !important;
                 border: 1px solid #adb5bd !important;
             }
 

@@ -13,7 +13,7 @@
                     <div class="card-header">
                         <span class="card-title">{{ __('Crear') }} Tipos Equipo</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <form method="POST" action="{{ route('tipos-equipo.store') }}"  role="form" enctype="multipart/form-data">
                             @csrf
 

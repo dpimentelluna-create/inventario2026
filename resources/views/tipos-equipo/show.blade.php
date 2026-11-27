@@ -17,7 +17,7 @@
             gap: 15px;
             flex-wrap: wrap;
             padding: 22px 24px;
-            background: #fff;
+            background: #d1fae5;
             border: 1px solid #e5e9ef;
             border-radius: 12px;
             margin-bottom: 22px;
@@ -37,7 +37,7 @@
         }
 
         .tipo-panel {
-            background: #fff;
+            background: #d1fae5;
             border: 1px solid #e5e9ef;
             border-radius: 12px;
             margin-bottom: 22px;
@@ -63,7 +63,7 @@
         .tipo-card {
             height: 100%;
             padding: 20px;
-            background: #fff;
+            background: #d1fae5;
             border: 1px solid #e5e9ef;
             border-radius: 12px;
             border-left: 4px solid #64748b;
@@ -254,7 +254,7 @@
             }
 
             body {
-                background: #fff !important;
+                background: #d1fae5 !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }

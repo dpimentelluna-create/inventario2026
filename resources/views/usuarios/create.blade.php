@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <span class="card-title">{{ __('Registrar') }} Usuario</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         <form method="POST" action="{{ route('usuarios.store') }}" role="form" autocomplete="off">
                             @csrf
                             @include('usuarios.form')

@@ -420,7 +420,7 @@
        TARJETA PRINCIPAL
     ========================================= */
     .accesorio-index-card {
-        background: #fff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -518,7 +518,7 @@
         border-radius: 5px;
         color: #343a40;
         font-size: 0.82rem;
-        background-color: #fff;
+        background-color: #ecfdf5;
     }
 
     .panel-filtros-accesorios .input-group > .form-control,
@@ -575,7 +575,7 @@
         padding: 7px 12px;
         border: 1px solid #ced4da;
         border-radius: 6px;
-        background: #fff;
+        background: #d1fae5;
         color: #495057;
         font-weight: 600;
         font-size: 0.76rem;
@@ -618,7 +618,7 @@
         padding: 7px 13px;
         border: 1px solid #198754;
         border-radius: 7px;
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
         font-size: 0.78rem;
         font-weight: 700;
@@ -670,7 +670,7 @@
     .btn-filtros-accesorios:hover .badge-filtros-contador,
     .btn-filtros-accesorios.filtros-abiertos .badge-filtros-contador {
         border-color: rgba(255, 255, 255, 0.45);
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
     }
 
@@ -754,7 +754,7 @@
         border: 1px solid #ced4da;
         border-radius: 6px;
         padding: 5px 9px;
-        background: #fff;
+        background: #d1fae5;
         color: #212529;
     }
 
@@ -946,7 +946,7 @@
     padding: 16px;
     border: 1px solid #e2e8e5;
     border-radius: 10px;
-    background: #fff;
+    background: #d1fae5;
     box-shadow: 0 2px 6px rgba(0, 0, 0, .04);
     transition: transform .2s ease, box-shadow .2s ease;
 }

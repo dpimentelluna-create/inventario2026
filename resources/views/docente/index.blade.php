@@ -99,7 +99,7 @@
        TARJETA PRINCIPAL
     ========================================= */
     .docente-index-card {
-        background: #fff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -156,7 +156,7 @@
         border: 1px solid #ced4da;
         border-radius: 6px;
         padding: 6px 10px;
-        background: #fff;
+        background: #d1fae5;
         color: #212529;
     }
 

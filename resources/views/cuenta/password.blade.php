@@ -12,7 +12,7 @@
                     <div class="card-header">
                         <span class="card-title">Cambiar contraseña</span>
                     </div>
-                    <div class="card-body bg-white">
+                    <div class="card-body bg-success-subtle">
                         @if ($obligatorio)
                             <div class="alert alert-warning" role="alert">
                                 Por seguridad, debes definir tu propia contraseña antes de usar el sistema.

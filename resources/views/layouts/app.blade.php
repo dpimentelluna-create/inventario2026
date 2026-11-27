@@ -129,6 +129,9 @@
         #sidebar.collapsed .user-dropdown-container .dropdown-toggle .rounded-circle {
             margin-right: 0 !important;
         }
+        #sidebar { overflow-x: hidden !important; scrollbar-width: none !important; }
+        #sidebar::-webkit-scrollbar { display: none !important; }
+        #sidebar.collapsed .sidebar-brand img { display: none !important; }
 
         .sidebar-link {
             display: flex;
@@ -260,11 +263,11 @@
 
         /* SOLUCIÓN DEFINITIVA: FORZAR TARJETAS Y CUADROS BLANCOS A MODO OSCURO */
         html[data-bs-theme="dark"] .card,
-        html[data-bs-theme="dark"] .bg-white,
-        html[data-bs-theme="dark"] [class*="bg-white"],
+        html[data-bs-theme="dark"] .bg-success-subtle,
+        html[data-bs-theme="dark"] [class*="bg-success-subtle"],
         html.dark .card,
-        html.dark .bg-white,
-        html.dark [class*="bg-white"] {
+        html.dark .bg-success-subtle,
+        html.dark [class*="bg-success-subtle"] {
             background-color: #1e293b !important;
             color: #e2e8f0 !important;
             border-color: #334155 !important;
@@ -336,7 +339,7 @@
         }
 
         [data-bs-theme="light"] #sidebar {
-            background-color: #ffffff !important;
+            background-color: #ecfdf5 !important;
             border-right: 1px solid #e2e8f0 !important;
             color: #334155 !important;
         }
@@ -359,7 +362,7 @@
         [data-bs-theme="light"] .card,
         [data-bs-theme="light"] .card-body,
         [data-bs-theme="light"] .dropdown-menu {
-            background-color: #ffffff !important;
+            background-color: #ecfdf5 !important;
             color: #334155 !important;
             border-color: #e2e8f0 !important;
         }
@@ -424,28 +427,28 @@
   }
 
   /* Numeros y textos dentro de tarjetas/cajas blancas */
-  [class*="bg-white"]:not(table):not(tr):not(td):not(th) {
-    background-color: #ffffff !important;
+  [class*="bg-success-subtle"]:not(table):not(tr):not(td):not(th) {
+    background-color: #ecfdf5 !important;
     color: #0f172a !important;
     opacity: 1 !important;
   }
-  [class*="bg-white"]:not(table):not(tr):not(td):not(th) *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path) {
+  [class*="bg-success-subtle"]:not(table):not(tr):not(td):not(th) *:not(.btn):not(button):not(.badge):not(i):not(svg):not(path) {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
     opacity: 1 !important;
   }
 
   /* Controles de tabla y etiquetas sobre fondo oscuro (Mostrar, registros por pagina, Buscar) */
-  html.dark label:not([class*="bg-white"] *),
+  html.dark label:not([class*="bg-success-subtle"] *),
   html.dark .dataTables_wrapper label, html.dark .dataTables_wrapper .dataTables_info,
   html.dark .dataTables_wrapper .dataTables_length, html.dark .dataTables_wrapper .dataTables_filter,
-  body.dark label:not([class*="bg-white"] *),
+  body.dark label:not([class*="bg-success-subtle"] *),
   body.dark .dataTables_wrapper label, body.dark .dataTables_wrapper .dataTables_info,
   body.dark .dataTables_wrapper .dataTables_length, body.dark .dataTables_wrapper .dataTables_filter,
-  body.dark-mode label:not([class*="bg-white"] *),
+  body.dark-mode label:not([class*="bg-success-subtle"] *),
   body.dark-mode .dataTables_wrapper label, body.dark-mode .dataTables_wrapper .dataTables_info,
   body.dark-mode .dataTables_wrapper .dataTables_length, body.dark-mode .dataTables_wrapper .dataTables_filter,
-  body.tema-oscuro-activo label:not([class*="bg-white"] *),
+  body.tema-oscuro-activo label:not([class*="bg-success-subtle"] *),
   body.tema-oscuro-activo .dataTables_wrapper label, body.tema-oscuro-activo .dataTables_wrapper .dataTables_info,
   body.tema-oscuro-activo .dataTables_wrapper .dataTables_length, body.tema-oscuro-activo .dataTables_wrapper .dataTables_filter {
     color: #e2e8f0 !important;
@@ -490,9 +493,9 @@
   }
 
   /* Numeros grandes y textos en tarjetas claras (Accesorios, Dashboard, etc.) */
-  [class*="bg-white"] h1, [class*="bg-white"] h2, [class*="bg-white"] h3, [class*="bg-white"] h4,
-  [class*="bg-white"] p, [class*="bg-white"] span:not(.badge), [class*="bg-white"] div,
-  .card.bg-white *, .card[style*="background: #fff"] *, .card[style*="background-color: #fff"] *,
+  [class*="bg-success-subtle"] h1, [class*="bg-success-subtle"] h2, [class*="bg-success-subtle"] h3, [class*="bg-success-subtle"] h4,
+  [class*="bg-success-subtle"] p, [class*="bg-success-subtle"] span:not(.badge), [class*="bg-success-subtle"] div,
+  .card.bg-success-subtle *, .card[style*="background: #d1fae5"] *, .card[style*="background-color: #ecfdf5"] *,
   .card[style*="background: white"] *, .card[style*="background-color: white"] * {
     color: #0f172a !important;
     -webkit-text-fill-color: #0f172a !important;
@@ -734,9 +737,9 @@
   }
 
   /* Tarjetas o cajas blancas dentro de modo oscuro: evitar texto blanco sobre blanco */
-  html.dark main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
-  body.dark main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
-  html[data-bs-theme="dark"] main :is(.bg-white, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]) {
+  html.dark main :is(.bg-success-subtle, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
+  body.dark main :is(.bg-success-subtle, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]),
+  html[data-bs-theme="dark"] main :is(.bg-success-subtle, [style*="background:#fff"], [style*="background: #fff"], [style*="background:#ffffff"], [style*="background: #ffffff"], [style*="background-color:#fff"], [style*="background-color: #fff"], [style*="background-color:#ffffff"], [style*="background-color: #ffffff"]) {
     background-color: #111827 !important;
     color: #f8fafc !important;
     border-color: #334155 !important;
@@ -750,85 +753,7 @@
 <!-- INV_THEME_FIX_CSS_END -->
 
 <!-- FIX_FILTROS_EXPORTAR_START -->
-<style id="fix-filtros-exportar-css">
-  html.dark :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item),
-  body.dark :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item),
-  html[data-bs-theme="dark"] :is([id*="filtro" i], [class*="filtro" i], button, a, .dropdown-menu, .dropdown-item) {
-    color: inherit;
-  }
-
-  html.dark .dropdown-menu a,
-  html.dark .dropdown-menu button,
-  html.dark .dropdown-item,
-  body.dark .dropdown-menu a,
-  body.dark .dropdown-menu button,
-  body.dark .dropdown-item,
-  html[data-bs-theme="dark"] .dropdown-menu a,
-  html[data-bs-theme="dark"] .dropdown-menu button,
-  html[data-bs-theme="dark"] .dropdown-item {
-    color: #f8fafc !important;
-    -webkit-text-fill-color: #f8fafc !important;
-    opacity: 1 !important;
-  }
-
-  html.dark .dropdown-menu a:hover,
-  html.dark .dropdown-menu button:hover,
-  html.dark .dropdown-item:hover,
-  body.dark .dropdown-menu a:hover,
-  body.dark .dropdown-menu button:hover,
-  body.dark .dropdown-item:hover,
-  html[data-bs-theme="dark"] .dropdown-menu a:hover,
-  html[data-bs-theme="dark"] .dropdown-menu button:hover,
-  html[data-bs-theme="dark"] .dropdown-item:hover {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-  }
-</style>
-<script id="fix-filtros-exportar-js">
-(function () {
-  function esOscuro() {
-    var h = document.documentElement, b = document.body;
-    return h.classList.contains("dark") || (b && b.classList.contains("dark")) || h.getAttribute("data-bs-theme") === "dark";
-  }
-  function ajustarPuntual() {
-    if (!esOscuro()) return;
-    var nodos = document.querySelectorAll("button, a, .dropdown-item, [role=\"menuitem\"]");
-    for (var i = 0; i < nodos.length; i++) {
-      var el = nodos[i];
-      var txt = (el.textContent || "").trim().toLowerCase();
-      var enDropdown = !!el.closest(".dropdown-menu, [class*=\"dropdown\"]");
-      var esFiltro = txt === "filtros" || txt.indexOf("filtros") === 0;
-      var esExportItem = enDropdown && (txt.indexOf("excel") !== -1 || txt.indexOf("pdf") !== -1);
-      if (esFiltro || esExportItem) {
-        el.style.setProperty("color", "#f8fafc", "important");
-        el.style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
-        el.style.setProperty("opacity", "1", "important");
-        var hijos = el.querySelectorAll("span, i, svg");
-        for (var j = 0; j < hijos.length; j++) {
-          hijos[j].style.setProperty("color", "#f8fafc", "important");
-          hijos[j].style.setProperty("-webkit-text-fill-color", "#f8fafc", "important");
-          hijos[j].style.setProperty("opacity", "1", "important");
-        }
-      }
-    }
-  }
-  ajustarPuntual();
-  document.addEventListener("DOMContentLoaded", ajustarPuntual);
-  document.addEventListener("click", function () {
-    setTimeout(ajustarPuntual, 30);
-  });
-})();
-</script>
 <!-- FIX_FILTROS_EXPORTAR_END --><!-- FIX_HAMBURGER_LINES_START -->
-<style id="fix-hamburger-lines-css">
-  html.dark :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i),
-  body.dark :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i),
-  html[data-bs-theme="dark"] :is(aside, nav, .sidebar) :is([data-sidebar-toggle], .sidebar-toggle, .hamburger, .menu-toggle, button[aria-label*="menu" i], button[aria-label*="sidebar" i], button[title*="menu" i]) :is(svg, path, line, rect, i) {
-    color: #f8fafc !important;
-    stroke: #f8fafc !important;
-  }
-</style>
 <!-- FIX_HAMBURGER_LINES_END --></head>
 
 <body>
@@ -959,7 +884,7 @@
                 <div class="pt-2 border-top mt-2 flex-shrink-0">
                     <button id="btn-switch-theme"
                         class="btn btn-sm btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-2 mb-2"
-                        type="button" title="Cambiar Tema" onclick="toggleThemeDirecto()">
+                        type="button" title="Cambiar Tema" onclick="toggleThemeDirecto()" style="display:none !important;">
                         <i id="themeIcon" class="fas fa-moon me-1"></i>
                         <span id="themeText" class="sidebar-text">Modo Oscuro</span>
                     </button>
@@ -1229,277 +1154,7 @@
     </script>
     @endif
 
-    @stack('scripts')<style id="fix-both-modes-clean">
-  /* MODO CLARO: cabecera de tabla clara con texto oscuro legible */
-  html:not(.dark):not([data-bs-theme="dark"]) table thead,
-  html:not(.dark):not([data-bs-theme="dark"]) table thead tr,
-  html:not(.dark):not([data-bs-theme="dark"]) table thead th,
-  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead,
-  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead tr,
-  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead th {
-    background-color: #e2e8f0 !important;
-    color: #0f172a !important;
-    border-color: #cbd5e1 !important;
-    opacity: 1 !important;
-  }
-
-  html:not(.dark):not([data-bs-theme="dark"]) table thead th *,
-  body:not(.dark):not(.dark-mode):not(.tema-oscuro-activo):not([data-bs-theme="dark"]) table thead th * {
-    color: #0f172a !important;
-    fill: #0f172a !important;
-    opacity: 1 !important;
-  }
-
-  /* MODO OSCURO: cabecera de tabla oscura con texto blanco y titulos visibles */
-  html.dark table thead,
-  html.dark table thead tr,
-  html.dark table thead th,
-  html[data-bs-theme="dark"] table thead,
-  html[data-bs-theme="dark"] table thead tr,
-  html[data-bs-theme="dark"] table thead th,
-  body.dark table thead,
-  body.dark table thead tr,
-  body.dark table thead th,
-  body.dark-mode table thead,
-  body.dark-mode table thead tr,
-  body.dark-mode table thead th,
-  body.tema-oscuro-activo table thead,
-  body.tema-oscuro-activo table thead tr,
-  body.tema-oscuro-activo table thead th {
-    background-color: #0f172a !important;
-    color: #ffffff !important;
-    border-color: #334155 !important;
-    opacity: 1 !important;
-  }
-
-  html.dark table thead th *,
-  html[data-bs-theme="dark"] table thead th *,
-  body.dark table thead th *,
-  body.dark-mode table thead th *,
-  body.tema-oscuro-activo table thead th * {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-    opacity: 1 !important;
-  }
-
-  /* Botones de acciones en tabla: conservar visibilidad clara en ambos modos */
-  table tbody td .btn,
-  table tbody td button,
-  table tbody td a.btn {
-    opacity: 1 !important;
-  }
-</style>
-<script id="fix-both-modes-clean">
-(function() {
-  function detectDarkMode() {
-    var attrHtml = (document.documentElement.getAttribute("data-bs-theme") || "").toLowerCase();
-    var attrBody = (document.body && document.body.getAttribute("data-bs-theme") || "").toLowerCase();
-    var cls = ((document.documentElement.className || "") + " " + ((document.body && document.body.className) || "")).toLowerCase();
-    var btnText = (document.body && document.body.innerText) || "";
-    if (attrHtml === "dark" || attrBody === "dark") return true;
-    if (cls.indexOf("dark") !== -1 || cls.indexOf("tema-oscuro") !== -1) return true;
-    if (btnText.indexOf("Modo Claro") !== -1) return true;
-    return false;
-  }
-
-  function applyThemeLegibility() {
-    var isDark = detectDarkMode();
-
-    // 1. Encabezado de tabla segun modo claro u oscuro
-    document.querySelectorAll("table thead th").forEach(function(th) {
-      var bg = isDark ? "#0f172a" : "#e2e8f0";
-      var fg = isDark ? "#ffffff" : "#0f172a";
-      th.style.setProperty("background-color", bg, "important");
-      th.style.setProperty("color", fg, "important");
-      th.style.setProperty("opacity", "1", "important");
-      th.querySelectorAll("*").forEach(function(ch) {
-        ch.style.setProperty("color", fg, "important");
-        ch.style.setProperty("fill", fg, "important");
-        ch.style.setProperty("opacity", "1", "important");
-      });
-    });
-
-    // 2. Boton FILTROS fuera de la tabla
-    document.querySelectorAll("button, a").forEach(function(el) {
-      if (el.closest("table")) return;
-      var txt = (el.innerText || el.textContent || "").trim().toUpperCase();
-      if (txt.indexOf("FILTRO") === -1 || txt.length > 35) return;
-
-      var bg = isDark ? "#1e293b" : "#f1f5f9";
-      var fg = isDark ? "#f8fafc" : "#0f172a";
-      var bd = isDark ? "#64748b" : "#cbd5e1";
-
-      el.style.setProperty("background-color", bg, "important");
-      el.style.setProperty("border-color", bd, "important");
-      el.style.setProperty("color", fg, "important");
-      el.style.setProperty("opacity", "1", "important");
-
-      el.querySelectorAll("*").forEach(function(ch) {
-        ch.style.setProperty("color", fg, "important");
-        ch.style.setProperty("fill", fg, "important");
-        ch.style.setProperty("stroke", fg, "important");
-        ch.style.setProperty("opacity", "1", "important");
-      });
-    });
-
-    // 3. Titulos, subtitulos y etiquetas fuera de tablas/botones/badges
-    document.querySelectorAll("h1, h2, h3, h4, h5, h6, p, label, span, div").forEach(function(el) {
-      if (el.closest("table") || el.closest("button") || el.closest("a") || el.closest(".badge") || el.closest(".btn")) return;
-      var hasDirectText = Array.prototype.some.call(el.childNodes, function(n) {
-        return n.nodeType === 3 && n.textContent.trim().length > 0;
-      });
-      if (!hasDirectText) return;
-
-      var cs = window.getComputedStyle(el);
-      var col = cs.color || "";
-      var m = col.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-      if (!m) return;
-
-      var r = parseInt(m[1], 10), g = parseInt(m[2], 10), b = parseInt(m[3], 10);
-
-      if (isDark) {
-        // En modo oscuro, si el texto es oscuro o transparente, volverlo claro
-        if ((r < 115 && g < 115 && b < 115) || parseFloat(cs.opacity || "1") < 0.5) {
-          var targetDark = /^H[1-6]$/.test(el.tagName) ? "#ffffff" : "#e2e8f0";
-          el.style.setProperty("color", targetDark, "important");
-          el.style.setProperty("opacity", "1", "important");
-        }
-      } else {
-        // En modo claro, si el texto es muy claro (blanco/gris claro), volverlo oscuro
-        if ((r > 210 && g > 210 && b > 210) || parseFloat(cs.opacity || "1") < 0.5) {
-          var targetLight = /^H[1-6]$/.test(el.tagName) ? "#0f172a" : "#334155";
-          el.style.setProperty("color", targetLight, "important");
-          el.style.setProperty("opacity", "1", "important");
-        }
-      }
-    });
-  }
-
-  applyThemeLegibility();
-  document.addEventListener("DOMContentLoaded", function() {
-    applyThemeLegibility();
-    setTimeout(applyThemeLegibility, 200);
-    setTimeout(applyThemeLegibility, 650);
-  });
-  window.addEventListener("load", applyThemeLegibility);
-  document.addEventListener("click", function() {
-    setTimeout(applyThemeLegibility, 90);
-  });
-})();
-</script><style id="fix-btn-accion-dark">
-  /* Solo en Modo Oscuro: iconos dentro de .btn-accion bien visibles */
-  html.dark .btn-accion,
-  html.dark .btn-accion i,
-  html.dark .btn-accion svg,
-  html[data-bs-theme="dark"] .btn-accion,
-  html[data-bs-theme="dark"] .btn-accion i,
-  html[data-bs-theme="dark"] .btn-accion svg,
-  body.dark .btn-accion,
-  body.dark .btn-accion i,
-  body.dark .btn-accion svg,
-  body.dark-mode .btn-accion,
-  body.dark-mode .btn-accion i,
-  body.dark-mode .btn-accion svg,
-  body.tema-oscuro-activo .btn-accion,
-  body.tema-oscuro-activo .btn-accion i,
-  body.tema-oscuro-activo .btn-accion svg {
-    opacity: 1 !important;
-  }
-
-  html.dark .btn-accion i,
-  html.dark .btn-accion svg,
-  html[data-bs-theme="dark"] .btn-accion i,
-  html[data-bs-theme="dark"] .btn-accion svg,
-  body.dark .btn-accion i,
-  body.dark .btn-accion svg,
-  body.dark-mode .btn-accion i,
-  body.dark-mode .btn-accion svg,
-  body.tema-oscuro-activo .btn-accion i,
-  body.tema-oscuro-activo .btn-accion svg {
-    color: #0f172a !important;
-    fill: #0f172a !important;
-    stroke: #0f172a !important;
-  }
-</style>
-<script id="fix-btn-accion-dark">
-(function() {
-  function esOscuro() {
-    var hAttr = (document.documentElement.getAttribute("data-bs-theme") || "").toLowerCase();
-    var bAttr = (document.body && document.body.getAttribute("data-bs-theme") || "").toLowerCase();
-    var cls = ((document.documentElement.className || "") + " " + ((document.body && document.body.className) || "")).toLowerCase();
-    var txt = (document.body && document.body.innerText) || "";
-    return hAttr === "dark" || bAttr === "dark" || cls.indexOf("dark") !== -1 || cls.indexOf("tema-oscuro") !== -1 || txt.indexOf("Modo Claro") !== -1;
-  }
-
-  function aplicarAjustePuntual() {
-    if (!esOscuro()) return;
-
-    // 1. Iconos dentro de .btn-accion (y botones de acciones en tbody)
-    document.querySelectorAll(".btn-accion, table tbody td .btn, table tbody td button, table tbody td a").forEach(function(el) {
-      el.style.setProperty("opacity", "1", "important");
-      el.querySelectorAll("i, svg, path").forEach(function(ic) {
-        ic.style.setProperty("color", "#0f172a", "important");
-        ic.style.setProperty("fill", "#0f172a", "important");
-        ic.style.setProperty("stroke", "#0f172a", "important");
-        ic.style.setProperty("opacity", "1", "important");
-      });
-    });
-
-    // 2. Titulo PRÉSTAMOS y subtitulo "Consulta y administra los préstamos..."
-    document.querySelectorAll("h1, h2, h3, h4, p, span, div, small, label").forEach(function(el) {
-      if (el.closest("table") || el.closest("button") || el.closest("a") || el.closest(".btn") || el.closest(".badge")) return;
-      var t = (el.textContent || "").trim();
-      var up = t.toUpperCase();
-      if (up === "PRÉSTAMOS" || up === "PRESTAMOS") {
-        el.style.setProperty("color", "#ffffff", "important");
-        el.style.setProperty("opacity", "1", "important");
-      } else if (t.indexOf("Consulta y administra los préstamos") !== -1 || t.indexOf("Consulta y administra los prestamos") !== -1) {
-        el.style.setProperty("color", "#cbd5e1", "important");
-        el.style.setProperty("opacity", "1", "important");
-      }
-    });
-  }
-
-  aplicarAjustePuntual();
-  document.addEventListener("DOMContentLoaded", function() {
-    aplicarAjustePuntual();
-    setTimeout(aplicarAjustePuntual, 250);
-    setTimeout(aplicarAjustePuntual, 700);
-  });
-  window.addEventListener("load", aplicarAjustePuntual);
-})();
-</script>
-<!-- FIX_ALL_THEMES_AUTO_START -->
-<style id="fix-solo-boton-tema-css">
-  [id*="tema"], [id*="theme"], [class*="btn-tema"], [class*="theme-toggle"], [data-theme-toggle] {
-    display: none !important;
-  }
-
-  main, main * {
-    background-color: #ffffff !important;
-    background-image: none !important;
-    color: #0f172a !important;
-    -webkit-text-fill-color: #0f172a !important;
-    border-color: #cbd5e1 !important;
-  }
-</style>
-<script id="fix-solo-boton-tema-js">
-(function () {
-  function ocultarSoloBotonTema() {
-    var items = document.querySelectorAll("aside button, aside a, nav button, nav a, [class*=\"sidebar\"] button, [class*=\"sidebar\"] a");
-    for (var i = 0; i < items.length; i++) {
-      var txt = (items[i].textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-      if (txt === "modo oscuro" || txt === "modo claro") {
-        var box = items[i].closest("button, a, div, li") || items[i];
-        box.style.setProperty("display", "none", "important");
-      }
-    }
-  }
-  ocultarSoloBotonTema();
-  document.addEventListener("DOMContentLoaded", ocultarSoloBotonTema);
-  window.addEventListener("load", ocultarSoloBotonTema);
-})();
-</script>
+    @stack('scripts')<!-- FIX_ALL_THEMES_AUTO_START -->
 <!-- FIX_ALL_THEMES_AUTO_END -->
 </body>
 
@@ -1618,3 +1273,917 @@
 })();
 </script>
 <!-- FIX_BURGER_CIRCLE_END -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style id="tema-verde-sidebar-contraste-total">
+  /* Ocultar el botón/rectángulo de cambio de modo */
+  [id*="modo-oscuro"],
+  [id*="dark-mode"],
+  [id*="theme-toggle"],
+  [class*="modo-oscuro"],
+  [class*="dark-mode"],
+  [class*="theme-toggle"] {
+    display: none !important;
+  }
+
+  /* Fondo general verde menta en el contenido principal */
+  html,
+  body,
+  #app,
+  .wrapper,
+  .main-content,
+  .content-wrapper,
+  .page-content,
+  main,
+  section,
+  .container,
+  .container-fluid {
+    background-color: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Barra lateral en verde esmeralda oscuro */
+  aside,
+  #sidebar,
+  .sidebar,
+  nav.sidebar,
+  .offcanvas {
+    background: linear-gradient(180deg, #065f46 0%, #047857 100%) !important;
+    background-color: #065f46 !important;
+    color: #ecfdf5 !important;
+    border-right: 1px solid #10b981 !important;
+  }
+
+  /* Título y todos los textos/íconos sobre fondo verde oscuro del sidebar */
+  aside h1, aside h2, aside h3, aside h4, aside h5, aside h6,
+  #sidebar h1, #sidebar h2, #sidebar h3, #sidebar h4, #sidebar h5, #sidebar h6,
+  .sidebar h1, .sidebar h2, .sidebar h3, .sidebar h4, .sidebar h5, .sidebar h6,
+  aside p, #sidebar p, .sidebar p,
+  aside small, #sidebar small, .sidebar small,
+  aside label, #sidebar label, .sidebar label,
+  aside a, #sidebar a, .sidebar a,
+  aside span:not(.badge), #sidebar span:not(.badge), .sidebar span:not(.badge),
+  aside i, #sidebar i, .sidebar i,
+  aside svg, #sidebar svg, .sidebar svg {
+    color: #ecfdf5 !important;
+    opacity: 1 !important;
+  }
+
+  /* Enlaces activos y tarjetas claras dentro del sidebar: fondo verde menta con texto oscuro nítido */
+  aside .nav-link.active,
+  aside a.active,
+  aside .active,
+  #sidebar .active,
+  .sidebar .active,
+  aside .card,
+  aside .bg-light,
+  aside .bg-white,
+  #sidebar .card,
+  #sidebar .bg-light,
+  #sidebar .bg-white,
+  .sidebar .card,
+  .sidebar .bg-light,
+  .sidebar .bg-white {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  aside .nav-link.active *,
+  aside a.active *,
+  aside .active *,
+  #sidebar .active *,
+  .sidebar .active *,
+  aside .card *,
+  aside .bg-light *,
+  aside .bg-white *,
+  #sidebar .card *,
+  #sidebar .bg-light *,
+  #sidebar .bg-white *,
+  .sidebar .card *,
+  .sidebar .bg-light *,
+  .sidebar .bg-white * {
+    color: #052e16 !important;
+    opacity: 1 !important;
+  }
+
+  /* Menús desplegables (incluyendo "Cambiar contraseña" y listas flotantes): fondo verde menta sólido y texto oscuro */
+  .dropdown-menu,
+  .dropdown-item,
+  .position-absolute.w-100,
+  .lista-tipos-accesorio {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    border-color: #16a34a !important;
+    opacity: 1 !important;
+  }
+
+  .dropdown-menu *,
+  .dropdown-item *,
+  .position-absolute.w-100 > *,
+  .lista-tipos-accesorio > * {
+    color: #052e16 !important;
+    opacity: 1 !important;
+  }
+
+  .dropdown-item:hover,
+  .dropdown-item:focus,
+  .position-absolute.w-100 > *:hover,
+  .lista-tipos-accesorio > *:hover {
+    background-color: #86efac !important;
+    color: #052e16 !important;
+  }
+
+  /* Tarjetas, paneles, manual, acordeones y modales en verde menta */
+  main .card,
+  main .card-header,
+  main .card-body,
+  main .card-footer,
+  main .dashboard-tarjeta,
+  main .dashboard-cabecera,
+  main .accordion-item,
+  main .accordion-button,
+  main .accordion-body,
+  main .alert,
+  main .bg-white,
+  main .bg-light,
+  .modal-content,
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    background-color: #d1fae5 !important;
+    color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  /* Tablas con contraste limpio */
+  table tbody td {
+    background-color: #ecfdf5 !important;
+    box-shadow: inset 0 0 0 9999px #ecfdf5 !important;
+    color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  table tbody tr:hover > td {
+    background-color: #bbf7d0 !important;
+    box-shadow: inset 0 0 0 9999px #bbf7d0 !important;
+    color: #052e16 !important;
+  }
+
+  table thead th {
+    background-color: #a7f3d0 !important;
+    box-shadow: inset 0 0 0 9999px #a7f3d0 !important;
+    color: #052e16 !important;
+    border-color: #4ade80 !important;
+    font-weight: 700 !important;
+  }
+
+  /* Inputs, selects, botones y paginación */
+  .form-control,
+  .form-select,
+  .page-link,
+  .input-group .btn,
+  .input-group button {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  /* Impresión en blanco limpio */
+  @media print {
+    html, body, #app, main, section, .card, .card-body, .dashboard-cabecera, .dashboard-tarjeta, table, table td, table th {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<script id="tema-verde-sidebar-contraste-js">
+(function() {
+  document.documentElement.removeAttribute("data-bs-theme");
+  document.documentElement.classList.remove("home-dark", "dark", "theme-dark");
+
+  function aplicarContrasteVerde() {
+    // Ocultar botón/rectángulo de modo
+    document.querySelectorAll("button, a, div, label, span").forEach(el => {
+      if (el.children.length > 2) return;
+      const txt = (el.textContent || "").trim();
+      if (txt === "Modo Oscuro" || txt === "Modo Claro") {
+        const btn = el.closest("button, a") || el;
+        btn.style.setProperty("display", "none", "important");
+      }
+    });
+
+    // Asegurar contraste alto en el menú desplegable (ej. "Cambiar contraseña")
+    document.querySelectorAll(".dropdown-menu, .dropdown-item").forEach(el => {
+      el.style.setProperty("background-color", "#bbf7d0", "important");
+      el.style.setProperty("color", "#052e16", "important");
+      el.style.setProperty("opacity", "1", "important");
+    });
+
+    // Asegurar contraste claro en textos e íconos del sidebar
+    document.querySelectorAll("aside h1, aside h2, aside h3, aside h4, aside h5, aside h6, #sidebar h1, #sidebar h2, #sidebar h3, #sidebar h4, #sidebar h5, #sidebar h6, .sidebar h1, .sidebar h2, .sidebar h3, .sidebar h4, .sidebar h5, .sidebar h6").forEach(h => {
+      h.style.setProperty("color", "#ecfdf5", "important");
+      h.style.setProperty("opacity", "1", "important");
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    aplicarContrasteVerde();
+    setTimeout(aplicarContrasteVerde, 200);
+    setTimeout(aplicarContrasteVerde, 600);
+  });
+})();
+</script>
+
+<style id="tema-verde-force-fix">
+  /* Forzar contraste claro en todo texto/ícono de la barra lateral sobre fondo verde oscuro */
+  body aside, body #sidebar, body .sidebar, body nav.sidebar {
+    background-color: #065f46 !important;
+    color: #ecfdf5 !important;
+  }
+  body aside *, body #sidebar *, body .sidebar *, body nav.sidebar * {
+    opacity: 1 !important;
+  }
+  body aside h1, body aside h2, body aside h3, body aside h4, body aside h5, body aside h6,
+  body #sidebar h1, body #sidebar h2, body #sidebar h3, body #sidebar h4, body #sidebar h5, body #sidebar h6,
+  body .sidebar h1, body .sidebar h2, body .sidebar h3, body .sidebar h4, body .sidebar h5, body .sidebar h6 {
+    color: #ffffff !important;
+  }
+
+  /* Forzar fondo verde menta sólido y texto oscuro nítido en menús desplegables y opciones de cuenta */
+  body .dropdown-menu,
+  body .dropdown-menu li,
+  body .dropdown-menu a,
+  body .dropdown-menu button,
+  body .dropdown-item {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    opacity: 1 !important;
+  }
+  body .dropdown-menu a *,
+  body .dropdown-menu button *,
+  body .dropdown-item * {
+    color: #052e16 !important;
+    opacity: 1 !important;
+  }
+  body .dropdown-item:hover,
+  body .dropdown-menu a:hover,
+  body .dropdown-menu button:hover {
+    background-color: #86efac !important;
+    color: #052e16 !important;
+  }
+</style>
+<script id="tema-verde-force-fix-js">
+(function() {
+  function fixElementos() {
+    // 1. Título del sidebar en blanco/menta claro legible
+    document.querySelectorAll("aside, #sidebar, .sidebar").forEach(sb => {
+      sb.querySelectorAll("h1, h2, h3, h4, h5, h6, .brand-text, .sidebar-title").forEach(t => {
+        t.style.setProperty("color", "#ffffff", "important");
+        t.style.setProperty("opacity", "1", "important");
+      });
+    });
+
+    // 2. Cualquier enlace o botón que diga "Cambiar contraseña" o esté dentro de un dropdown abierto
+    document.querySelectorAll("a, button, li, div").forEach(el => {
+      const txt = (el.textContent || "").trim();
+      if (txt === "Cambiar contraseña" || el.classList.contains("dropdown-menu") || el.classList.contains("dropdown-item")) {
+        if (el.tagName === "A" || el.tagName === "BUTTON" || el.classList.contains("dropdown-menu")) {
+          el.style.setProperty("background-color", "#bbf7d0", "important");
+          el.style.setProperty("color", "#052e16", "important");
+          el.style.setProperty("opacity", "1", "important");
+        }
+        el.querySelectorAll("span, i, svg, small, b, strong").forEach(c => {
+          c.style.setProperty("color", "#052e16", "important");
+          c.style.setProperty("opacity", "1", "important");
+        });
+      }
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    fixElementos();
+    setTimeout(fixElementos, 200);
+    setTimeout(fixElementos, 700);
+    document.addEventListener("click", () => setTimeout(fixElementos, 80));
+  });
+})();
+</script>
+
+<style id="tema-verde-definitivo-clean">
+  /* 1. Ocultar por completo el botón de cambio de modo */
+  #btn-switch-theme,
+  [id*="btn-switch-theme"],
+  [id*="modo-oscuro"],
+  [id*="dark-mode"],
+  [id*="theme-toggle"] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* 2. Menú desplegable de usuario ("Cambiar contraseña", etc.) siempre legible y contrastado */
+  #sidebar .user-dropdown-container .dropdown-menu,
+  .user-dropdown-container .dropdown-menu,
+  .dropdown-menu {
+    background-color: #bbf7d0 !important;
+    border: 1px solid #16a34a !important;
+    opacity: 1 !important;
+  }
+
+  #sidebar .user-dropdown-container .dropdown-menu .dropdown-item,
+  .user-dropdown-container .dropdown-menu .dropdown-item,
+  .dropdown-menu .dropdown-item,
+  .dropdown-menu a,
+  .dropdown-menu button {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    opacity: 1 !important;
+  }
+
+  #sidebar .user-dropdown-container .dropdown-menu .dropdown-item *,
+  .user-dropdown-container .dropdown-menu .dropdown-item *,
+  .dropdown-menu .dropdown-item *,
+  .dropdown-menu a *,
+  .dropdown-menu button * {
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    opacity: 1 !important;
+  }
+
+  #sidebar .user-dropdown-container .dropdown-menu .dropdown-item:hover,
+  .user-dropdown-container .dropdown-menu .dropdown-item:hover,
+  .dropdown-menu .dropdown-item:hover,
+  .dropdown-menu a:hover,
+  .dropdown-menu button:hover {
+    background-color: #86efac !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  /* 3. Título del sidebar bien visible */
+  #sidebar .sidebar-brand-text,
+  .sidebar-brand-text {
+    color: #ecfdf5 !important;
+    -webkit-text-fill-color: #ecfdf5 !important;
+    opacity: 1 !important;
+  }
+</style>
+<script id="tema-verde-definitivo-js">
+(function() {
+  // Neutralizar cualquier intento de activar modo oscuro
+  window.toggleThemeDirecto = function() { return false; };
+  document.documentElement.removeAttribute("data-bs-theme");
+  document.documentElement.classList.remove("home-dark", "dark", "theme-dark");
+
+  function reforzarElementos() {
+    const btnModo = document.getElementById("btn-switch-theme");
+    if (btnModo) {
+      btnModo.style.setProperty("display", "none", "important");
+    }
+
+    document.querySelectorAll(".dropdown-menu, .dropdown-menu .dropdown-item, .dropdown-menu a, .dropdown-menu button").forEach(el => {
+      el.style.setProperty("background-color", "#bbf7d0", "important");
+      el.style.setProperty("color", "#052e16", "important");
+      el.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+      el.style.setProperty("opacity", "1", "important");
+      el.querySelectorAll("span, i, svg, small").forEach(child => {
+        child.style.setProperty("color", "#052e16", "important");
+        child.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+        child.style.setProperty("opacity", "1", "important");
+      });
+    });
+
+    document.querySelectorAll(".sidebar-brand-text").forEach(brand => {
+      brand.style.setProperty("color", "#ecfdf5", "important");
+      brand.style.setProperty("-webkit-text-fill-color", "#ecfdf5", "important");
+      brand.style.setProperty("opacity", "1", "important");
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", reforzarElementos);
+  } else {
+    reforzarElementos();
+  }
+  setTimeout(reforzarElementos, 150);
+  setTimeout(reforzarElementos, 500);
+  document.addEventListener("click", () => setTimeout(reforzarElementos, 60));
+})();
+</script>
+
+<style id="tema-verde-sin-blancos-v3">
+  /* 1. Enlace activo del menú lateral ("Inicio"): fondo verde esmeralda fuerte y texto/ícono blanco nítido */
+  #sidebar .sidebar-link.active,
+  #sidebar a.active,
+  #sidebar .nav-link.active,
+  aside .sidebar-link.active,
+  aside a.active,
+  aside .nav-link.active {
+    background-color: #059669 !important;
+    background: #059669 !important;
+    color: #ffffff !important;
+    border-color: #34d399 !important;
+  }
+
+  #sidebar .sidebar-link.active *,
+  #sidebar a.active *,
+  #sidebar .nav-link.active *,
+  aside .sidebar-link.active *,
+  aside a.active *,
+  aside .nav-link.active * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+
+  /* 2. Tarjeta inferior de Rol / Registrador en el sidebar: contraste fuerte y legible */
+  #sidebar .user-info-cards .card,
+  #sidebar .user-info-cards .card-body,
+  aside .user-info-cards .card,
+  aside .user-info-cards .card-body {
+    background-color: #064e3b !important;
+    border-color: #34d399 !important;
+  }
+
+  #sidebar .user-info-cards *,
+  aside .user-info-cards * {
+    color: #ecfdf5 !important;
+    -webkit-text-fill-color: #ecfdf5 !important;
+    opacity: 1 !important;
+  }
+
+  /* 3. Celdas de tablas, filas y botones secundarios ("VER", paginación, etc.) sin blanco */
+  table tbody td,
+  table tbody tr td,
+  .table tbody td,
+  .table > :not(caption) > * > * {
+    background-color: #dcfce7 !important;
+    background: #dcfce7 !important;
+    box-shadow: inset 0 0 0 9999px #dcfce7 !important;
+    color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  table tbody tr:hover > td,
+  .table tbody tr:hover > td {
+    background-color: #bbf7d0 !important;
+    background: #bbf7d0 !important;
+    box-shadow: inset 0 0 0 9999px #bbf7d0 !important;
+    color: #052e16 !important;
+  }
+
+  table thead th,
+  .table thead th {
+    background-color: #a7f3d0 !important;
+    background: #a7f3d0 !important;
+    box-shadow: inset 0 0 0 9999px #a7f3d0 !important;
+    color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  /* Botones claros tipo "VER" o de acción secundaria dentro de tarjetas/tablas */
+  main .btn-light,
+  main .btn-outline-secondary,
+  main .btn-outline-light,
+  main .btn-white,
+  main a.btn.btn-sm:not(.btn-primary):not(.btn-success):not(.btn-danger):not(.btn-warning),
+  main button.btn.btn-sm:not(.btn-primary):not(.btn-success):not(.btn-danger):not(.btn-warning) {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #16a34a !important;
+  }
+
+  /* 4. Impresión siempre en blanco limpio */
+  @media print {
+    html, body, #app, main, section, .card, .card-body, table, table td, table th, .btn {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<script id="tema-verde-sin-blancos-v3-js">
+(function() {
+  function quitarBlancosPuntuales() {
+    // 1. Enlace activo del sidebar ("Inicio")
+    document.querySelectorAll("#sidebar .sidebar-link.active, #sidebar a.active, aside .sidebar-link.active, aside a.active").forEach(el => {
+      el.style.setProperty("background-color", "#059669", "important");
+      el.style.setProperty("background", "#059669", "important");
+      el.style.setProperty("color", "#ffffff", "important");
+      el.querySelectorAll("span, i, svg").forEach(c => {
+        c.style.setProperty("color", "#ffffff", "important");
+        c.style.setProperty("-webkit-text-fill-color", "#ffffff", "important");
+      });
+    });
+
+    // 2. Celdas de tablas y botones claros dentro de tablas/tarjetas
+    document.querySelectorAll("table tbody td, table tbody tr").forEach(el => {
+      el.style.setProperty("background-color", "#dcfce7", "important");
+      el.style.setProperty("box-shadow", "inset 0 0 0 9999px #dcfce7", "important");
+      el.style.setProperty("color", "#052e16", "important");
+    });
+
+    document.querySelectorAll("main .btn-light, main .btn-outline-secondary, main .btn-outline-light, main a.btn, main button.btn").forEach(btn => {
+      const bg = getComputedStyle(btn).backgroundColor;
+      const m = bg && bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (m && parseInt(m[1], 10) >= 235 && parseInt(m[2], 10) >= 235 && parseInt(m[3], 10) >= 235) {
+        btn.style.setProperty("background-color", "#bbf7d0", "important");
+        btn.style.setProperty("color", "#052e16", "important");
+        btn.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+        btn.style.setProperty("border-color", "#16a34a", "important");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", quitarBlancosPuntuales);
+  } else {
+    quitarBlancosPuntuales();
+  }
+  setTimeout(quitarBlancosPuntuales, 150);
+  setTimeout(quitarBlancosPuntuales, 500);
+})();
+</script>
+
+<style id="tema-verde-prestamos-fix">
+  /* Eliminar fondos blancos en contenedores principales, wrappers y tablas de préstamos */
+  body,
+  main,
+  main > div,
+  main .container,
+  main .container-fluid,
+  .content-wrapper,
+  .page-wrapper,
+  .table-responsive,
+  .dataTables_wrapper {
+    background-color: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Botones de acción en filas de tablas (ojo, editar, devolver, eliminar, etc.) en verde menta */
+  table tbody td .btn,
+  table tbody td a.btn,
+  table tbody td button,
+  table tbody td a {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  table tbody td .btn:hover,
+  table tbody td a.btn:hover,
+  table tbody td button:hover,
+  table tbody td a:hover {
+    background-color: #86efac !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  /* Paginación ("Mostrando 1 a 9...", « < 1 > ») en verde menta */
+  .pagination .page-link,
+  .page-item .page-link,
+  nav[aria-label*="Pagination"] a,
+  nav[aria-label*="Pagination"] span {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  .pagination .page-item.active .page-link,
+  .page-item.active .page-link {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+
+  /* Impresión siempre en blanco limpio */
+  @media print {
+    html, body, #app, main, main > div, .table-responsive, table, table td, table th, .btn, .page-link {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<script id="tema-verde-prestamos-fix-js">
+(function() {
+  function limpiarBlancosEnTablasYContenedores() {
+    document.querySelectorAll("main > div, .table-responsive, .dataTables_wrapper, .pagination .page-link, table tbody td a, table tbody td button").forEach(el => {
+      if (el.closest(".badge")) return;
+      const bg = getComputedStyle(el).backgroundColor;
+      const m = bg && bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (m && parseInt(m[1], 10) >= 235 && parseInt(m[2], 10) >= 235 && parseInt(m[3], 10) >= 235) {
+        const targetBg = el.classList.contains("page-link") || el.tagName === "A" || el.tagName === "BUTTON" ? "#bbf7d0" : "#dcfce7";
+        el.style.setProperty("background-color", targetBg, "important");
+        el.style.setProperty("background", targetBg, "important");
+        el.style.setProperty("color", "#052e16", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", limpiarBlancosEnTablasYContenedores);
+  } else {
+    limpiarBlancosEnTablasYContenedores();
+  }
+  setTimeout(limpiarBlancosEnTablasYContenedores, 150);
+  setTimeout(limpiarBlancosEnTablasYContenedores, 500);
+})();
+</script>
+<style id="todo-verde-forzado-final">
+  /* Forzar verde menta en fondos de página, tarjetas, tablas y contenedores */
+  html, body, #app, main, main > div, main > section,
+  .container, .container-fluid, .content-wrapper, .page-content,
+  .card, .card-header, .card-body, .card-footer,
+  .table-responsive, .dataTables_wrapper {
+    background-color: #dcfce7 !important;
+    background: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Cabeceras de tabla en verde menta medio y celdas en verde menta claro */
+  table thead th, .table thead th {
+    background-color: #a7f3d0 !important;
+    background: #a7f3d0 !important;
+    box-shadow: inset 0 0 0 9999px #a7f3d0 !important;
+    color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  table tbody td, .table tbody td {
+    background-color: #ecfdf5 !important;
+    background: #ecfdf5 !important;
+    box-shadow: inset 0 0 0 9999px #ecfdf5 !important;
+    color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  table tbody tr:hover > td, .table tbody tr:hover > td {
+    background-color: #bbf7d0 !important;
+    background: #bbf7d0 !important;
+    box-shadow: inset 0 0 0 9999px #bbf7d0 !important;
+    color: #052e16 !important;
+  }
+
+  /* Inputs, selects, botones secundarios y paginación en verde */
+  .form-control, .form-select, .dataTables_filter input, .dataTables_length select,
+  .page-link, .pagination .page-link {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  table tbody td .btn, table tbody td a.btn, table tbody td button, table tbody td a {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  .pagination .page-item.active .page-link, .page-item.active .page-link {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+
+  /* Impresión en blanco */
+  @media print {
+    html, body, #app, main, main > div, .card, .card-body, .table-responsive, table, table td, table th, .btn, .page-link {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<style id="manual-tema-verde-completo">
+  /* Fondo general del manual en verde menta */
+  body,
+  main,
+  .container,
+  .container-fluid,
+  .manual-wrapper,
+  .manual-container {
+    background-color: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Barra de búsqueda y botón Limpiar en verde */
+  input[placeholder*="Buscar en el manual"],
+  .manual-search input,
+  .manual-buscador input,
+  input.form-control[type="search"],
+  input.form-control[type="text"] {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #34d399 !important;
+  }
+
+  input[placeholder*="Buscar en el manual"]::placeholder {
+    color: #166534 !important;
+    opacity: 1 !important;
+  }
+
+  /* Botones / píldoras de navegación rápida (1. Objetivo, 2.1 Registro, etc.) y botón Limpiar */
+  main button:not(.btn-primary):not(.btn-danger),
+  main .btn:not(.btn-primary):not(.btn-danger),
+  main a.badge,
+  main span.badge,
+  .filtro-seccion,
+  .nav-pill-manual,
+  .btn-filtro-manual {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #22c55e !important;
+  }
+
+  main button:not(.btn-primary):not(.btn-danger):hover,
+  main .btn:not(.btn-primary):not(.btn-danger):hover,
+  .filtro-seccion:hover,
+  .filtro-seccion.active,
+  .nav-pill-manual.active {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #047857 !important;
+  }
+
+  /* Acordeones, tarjetas y secciones del manual (1. Objetivo del módulo, 2.1, 2.2...) */
+  main .card,
+  main .card-header,
+  main .card-body,
+  main .accordion,
+  main .accordion-item,
+  main .accordion-header,
+  main .accordion-button,
+  main .accordion-collapse,
+  main .accordion-body,
+  main .alert,
+  main .callout,
+  main .nota-importantes,
+  main [class*="simulador"],
+  main [class*="seccion"],
+  main [class*="bloque"] {
+    background-color: #d1fae5 !important;
+    background: #d1fae5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  /* Encabezados de acordeones / secciones con un tono verde ligeramente más marcado para distinguirlos */
+  main .accordion-button,
+  main .accordion-button:not(.collapsed),
+  main .card-header {
+    background-color: #a7f3d0 !important;
+    background: #a7f3d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  main .accordion-button::after {
+    filter: none !important;
+  }
+
+  /* Textos, listas, strong y párrafos dentro de las secciones del manual */
+  main .card-body *,
+  main .accordion-body *,
+  main .alert *,
+  main [class*="simulador"] * {
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+  }
+
+  /* Selects dentro del simulador rápido */
+  main select,
+  main .form-select {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border: 1px solid #22c55e !important;
+  }
+
+  /* Tabla dentro del manual */
+  main table thead th {
+    background-color: #a7f3d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  main table tbody td {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  /* Impresión en blanco limpio */
+  @media print {
+    html, body, main, .card, .card-body, .accordion-item, .accordion-button, .accordion-body, table, table td, table th, .btn {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
+<script id="manual-tema-verde-js">
+(function() {
+  function pintarManualVerde() {
+    document.querySelectorAll("main div, main section, main article, main button, main a, main input, main select").forEach(el => {
+      if (el.closest("#sidebar") || el.closest("aside") || el.closest(".navbar")) return;
+      const bg = getComputedStyle(el).backgroundColor;
+      const m = bg && bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (!m) return;
+      const r = parseInt(m[1], 10), g = parseInt(m[2], 10), b = parseInt(m[3], 10);
+      if (r + g + b < 130) {
+        const esBoton = (el.tagName === "BUTTON" || el.classList.contains("btn"));
+        const nuevoBg = esBoton ? "#bbf7d0" : "#d1fae5";
+        el.style.setProperty("background-color", nuevoBg, "important");
+        el.style.setProperty("background", nuevoBg, "important");
+        el.style.setProperty("color", "#052e16", "important");
+        el.style.setProperty("-webkit-text-fill-color", "#052e16", "important");
+        el.style.setProperty("border-color", "#34d399", "important");
+      }
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", pintarManualVerde);
+  } else {
+    pintarManualVerde();
+  }
+  setTimeout(pintarManualVerde, 150);
+  setTimeout(pintarManualVerde, 500);
+})();
+</script>

@@ -441,7 +441,7 @@
        TARJETA PRINCIPAL
     ========================================= */
     .prestamo-index-card {
-        background: #fff;
+        background: #d1fae5;
         border: 1px solid #dee2e6;
         border-radius: 10px;
         box-shadow: 0 2px 6px rgba(0, 0, 0, .06);
@@ -528,7 +528,7 @@
         border: 1px solid #ced4da;
         border-radius: 6px;
         padding: 5px 9px;
-        background: #fff;
+        background: #d1fae5;
         color: #212529;
     }
 
@@ -740,7 +740,7 @@
 ========================================= */
 
     .panel-filtros-prestamos {
-        background: #ffffff;
+        background: #d1fae5;
         border: 1px solid #dce5dd;
         border-radius: 10px;
         overflow: hidden;
@@ -804,7 +804,7 @@
         border-radius: 5px;
         color: #343a40;
         font-size: 0.82rem;
-        background-color: #fff;
+        background-color: #ecfdf5;
     }
 
     .panel-filtros-prestamos .input-group>.form-control,
@@ -880,7 +880,7 @@
         padding: 7px 12px;
         border: 1px solid #ced4da;
         border-radius: 6px;
-        background: #fff;
+        background: #d1fae5;
         color: #495057;
         font-weight: 600;
         font-size: 0.76rem;
@@ -954,7 +954,7 @@
         padding: 7px 13px;
         border: 1px solid #198754;
         border-radius: 7px;
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
         font-size: 0.78rem;
         font-weight: 700;
@@ -1009,7 +1009,7 @@
     .btn-filtros-prestamos:hover .badge-filtros-contador,
     .btn-filtros-prestamos.filtros-abiertos .badge-filtros-contador {
         border-color: rgba(255, 255, 255, 0.45);
-        background: #fff;
+        background: #d1fae5;
         color: #198754;
     }
 
@@ -1116,7 +1116,7 @@
     padding: 30px 28px;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    background: #ffffff;
+    background: #d1fae5;
     color: #334155;
     text-align: center;
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
@@ -2355,3 +2355,99 @@ $('#btn_cancelar_exportacion')
 })();
 </script>
 <!-- FIX_FILTROS_DARK_END -->
+
+<style id="fix-tabla-prestamos">
+  /* Evitar que las flechas de ordenamiento pisen o corten los encabezados */
+  table.dataTable thead th {
+    padding-right: 22px !important;
+    white-space: nowrap !important;
+    vertical-align: middle !important;
+  }
+
+  /* Mantener la fecha en una sola línea sin partirse */
+  table.dataTable tbody td:nth-child(5),
+  table.dataTable tbody td:nth-child(6),
+  table.dataTable tbody td:nth-child(7) {
+    white-space: nowrap !important;
+  }
+
+  /* Quitar fondo blanco encajonado detrás de los botones de acciones */
+  table.dataTable tbody td:last-child > div,
+  table.dataTable tbody td:last-child .btn-group,
+  table.dataTable tbody td:last-child .d-flex {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+</style>
+
+<style id="todo-verde-forzado-final">
+  /* Forzar verde menta en fondos de página, tarjetas, tablas y contenedores */
+  html, body, #app, main, main > div, main > section,
+  .container, .container-fluid, .content-wrapper, .page-content,
+  .card, .card-header, .card-body, .card-footer,
+  .table-responsive, .dataTables_wrapper {
+    background-color: #dcfce7 !important;
+    background: #dcfce7 !important;
+    color: #052e16 !important;
+  }
+
+  /* Cabeceras de tabla en verde menta medio y celdas en verde menta claro */
+  table thead th, .table thead th {
+    background-color: #a7f3d0 !important;
+    background: #a7f3d0 !important;
+    box-shadow: inset 0 0 0 9999px #a7f3d0 !important;
+    color: #052e16 !important;
+    border-color: #4ade80 !important;
+  }
+
+  table tbody td, .table tbody td {
+    background-color: #ecfdf5 !important;
+    background: #ecfdf5 !important;
+    box-shadow: inset 0 0 0 9999px #ecfdf5 !important;
+    color: #052e16 !important;
+    border-color: #86efac !important;
+  }
+
+  table tbody tr:hover > td, .table tbody tr:hover > td {
+    background-color: #bbf7d0 !important;
+    background: #bbf7d0 !important;
+    box-shadow: inset 0 0 0 9999px #bbf7d0 !important;
+    color: #052e16 !important;
+  }
+
+  /* Inputs, selects, botones secundarios y paginación en verde */
+  .form-control, .form-select, .dataTables_filter input, .dataTables_length select,
+  .page-link, .pagination .page-link {
+    background-color: #ecfdf5 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  table tbody td .btn, table tbody td a.btn, table tbody td button, table tbody td a {
+    background-color: #bbf7d0 !important;
+    color: #052e16 !important;
+    -webkit-text-fill-color: #052e16 !important;
+    border-color: #34d399 !important;
+  }
+
+  .pagination .page-item.active .page-link, .page-item.active .page-link {
+    background-color: #059669 !important;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    border-color: #059669 !important;
+  }
+
+  /* Impresión en blanco */
+  @media print {
+    html, body, #app, main, main > div, .card, .card-body, .table-responsive, table, table td, table th, .btn, .page-link {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      box-shadow: none !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      border-color: #cbd5e1 !important;
+    }
+  }
+</style>
