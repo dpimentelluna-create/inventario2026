@@ -91,7 +91,7 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
             );
 
             $filas->push([
-                sprintf('%02d', $indice),
+                $indice,
                 $tipo,
                 $serie,
                 $marca,
@@ -311,7 +311,8 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                             'size' => 9,
                         ],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => [
@@ -325,6 +326,9 @@ class EquiposInformacionGeneralSheet implements FromCollection, WithEvents, With
                         'A7:A' . $highestRow
                     )->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $sheet->getStyle('A7:A' . $highestRow)->getNumberFormat()->setFormatCode('00');
+                    $sheet->getStyle('I7:I' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->getStyle(
                         'F7:H' . $highestRow

@@ -107,7 +107,7 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
             }
 
             $filas->push([
-                sprintf('%02d', $indice),
+                $indice,
                 $tipo,
                 $serie,
                 $marca,
@@ -304,13 +304,19 @@ class EquiposCompletoSheet implements FromCollection, WithEvents, WithStyles, Wi
                     $sheet->getStyle('A8:P' . $highestRow)->applyFromArray([
                         'font' => ['size' => 9],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => [
                             'allBorders' => ['borderStyle' => Border::BORDER_THIN],
                         ],
                     ]);
+
+                    $sheet->getStyle('A8:A' . $highestRow)->getNumberFormat()->setFormatCode('00');
+                    $sheet->getStyle('I8:I' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('J8:J' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('P8:P' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->getStyle('A8:A' . $highestRow)
                         ->getAlignment()

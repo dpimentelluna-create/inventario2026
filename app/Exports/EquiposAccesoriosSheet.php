@@ -56,7 +56,7 @@ class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, 
 
             if ($accesorios->isEmpty()) {
                 $filas->push([
-                    sprintf('%02d', $indice),
+                    $indice,
                     $tipo,
                     $serieEquipo,
                     '-',
@@ -68,7 +68,7 @@ class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, 
             } else {
                 foreach ($accesorios as $accesorio) {
                     $filas->push([
-                        sprintf('%02d', $indice),
+                        $indice,
                         $tipo,
                         $serieEquipo,
                         strtoupper($accesorio->tipo ?? '-'),
@@ -219,7 +219,8 @@ class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, 
                     $sheet->getStyle('A7:H' . $highestRow)->applyFromArray([
                         'font' => ['size' => 9],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => [
@@ -234,6 +235,9 @@ class EquiposAccesoriosSheet implements FromCollection, WithEvents, WithStyles, 
                     $sheet->getStyle('G7:G' . $highestRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $sheet->getStyle('A7:A' . $highestRow)->getNumberFormat()->setFormatCode('00');
+                    $sheet->getStyle('H7:H' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->setAutoFilter('A6:H' . $highestRow);
                 }

@@ -70,7 +70,7 @@ class EquiposDetallesSheet implements FromCollection, WithEvents, WithStyles, Wi
             }
 
             $filas->push([
-                sprintf('%02d', $indice),
+                $indice,
                 $tipo,
                 $serie,
                 $procesador,
@@ -219,7 +219,8 @@ class EquiposDetallesSheet implements FromCollection, WithEvents, WithStyles, Wi
                     $sheet->getStyle('A7:H' . $highestRow)->applyFromArray([
                         'font' => ['size' => 9],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => [
@@ -227,13 +228,19 @@ class EquiposDetallesSheet implements FromCollection, WithEvents, WithStyles, Wi
                         ],
                     ]);
 
+                    // N.º: centrado y con formato numérico 00.
                     $sheet->getStyle('A7:A' . $highestRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-                    $sheet->getStyle('E7:G' . $highestRow)
+                    $sheet->getStyle('A7:A' . $highestRow)
+                        ->getNumberFormat()
+                        ->setFormatCode('00');
+
+                    // Detalles: alineación izquierda y centrado vertical.
+                    $sheet->getStyle('D7:H' . $highestRow)
                         ->getAlignment()
-                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                        ->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->setAutoFilter('A6:H' . $highestRow);
                 }

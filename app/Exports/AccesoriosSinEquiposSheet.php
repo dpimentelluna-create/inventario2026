@@ -69,7 +69,7 @@ class AccesoriosSinEquiposSheet implements FromCollection, WithEvents, WithStyle
         $indice = 1;
         foreach ($accesorios as $accesorio) {
             $filas->push([
-                sprintf('%02d', $indice),
+                $indice,
                 strtoupper($accesorio->tipo ?? '-'),
                 strtoupper($accesorio->marca ?? '-'),
                 strtoupper($accesorio->num_serie ?? '-'),
@@ -225,7 +225,8 @@ class AccesoriosSinEquiposSheet implements FromCollection, WithEvents, WithStyle
                     $sheet->getStyle('A7:G' . $highestRow)->applyFromArray([
                         'font' => ['size' => 9],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => [
@@ -240,6 +241,9 @@ class AccesoriosSinEquiposSheet implements FromCollection, WithEvents, WithStyle
                     $sheet->getStyle('E7:E' . $highestRow)
                         ->getAlignment()
                         ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                    $sheet->getStyle('A7:A' . $highestRow)->getNumberFormat()->setFormatCode('00');
+                    $sheet->getStyle('G7:G' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->setAutoFilter('A6:G' . $highestRow);
                 }

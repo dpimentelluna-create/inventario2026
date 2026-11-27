@@ -90,7 +90,7 @@ class InventarioCompletoSheet implements FromCollection, WithEvents, WithStyles,
 
             if ($accesorios->isEmpty()) {
                 $filas->push([
-                    sprintf('%02d', $indice),
+                    $indice,
                     $tipo, $serie, $marca, $modelo, $estado, $ubicacion,
                     $equipo->fecha_registro ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y') : '-',
                     $observacion, $detallesTexto, $color ?: '-',
@@ -99,7 +99,7 @@ class InventarioCompletoSheet implements FromCollection, WithEvents, WithStyles,
             } else {
                 foreach ($accesorios as $accesorio) {
                     $filas->push([
-                        sprintf('%02d', $indice),
+                        $indice,
                         $tipo, $serie, $marca, $modelo, $estado, $ubicacion,
                         $equipo->fecha_registro ? \Carbon\Carbon::parse($equipo->fecha_registro)->format('d/m/Y') : '-',
                         $observacion, $detallesTexto, $color ?: '-',
@@ -130,7 +130,7 @@ class InventarioCompletoSheet implements FromCollection, WithEvents, WithStyles,
 
         foreach ($accesoriosIndependientes as $accesorio) {
             $filas->push([
-                sprintf('%02d', $indice),
+                $indice,
                 'SIN EQUIPO', '-', '-', '-', '-',
                 strtoupper($accesorio->ubicacion->nombre ?? 'SIN UBICACIÓN'),
                 '-', '-', '-', '-',
@@ -367,7 +367,8 @@ class InventarioCompletoSheet implements FromCollection, WithEvents, WithStyles,
                     $sheet->getStyle('A11:P' . $highestRow)->applyFromArray([
                         'font' => ['size' => 9],
                         'alignment' => [
-                            'vertical' => Alignment::VERTICAL_TOP,
+                            'horizontal' => Alignment::HORIZONTAL_CENTER,
+                            'vertical' => Alignment::VERTICAL_CENTER,
                             'wrapText' => true,
                         ],
                         'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
@@ -388,6 +389,11 @@ class InventarioCompletoSheet implements FromCollection, WithEvents, WithStyles,
                             'startColor' => ['argb' => 'FFDDE8F3'],
                         ],
                     ]);
+
+                    $sheet->getStyle('A11:A' . $highestRow)->getNumberFormat()->setFormatCode('00');
+                    $sheet->getStyle('I11:I' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('J11:J' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+                    $sheet->getStyle('P11:P' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
 
                     $sheet->getStyle('A11:A' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
                     $sheet->getStyle('F11:H' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
