@@ -423,6 +423,8 @@ class PrestamoController extends Controller
         $prestamo = Prestamo::with([
             'docente',
             'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.equipo.especificacionesLaptops',
+            'prestamoEquipos.equipo.especificacionesEquipo',
             'prestamoEquipos.prestamoAccesorios.accesorioEquipo'
         ])->findOrFail($id);
 
@@ -438,6 +440,8 @@ class PrestamoController extends Controller
         $prestamo->loadMissing([
             'docente',
             'prestamoEquipos.equipo.tipoEquipo',
+            'prestamoEquipos.equipo.especificacionesLaptops',
+            'prestamoEquipos.equipo.especificacionesEquipo',
             'prestamoEquipos.prestamoAccesorios.accesorioEquipo',
         ]);
 
@@ -481,6 +485,7 @@ class PrestamoController extends Controller
 
                                 return [
                                     'id' => $accesorio?->id,
+                                    'equipo_id' => $accesorio?->equipo_id,
                                     'tipo' => $accesorio?->tipo,
                                     'marca' => $accesorio?->marca,
                                     'num_serie' => $accesorio?->num_serie,
@@ -928,24 +933,26 @@ class PrestamoController extends Controller
      */
     public function buscarEquipos(Request $request)
     {
-        $query = Equipo::with([
-    'tipoEquipo',
-    'especificacionesLaptops',
-    'especificacionesEquipo',
-    'accesoriosEquipos'
-    ])->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
-        $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
-            $prestamoQuery->where('estado', 'ACTIVO');
+    $query = Equipo::with([
+        'tipoEquipo',
+        'especificacionesLaptops',
+        'especificacionesEquipo',
+        'accesoriosEquipos'
+        ])
+        ->where('situacion_administrativa', 'EN_INVENTARIO')
+        ->whereDoesntHave('prestamoEquipos', function ($detalle) use ($request) {
+            $detalle->whereHas('prestamo', function ($prestamoQuery) use ($request) {
+                $prestamoQuery->where('estado', 'ACTIVO');
 
-            if ($request->filled('prestamo_id')) {
-                $prestamoQuery->where(
-                    'id',
-                    '!=',
-                    (int) $request->input('prestamo_id')
-                );
-            }
+                if ($request->filled('prestamo_id')) {
+                    $prestamoQuery->where(
+                        'id',
+                        '!=',
+                        (int) $request->input('prestamo_id')
+                    );
+                }
+            });
         });
-    });
 
         if ($request->filled('tipo_equipo_id')) {
             $query->where(
@@ -1035,6 +1042,15 @@ class PrestamoController extends Controller
             : null;
 
         $query = AccesoriosEquipo::query()
+            ->where(function ($q) {
+                $q->whereNull('equipo_id')
+                    ->orWhereHas('equipo', function ($equipoQuery) {
+                        $equipoQuery->where(
+                            'situacion_administrativa',
+                            'EN_INVENTARIO'
+                        );
+                    });
+            })
             ->whereNotIn('id', function ($subquery) use ($prestamoId) {
                 $subquery
                     ->select('prestamo_accesorios.accesorio_equipo_id')
@@ -1193,6 +1209,7 @@ class PrestamoController extends Controller
 
                                     return [
                                         'id' => $accesorio?->id,
+                                        'equipo_id' => $accesorio?->equipo_id,
                                         'tipo' => $accesorio?->tipo ?? 'SIN TIPO',
                                         'marca' => $accesorio?->marca ?? 'SIN MARCA',
                                         'num_serie' => $accesorio?->num_serie ?? 'SIN SERIE',

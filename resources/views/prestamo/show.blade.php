@@ -243,6 +243,17 @@ return 'borde-neutro';
                         @php
                         $equipo = $prestamoEquipo->equipo;
                         $estadoEq = strtoupper($prestamoEquipo->estado ?? '');
+
+                        $observacionEquipo = $equipo?->especificacionesLaptops?->observaciones
+                            ?? $equipo?->especificacionesEquipo?->observaciones;
+
+                        $observacionEquipo = $observacionEquipo !== null
+                            ? trim($observacionEquipo)
+                            : null;
+
+                        $observacionPrestamo = $prestamoEquipo->observacion !== null
+                            ? trim($prestamoEquipo->observacion)
+                            : null;
                         @endphp
 
                         <div class="card tarjeta-equipo {{ $borde($estadoEq) }}">
@@ -294,18 +305,15 @@ return 'borde-neutro';
 
                             <div class="card-body cuerpo-equipo">
 
-                                {{-- OBSERVACIÓN DEL EQUIPO --}}
+                                {{-- OBSERVACIÓN PERMANENTE DEL EQUIPO --}}
                                 <div class="bloque-observacion mb-3">
                                     <div class="etiqueta mb-1">
-                                        <i class="bi bi-chat-left-text me-1"></i>
+                                        <i class="bi bi-pc-display me-1"></i>
                                         OBSERVACIÓN DEL EQUIPO
+                                        <span class="badge bg-secondary ms-1">INVENTARIO</span>
                                     </div>
 
-                                    <div class="{{ $prestamoEquipo->observacion
-                                            ? 'texto-observacion'
-                                            : 'text-muted' }}">
-                                        {{ $prestamoEquipo->observacion ?: 'Sin observaciones registradas.' }}
-                                    </div>
+                                    <div class="texto-observacion {{ $observacionEquipo ? '' : 'text-muted' }}">{{ $observacionEquipo ?: 'Sin observaciones registradas en el inventario.' }}</div>
                                 </div>
 
                                 {{-- ACCESORIOS --}}
@@ -369,9 +377,7 @@ return 'borde-neutro';
                                                     </span>
                                                 </td>
 
-                                                <td class="{{ $prestamoAccesorio->observacion
-                                                                ? ''
-                                                                : 'text-muted' }}">
+                                                <td class="{{ $prestamoAccesorio->observacion ? '' : 'text-muted' }}">
                                                     {{ $prestamoAccesorio->observacion ?: 'Sin observaciones' }}
                                                 </td>
                                             </tr>
@@ -392,6 +398,7 @@ return 'borde-neutro';
                                 @endif
 
                             </div>
+
                         </div>
 
                         @empty
@@ -404,6 +411,17 @@ return 'borde-neutro';
 
                         @endforelse
 
+                    </div>
+
+                    {{-- OBSERVACIÓN ESPECÍFICA DEL PRÉSTAMO --}}
+                    <div class="bloque-observacion mb-3">
+                        <div class="etiqueta mb-1">
+                            <i class="bi bi-clipboard2-check me-1"></i>
+                            OBSERVACIÓN DEL PRÉSTAMO
+                            <span class="badge bg-primary ms-1">PRÉSTAMO</span>
+                        </div>
+
+                        <div class="texto-observacion {{ $observacionPrestamo ? '' : 'text-muted' }}">{{ $observacionPrestamo ?: 'Sin observaciones registradas en este préstamo.' }}</div>
                     </div>
 
                     {{-- ACCIONES INFERIORES --}}
@@ -761,6 +779,7 @@ return 'borde-neutro';
     .texto-observacion {
         color: #495057;
         overflow-wrap: anywhere;
+        white-space: pre-wrap;
     }
 
     /* TABLA DE ACCESORIOS */

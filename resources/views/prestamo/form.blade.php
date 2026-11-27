@@ -3206,6 +3206,11 @@ actualizarEstadoBuscadorEquipos();
             equipo.accesorios_equipos ??
             [];
 
+        // Identificar los accesorios que pertenecen originalmente al equipo.
+        const idsAccesoriosOriginales = new Set(
+            originales.map(accesorio => String(accesorio.id))
+        );
+
         // Accesorios históricos guardados en el préstamo.
         const historicos =
             accesoriosHistoricos ??
@@ -3246,6 +3251,9 @@ actualizarEstadoBuscadorEquipos();
                             accesorio.observacion ??
                             accesorio.observaciones ??
                             '';
+                        const esOriginal = idsAccesoriosOriginales.has(
+                            String(accesorio.id)
+                        );
 
                         return `
                             <div class="border rounded p-2 mb-2 accesorio-prestamo bg-light"
@@ -3253,49 +3261,48 @@ actualizarEstadoBuscadorEquipos();
                                 data-tipo="${escaparHtmlAccesorio(accesorio.tipo)}"
                                 data-marca="${escaparHtmlAccesorio(accesorio.marca)}"
                                 data-modelo="${escaparHtmlAccesorio(accesorio.modelo)}"
-                                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}">
+                                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}"
+                                data-estado="${escaparHtmlAccesorio(estado)}"
+                                data-observacion="${escaparHtmlAccesorio(observacion)}"
+                                data-es-original="${esOriginal ? 'true' : 'false'}">
 
                                 <input type="hidden"
                                     name="equipos[${indice}][accesorios][${accesorioIndex}][accesorio_equipo_id]"
                                     value="${escaparHtmlAccesorio(accesorio.id)}">
 
-                                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-                                    <strong class="small titulo-accesorio">
-                                        ACCESORIO ${accesorioIndex + 1}
-                                    </strong>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+
+                                        <strong class="small titulo-accesorio">
+                                            ACCESORIO ${accesorioIndex + 1} —
+                                            ${escaparHtmlAccesorio(accesorio.tipo ?? 'SIN TIPO')}
+                                            #${escaparHtmlAccesorio(accesorio.id)}
+                                        </strong>
+
+                                        <span class="badge ${esOriginal ? 'bg-primary' : 'bg-secondary'}">
+                                            ${esOriginal ? 'ORIGINAL' : 'ALTERNATIVO'}
+                                        </span>
+
+                                    </div>
 
                                     <button type="button"
                                         class="btn btn-outline-danger btn-sm quitar-accesorio">
                                         QUITAR
                                     </button>
+
+                                </div>
+
+                                <div class="small text-muted mb-3">
+                                    ${escaparHtmlAccesorio([
+                                        accesorio.marca ?? '',
+                                        accesorio.num_serie ?? 'S/N'
+                                    ].filter(Boolean).join(' | '))}
                                 </div>
 
                                 <div class="mb-2">
-                                    <label class="form-label small mb-0">TIPO</label>
-                                    <input type="text"
-                                        class="form-control form-control-sm"
-                                        value="${escaparHtmlAccesorio(accesorio.tipo)}"
-                                        readonly>
-                                </div>
 
-                                <div class="mb-2">
-                                    <label class="form-label small mb-0">MARCA</label>
-                                    <input type="text"
-                                        class="form-control form-control-sm"
-                                        value="${escaparHtmlAccesorio(accesorio.marca)}"
-                                        readonly>
-                                </div>
-
-                                <div class="mb-2">
-                                    <label class="form-label small mb-0">NÚM. SERIE</label>
-                                    <input type="text"
-                                        class="form-control form-control-sm"
-                                        value="${escaparHtmlAccesorio(accesorio.num_serie)}"
-                                        readonly>
-                                </div>
-
-                                <div class="mb-2">
-                                    <label class="form-label small mb-0">ESTADO</label>
+                                    <label class="form-label small mb-1">ESTADO</label>
 
                                     ${esEdicion ? `
                                         <select
@@ -3307,19 +3314,24 @@ actualizarEstadoBuscadorEquipos();
                                             <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
                                         </select>
                                     ` : `
-                                        <input type="text"
-                                            class="form-control form-control-sm"
-                                            value="${estado}"
-                                            readonly>
+                                        <span class="badge ${
+                                            estado === 'BUENO' ? 'bg-success' :
+                                            estado === 'REGULAR' ? 'bg-warning text-dark' :
+                                            'bg-danger'
+                                        }">
+                                            ${escaparHtmlAccesorio(estado)}
+                                        </span>
 
                                         <input type="hidden"
                                             name="equipos[${indice}][accesorios][${accesorioIndex}][estado]"
                                             value="${estado}">
                                     `}
+
                                 </div>
 
                                 <div class="mb-1">
-                                    <label class="form-label small mb-0">OBSERVACIÓN</label>
+
+                                    <label class="form-label small mb-1">OBSERVACIÓN</label>
 
                                     ${esEdicion ? `
                                         <input type="text"
@@ -3328,15 +3340,17 @@ actualizarEstadoBuscadorEquipos();
                                             value="${escaparHtmlAccesorio(observacion)}"
                                             placeholder="Observación...">
                                     ` : `
-                                        <input type="text"
-                                            class="form-control form-control-sm"
-                                            value="${escaparHtmlAccesorio(observacion)}"
-                                            readonly>
+                                        <div class="small text-muted">
+                                            ${observacion.trim() !== ''
+                                                ? escaparHtmlAccesorio(observacion)
+                                                : 'Sin observaciones registradas.'}
+                                        </div>
 
                                         <input type="hidden"
                                             name="equipos[${indice}][accesorios][${accesorioIndex}][observacion]"
                                             value="${escaparHtmlAccesorio(observacion)}">
                                     `}
+
                                 </div>
                             </div>
                         `;
@@ -3360,7 +3374,6 @@ actualizarEstadoBuscadorEquipos();
                                 class="btn btn-outline-primary btn-sm w-100 text-start mb-1 agregar-accesorio-original"
                                 data-accesorio-id="${escaparHtmlAccesorio(accesorio.id)}"
                                 data-accesorio='${escaparHtmlAccesorio(JSON.stringify(accesorio))}'
-                                ${yaSeleccionado ? 'hidden' : ''}>
                                 + ${escaparHtmlAccesorio(accesorio.tipo)}
                                 ${escaparHtmlAccesorio(accesorio.marca)}
                                 ${escaparHtmlAccesorio(accesorio.num_serie)}
@@ -3390,6 +3403,11 @@ actualizarEstadoBuscadorEquipos();
                     style="max-height: 280px; overflow-y: auto;">
                 </div>
             </div>
+
+            <button type="button"
+                class="btn btn-outline-secondary btn-sm mt-2 mb-3 sin-accesorio-equipo">
+                SIN ACCESORIO
+            </button>
         `;
 
 
@@ -3397,141 +3415,197 @@ actualizarEstadoBuscadorEquipos();
            TARJETA DEL EQUIPO
         ========================================================= */
 
-        const resumenEquipo = [
-            equipo.tipo_equipo?.nombre ?? 'SIN TIPO',
+        const identificacionEquipo = [
             equipo.marca ?? '',
+            equipo.modelo ?? '',
             equipo.num_serie ?? 'S/N'
-        ].filter(Boolean).join('  |  ');
+        ].filter(Boolean).join(' | ');
 
-        const resumenAccesoriosHtml = accesoriosIniciales.length > 0
-            ? accesoriosIniciales.map((accesorio, accesorioIndex) => {
-                const resumen = [
-                    accesorio.tipo ?? 'SIN TIPO',
-                    accesorio.marca ?? '',
-                    accesorio.num_serie ?? 'S/N'
-                ].filter(Boolean).join('  |  ');
+        const claseEstadoEquipo = {
+            BUENO: 'bg-success',
+            REGULAR: 'bg-warning text-dark',
+            MALOGRADO: 'bg-danger'
+        }[estadoEquipo] || 'bg-secondary';
 
-                return `
-                    <label class="form-label small mb-1">
-                        ACCESORIO ${accesorioIndex + 1}
-                    </label>
-                    <input
-                        type="text"
-                        class="form-control form-control-sm mb-2"
-                        value="${escaparHtmlAccesorio(resumen)}"
-                        readonly>
-                `;
-            }).join('')
-            : '<div class="text-muted small">Sin accesorios</div>';
+    const resumenAccesoriosHtml = accesoriosIniciales.length > 0
+        ? accesoriosIniciales.map((accesorio, accesorioIndex) => {
+
+            const esOriginal =
+                accesorio.equipo_id != null &&
+                String(accesorio.equipo_id) === String(equipo.id);
+
+            const estado = normalizarEstado(accesorio.estado);
+
+            const observacion =
+                accesorio.observacion ??
+                accesorio.observaciones ??
+                '';
+
+            const descripcion = [
+                accesorio.marca ?? '',
+                accesorio.num_serie ?? 'S/N'
+            ].filter(Boolean).join(' | ');
+
+            const clasesEstado = {
+                BUENO: 'bg-success',
+                REGULAR: 'bg-warning text-dark',
+                MALOGRADO: 'bg-danger'
+            };
+
+            return `
+                <div class="mb-3">
+
+                    <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+                        <strong class="small">
+                            ACCESORIO ${accesorioIndex + 1} —
+                            ${escaparHtmlAccesorio(accesorio.tipo ?? 'SIN TIPO')}
+                            #${escaparHtmlAccesorio(accesorio.id)}
+                        </strong>
+
+                        <span class="badge ${esOriginal ? 'bg-primary' : 'bg-secondary'}">
+                            ${esOriginal ? 'ORIGINAL' : 'ALTERNATIVO'}
+                        </span>
+                    </div>
+
+                    <div class="small text-muted">
+                        ${escaparHtmlAccesorio(descripcion)}
+                    </div>
+
+                    <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+                        <span class="badge ${clasesEstado[estado] || 'bg-secondary'}">
+                            ${escaparHtmlAccesorio(estado)}
+                        </span>
+
+                        ${observacion.trim() !== '' ? `
+                            <small class="text-muted">
+                                Observación: ${escaparHtmlAccesorio(observacion)}
+                            </small>
+                        ` : ''}
+                    </div>
+
+                </div>
+            `;
+        }).join('')
+        : '<div class="text-muted small">Sin accesorios</div>';
+
 
         const equipoHtml = `
+            <div
+                class="card mb-4 equipo-seleccionado"
+                data-equipo-id="${escaparHtmlAccesorio(equipo.id)}"
+                data-tipo-equipo="${escaparHtmlAccesorio(equipo.tipo_equipo?.nombre ?? 'SIN TIPO')}"
+            >
 
-        <div
-            class="card mb-4 equipo-seleccionado"
-            data-equipo-id="${equipo.id}"
-        >
+                <div class="card-header">
 
-            <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
 
-                <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                        <div class="flex-grow-1">
 
-                    <strong class="titulo-equipo">
-                        EQUIPO ${indice + 1}
-                    </strong>
+                            <strong class="titulo-equipo">
+                                EQUIPO ${indice + 1} —
+                                ${escaparHtmlAccesorio(equipo.tipo_equipo?.nombre ?? 'SIN TIPO')}
+                                #${escaparHtmlAccesorio(equipo.id)}
+                            </strong>
 
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-menos" style="display: none;">
-                            VER MENOS
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary btn-sm btn-ver-mas">
-                            VER MÁS
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm quitar-equipo">
-                            <i class="bi bi-trash"></i>
-                            QUITAR
-                        </button>
+                            <div class="datos-principales-equipo mt-2">
+
+                                <div class="small text-muted mb-1">
+                                    ${escaparHtmlAccesorio(identificacionEquipo)}
+                                </div>
+
+                                <span class="badge ${claseEstadoEquipo} estado-equipo-badge">
+                                    ${escaparHtmlAccesorio(estadoEquipo)}
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex gap-2 flex-wrap">
+
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-sm btn-ver-menos"
+                                style="display: none;">
+                                VER MENOS
+                            </button>
+
+                            <button type="button"
+                                class="btn btn-outline-secondary btn-sm btn-ver-mas">
+                                VER MÁS
+                            </button>
+
+                            <button type="button"
+                                class="btn btn-danger btn-sm quitar-equipo">
+                                <i class="bi bi-trash"></i>
+                                QUITAR
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-body py-3">
+
+                    <input type="hidden"
+                        name="equipos[${indice}][equipo_id]"
+                        value="${escaparHtmlAccesorio(equipo.id)}">
+
+                    <div class="resumen-equipo mb-0">
+
+                        <div class="resumen-accesorios">
+                            ${resumenAccesoriosHtml}
+                        </div>
+
+                    </div>
+
+                    <div class="detalle-equipo" style="display: none;">
+
+                        <div class="row g-3">
+
+
+                            <div class="col-md-5 border-end">
+
+                                <div class="mb-3">
+                                    <label class="form-label small mb-1">ESTADO</label>
+
+                                    <select
+                                        name="equipos[${indice}][estado]"
+                                        class="form-select form-select-sm selector-estado-equipo"
+                                        required>
+                                        <option value="REGULAR" ${estadoEquipo === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
+                                        <option value="BUENO" ${estadoEquipo === 'BUENO' ? 'selected' : ''}>BUENO</option>
+                                        <option value="MALOGRADO" ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="form-label small mb-1">OBSERVACIÓN</label>
+
+                                    <textarea
+                                        name="equipos[${indice}][observacion]"
+                                        class="form-control form-control-sm"
+                                        rows="3"
+                                        placeholder="Escribe la observación del equipo...">${escaparHtmlAccesorio(observacionEquipo)}</textarea>
+                                </div>
+
+                            </div>
+
+
+                            <div class="col-md-7">
+                                ${accesoriosHtml}
+                            </div>
+
+                        </div>
+
                     </div>
 
                 </div>
 
             </div>
-
-
-            <div class="card-body py-3">
-
-                <input type="hidden" name="equipos[${indice}][equipo_id]" value="${equipo.id}">
-
-                <div class="resumen-equipo mb-0">
-                    <label class="form-label small mb-1">EQUIPO</label>
-                    <input
-                        type="text"
-                        class="form-control form-control-sm mb-2"
-                        value="${escaparHtmlAccesorio(resumenEquipo)}"
-                        readonly>
-
-                    <div class="resumen-accesorios">
-                        ${resumenAccesoriosHtml}
-                    </div>
-                </div>
-
-                <div class="detalle-equipo" style="display: none;">
-
-                <div class="row g-3">
-
-                    <div class="col-md-6 border-end">
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">TIPO</label>
-                            <input type="text" class="form-control form-control-sm" value="${equipo.tipo_equipo?.nombre ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">MARCA</label>
-                            <input type="text" class="form-control form-control-sm" value="${equipo.marca ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">MODELO</label>
-                            <input type="text" class="form-control form-control-sm" value="${equipo.modelo ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">NÚM. SERIE</label>
-                            <input type="text" class="form-control form-control-sm" value="${equipo.num_serie ?? ''}" readonly>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small mb-0">ESTADO</label>
-                            ${esEdicion ? `
-                            <select name="equipos[${indice}][estado]" class="form-select form-select-sm" required>
-                                <option value="REGULAR" ${estadoEquipo === 'REGULAR' ? 'selected' : ''}>REGULAR</option>
-                                <option value="BUENO" ${estadoEquipo === 'BUENO' ? 'selected' : ''}>BUENO</option>
-                                <option value="MALOGRADO" ${estadoEquipo === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
-                            </select>
-                            ` : `
-                            <input type="text" class="form-control form-control-sm" value="${estadoEquipo}" readonly>
-                            <input type="hidden" name="equipos[${indice}][estado]" value="${estadoEquipo}">
-                            `}
-                        </div>
-                        <div>
-                            <label class="form-label small mb-0">OBSERVACIÓN</label>
-                            ${esEdicion ? `
-                            <textarea name="equipos[${indice}][observacion]" class="form-control form-control-sm" rows="2" placeholder="Observación del equipo...">${observacionEquipo ?? ''}</textarea>
-                            ` : `
-                            <textarea class="form-control form-control-sm" rows="2" readonly>${observacionEquipo ?? ''}</textarea>
-                            <input type="hidden" name="equipos[${indice}][observacion]" value="${observacionEquipo ?? ''}">
-                            `}
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        ${accesoriosHtml}
-                    </div>
-
-                </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
+        `;
 
 
         /* =========================================================
@@ -3546,7 +3620,7 @@ actualizarEstadoBuscadorEquipos();
         if (!esEdicion) {
             const cardNueva = contenedor.querySelector('.equipo-seleccionado:last-child');
             if (cardNueva) {
-                cardNueva.querySelectorAll('select').forEach(function (el) {
+                cardNueva.querySelectorAll('select:not(.selector-estado-equipo)').forEach(function (el) {
                     const hidden = document.createElement('input');
                     hidden.type = 'hidden';
                     hidden.name = el.name;
@@ -3555,9 +3629,52 @@ actualizarEstadoBuscadorEquipos();
                     el.disabled = true;
                     el.removeAttribute('name');
                 });
-                cardNueva.querySelectorAll('textarea, input[type="text"]').forEach(function (el) {
+                cardNueva.querySelectorAll('input[type="text"]').forEach(function (el) {
                     el.readOnly = true;
                 });
+                /*
+                cardNueva.querySelectorAll('textarea').forEach(function (el) {
+                    el.readOnly = true;
+                });*/
+            }
+        }
+
+        const tarjetaInsertada =
+            contenedor.querySelector('.equipo-seleccionado:last-child');
+
+        if (tarjetaInsertada) {
+
+            actualizarEstadoAccesoriosOriginales(tarjetaInsertada);
+
+            const detalle =
+                tarjetaInsertada.querySelector('.detalle-equipo');
+
+            const resumen =
+                tarjetaInsertada.querySelector('.resumen-equipo');
+
+            const btnMas =
+                tarjetaInsertada.querySelector('.btn-ver-mas');
+
+            const btnMenos =
+                tarjetaInsertada.querySelector('.btn-ver-menos');
+
+            // La primera tarjeta aparece expandida.
+            const mostrarDetalle = indice === 0;
+
+            if (detalle) {
+                detalle.style.display = mostrarDetalle ? 'block' : 'none';
+            }
+
+            if (resumen) {
+                resumen.style.display = mostrarDetalle ? 'none' : 'block';
+            }
+
+            if (btnMas) {
+                btnMas.style.display = mostrarDetalle ? 'none' : 'inline-block';
+            }
+
+            if (btnMenos) {
+                btnMenos.style.display = mostrarDetalle ? 'inline-block' : 'none';
             }
         }
 
@@ -3565,6 +3682,110 @@ actualizarEstadoBuscadorEquipos();
         actualizarEventosVerMasMenos();
         actualizarEstadoBuscadorEquipos();
     }
+
+
+    /* =========================================================
+       ACTUALIZAR DISTINTIVO DE ESTADO DEL EQUIPO
+    ========================================================= */
+
+    document.addEventListener('change', function (event) {
+
+        const selector = event.target;
+
+        if (
+            !selector.matches(
+                'select[name^="equipos["][name$="[estado]"]'
+            )
+        ) {
+            return;
+        }
+
+        const tarjeta = selector.closest('.equipo-seleccionado');
+
+        if (!tarjeta) {
+            return;
+        }
+
+        const distintivo = tarjeta.querySelector('.estado-equipo-badge');
+
+        if (!distintivo) {
+            return;
+        }
+
+        const estado = normalizarEstado(selector.value);
+
+        const clasesEstado = {
+            BUENO: 'bg-success',
+            REGULAR: 'bg-warning text-dark',
+            MALOGRADO: 'bg-danger'
+        };
+
+        distintivo.classList.remove(
+            'bg-success',
+            'bg-warning',
+            'bg-danger',
+            'bg-secondary',
+            'text-dark'
+        );
+
+        distintivo.classList.add(
+            ...(clasesEstado[estado] || 'bg-secondary').split(' ')
+        );
+
+        distintivo.textContent = estado;
+
+    });
+
+    /* =========================================================
+       ACTUALIZAR RESUMEN DE ESTADO Y OBSERVACIÓN DE ACCESORIOS
+    ========================================================= */
+
+    function sincronizarResumenAccesorio(event) {
+
+        const campo = event.target;
+
+        const esEstado = campo.matches(
+            'select[name*="[accesorios]"][name$="[estado]"]'
+        );
+
+        const esObservacion = campo.matches(
+            'input[name*="[accesorios]"][name$="[observacion]"]'
+        );
+
+        if (!esEstado && !esObservacion) return;
+
+        const tarjetaAccesorio =
+            campo.closest('.accesorio-prestamo');
+
+        if (!tarjetaAccesorio) return;
+
+        const tarjetaEquipo =
+            campo.closest('.equipo-seleccionado');
+
+        if (!tarjetaEquipo) return;
+
+        if (esEstado) {
+            tarjetaAccesorio.dataset.estado =
+                normalizarEstado(campo.value);
+        }
+
+        if (esObservacion) {
+            tarjetaAccesorio.dataset.observacion =
+                campo.value;
+        }
+
+        actualizarResumenAccesorios(tarjetaEquipo);
+    }
+
+    document.addEventListener(
+        'change',
+        sincronizarResumenAccesorio
+    );
+
+    document.addEventListener(
+        'input',
+        sincronizarResumenAccesorio
+    );
 
     /* =========================================================
        GESTIÓN UNIFICADA DE ACCESORIOS
@@ -3592,20 +3813,60 @@ actualizarEstadoBuscadorEquipos();
     }
 
     /* =========================================================
+       ACTUALIZAR ESTADO DE BOTONES DE ACCESORIOS ORIGINALES
+    ========================================================= */
+    function actualizarEstadoAccesoriosOriginales(tarjetaEquipo) {
+        const seleccionados = new Set(
+            Array.from(
+                tarjetaEquipo.querySelectorAll(
+                    '.accesorios-seleccionados .accesorio-prestamo'
+                )
+            ).map(accesorio => accesorio.dataset.accesorioId)
+        );
+
+        tarjetaEquipo.querySelectorAll(
+            '.agregar-accesorio-original'
+        ).forEach(function (boton) {
+            const yaSeleccionado = seleccionados.has(
+                boton.dataset.accesorioId
+            );
+
+            boton.disabled = yaSeleccionado;
+            boton.classList.toggle(
+                'btn-outline-primary',
+                !yaSeleccionado
+            );
+            boton.classList.toggle(
+                'btn-success',
+                yaSeleccionado
+            );
+
+            const accesorio = JSON.parse(boton.dataset.accesorio);
+
+            boton.textContent = [
+                yaSeleccionado ? '✓ AGREGADO' : '+ AGREGAR',
+                accesorio.tipo,
+                accesorio.marca,
+                accesorio.num_serie
+            ].filter(Boolean).join(' | ');
+        });
+    }
+
+    /* =========================================================
        ACTUALIZAR RESUMEN DE ACCESORIOS
     ========================================================= */
 
     function actualizarResumenAccesorios(tarjetaEquipo) {
 
-        const resumen =
-            tarjetaEquipo.querySelector('.resumen-accesorios');
+        const resumen = tarjetaEquipo.querySelector(
+            '.resumen-accesorios'
+        );
 
         if (!resumen) return;
 
-        const accesorios =
-            tarjetaEquipo.querySelectorAll(
-                '.accesorios-seleccionados .accesorio-prestamo'
-            );
+        const accesorios = tarjetaEquipo.querySelectorAll(
+            '.accesorios-seleccionados .accesorio-prestamo'
+        );
 
         if (accesorios.length === 0) {
             resumen.innerHTML =
@@ -3618,26 +3879,91 @@ actualizarEstadoBuscadorEquipos();
 
         accesorios.forEach(function (accesorio, indice) {
 
-            const descripcion = [
-                accesorio.dataset.tipo || 'SIN TIPO',
-                accesorio.dataset.marca || '',
-                accesorio.dataset.numSerie || 'S/N'
-            ].filter(Boolean).join('  |  ');
+            const id = accesorio.dataset.accesorioId || '?';
+            const tipo = accesorio.dataset.tipo || 'SIN TIPO';
+            const marca = accesorio.dataset.marca || '';
+            const numSerie = accesorio.dataset.numSerie || 'S/N';
 
-            const etiqueta = document.createElement('label');
-            etiqueta.className = 'form-label small mb-1';
-            etiqueta.textContent = `ACCESORIO ${indice + 1}`;
+            const estado = normalizarEstado(
+                accesorio.dataset.estado || 'BUENO'
+            );
 
-            const campo = document.createElement('input');
-            campo.type = 'text';
-            campo.className = 'form-control form-control-sm mb-2';
-            campo.value = descripcion;
-            campo.readOnly = true;
+            const observacion =
+                accesorio.dataset.observacion || '';
 
-            resumen.appendChild(etiqueta);
-            resumen.appendChild(campo);
+            const esOriginal =
+                accesorio.dataset.esOriginal === 'true';
+
+            const contenedor = document.createElement('div');
+            contenedor.className = 'mb-3';
+
+            // Primera línea: número, tipo, ID y clasificación.
+            const encabezado = document.createElement('div');
+            encabezado.className =
+                'd-flex align-items-center flex-wrap gap-2 mb-1';
+
+            const titulo = document.createElement('strong');
+            titulo.className = 'small';
+
+            titulo.textContent =
+                `ACCESORIO ${indice + 1} — ${tipo} #${id}`;
+
+            const distintivo = document.createElement('span');
+            distintivo.className =
+                `badge ${esOriginal ? 'bg-primary' : 'bg-secondary'}`;
+
+            distintivo.textContent =
+                esOriginal ? 'ORIGINAL' : 'ALTERNATIVO';
+
+            encabezado.appendChild(titulo);
+            encabezado.appendChild(distintivo);
+
+            // Segunda línea: marca y número de serie.
+            const descripcion = document.createElement('div');
+            descripcion.className = 'small text-muted';
+
+            descripcion.textContent =
+                [marca, numSerie].filter(Boolean).join(' | ');
+
+            // Tercera línea: estado.
+            const lineaEstado = document.createElement('div');
+            lineaEstado.className =
+                'd-flex align-items-center flex-wrap gap-2 mt-1';
+
+            const clasesEstado = {
+                BUENO: 'bg-success',
+                REGULAR: 'bg-warning text-dark',
+                MALOGRADO: 'bg-danger'
+            };
+
+            const distintivoEstado = document.createElement('span');
+            distintivoEstado.className =
+                `badge ${clasesEstado[estado] || 'bg-secondary'}`;
+
+            distintivoEstado.textContent = estado;
+
+            lineaEstado.appendChild(distintivoEstado);
+
+            // Observación, solamente cuando existe.
+            if (observacion.trim() !== '') {
+
+                const textoObservacion = document.createElement('small');
+                textoObservacion.className = 'text-muted';
+
+                textoObservacion.textContent =
+                    `Observación: ${observacion}`;
+
+                lineaEstado.appendChild(textoObservacion);
+            }
+
+            contenedor.appendChild(encabezado);
+            contenedor.appendChild(descripcion);
+            contenedor.appendChild(lineaEstado);
+
+            resumen.appendChild(contenedor);
 
         });
+
     }
 
 
@@ -3664,7 +3990,15 @@ actualizarEstadoBuscadorEquipos();
                 accesorio.querySelector('.titulo-accesorio');
 
             if (titulo) {
-                titulo.textContent = `ACCESORIO ${indice + 1}`;
+
+                const tipo =
+                    accesorio.dataset.tipo || 'SIN TIPO';
+
+                const id =
+                    accesorio.dataset.accesorioId || '?';
+
+                titulo.textContent =
+                    `ACCESORIO ${indice + 1} — ${tipo} #${id}`;
             }
 
             accesorio.querySelectorAll('[name]').forEach(function (campo) {
@@ -3693,7 +4027,7 @@ actualizarEstadoBuscadorEquipos();
        AGREGAR ACCESORIO ORIGINAL O ALTERNATIVO
     ========================================================= */
 
-    function agregarAccesorio(tarjetaEquipo, accesorio) {
+    function agregarAccesorio(tarjetaEquipo, accesorio, esAccesorioOriginal = false) {
 
         if (!tarjetaEquipo || !accesorio || !accesorio.id) {
             return;
@@ -3745,6 +4079,8 @@ actualizarEstadoBuscadorEquipos();
             accesorio.observaciones ??
             '';
 
+        const esOriginal = esAccesorioOriginal;
+
         const indiceEquipo = Array.from(
             document.querySelectorAll('.equipo-seleccionado')
         ).indexOf(tarjetaEquipo);
@@ -3762,49 +4098,48 @@ actualizarEstadoBuscadorEquipos();
                 data-tipo="${escaparHtmlAccesorio(accesorio.tipo)}"
                 data-marca="${escaparHtmlAccesorio(accesorio.marca)}"
                 data-modelo="${escaparHtmlAccesorio(accesorio.modelo)}"
-                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}">
+                data-num-serie="${escaparHtmlAccesorio(accesorio.num_serie)}"
+                data-estado="${escaparHtmlAccesorio(estado)}"
+                data-observacion="${escaparHtmlAccesorio(observacion)}"
+                data-es-original="${esOriginal ? 'true' : 'false'}">
 
                 <input type="hidden"
                     name="${nombreBase}[accesorio_equipo_id]"
                     value="${escaparHtmlAccesorio(idAccesorio)}">
 
-                <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
-                    <strong class="small titulo-accesorio">
-                        ACCESORIO ${indiceAccesorio + 1}
-                    </strong>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+
+                        <strong class="small titulo-accesorio">
+                            ACCESORIO ${indiceAccesorio + 1} —
+                            ${escaparHtmlAccesorio(accesorio.tipo ?? 'SIN TIPO')}
+                            #${escaparHtmlAccesorio(idAccesorio)}
+                        </strong>
+
+                        <span class="badge ${esOriginal ? 'bg-primary' : 'bg-secondary'}">
+                            ${esOriginal ? 'ORIGINAL' : 'ALTERNATIVO'}
+                        </span>
+
+                    </div>
 
                     <button type="button"
                         class="btn btn-outline-danger btn-sm quitar-accesorio">
                         QUITAR
                     </button>
+
+                </div>
+
+                <div class="small text-muted mb-3">
+                    ${escaparHtmlAccesorio([
+                        accesorio.marca ?? '',
+                        accesorio.num_serie ?? 'S/N'
+                    ].filter(Boolean).join(' | '))}
                 </div>
 
                 <div class="mb-2">
-                    <label class="form-label small mb-0">TIPO</label>
-                    <input type="text"
-                        class="form-control form-control-sm"
-                        value="${escaparHtmlAccesorio(accesorio.tipo)}"
-                        readonly>
-                </div>
 
-                <div class="mb-2">
-                    <label class="form-label small mb-0">MARCA</label>
-                    <input type="text"
-                        class="form-control form-control-sm"
-                        value="${escaparHtmlAccesorio(accesorio.marca)}"
-                        readonly>
-                </div>
-
-                <div class="mb-2">
-                    <label class="form-label small mb-0">NÚM. SERIE</label>
-                    <input type="text"
-                        class="form-control form-control-sm"
-                        value="${escaparHtmlAccesorio(accesorio.num_serie)}"
-                        readonly>
-                </div>
-
-                <div class="mb-2">
-                    <label class="form-label small mb-0">ESTADO</label>
+                    <label class="form-label small mb-1">ESTADO</label>
 
                     ${esEdicion ? `
                         <select
@@ -3816,19 +4151,24 @@ actualizarEstadoBuscadorEquipos();
                             <option value="MALOGRADO" ${estado === 'MALOGRADO' ? 'selected' : ''}>MALOGRADO</option>
                         </select>
                     ` : `
-                        <input type="text"
-                            class="form-control form-control-sm"
-                            value="${estado}"
-                            readonly>
+                        <span class="badge ${
+                            estado === 'BUENO' ? 'bg-success' :
+                            estado === 'REGULAR' ? 'bg-warning text-dark' :
+                            'bg-danger'
+                        }">
+                            ${escaparHtmlAccesorio(estado)}
+                        </span>
 
                         <input type="hidden"
                             name="${nombreBase}[estado]"
                             value="${estado}">
                     `}
+
                 </div>
 
                 <div class="mb-1">
-                    <label class="form-label small mb-0">OBSERVACIÓN</label>
+
+                    <label class="form-label small mb-1">OBSERVACIÓN</label>
 
                     ${esEdicion ? `
                         <input type="text"
@@ -3837,16 +4177,19 @@ actualizarEstadoBuscadorEquipos();
                             value="${escaparHtmlAccesorio(observacion)}"
                             placeholder="Observación...">
                     ` : `
-                        <input type="text"
-                            class="form-control form-control-sm"
-                            value="${escaparHtmlAccesorio(observacion)}"
-                            readonly>
+                        <div class="small text-muted">
+                            ${observacion.trim() !== ''
+                                ? escaparHtmlAccesorio(observacion)
+                                : 'Sin observaciones registradas.'}
+                        </div>
 
                         <input type="hidden"
                             name="${nombreBase}[observacion]"
                             value="${escaparHtmlAccesorio(observacion)}">
                     `}
+
                 </div>
+
             </div>
         `;
 
@@ -3856,15 +4199,7 @@ actualizarEstadoBuscadorEquipos();
         );
 
         // Ocultar el botón original si corresponde.
-        tarjetaEquipo.querySelectorAll(
-            '.agregar-accesorio-original'
-        ).forEach(function (boton) {
-
-            if (boton.dataset.accesorioId === idAccesorio) {
-                boton.hidden = true;
-            }
-
-        });
+        actualizarEstadoAccesoriosOriginales(tarjetaEquipo);
 
         renumerarAccesorios(tarjetaEquipo);
 
@@ -3902,7 +4237,8 @@ actualizarEstadoBuscadorEquipos();
 
             agregarAccesorio(
                 tarjetaEquipo,
-                accesorio
+                accesorio,
+                true
             );
 
         } catch (error) {
@@ -3921,7 +4257,7 @@ actualizarEstadoBuscadorEquipos();
        QUITAR ACCESORIOS SELECCIONADOS
     ========================================================= */
 
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', async function (event) {
 
         const boton = event.target.closest('.quitar-accesorio');
 
@@ -3938,20 +4274,29 @@ actualizarEstadoBuscadorEquipos();
         if (!tarjetaEquipo || !tarjetaAccesorio) return;
 
         const idAccesorio =
-            tarjetaAccesorio.dataset.accesorioId;
+            tarjetaAccesorio.dataset.accesorioId || '?';
+
+        const tipoAccesorio =
+            tarjetaAccesorio.dataset.tipo || 'ACCESORIO';
+
+        const resultado = await Swal.fire({
+            title: '¿RETIRAR ACCESORIO?',
+            text: `¿Deseas quitar ${tipoAccesorio} #${idAccesorio} de este préstamo?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'SÍ, QUITAR',
+            cancelButtonText: 'CANCELAR',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true
+        });
+
+        if (!resultado.isConfirmed) return;
 
         tarjetaAccesorio.remove();
 
         // Volver a mostrar el botón del accesorio original.
-        tarjetaEquipo.querySelectorAll(
-            '.agregar-accesorio-original'
-        ).forEach(function (botonOriginal) {
-
-            if (botonOriginal.dataset.accesorioId === idAccesorio) {
-                botonOriginal.hidden = false;
-            }
-
-        });
+        actualizarEstadoAccesoriosOriginales(tarjetaEquipo);
 
         renumerarAccesorios(tarjetaEquipo);
 
@@ -3962,6 +4307,75 @@ actualizarEstadoBuscadorEquipos();
 
     });
 
+    /* =========================================================
+    LIMPIAR ACCESORIOS DE UN EQUIPO
+    ========================================================= */
+
+    document.addEventListener('click', function (event) {
+
+        const boton = event.target.closest('.sin-accesorio-equipo');
+
+        if (!boton) return;
+
+        event.preventDefault();
+
+        const tarjetaEquipo = boton.closest('.equipo-seleccionado');
+
+        if (!tarjetaEquipo) return;
+
+        const zonaSeleccionados =
+            tarjetaEquipo.querySelector('.accesorios-seleccionados');
+
+        if (!zonaSeleccionados) return;
+
+        const accesorios = zonaSeleccionados.querySelectorAll(
+            '.accesorio-prestamo'
+        );
+
+        if (accesorios.length === 0) {
+            mostrarToast('Este equipo ya no tiene accesorios seleccionados.', 'info');
+            return;
+        }
+
+        function limpiarAccesorios() {
+            zonaSeleccionados.querySelectorAll('.accesorio-prestamo')
+                .forEach(accesorio => accesorio.remove());
+
+            actualizarEstadoAccesoriosOriginales(tarjetaEquipo);
+            renumerarAccesorios(tarjetaEquipo);
+
+            const campoBusqueda =
+                tarjetaEquipo.querySelector('.buscar-accesorio-manual');
+
+            const resultados =
+                tarjetaEquipo.querySelector('.resultados-accesorios-manuales');
+
+            if (campoBusqueda) campoBusqueda.value = '';
+            if (resultados) resultados.innerHTML = '';
+
+            mostrarToast('Se quitaron todos los accesorios de este equipo.', 'success');
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'warning',
+                title: '¿Dejar el equipo sin accesorios?',
+                text: 'Se quitarán todos los accesorios seleccionados de esta tarjeta.',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, quitar todos',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true
+            }).then(function (resultado) {
+                if (resultado.isConfirmed) {
+                    limpiarAccesorios();
+                }
+            });
+        } else if (confirm('¿Quitar todos los accesorios de este equipo?')) {
+            limpiarAccesorios();
+        }
+    });
 
     /* =========================================================
        BÚSQUEDA DE ACCESORIOS ALTERNATIVOS
@@ -3992,7 +4406,7 @@ actualizarEstadoBuscadorEquipos();
 
         resultados.innerHTML = '';
 
-        if (termino.length < 2) return;
+        if (termino.length === 0) return;
 
         resultados.innerHTML = `
             <div class="text-muted small">
@@ -4026,10 +4440,24 @@ actualizarEstadoBuscadorEquipos();
                 throw new Error('Error en la búsqueda.');
             }
 
-            const accesorios = await respuesta.json();
+            const accesoriosEncontrados = await respuesta.json();
 
             // Evitar mostrar respuestas antiguas.
             if (campo.value.trim() !== termino) return;
+
+            // IDs seleccionados en cualquier equipo del préstamo.
+            const idsSeleccionados = new Set(
+                Array.from(
+                    document.querySelectorAll(
+                        '.accesorios-seleccionados .accesorio-prestamo'
+                    )
+                ).map(elemento => elemento.dataset.accesorioId)
+            );
+
+            // Ocultar accesorios que ya están seleccionados.
+            const accesorios = accesoriosEncontrados.filter(
+                accesorio => !idsSeleccionados.has(String(accesorio.id))
+            );
 
             resultados.innerHTML = '';
 
@@ -4110,10 +4538,40 @@ actualizarEstadoBuscadorEquipos();
 
             if (btnMas) {
                 btnMas.onclick = function () {
+
+                    // Cerrar todas las demás tarjetas.
+                    document.querySelectorAll('.equipo-seleccionado').forEach(function (otraCard) {
+
+                        if (otraCard === card) {
+                            return;
+                        }
+
+                        const otroDetalle =
+                            otraCard.querySelector('.detalle-equipo');
+
+                        const otroResumen =
+                            otraCard.querySelector('.resumen-equipo');
+
+                        const otroBtnMas =
+                            otraCard.querySelector('.btn-ver-mas');
+
+                        const otroBtnMenos =
+                            otraCard.querySelector('.btn-ver-menos');
+
+                        if (otroDetalle) otroDetalle.style.display = 'none';
+                        if (otroResumen) otroResumen.style.display = 'block';
+                        if (otroBtnMas) otroBtnMas.style.display = 'inline-block';
+                        if (otroBtnMenos) otroBtnMenos.style.display = 'none';
+                    });
+
+                    // Abrir la tarjeta seleccionada.
                     if (detalle) detalle.style.display = 'block';
                     if (resumen) resumen.style.display = 'none';
                     btnMas.style.display = 'none';
-                    if (btnMenos) btnMenos.style.display = 'inline-block';
+
+                    if (btnMenos) {
+                        btnMenos.style.display = 'inline-block';
+                    }
                 };
             }
         });
@@ -4200,12 +4658,20 @@ actualizarEstadoBuscadorEquipos();
                     );
 
 
+
                 if (titulo) {
 
+                    const tipo =
+                        equipo.dataset.tipoEquipo || 'SIN TIPO';
+
+                    const id =
+                        equipo.dataset.equipoId || '?';
+
                     titulo.textContent =
-                        `EQUIPO ${indice + 1}`;
+                        `EQUIPO ${indice + 1} — ${tipo} #${id}`;
 
                 }
+
 
 
                 equipo
